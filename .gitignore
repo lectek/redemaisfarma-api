@@ -1,0 +1,76 @@
+# 🌐 PASTAS ESPECÍFICAS DO PROJETO
+passos necessarios/
+.vscode/
+
+# 💡 INTELLIJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# 💡 ECLIPSE
+.project
+.classpath
+.settings/
+bin/
+
+# 💡 VS CODE
+.vscode/
+.history/
+
+# ☕ JAVA
+*.class
+*.log
+*.ctxt
+*.jar
+*.war
+*.ear
+hs_err_pid*
+
+# 📦 MAVEN
+target/
+!.mvn/wrapper/maven-wrapper.jar
+dependency-reduced-pom.xml
+release.properties
+
+# 🐋 DOCKER
+*.env
+.env
+docker-compose.override.yml
+*.local
+**/docker-data/
+**/mysql/
+**/firebird/
+
+# 🔍 LOGS E TEMP
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.orig
+
+# 🧪 TESTES E BUILD TOOLS
+surefire-reports/
+jacoco.exec
+.jacoco/
+coverage/
+.build/
+
+# 📷 SISTEMA
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 🐍 PYTHON OU OUTROS (caso misture scripts)
+__pycache__/
+*.py[cod]
+*.ipynb_checkpoints
+
+# 📝 OUTROS
+*.pdf
+*.sqlite
+*.fdb
+*.sql
+*.db
