@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- EMBALANDO-NET-BR • Java 21 • Spring Boot 3.3.0 -->
+<!-- REDEMAISFARMA-API • Java 21 • Spring Boot 3.3.0 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
                              https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <!-- ==== Artefato ==== -->
-  <groupId>br.com.embalando</groupId>
-  <artifactId>embalando-net-br</artifactId>
+  <groupId>br.com.redemaisfarma</groupId>
+  <artifactId>redemaisfarma-api</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>EMBALANDO-NET-BR</name>
-  <description>Plataforma de dropshipping em Arquitetura Hexagonal (Java 21 + Spring Boot 3.3.0)</description>
+  <name>RedeMaisFarma API</name>
+  <description>API da RedeMaisFarma: gestão de farmácia, delivery, NF-e, e integração com sistema legado (Java 21 + Spring Boot 3.3.0)</description>
   <packaging>jar</packaging>
 
-  <!-- ==== Parent Spring Boot ==== -->
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -22,18 +20,15 @@
     <relativePath/>
   </parent>
 
-  <!-- ==== Propriedades ==== -->
   <properties>
     <java.version>21</java.version>
     <mapstruct.version>1.5.5.Final</mapstruct.version>
     <testcontainers.version>1.19.7</testcontainers.version>
     <lombok.version>1.18.32</lombok.version>
-
     <jacoco.version>0.8.10</jacoco.version>
     <jib.version>3.3.1</jib.version>
     <formatter.version>2.23.0</formatter.version>
     <reproducible.build.plugin.version>1.6.0</reproducible.build.plugin.version>
-
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -42,17 +37,43 @@
     <reproducible.build.outputTimestamp>2025-01-01T00:00:00Z</reproducible.build.outputTimestamp>
   </properties>
 
-  <!-- ==== Dependências ==== -->
   <dependencies>
-    <!-- Web & API -->
+    <!-- Web -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
+  
+    <!-- Driver Firebird -->
+    <dependency>
+      <groupId>org.firebirdsql.jdbc</groupId>
+      <artifactId>jaybird</artifactId>
+      <version>5.0.3.java11</version>
+    </dependency>
+
+    <!-- Dialetos adicionais do Hibernate (inclui FirebirdDialect) -->
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-community-dialects</artifactId>
+      <version>6.5.2.Final</version>
+    </dependency>
+
+    <!-- Thymeleaf -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
+
+    <!-- Swagger OpenAPI -->
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>2.1.0</version>
+      <version>2.3.0</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+      <version>3.0.2</version>
     </dependency>
 
     <!-- JPA + MySQL -->
@@ -83,6 +104,13 @@
       <groupId>org.mapstruct</groupId>
       <artifactId>mapstruct</artifactId>
       <version>${mapstruct.version}</version>
+    </dependency>
+
+    <!-- H2 Database para testes -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <!-- Observabilidade -->
@@ -127,11 +155,9 @@
     </dependency>
   </dependencies>
 
-  <!-- ==== Build & Plugins ==== -->
   <build>
     <pluginManagement>
       <plugins>
-        <!-- SpotBugs -->
         <plugin>
           <groupId>com.github.spotbugs</groupId>
           <artifactId>spotbugs-maven-plugin</artifactId>
@@ -146,8 +172,6 @@
             </execution>
           </executions>
         </plugin>
-
-        <!-- Checkstyle -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
@@ -161,7 +185,6 @@
     </pluginManagement>
 
     <plugins>
-      <!-- 1) Compilador Java -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -188,17 +211,15 @@
         </configuration>
       </plugin>
 
-      <!-- 2) Spring Boot -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <configuration>
           <layers enabled="true"/>
-          <mainClass>br.com.embalando.EmbalandoNetBrApplication</mainClass>
+          <mainClass>br.com.redemaisfarma.RedeMaisFarmaApiApplication</mainClass>
         </configuration>
       </plugin>
 
-      <!-- 3) JaCoCo -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -209,7 +230,6 @@
         </executions>
       </plugin>
 
-      <!-- 4) Formatter -->
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>
         <artifactId>formatter-maven-plugin</artifactId>
@@ -219,7 +239,6 @@
         </executions>
       </plugin>
 
-      <!-- 5) Jib -->
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
         <artifactId>jib-maven-plugin</artifactId>
@@ -229,7 +248,7 @@
             <image>eclipse-temurin:21-jre-jammy</image>
           </from>
           <to>
-            <image>br.com.embalando/embalando-net-br:${project.version}</image>
+            <image>br.com.redemaisfarma/redemaisfarma-api:${project.version}</image>
           </to>
           <container>
             <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
@@ -244,7 +263,6 @@
     </plugins>
   </build>
 
-  <!-- ==== Perfis Spring ==== -->
   <profiles>
     <profile>
       <id>dev</id>
