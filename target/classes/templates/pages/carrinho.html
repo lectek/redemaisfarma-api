@@ -1,43 +1,73 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>Carrinho • EMBALANDO</title>
-  <link rel="stylesheet" href="/css/style.css"> 
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carrinho • RedeMaisFarma</title>
+
+  <!-- Estilos principais -->
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
 </head>
-<body>
 
-<header class="navbar">
-  <div class="container">
-    <a href="/pages/index.html"><strong>EMBALANDO</strong></a>
-  </div>
-</header>
+<body class="body-flex">
 
-<main class="container" style="padding:2rem 0">
-  <h2>Carrinho de compras</h2>
-  <table style="width:100%; margin-top:1rem; border-collapse:collapse">
-    <thead>
-      <tr style="background:#eee">
-        <th style="text-align:left; padding:.5rem">Item</th>
-        <th style="text-align:center">Qtd.</th>
-        <th style="text-align:right">Subtotal</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td style="padding:.5rem 0">Coleira Vermelha</td>
-        <td style="text-align:center">1</td>
-        <td style="text-align:right">R$ 49,90</td>
-      </tr>
-      <!-- … outros itens … -->
-    </tbody>
-  </table>
+  <!-- Cabeçalho -->
+  <header th:replace="~{fragments/header :: header}"></header>
 
-  <div style="margin-top:1.5rem; text-align:right">
-    <strong>Total: R$ 49,90</strong><br>
-    <a href="/pages/checkout.html" class="btn" style="margin-top:.5rem; display:inline-block">Finalizar compra</a>
-  </div>
-</main>
+  <!-- Conteúdo do carrinho -->
+  <main id="main-content" class="container mt-4 mb-4">
+    <h1 class="mb-2 text-lg">🧾 Carrinho de Medicamentos</h1>
+
+    <div class="carrinho grid grid-2 gap-32 mt-4">
+      <!-- Lista de produtos -->
+      <div class="lista-produtos stack gap-16">
+
+        <!-- Produto 1: Exemplo fixo -->
+        <div class="produto-item card flex gap-16 p-2">
+          <img src="/images/dorflex.png" alt="Dorflex 36 comprimidos"
+               style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px;" />
+
+          <div class="produto-info stack gap-8">
+            <span class="produto-nome font-semibold text-base">Dorflex 36 comprimidos</span>
+            <span class="produto-preco text-sm">R$ 19,90</span>
+            <div class="produto-quantidade flex gap-8 items-center">
+              <label for="qtd1" class="visually-hidden">Quantidade</label>
+              <input type="number" id="qtd1" name="qtd1" value="1" min="1"
+                     class="form-input" style="max-width: 64px;" />
+              <button class="btn btn-danger">Remover</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Outros produtos serão renderizados dinamicamente -->
+      </div>
+
+      <!-- Resumo do pedido -->
+      <aside class="resumo-pedido card stack gap-16 p-4">
+        <h2 class="text-base font-semibold">Resumo do Pedido</h2>
+
+        <div class="resumo-linha flex justify-between">
+          <span>Subtotal:</span>
+          <span>R$ 19,90</span>
+        </div>
+
+        <div class="resumo-linha flex justify-between">
+          <span>Entrega:</span>
+          <span>Grátis</span>
+        </div>
+
+        <div class="resumo-linha total flex justify-between font-bold">
+          <span>Total:</span>
+          <span>R$ 19,90</span>
+        </div>
+
+        <a th:href="@{/checkout}" class="btn btn--primary">Finalizar Compra</a>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Rodapé -->
+  <footer th:replace="~{fragments/footer :: footer}"></footer>
 
 </body>
 </html>

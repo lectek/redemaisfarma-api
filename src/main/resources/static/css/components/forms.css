@@ -1,0 +1,130 @@
+/* ===============================
+🧾 Formulários - Estilo Embalando
+=============================== */
+
+.form-section {
+  padding: 2rem;
+  max-width: 700px;
+  margin: 0 auto;
+  background-color: var(--layout-card, #fff);
+  border-radius: var(--layout-radius, 12px);
+  box-shadow: var(--layout-shadow);
+}
+
+.form-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--layout-dark, #1f2937);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.form-embalando {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--layout-dark);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--layout-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #fff;
+  color: var(--layout-dark);
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--layout-accent);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo do botão de envio */
+.btn-form {
+  background-color: var(--layout-accent);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: background-color 0.2s ease, transform 0.2s;
+}
+
+.btn-form:hover {
+  background-color: var(--layout-accent-hover);
+  transform: translateY(-2px);
+}
+
+/* Busca no cabeçalho (se usar em conjunto) */
+.barra-superior input[type="search"] {
+  padding: 0.6rem 1rem 0.6rem 2.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--layout-border);
+  background-color: #f1f5f9;
+  background-image: url('/icons/search.svg');
+  background-repeat: no-repeat;
+  background-position: 12px center;
+  background-size: 16px;
+  font-size: 1rem;
+}
+
+.barra-superior input[type="search"]:focus {
+  border-color: var(--layout-accent);
+  background-color: #fff;
+  outline: none;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .form-section {
+    background-color: #1e1e1e;
+  }
+
+  .form-group label {
+    color: #f3f3f3;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    background-color: #2a2a2a;
+    color: #e92626;
+    border-color: #444;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--layout-accent);
+  }
+
+  .btn-form {
+    background-color: var(--layout-accent);
+    color: rgb(191, 18, 18);
+  }
+
+  .btn-form:hover {
+    background-color: var(--layout-accent-hover);
+  }
+}

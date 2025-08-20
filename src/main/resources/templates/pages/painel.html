@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Painel Administrativo • RedeMaisFarma</title>
+
+  <!-- CSS principal -->
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+
+<body class="body-flex">
+
+  <!-- Navegação superior -->
+  <nav class="navbar">
+    <div class="left">
+      <a href="/" class="logo-link" aria-label="Voltar à página inicial">
+        <img th:src="@{/images/logo-redemaisfarma.png}" alt="Logo RedeMaisFarma" class="logo" />
+      </a>
+      <button class="menu-button">Painel</button>
+      <button class="menu-button">Produtos</button>
+      <button class="menu-button">Pedidos</button>
+      <button class="menu-button">Clientes</button>
+    </div>
+    <button class="menu-button">Sair</button>
+  </nav>
+
+  <!-- Conteúdo principal -->
+  <main class="container mt-4 mb-4">
+
+    <!-- Cabeçalho do painel -->
+    <header class="painel-header">
+      <h1>Painel Administrativo</h1>
+      <p>Bem-vindo ao painel da <strong>RedeMaisFarma</strong>. Gerencie suas operações com eficiência e segurança.</p>
+    </header>
+
+    <!-- Resumo do sistema -->
+    <section class="painel-resumo" th:object="${painelAdmin}">
+      <div class="resumo-header">
+        <h2 th:text="'Olá, ' + *{adminNome} + '! 👋'">Olá, Admin!</h2>
+        <p th:text="'Último pedido realizado há ' + @{T(java.time.Duration).between(*{dataUltimoPedido}, T(java.time.LocalDateTime).now()).toHours()} + ' horas.'">
+          Último pedido: 2 horas atrás
+        </p>
+      </div>
+
+      <div class="resumo-metricas">
+        <div class="card-metrica"><strong>Total de Pedidos:</strong><span th:text="*{totalPedidos}">--</span></div>
+        <div class="card-metrica"><strong>Lucro Total:</strong><span>R$ <span th:text="*{totalLucro}">--</span></span></div>
+        <div class="card-metrica"><strong>Ticket Médio:</strong><span>R$ <span th:text="*{ticketMedio}">--</span></span></div>
+        <div class="card-metrica"><strong>Clientes Ativos:</strong><span th:text="*{clientesAtivos}">--</span></div>
+        <div class="card-metrica"><strong>Produtos Cadastrados:</strong><span th:text="*{qtdProdutos}">--</span></div>
+        <div class="card-metrica"><strong>Pedidos Pendentes:</strong><span th:text="*{qtdPedidosPendentes}">--</span></div>
+        <div class="card-metrica"><strong>Pedidos Entregues:</strong><span th:text="*{qtdPedidosEntregues}">--</span></div>
+        <div class="card-metrica"><strong>Satisfação do Cliente:</strong><span th:text="*{satisfacaoCliente} + '%'">--</span></div>
+      </div>
+
+      <!-- Categorias -->
+      <div class="resumo-categorias">
+        <h3>Categorias Mais Vendidas</h3>
+        <ul>
+          <li th:each="cat : *{categoriasMaisVendidas}" th:text="${cat}">Categoria</li>
+        </ul>
+      </div>
+
+      <!-- Alertas -->
+      <div class="resumo-alertas">
+        <h3>🔔 Alertas Operacionais</h3>
+        <ul>
+          <li th:each="alerta : *{alertas}" th:text="${alerta}">Alerta</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Módulos administrativos -->
+    <section class="painel-grid mt-6">
+      <div class="card"><h2>🛍️ Produtos</h2><p>Gerencie o catálogo de produtos.</p><a href="/admin/produtos" class="btn-acessar">Acessar</a></div>
+      <div class="card"><h2>📦 Pedidos</h2><p>Controle pedidos e entregas.</p><a href="/admin/pedidos" class="btn-acessar">Acessar</a></div>
+      <div class="card"><h2>👤 Clientes</h2><p>Edite dados dos clientes.</p><a href="/admin/clientes" class="btn-acessar">Acessar</a></div>
+      <div class="card"><h2>📂 Categorias</h2><p>Organize por categorias.</p><a href="/admin/categorias" class="btn-acessar">Acessar</a></div>
+      <div class="card"><h2>📈 Relatórios</h2><p>Visualize os dados da farmácia.</p><a href="/admin/relatorios" class="btn-acessar">Visualizar</a></div>
+      <div class="card"><h2>⚙️ Configurações</h2><p>Ajuste preferências do sistema.</p><a href="/admin/configuracoes" class="btn-acessar">Ajustar</a></div>
+    </section>
+  </main>
+
+  <!-- Rodapé fixo -->
+  <footer class="footer--sticky">
+    <p>© 2025 RedeMaisFarma • Painel Administrativo</p>
+  </footer>
+
+</body>
+</html>

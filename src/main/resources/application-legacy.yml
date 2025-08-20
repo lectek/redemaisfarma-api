@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${FB_URL:jdbc:firebirdsql://localhost:3050/REDMFRM_LEGADO?encoding=UTF8}
+    username: ${FB_USER:sysdba}
+    password: ${FB_PASS:masterkey}
+    driver-class-name: org.firebirdsql.jdbc.FBDriver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      # ⚠️ Hibernate 6 → usar o pacote "community"
+      hibernate.dialect: org.hibernate.community.dialect.FirebirdDialect
+  flyway:
+    enabled: false

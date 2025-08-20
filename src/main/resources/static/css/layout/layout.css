@@ -1,0 +1,206 @@
+/* ===============================
+📦 Layout Profissional do Painel Embalando
+=============================== */
+
+:root {
+  --layout-bg: #f9fafb;
+  --layout-card: #ffffff;
+  --layout-dark: #1f2937;
+  --layout-accent: #000000;
+  --layout-accent-hover: #333333;
+  --layout-border: #e5e7eb;
+  --layout-radius: 12px;
+  --layout-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--layout-bg);
+  margin: 0;
+  color: #111827;
+  line-height: 1.6;
+}
+
+/* 🔝 Navbar fixa */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--layout-dark);
+  color: white;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.navbar .left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo {
+  height: 60px;
+  display: flex;
+  align-items: center;
+}
+/* 🌐 Seletor de idioma alinhado ao topo direito */
+.language-selector {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-right: 1rem;
+}
+
+.language-selector a {
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-full);
+  color: var(--color-dark);
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+}
+
+.language-selector a:hover {
+  background-color: var(--color-neutral-3);
+}
+
+
+.language-selector .lang-label {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* Botões principais */
+.menu-button,
+.btn,
+.btn-acessar,
+.btn-form {
+  background-color: var(--layout-accent);
+  color: white;
+  font-weight: 600;
+  padding: 0.6rem 1.3rem;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.menu-button:hover,
+.btn:hover,
+.btn-acessar:hover,
+.btn-form:hover {
+  background-color: var(--layout-accent-hover);
+  transform: translateY(-2px);
+}
+
+.menu-button.ativo {
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+}
+
+/* 🧱 Estrutura principal */
+main {
+  padding: 2rem;
+  max-width: 1280px;
+  margin: auto;
+}
+
+.painel-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.painel-header h1 {
+  font-size: 2.2rem;
+  margin-bottom: 0.3rem;
+  color: var(--layout-dark);
+}
+
+/* 🧩 Grid com cartões */
+.painel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.card {
+  background-color: var(--layout-card);
+  border-radius: var(--layout-radius);
+  padding: 1.8rem;
+  box-shadow: var(--layout-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+}
+
+.card h2 {
+  font-size: 1.4rem;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.card p {
+  color: #4b5563;
+  flex-grow: 1;
+  font-size: 0.95rem;
+  margin-bottom: 1.2rem;
+}
+
+/* 📌 Rodapé fixo */
+.footer--sticky {
+  background-color: var(--layout-dark);
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* 📱 Responsividade */
+@media (max-width: 768px) {
+  .painel-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .menu-button,
+  .btn,
+  .btn-acessar,
+  .btn-form {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .card {
+    padding: 1.2rem;
+  }
+
+  .btn-acessar,
+  .btn-form {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ☑️ Menu alinhado à direita */
+.painel-nav {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-left: auto;
+}

@@ -1,0 +1,210 @@
+/* ============================
+🎛️ Painel Administrativo RedeMaisFarma
+Adaptado com as cores da identidade LekTeC/Farma
+============================ */
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #fefefe;
+  margin: 0;
+  padding: 0;
+  color: #1e293b;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #165baa; /* Azul LekTeC */
+  color: white;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.navbar .left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navbar .logo {
+  height: 36px;
+}
+
+.menu-button {
+  background: transparent;
+  color: white;
+  border: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.menu-button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+}
+
+main {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.painel-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.painel-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #165baa;
+}
+
+.painel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
+}
+
+.card p {
+  flex-grow: 1;
+  color: #4b5563;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.btn-acessar {
+  align-self: flex-start;
+  padding: 0.6rem 1.2rem;
+  background-color: #f43f5e; /* Rosa Farma */
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.btn-acessar:hover {
+  background-color: #be123c;
+}
+
+.footer--sticky {
+  background-color: #165baa;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+.painel-resumo {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.resumo-header h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.25rem;
+  color: #1f2937;
+}
+
+.resumo-metricas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.card-metrica {
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.card-metrica span {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #0f172a;
+}
+
+.resumo-categorias,
+.resumo-alertas {
+  margin-top: 2rem;
+}
+
+.resumo-categorias h3,
+.resumo-alertas h3 {
+  font-size: 1.1rem;
+  color: #165baa;
+  margin-bottom: 0.5rem;
+}
+
+.resumo-categorias ul,
+.resumo-alertas ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  color: #475569;
+}
+
+.resumo-alertas li {
+  color: #b91c1c;
+  font-weight: 500;
+}
+
+/* 🌒 Dark Mode */
+:root {
+  --bg-light: #fefefe;
+  --bg-dark: #0f172a;
+  --text-light: #ffffff;
+  --text-dark: #0f172a;
+}
+
+body[data-theme='dark'] {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+}
+
+body[data-theme='dark'] .card,
+body[data-theme='dark'] .painel-resumo {
+  background-color: #1e293b;
+  color: #f1f5f9;
+}

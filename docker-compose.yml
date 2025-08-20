@@ -1,34 +1,63 @@
-services:
-  mysql:
-    image: mysql:8.4
-    container_name: mysql_embalando
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: embalando
-      MYSQL_USER: embalando
-      MYSQL_PASSWORD: embalando_pwd
-      MYSQL_ROOT_PASSWORD: root_pwd
-    ports:
-      - "3307:3306"
-    networks:
-      - back
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+version: "3.9"
 
-  app:
-    build: .
-    container_name: embalando_app
+services:
+  # =========================
+  # 🔥 FIREBIRD (banco legado)
+  # =========================
+  firebird:
+    image: jacobalberty/firebird:3.0
+    container_name: firebird
     restart: unless-stopped
+    ports:
+      - "3050:3050"
+    environment:
+      ISC_PASSWORD: ${FIREBIRD_PASSWORD}
+      FIREBIRD_DATABASE: ${FIREBIRD_DB}
+    volumes:
+      - ./data:/firebird/data
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 1 bash -c '< /dev/tcp/127.0.0.1/3050' || exit 1"]
+      interval: 5s
+      timeout: 2s
+      retries: 30
+
+  # =========================
+  # 🟩 API Spring Boot
+  # =========================
+  redemaisfarma_app:
+    container_name: redemaisfarma_app
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on:
-      mysql:
-        condition: service_healthy
+      firebird:
+        condition: service_started   # ✅ não trava mais por causa do healthcheck
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS}
     ports:
       - "8080:8080"
-    networks:
-      - back
+    restart: unless-stopped
 
-networks:
-  back:
+# ==================================
+# 🐬 MySQL
+# ==================================
+mysql:
+  image: mysql:8.0
+  container_name: mysql
+  restart: unless-stopped
+  environment:
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_DATABASE: redemaisfarma
+    MYSQL_USER: appuser
+    MYSQL_PASSWORD: apppass
+  ports:
+    - "3306:3306"
+  volumes:
+    - ./mysql_data:/var/lib/mysql
+  healthcheck:
+    test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+    interval: 5s
+    timeout: 2s
+    retries: 30
+

@@ -1,0 +1,40 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    mysql:
+      url: jdbc:mysql://${MYSQL_HOST:db-prod}:3306/${MYSQL_DB:redemaisfarma}?useSSL=true&serverTimezone=UTC
+      username: ${MYSQL_USER}
+      password: ${MYSQL_PASSWORD}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+
+    firebird:
+      url: jdbc:firebirdsql://${FIREBIRD_HOST:firebird-prod}:${FIREBIRD_PORT:3050}/${FIREBIRD_DB:digifarma6.fdb}?encoding=WIN1252&authPlugins=Legacy_Auth&wireCrypt=DISABLED
+      username: ${FIREBIRD_USER:SYSDBA}
+      password: ${FIREBIRD_PASSWORD}
+      driver-class-name: org.firebirdsql.jdbc.FBDriver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    table: flyway_schema_history
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    root: WARN
+    org.springframework: INFO

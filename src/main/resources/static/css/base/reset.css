@@ -1,0 +1,132 @@
+/* ================================
+   🔄 RESET.CSS — Reset Moderno Profissional
+   Remove diferenças de estilo padrão entre navegadores
+   ================================ */
+
+/* Box model consistente */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Remove margens e paddings padrão */
+body, h1, h2, h3, h4, h5, h6,
+p, blockquote, figure, dl, dd {
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove estilo padrão de listas */
+ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Remove estilo padrão de links */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Remove estilos padrão de botões e inputs */
+button,
+input,
+select,
+textarea {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  outline: none;
+}
+
+/* Corrige comportamento do cursor em botões */
+button {
+  cursor: pointer;
+}
+
+/* Remove estilos padrão de imagens e mídias */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Corrige formatação de tabelas */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* Remove aspas automáticas de blockquotes */
+blockquote::before,
+blockquote::after,
+q::before,
+q::after {
+  content: none;
+}
+
+/* Ajusta elementos HTML5 para serem display block */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, main, nav, section, summary {
+  display: block;
+}
+
+/* Remove o estilo de focos nativos em alguns navegadores */
+[tabindex="-1"]:focus {
+  outline: none !important;
+}
+
+/* Remove decoração padrão de marcadores de citações */
+blockquote,
+q {
+  quotes: none;
+}
+
+/* Remove bordas dos campos no Firefox */
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  display: none;
+}
+
+/* Remove preenchimento e borda do Firefox */
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/* Corrige sublinhado em links no Safari */
+a:active,
+a:hover {
+  outline: 0;
+}
+
+/* Define estilos iniciais do HTML e body */
+html {
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  text-rendering: optimizeSpeed;
+  font-family: sans-serif;
+}
+
+/* Remove animações e transições para usuários que preferem menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

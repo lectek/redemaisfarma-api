@@ -1,34 +1,88 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<head th:fragment="head">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<head th:fragment="commonHead">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Sistema Embalando - Loja de produtos para pets com carinho e tecnologia." />
+  <meta name="theme-color" content="#f43f5e" />
+  <meta property="og:title" content="Embalando • Loja de Produtos Pet" />
+  <meta property="og:description" content="Compre os melhores acessórios para pets com segurança e agilidade." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="LekTec" />
+  <link rel="icon" type="image/png" href="/images/favicon.png" />
   <title th:text="${title} ?: 'Embalando • Loja de Produtos Pet'">Embalando</title>
-  <link rel="stylesheet" th:href="@{/css/style.css}" />
-  <link rel="stylesheet" th:href="@{/css/index.css}" />
-  <style>
-    :root {
-      --primaria: #2a9d8f;
-      --secundaria: #264653;
-      --neutra: #f4f4f4;
-      --texto: #333333;
-      --espaco: 8px;
-      --transicao: 250ms;
-    }
-  </style>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
 </head>
-<body>
 
-  <header th:replace="fragments/header :: header"></header>
+<body class="body-flex" data-page="layout">
+  <a href="#main-content" class="skip-link">Pular para o conteúdo</a>
 
-  <main th:fragment="conteudo">
-    <!-- conteúdo dinâmico -->
+  <header th:replace="~{fragments/header :: header}" role="banner"></header>
+
+  <main id="main-content" role="main" tabindex="-1" th:fragment="conteudo" aria-label="Conteúdo principal da página">
+    <!-- As páginas inserem seu conteúdo aqui -->
   </main>
 
-  <footer th:replace="fragments/footer :: footer"></footer>
+  <footer th:fragment="footer" role="contentinfo" class="site-footer">
+    <a href="#main-content" class="skip-link">Voltar ao topo</a>
+    <div class="container footer-grid">
+      <div class="footer-column">
+        <h4>Sobre a Embalando</h4>
+        <ul>
+          <li><a href="/sobre">Quem somos</a></li>
+          <li><a href="/missao">Missão e Visão</a></li>
+          <li><a href="/contato">Contato</a></li>
+        </ul>
+      </div>
+      <div class="footer-column">
+        <h4>Ajuda</h4>
+        <ul>
+          <li><a href="/faq">Perguntas frequentes</a></li>
+          <li><a href="/entrega">Informações de entrega</a></li>
+          <li><a href="/politica">Política de Privacidade</a></li>
+        </ul>
+      </div>
+      <div class="footer-column">
+        <h4>Mapa do Site</h4>
+        <ul>
+          <li><a href="/">Início</a></li>
+          <li><a href="/produtos">Produtos</a></li>
+          <li><a href="/checkout">Finalizar compra</a></li>
+        </ul>
+      </div>
+      <div class="footer-column">
+        <h4>Receba novidades</h4>
+        <form>
+          <input type="email" placeholder="Seu e-mail" required />
+          <button type="submit" class="btn">Assinar</button>
+        </form>
+        <div id="newsletter-status"></div>
+      </div>
+      <div class="footer-column credits">
+        <small>© 2025 Embalando. Todos os direitos reservados.</small>
+        <small>Desenvolvido por LekTec</small>
+      </div>
+    </div>
 
-  <!-- 👉 Aqui entra seu script layout.js -->
-  <script th:src="@{/js/layout.js}"></script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Embalando",
+      "url": "https://embalando.com",
+      "logo": "https://embalando.com/img/logo.svg",
+      "sameAs": [
+        "https://instagram.com/embalando",
+        "https://facebook.com/embalando",
+        "https://twitter.com/embalando"
+      ]
+    }
+    </script>
+    <script defer th:src="@{/js/footer.js}"></script>
+  </footer>
 
+  <script defer th:src="@{/js/layout.js}"></script>
 </body>
 </html>

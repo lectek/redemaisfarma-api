@@ -1,0 +1,111 @@
+/* ===============================
+   UTILITÁRIOS DE ANIMAÇÃO
+   Arquivo: utilities/animation.css
+   =============================== */
+
+/* 💫 Tipos de animação */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out both;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.5s ease-in-out both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-in-out both;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.5s ease-in-out both;
+}
+
+.animate-slide-left {
+  animation: slideLeft 0.5s ease-in-out both;
+}
+
+.animate-slide-right {
+  animation: slideRight 0.5s ease-in-out both;
+}
+
+.animate-zoom-in {
+  animation: zoomIn 0.4s ease-in-out both;
+}
+
+.animate-zoom-out {
+  animation: zoomOut 0.4s ease-in-out both;
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* 🔁 Delay de animação */
+.delay-100  { animation-delay: 0.1s; }
+.delay-200  { animation-delay: 0.2s; }
+.delay-300  { animation-delay: 0.3s; }
+.delay-400  { animation-delay: 0.4s; }
+.delay-500  { animation-delay: 0.5s; }
+
+/* ⏱️ Duração de animação */
+.duration-100  { animation-duration: 0.1s; }
+.duration-200  { animation-duration: 0.2s; }
+.duration-500  { animation-duration: 0.5s; }
+.duration-1000 { animation-duration: 1s; }
+
+/* ===============================
+   💡 Keyframes das animações
+   =============================== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideRight {
+  from { transform: translateX(-20px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+@keyframes zoomOut {
+  from { transform: scale(1); opacity: 1; }
+  to   { transform: scale(0.8); opacity: 0; }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

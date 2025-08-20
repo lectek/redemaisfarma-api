@@ -1,0 +1,88 @@
+/* index.css - Página inicial do sistema RedeMaisFarma */
+
+:root {
+  --home-bg: #f3f4f6;
+  --home-card-bg: #ffffff;
+  --home-card-shadow: rgba(0, 0, 0, 0.04);
+  --home-card-radius: 14px;
+  --home-title-color: #0d9488; /* teal-600 */
+  --home-text: #374151;
+  --home-accent: #10b981;
+}
+
+main.home-container {
+  margin-left: 280px; /* espaço da sidebar */
+  padding: 2rem 3rem;
+  background-color: var(--home-bg);
+  min-height: 100vh;
+  transition: margin 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  main.home-container {
+    margin-left: 0;
+    padding: 1.5rem;
+  }
+}
+
+/* Título da página */
+main.home-container h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--home-title-color);
+  margin-bottom: 2rem;
+}
+
+/* Cards principais */
+.home-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.card-farma {
+  background-color: var(--home-card-bg);
+  border-radius: var(--home-card-radius);
+  padding: 1.5rem;
+  box-shadow: 0 6px 16px var(--home-card-shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.card-farma:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-farma h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--home-text);
+}
+
+.card-farma p {
+  font-size: 0.95rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Botão dentro do card */
+.card-farma button {
+  margin-top: auto;
+  background-color: var(--home-accent);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.card-farma button:hover {
+  background-color: #059669; /* verde mais escuro */
+}

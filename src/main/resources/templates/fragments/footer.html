@@ -1,129 +1,40 @@
-<!-- fragments/footer.html -->
-<footer role="contentinfo" class="site-footer" th:fragment="footer">
-  <!-- Atalho para voltar ao topo -->
-  <a href="#main-content" class="skip-footer">Voltar ao topo</a>
+<!-- src/main/resources/templates/fragments/footer.html -->
+<footer th:fragment="footer" role="contentinfo" class="site-footer">
+  <a href="#main-content" class="skip-link">Voltar ao topo</a>
 
-  <div class="footer-grid">
-    <!-- Sobre & Contato -->
-    <div class="footer-column about">
-      <h2 class="visually-hidden">Sobre</h2>
-
-      <small>© <span th:text="${T(java.time.Year).now()}"></span> Embalando.</small>
-
-      <address>
-        Rua Exemplo, 123 – João Pessoa, PB<br>
-        <a href="tel:+5583999999999">(83) 9 9999-9999</a><br>
-        <a href="mailto:contato@embalando.com">contato@embalando.com</a>
-      </address>
-
-      <!-- Seletor de idioma -->
-      <nav aria-label="Seletor de idioma" class="lang-selector">
-        <button aria-controls="footer-lang-menu" aria-expanded="false">PT</button>
-        <ul id="footer-lang-menu">
-          <li><a th:href="@{/?lang=pt}" lang="pt">Português</a></li>
-          <li><a th:href="@{/?lang=en}" lang="en">English</a></li>
-        </ul>
-      </nav>
+  <div class="container footer-grid">
+    <div class="footer-column">
+      <h2>Sobre a Loja</h2>
+      <p>Produtos com carinho, qualidade e tecnologia para o seu pet.</p>
+      <p>&copy; 2025 Embalando. Desenvolvido por LekTeC.</p>
     </div>
 
-    <!-- Links legais -->
-    <div class="footer-column legal">
-      <h2 class="visually-hidden">Legal</h2>
-      <nav aria-label="Links legais">
-        <ul>
-          <li><a th:href="@{/politica-privacidade}">Política de Privacidade</a></li>
-          <li><a th:href="@{/termos}">Termos de Uso</a></li>
-          <li><a th:href="@{/cookies}">Política de Cookies</a></li>
-          <li><a th:href="@{/acessibilidade}">Declaração de Acessibilidade</a></li>
-          <li><button id="cookie-preferences">Preferências de Cookies</button></li>
-          <li><a th:href="@{/analytics-opt-out}">Opt-out de Analytics</a></li>
-        </ul>
-      </nav>
-    </div>
-
-    <!-- Mapa do site -->
-    <div class="footer-column sitemap">
-      <h2>Mapa do Site</h2>
+    <div class="footer-column">
+      <h2>Links</h2>
       <ul>
         <li><a th:href="@{/}">Início</a></li>
-        <li>
-          <a th:href="@{/servicos}">Serviços</a>
-          <ul>
-            <li><a th:href="@{/servicos/a}">Serviço A</a></li>
-            <li><a th:href="@{/servicos/b}">Serviço B</a></li>
-          </ul>
-        </li>
-        <li><a th:href="@{/sobre}">Sobre</a></li>
-        <li><a th:href="@{/blog}">Blog</a></li>
+        <li><a th:href="@{/produtos}">Produtos</a></li>
+        <li><a th:href="@{/carrinho}">Carrinho</a></li>
+        <li><a th:href="@{/checkout}">Checkout</a></li>
       </ul>
     </div>
 
-    <!-- Newsletter -->
-    <div class="footer-column newsletter">
-      <h2 id="newsletter-heading">Newsletter</h2>
-      <form id="newsletter-form"
-            th:action="@{/inscrever}"
-            method="post"
-            novalidate
-            aria-labelledby="newsletter-heading">
-        <label for="newsletter-email">E-mail</label>
-        <input type="email" id="newsletter-email" name="email" required>
-        <button type="submit">Inscrever-se</button>
-        <span class="error-message" role="alert" aria-live="assertive"></span>
-        <div id="newsletter-status" aria-live="polite"></div>
-      </form>
+    <div class="footer-column">
+      <h2>Contato</h2>
+      <p>Email: contato@embalando.com</p>
+      <p>WhatsApp: (83) 99999-9999</p>
     </div>
 
-    <!-- Redes sociais -->
-    <div class="footer-column social">
-      <h2 class="visually-hidden">Redes sociais</h2>
-      <a href="https://instagram.com/embalando" target="_blank" rel="noopener noreferrer">
-        <svg aria-hidden="true" width="24" height="24"><!-- ícone Instagram --></svg>
-        <span class="visually-hidden">Instagram</span>
-      </a>
-      <a href="https://facebook.com/embalando" target="_blank" rel="noopener noreferrer">
-        <svg aria-hidden="true" width="24" height="24"><!-- ícone Facebook --></svg>
-        <span class="visually-hidden">Facebook</span>
-      </a>
-      <a href="https://twitter.com/embalando" target="_blank" rel="noopener noreferrer">
-        <svg aria-hidden="true" width="24" height="24"><!-- ícone X/Twitter --></svg>
-        <span class="visually-hidden">X&nbsp;(Twitter)</span>
-      </a>
-    </div>
-
-    <!-- Selos de confiança -->
-    <div class="footer-column badges">
-      <h2 class="visually-hidden">Selos de confiança</h2>
-      <img th:src="@{/img/ssl.svg}" alt="SSL Seguro" loading="lazy">
-      <img th:src="@{/img/iso.svg}" alt="Certificado ISO" loading="lazy">
-      <a th:href="@{/status}" rel="noopener">
-        <img th:src="@{/img/status.svg}" alt="Status de Uptime" loading="lazy">
-      </a>
-    </div>
-
-    <!-- Pagamentos & apps -->
-    <div class="footer-column payments">
-      <h2 class="visually-hidden">Pagamentos</h2>
+    <div class="footer-column">
+      <h2>Siga-nos</h2>
       <ul>
-        <li><img th:src="@{/img/visa.svg}" alt="Visa" loading="lazy"> Visa</li>
-        <li><img th:src="@{/img/pix.svg}"  alt="Pix"  loading="lazy"> Pix</li>
+        <li><a href="https://instagram.com/embalando" target="_blank">Instagram</a></li>
+        <li><a href="https://facebook.com/embalando" target="_blank">Facebook</a></li>
+        <li><a href="https://twitter.com/embalando" target="_blank">Twitter</a></li>
       </ul>
-      <a href="https://play.google.com" rel="noopener">
-        <img th:src="@{/img/google-play.svg}" alt="Google Play" loading="lazy">
-      </a>
-      <a href="https://apple.com/app-store" rel="noopener">
-        <img th:src="@{/img/app-store.svg}" alt="App Store" loading="lazy">
-      </a>
-    </div>
-
-    <!-- Créditos & aviso -->
-    <div class="footer-column credits">
-      <small>Site desenvolvido por LekTeC.</small>
-      <p class="disclaimer">Texto de disclaimer regional.</p>
     </div>
   </div>
 
-  <!-- Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -131,72 +42,12 @@
     "name": "Embalando",
     "url": "https://embalando.com",
     "logo": "https://embalando.com/img/logo.svg",
-    "sameAs": ["https://instagram.com/embalando"]
+    "sameAs": [
+      "https://instagram.com/embalando",
+      "https://facebook.com/embalando",
+      "https://twitter.com/embalando"
+    ]
   }
   </script>
-
-  <!-- JS externo (atualiza ano, preferências de cookies etc.) -->
   <script defer th:src="@{/js/footer.js}"></script>
 </footer>
-
-<style>
-:root {
-  --color-bg: #222;
-  --color-text: #fff;
-  --spacing: clamp(8px,2vw,16px);
-  --breakpoint: 768px;
-}
-@media (prefers-color-scheme: dark) {
-  :root { --color-bg: #111; --color-text: #eee; }
-}
-
-/* Estrutura */
-.site-footer {
-  background: var(--color-bg);
-  color: var(--color-text);
-  padding: var(--spacing);
-  border-top: 1px solid #444;
-  position: relative;
-  z-index: 500;
-}
-.footer-grid {
-  display: grid;
-  gap: var(--spacing);
-  grid-template-columns: 1fr;
-}
-@media(min-width:var(--breakpoint)){
-  .footer-grid { grid-template-columns: repeat(4,1fr); }
-}
-
-/* Colunas que precisam de flex */
-.footer-column.social,
-.footer-column.badges,
-.footer-column.payments {
-  display: flex;
-  gap: var(--spacing);
-  flex-wrap: wrap;
-}
-
-/* Elementos interativos */
-.site-footer a,
-.site-footer button {
-  min-inline-size:44px;
-  min-block-size:44px;
-}
-.site-footer a:hover,
-.site-footer a:focus,
-.site-footer button:hover,
-.site-footer button:focus {
-  outline:2px solid var(--color-text);
-}
-
-/* Utilitário */
-.visually-hidden{
-  position:absolute; width:1px; height:1px; margin:-1px; overflow:hidden; clip:rect(0 0 0 0);
-}
-
-/* Impressão */
-@media print {
-  .site-footer { background-image:none; }
-}
-</style>

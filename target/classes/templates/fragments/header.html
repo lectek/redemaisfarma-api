@@ -1,221 +1,81 @@
-<!-- fragments/header.html -->
-<header role="banner" class="site-header" th:fragment="header">
-  <a href="#main-content" class="skip-link">Pular para conteúdo principal</a>
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<head th:fragment="commonHead">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Sistema Embalando - Loja de produtos para pets com carinho e tecnologia." />
+  <meta name="theme-color" content="#f43f5e" />
+  <meta property="og:title" content="Embalando • Loja de Produtos Pet" />
+  <meta property="og:description" content="Compre os melhores acessórios para pets com segurança e agilidade." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="LekTec" />
+  <link rel="icon" type="image/png" href="/images/favicon.png" />
+  <title th:text="${title} ?: 'Embalando • Loja de Produtos Pet'">Embalando</title>
 
-  <div class="header-inner">
-    <!-- Logo -->
-    <a th:href="@{/}" class="logo-link">
-      <svg class="logo" aria-hidden="true" focusable="false" width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <!-- … caminhos do SVG … -->
-      </svg>
-      <span class="visually-hidden">Embalando</span>
-    </a>
+  <!-- CSS principal e layout -->
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
 
-    <!-- Botão hambúrguer -->
-    <button class="nav-toggle"
-            aria-controls="primary-nav"
-            aria-expanded="false"
-            aria-label="Alternar navegação">
-      <span class="hamburger"></span>
-    </button>
+<body class="body-flex" data-page="layout">
+  <!-- Acessibilidade -->
+  <a href="#main-content" class="skip-link">Pular para o conteúdo</a>
 
-    <!-- Navegação principal -->
-    <nav id="primary-nav" class="primary-nav" aria-label="Menu principal">
-      <ul>
-        <li><a th:href="@{/}" aria-current="page">Início</a></li>
-        <li><a th:href="@{/sobre}">Sobre</a></li>
-        <li><a th:href="@{/servicos}">Serviços</a></li>
-        <li><a th:href="@{/cadastro}" class="cta">Cadastre-se</a></li>
-      </ul>
-    </nav>
+  <!-- Cabeçalho com fragmento -->
+  <header role="banner" class="site-header" th:fragment="header">
+    <a href="#main-content" class="skip-link">Pular para conteúdo principal</a>
 
-    <!-- Busca -->
-    <form role="search"
-          class="search-form"
-          aria-label="Busca no site"
-          th:action="@{/buscar}"
-          method="get">
-      <label for="search-input" class="visually-hidden">Buscar</label>
-      <input id="search-input"
-             type="search"
-             name="q"
-             placeholder="Pesquisar…"
-             required>
-      <button type="submit" aria-label="Enviar busca">🔍</button>
-    </form>
-
-    <!-- Ícones & seletor de idioma -->
-    <div class="header-icons">
-      <a th:href="@{/carrinho}" class="icon-link">
-        <svg aria-hidden="true" focusable="false" width="24" height="24"><!-- ícone carrinho --></svg>
-        <span class="visually-hidden">Carrinho</span>
+    <div class="header-grid">
+      <!-- LOGO -->
+      <a th:href="@{/}" class="logo" aria-label="Página inicial">
+        <img src="/images/logo-embalando.png" alt="Logo Embalando" class="logo" />
       </a>
-      <a th:href="@{/notificacoes}" class="icon-link">
-        <svg aria-hidden="true" focusable="false" width="24" height="24"><!-- ícone sino --></svg>
-        <span class="visually-hidden">Notificações</span>
-      </a>
-      <a th:href="@{/perfil}" class="icon-link">
-        <svg aria-hidden="true" focusable="false" width="24" height="24"><!-- ícone usuário --></svg>
-        <span class="visually-hidden">Perfil</span>
-      </a>
+       <div class="barra-inferior">
+          <a th:href="@{/produtos}" class="btn">Catálogo</a>
+          <a th:href="@{/checkout}" class="btn">Checkout</a>
+          <a th:href="@{/carrinho}" class="btn">Carrinho</a>
+          <a th:href="@{/sobre}" class="btn">Sobre nós</a>
+        </div>
+      <!-- 🔧 Botões do Painel Administrativo -->
+      <nav class="painel-nav">
+        <a href="/admin/painel" class="menu-button">Painel</a>
+        <a href="/admin/produtos" class="menu-button">Produtos</a>
+        <a href="/admin/pedidos" class="menu-button">Pedidos</a>
+        <a href="/admin/clientes" class="menu-button">Clientes</a>
+      </nav>
 
-      <div class="lang-switcher" aria-haspopup="true" aria-expanded="false">
-        <button aria-controls="lang-menu" aria-label="Selecionar idioma">PT</button>
-        <ul id="lang-menu">
-          <li><a th:href="@{/?lang=pt}"   lang="pt">Português</a></li>
-          <li><a th:href="@{/?lang=en}"   lang="en">English</a></li>
-        </ul>
+      <!-- CONTAINER BUSCA + BOTÕES -->
+      <div class="busca-e-botoes">
+        <!-- BARRA SUPERIOR: campo de busca -->
+        <form class="barra-superior" role="search" th:action="@{/buscar}" method="get" aria-label="Busca no site">
+          <input type="search" name="q" placeholder="Pesquisar…" required />
+          <button type="submit" aria-label="Buscar produto">🔍</button>
+        </form>
+
+      <!-- ÍCONES + IDIOMA -->
+      <div class="header-icons">
+        <a th:href="@{/notificacoes}" class="icon-link" aria-label="Notificações">
+          <svg width="24" height="24"><!-- ícone --></svg>
+        </a>
+        <a th:href="@{/perfil}" class="icon-link" aria-label="Perfil">
+          <svg width="24" height="24"><!-- ícone --></svg>
+        </a>
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
-</header>
+  </header>
 
-<style>
-  :root {
-    --header-bg: #ffffff;
-    --header-color: #000000;
-    --header-height: clamp(48px, 8vh, 96px);
-    --spacing: clamp(8px, 2vw, 16px);
-    --breakpoint: 768px;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --header-bg: #111111;
-      --header-color: #eeeeee;
-    }
-  }
+  <!-- Conteúdo principal injetável -->
+  <main id="main-content" role="main" tabindex="-1" th:fragment="conteudo" aria-label="Conteúdo principal da página">
+    <!-- As páginas inserem seu conteúdo aqui -->
+  </main>
 
-  /* Estrutura */
-  .site-header {
-    position: sticky;
-    top: 0;
-    background: var(--header-bg);
-    color: var(--header-color);
-    z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  .header-inner {
-    max-width: 1200px;
-    margin-inline: auto;
-    display: flex;
-    align-items: center;
-    height: var(--header-height);
-    padding-inline: var(--spacing);
-    gap: var(--spacing);
-  }
+  <!-- Rodapé com fragmento -->
+  <footer th:replace="~{fragments/footer :: footer}" role="contentinfo"></footer>
 
-  /* Acessibilidade */
-  .skip-link {
-    position: absolute;
-    inset-inline-start: 0;
-    top: -100%;
-    background: var(--header-bg);
-    color: var(--header-color);
-    padding: var(--spacing);
-    z-index: 1001;
-    transition: top .3s;
-  }
-  .skip-link:focus { top: 0; }
-  .visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  /* Logo */
-  .logo-link { display: flex; align-items: center; }
-
-  /* Botão hambúrguer */
-  .nav-toggle {
-    display: none;
-    background: none;
-    border: 0;
-    padding: var(--spacing);
-  }
-  .hamburger,
-  .hamburger::before,
-  .hamburger::after {
-    display: block;
-    width: 24px;
-    height: 2px;
-    background: var(--header-color);
-    position: relative;
-  }
-  .hamburger::before,
-  .hamburger::after {
-    content: "";
-    position: absolute;
-    left: 0;
-  }
-  .hamburger::before { top: -6px; }
-  .hamburger::after  { top:  6px; }
-
-  /* Navegação */
-  .primary-nav ul {
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    gap: var(--spacing);
-  }
-  .primary-nav a {
-    text-decoration: none;
-    padding-block: calc(var(--spacing)/2);
-    padding-inline: var(--spacing);
-  }
-  .primary-nav a:hover,
-  .primary-nav a:focus {
-    outline: 2px solid var(--header-color);
-    text-decoration: underline;
-  }
-  .cta {
-    background: var(--header-color);
-    color: var(--header-bg);
-    border-radius: 4px;
-  }
-
-  /* Busca */
-  .search-form {
-    display: flex;
-    align-items: center;
-    margin-inline-start: auto;
-  }
-  .search-form input {
-    padding: var(--spacing);
-    border: 1px solid #ccc;
-    border-radius: 4px 0 0 4px;
-    min-width: 150px;
-  }
-  .search-form button {
-    padding: var(--spacing);
-    border: 1px solid #ccc;
-    border-inline-start: 0;
-    border-radius: 0 4px 4px 0;
-    background: none;
-  }
-
-  /* Ícones */
-  .header-icons {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing);
-  }
-  .icon-link { padding: var(--spacing); }
-
-  /* Responsividade */
-  @media (max-width: var(--breakpoint)) {
-    .nav-toggle { display: block; }
-    .primary-nav { display: none; flex-direction: column; }
-    .primary-nav.open { display: flex; }
-  }
-  @media (min-width: var(--breakpoint)) {
-    .nav-toggle { display: none; }
-    .primary-nav { display: block; }
-  }
-</style>
+  <!-- JavaScript global -->
+  <script defer th:src="@{/js/layout.js}"></script>
+</body>
+</html>
