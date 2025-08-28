@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cadastro de Cliente • RedeMaisFarma</title>
+
+  <!-- CSS principal -->
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+
+  <style>
+    .divider{display:flex;align-items:center;gap:.75rem;margin:1rem 0}
+    .divider::before,.divider::after{content:"";flex:1;height:1px;background:#e5e7eb}
+    .divider span{font-size:.875rem;color:#6b7280}
+    .social-grid{display:grid;grid-template-columns:1fr;gap:.5rem}
+    @media(min-width:480px){.social-grid{grid-template-columns:1fr 1fr}}
+    .btn.social{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1rem;border:1px solid #e5e7eb;border-radius:.75rem;text-decoration:none}
+    .btn.social:hover{background:#f9fafb}
+    .btn.social .icon{width:18px;height:18px}
+    .alert{padding:.75rem 1rem;border-radius:.5rem;margin:.5rem 0}
+    .alert.error{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+    .alert.info{background:#eff6ff;color:#1e3a8a;border:1px solid #bfdbfe}
+  </style>
+</head>
+<body class="body-flex">
+<main class="form-container">
+  <section class="form-card">
+
+    <h1 class="form-title">Cadastro de Cliente</h1>
+
+    <!-- Erros globais do formulário (ex.: senha != confirmarSenha) -->
+    <div th:if="${#fields.hasGlobalErrors()}" class="alert error"
+         th:each="err : ${#fields.globalErrors()}" th:text="${err}"></div>
+
+    <!-- Mensagens globais opcionais -->
+    <div th:if="${errorMessage}" class="alert error" th:text="${errorMessage}"></div>
+    <div th:if="${infoMessage}"  class="alert info"  th:text="${infoMessage}"></div>
+
+    <div class="social-grid" style="margin-bottom:1rem">
+      <a class="btn social" th:href="@{/oauth2/authorization/google}" rel="nofollow">
+        <img th:src="@{/images/google.svg}" alt="Google" class="icon"> Continuar com Google
+      </a>
+      <a class="btn social" th:href="@{/oauth2/authorization/facebook}" rel="nofollow">
+        <img th:src="@{/images/facebook.svg}" alt="Facebook" class="icon"> Continuar com Facebook
+      </a>
+    </div>
+
+    <div class="divider"><span>ou cadastre-se com e-mail</span></div>
+
+    <form th:action="@{/cadastro-cliente}" th:object="${cadastroForm}" method="post" class="form-grid" autocomplete="off">
+      <!-- CSRF correto no Thymeleaf -->
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+      <!-- Nome completo -->
+      <div class="form-group">
+        <label for="nome">Nome completo:</label>
+        <input type="text" id="nome" th:field="*{nome}" class="input" required autocomplete="name" />
+        <p th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}" class="error-message"></p>
+      </div>
+
+      <!-- E-mail -->
+      <div class="form-group">
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" th:field="*{email}" class="input" required autocomplete="email" />
+        <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error-message"></p>
+      </div>
+
+      <!-- Senha -->
+      <div class="form-group">
+        <label for="senha">Senha:</label>
+        <input type="password" id="senha" th:field="*{senha}" class="input" required autocomplete="new-password" />
+        <p th:if="${#fields.hasErrors('senha')}" th:errors="*{senha}" class="error-message"></p>
+      </div>
+
+      <!-- Confirmar senha -->
+      <div class="form-group">
+        <label for="confirmarSenha">Confirmar senha:</label>
+        <input type="password" id="confirmarSenha" th:field="*{confirmarSenha}" class="input" required autocomplete="new-password" />
+        <p th:if="${#fields.hasErrors('confirmarSenha')}" th:errors="*{confirmarSenha}" class="error-message"></p>
+      </div>
+
+      <!-- Telefone -->
+      <div class="form-group">
+        <label for="telefone">Telefone:</label>
+        <input type="tel" id="telefone" th:field="*{telefone}" class="input" inputmode="tel" autocomplete="tel" />
+        <p th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}" class="error-message"></p>
+      </div>
+
+      <button type="submit" class="btn btn--primary">Criar conta</button>
+
+      <p style="text-align:center;margin-top:.75rem">
+        Já tem conta? <a th:href="@{/login}">Entrar</a>
+      </p>
+    </form>
+
+  </section>
+</main>
+</body>
+</html>
