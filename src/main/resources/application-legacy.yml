@@ -1,15 +1,19 @@
 spring:
-  datasource:
-    url: ${FB_URL:jdbc:firebirdsql://localhost:3050/REDMFRM_LEGADO?encoding=UTF8}
-    username: ${FB_USER:sysdba}
-    password: ${FB_PASS:masterkey}
-    driver-class-name: org.firebirdsql.jdbc.FBDriver
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: false
-    properties:
-      # ⚠️ Hibernate 6 → usar o pacote "community"
-      hibernate.dialect: org.hibernate.community.dialect.FirebirdDialect
+  config:
+    activate:
+      on-profile: legacy
+
   flyway:
     enabled: false
+
+  datasource:
+    firebird:
+      url: jdbc:firebirdsql://${FIREBIRD_HOST:localhost}:${FIREBIRD_PORT:3050}/${FIREBIRD_DB:digifarma6.fdb}?encoding=WIN1252&authPlugins=Legacy_Auth&wireCrypt=DISABLED
+      username: ${FIREBIRD_USER:SYSDBA}
+      password: ${FIREBIRD_PASSWORD:masterkey}
+      driver-class-name: org.firebirdsql.jdbc.FBDriver
+      hikari:
+        maximum-pool-size: 5
+        minimum-idle: 0
+        idle-timeout: 60000
+        connection-timeout: 10000

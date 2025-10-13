@@ -1,27 +1,66 @@
-# Maven: diretório de build
+# ===== Maven / Java =====
 target/
+**/target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/
+.settings/
+.classpath
+.project
+bin/
 
-# IntelliJ IDEA
-.idea/
+# Não versionar testes compilados
+src/test/**/target/
+
+# ===== IDEs =====
 *.iml
-
-# VS Code
+.idea/
+*.ipr
+*.iws
 .vscode/
+*.sw?
+*.bak
+*.tmp
 
-# Logs
-*.log
-
-# Arquivos de sistema
+# ===== Sistema operacional =====
 .DS_Store
 Thumbs.db
-*.swp
+desktop.ini
+ehthumbs.db
+*.log
+*.out
+*.pid
+*.gz
 
-# Configurações locais e arquivos sensíveis
+# ===== Artefatos de build locais =====
+app.jar
+*.jar.original
+jacoco.exec
+/*.exec
+
+# ===== Arquivos locais/sensíveis =====
 .env
+*.env
+*.properties.local
+*.yml.local
 *.local
 
-# Arquivos temporários ou gerados automaticamente
-dep-tree.txt
-validate
-pre-clean
-pre-site
+# ===== Dados e volumes locais (não versionar) =====
+app-logs/
+storage/
+mysql_data/
+kafka_data/
+infra/firebird/data/
+
+# ===== Mocks / WireMock / dados de teste grandes =====
+infra/wiremock/__files/
+infra/wiremock/mappings/
+mocks/
+
+# ===== Scripts e arquivos transitórios =====
+*.tmp
+*.bak
+# Logs
+*.log
+*.tmp
+logs/
+app-logs/

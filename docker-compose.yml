@@ -1,63 +1,231 @@
 version: "3.9"
 
 services:
-  # =========================
-  # 🔥 FIREBIRD (banco legado)
-  # =========================
-  firebird:
-    image: jacobalberty/firebird:3.0
-    container_name: firebird
-    restart: unless-stopped
-    ports:
-      - "3050:3050"
-    environment:
-      ISC_PASSWORD: ${FIREBIRD_PASSWORD}
-      FIREBIRD_DATABASE: ${FIREBIRD_DB}
-    volumes:
-      - ./data:/firebird/data
-    healthcheck:
-      test: ["CMD-SHELL", "timeout 1 bash -c '< /dev/tcp/127.0.0.1/3050' || exit 1"]
-      interval: 5s
-      timeout: 2s
-      retries: 30
-
-  # =========================
-  # 🟩 API Spring Boot
-  # =========================
-  redemaisfarma_app:
-    container_name: redemaisfarma_app
+  app:
+    container_name: redemaisfarma-api
     build:
       context: .
       dockerfile: Dockerfile
-    depends_on:
-      firebird:
-        condition: service_started   # ✅ não trava mais por causa do healthcheck
-    environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS}
+    image: redemaisfarma-api-app
     ports:
-      - "8080:8080"
+      - "18090:8080"
+    environment:
+      # ===== Perfis / Runtime =====
+      - SPRING_PROFILES_ACTIVE=prod,docker
+      - TZ=America/Fortaleza
+      - SPRING_OUTPUT_ANSI_ENABLED=ALWAYS
+      - LOGGING_LEVEL_ROOT=INFO
+
+      # ===== Server =====
+      - SERVER_ADDRESS=0.0.0.0
+      - SERVER_PORT=8080
+      - SERVER_SHUTDOWN=graceful
+      - SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE=30s
+      - SERVER_TOMCAT_THREADS_MAX=200
+      - SERVER_TOMCAT_ACCEPT_COUNT=100
+      - SERVER_TOMCAT_ACCESSLOG_ENABLED=false
+
+      # ===== Locale / Encoding =====
+      - SERVER_SERVLET_ENCODING_ENABLED=true
+      - SERVER_SERVLET_ENCODING_FORCE=true
+      - SERVER_SERVLET_ENCODING_CHARSET=UTF-8
+      - SPRING_MESSAGES_ENCODING=UTF-8
+      - SPRING_JACKSON_TIME_ZONE=America/Fortaleza
+
+      # ===== Thymeleaf =====
+      - SPRING_THYMELEAF_PREFIX=classpath:/templates/
+      - SPRING_THYMELEAF_SUFFIX=.html
+      - SPRING_THYMELEAF_CACHE=false
+
+      # ===== JWT =====
+      - JWT_ENABLED=true
+      - JWT_SECRET=<troque-por-um-segredo-bem-grande>
+      - JWT_ISSUER=redemaisfarma-api
+      - JWT_ACCESS_TOKEN_TTL_SECONDS=3600
+      - JWT_REFRESH_TOKEN_TTL_SECONDS=2592000
+      - JWT_ACCESS_TOKEN_EXPIRATION_MINUTES=60
+      - JWT_REFRESH_TOKEN_EXPIRATION_MINUTES=43200
+
+      # ===== MySQL (genérico) =====
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/redemaisfarma?sslMode=PREFERRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=app_user
+      - SPRING_DATASOURCE_PASSWORD=Rede_Mais_Farma25@
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_DATASOURCE_HIKARI_JDBC_URL=jdbc:mysql://mysql:3306/redemaisfarma?sslMode=PREFERRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_JPA_OPEN_IN_VIEW=false
+      - SPRING_JPA_SHOW_SQL=false
+      - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=false
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
+
+      # ===== MySQL (CONFIG CUSTOM) =====
+      - APP_MYSQL_ENABLED=true
+      - SPRING_DATASOURCE_MYSQL_URL=jdbc:mysql://mysql:3306/redemaisfarma?sslMode=PREFERRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_MYSQL_USERNAME=app_user
+      - SPRING_DATASOURCE_MYSQL_PASSWORD=Rede_Mais_Farma25@
+      - SPRING_DATASOURCE_MYSQL_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+      - SPRING_JPA_MYSQL_HIBERNATE_DDL_AUTO=none
+      - SPRING_JPA_MYSQL_SHOW_SQL=false
+      - SPRING_JPA_MYSQL_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
+
+      # ===== Flyway =====
+      - SPRING_FLYWAY_ENABLED=true
+      - SPRING_FLYWAY_URL=jdbc:mysql://mysql:3306/redemaisfarma?sslMode=PREFERRED&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_FLYWAY_USER=app_user
+      - SPRING_FLYWAY_PASSWORD=Rede_Mais_Farma25@
+      - SPRING_FLYWAY_ENCODING=UTF-8
+      - SPRING_FLYWAY_CONNECT_RETRIES=60
+      - SPRING_FLYWAY_BASELINE_ON_MIGRATE=false
+      - SPRING_FLYWAY_VALIDATE_ON_MIGRATE=true
+
+      # ===== Kafka =====
+      - KAFKA_ENABLED=true
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
+      # ===== URLs / Mail CSS =====
+      - APP_HTTP_PORT=18090
+      - APP_WEB_BASE_URL=http://127.0.0.1:18090
+      - APP_MAIL_CSS_URL=http://127.0.0.1:18090/assets/mail/main.css
+
+      # ===== Mail (Gmail) =====
+      - APP_MAIL_ENABLED=true
+      - APP_MAIL_NOOP=false
+      - SPRING_MAIL_TEST_CONNECTION=false
+      - GMAIL_USER=<seu_email@gmail.com>
+      - GMAIL_APP_PASSWORD=<sua_senha_de_app_16_chars>
+      - APP_MAIL_FROM=RedeMaisFarma <${GMAIL_USER}>
+      - SPRING_MAIL_FROM=RedeMaisFarma <${GMAIL_USER}>
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=${GMAIL_USER}
+      - SPRING_MAIL_PASSWORD=${GMAIL_APP_PASSWORD}
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_TRUST=smtp.gmail.com
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_CHECKSERVERIDENTITY=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_PROTOCOLS=TLSv1.2
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT=15000
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT=15000
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITETIMEOUT=15000
+      - SPRING_MAIL_PROPERTIES_MAIL_DEBUG=true
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_MAIL=DEBUG
+      - LOGGING_LEVEL_JAKARTA_MAIL=DEBUG
+      - LOGGING_LEVEL_ORG_ECLIPSE_ANGUS=DEBUG
+      - LOGGING_LEVEL_ORG_ECLIPSE_ANGUS_SMTP=DEBUG
+
+      # ===== Integrações =====
+      - INTEGRATIONS_CLIENTE_BASE_URL=http://cliente-mock:8080
+      - INTEGRATIONS_CLIENTE_BASEURL=http://cliente-mock:8080
+
+      # ===== Firebird (legacy) =====
+      - LEGACY_IMPORT_ENABLED=true
+      - FIREBIRD_USER=SYSDBA
+      - ISC_PASSWORD=masterkey
+      - FIREBIRD_HOST=firebird
+      - FIREBIRD_PORT=3050
+      - FIREBIRD_DATABASE=digifarma6.FDB
+      - SPRING_DATASOURCE_LEGACY_URL=jdbc:firebirdsql://firebird:3050/digifarma6.FDB?encoding=WIN1252&sql_dialect=3
+      - SPRING_DATASOURCE_LEGACY_USERNAME=SYSDBA
+      - SPRING_DATASOURCE_LEGACY_PASSWORD=masterkey
+      - SPRING_DATASOURCE_LEGACY_DRIVER_CLASS_NAME=org.firebirdsql.jdbc.FBDriver
+
+      # ===== JVM =====
+      - JAVA_TOOL_OPTIONS=-XX:InitialRAMPercentage=30.0 -XX:MaxRAMPercentage=60.0 -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Dserver.address=0.0.0.0
+
+      # ===== Excluir autoconfigs não usados =====
+      - SPRING_AUTOCONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration,org.springframework.boot.actuate.autoconfigure.data.redis.RedisHealthContributorAutoConfiguration,org.springframework.boot.actuate.autoconfigure.data.redis.RedisReactiveHealthContributorAutoConfiguration
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      firebird:
+        condition: service_started   # legado; não trava o app
+      cliente-mock:
+        condition: service_started   # mock; não precisa ficar “healthy”
     restart: unless-stopped
 
-# ==================================
-# 🐬 MySQL
-# ==================================
-mysql:
-  image: mysql:8.0
-  container_name: mysql
-  restart: unless-stopped
-  environment:
-    MYSQL_ROOT_PASSWORD: root
-    MYSQL_DATABASE: redemaisfarma
-    MYSQL_USER: appuser
-    MYSQL_PASSWORD: apppass
-  ports:
-    - "3306:3306"
-  volumes:
-    - ./mysql_data:/var/lib/mysql
-  healthcheck:
-    test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-    interval: 5s
-    timeout: 2s
-    retries: 30
+  mysql:
+    container_name: redemaisfarma-mysql
+    image: mysql:8.0.39
+    command: ["--default-authentication-plugin=mysql_native_password"]
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=Rede_Mais_Farma25@
+      - MYSQL_DATABASE=redemaisfarma
+      - MYSQL_USER=app_user
+      - MYSQL_PASSWORD=Rede_Mais_Farma25@
+      - TZ=America/Fortaleza
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
 
+  kafka:
+    container_name: redemaisfarma-kafka
+    image: bitnami/kafka:3.7
+    ports:
+      - "9094:9094"
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - TZ=America/Fortaleza
+    volumes:
+      - kafka_data:/bitnami/kafka
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/9092'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+
+  firebird:
+    container_name: redemaisfarma-firebird
+    image: jacobalberty/firebird:2.5-ss
+    environment:
+      - ISC_PASSWORD=masterkey
+      - FIREBIRD_DATABASE=/firebird/data/digifarma6.FDB
+      - TZ=America/Fortaleza
+    ports:
+      - "3054:3050"
+    volumes:
+      - firebird_data:/firebird
+      # - ./data/firebird:/firebird/data   # (opcional) monte seu FDB aqui
+    # sem healthcheck (a imagem não tem bash/nc por padrão)
+    restart: unless-stopped
+
+  cliente-mock:
+    container_name: redemaisfarma-cliente-mock
+    image: wiremock/wiremock:3.8.0
+    command: ["--verbose", "--port", "8080"]
+    ports:
+      - "18081:8080"
+    volumes:
+      - wiremock_data:/home/wiremock
+      # - ./wiremock/mappings:/home/wiremock/mappings
+      # - ./wiremock/__files:/home/wiremock/__files
+    # sem healthcheck obrigatório; o serviço sobe rápido
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  kafka_data:
+  firebird_data:
+  wiremock_data:

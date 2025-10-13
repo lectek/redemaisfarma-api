@@ -3,38 +3,141 @@ spring:
     activate:
       on-profile: prod
 
-  datasource:
-    mysql:
-      url: jdbc:mysql://${MYSQL_HOST:db-prod}:3306/${MYSQL_DB:redemaisfarma}?useSSL=true&serverTimezone=UTC
-      username: ${MYSQL_USER}
-      password: ${MYSQL_PASSWORD}
-      driver-class-name: com.mysql.cj.jdbc.Driver
+  jackson:
+    time-zone: ${SPRING_JACKSON_TIME_ZONE:America/Fortaleza}
+  messages:
+    encoding: ${SPRING_MESSAGES_ENCODING:UTF-8}
 
-    firebird:
-      url: jdbc:firebirdsql://${FIREBIRD_HOST:firebird-prod}:${FIREBIRD_PORT:3050}/${FIREBIRD_DB:digifarma6.fdb}?encoding=WIN1252&authPlugins=Legacy_Auth&wireCrypt=DISABLED
-      username: ${FIREBIRD_USER:SYSDBA}
-      password: ${FIREBIRD_PASSWORD}
-      driver-class-name: org.firebirdsql.jdbc.FBDriver
+  mail:
+    host: ${SPRING_MAIL_HOST}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
+    default-encoding: UTF-8
+    test-connection: ${SPRING_MAIL_TEST_CONNECTION:false}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH:true}
+          connectiontimeout: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_CONNECTIONTIMEOUT:20000}
+          timeout: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_TIMEOUT:20000}
+          writetimeout: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_WRITETIMEOUT:20000}
+          quitwait: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_QUITWAIT:false}
+          starttls:
+            enable: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:true}
+            required: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED:true}
+          ssl:
+            trust: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_TRUST:smtp.gmail.com}
+            checkserveridentity: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_CHECKSERVERIDENTITY:true}
+            protocols: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_PROTOCOLS:TLSv1.3 TLSv1.2}
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: mysqlHikari
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:20}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE:4}
+      idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:600000}
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:30000}
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: none
-    open-in-view: false
     properties:
       hibernate:
         format_sql: false
+        jdbc:
+          time_zone: UTC
 
   flyway:
     enabled: true
-    locations: classpath:db/migration
     table: flyway_schema_history
+    # ✅ inclui PROD para que V20251005_01__... rode em produção
+    locations: classpath:db/migration,classpath:db/migration-mysql,classpath:db/migration/PROD
+    # usa as mesmas credenciais do datasource (app_user). Se não tiver DDL/INDEX, use bloco "usuário dedicado" abaixo.
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:}
+    listener:
+      missing-topics-fatal: ${SPRING_KAFKA_MISSING_TOPICS_FATAL:true}
+
+  task:
+    scheduling:
+      pool:
+        size: ${SPRING_TASK_SCHEDULING_POOL_SIZE:2}
 
 server:
   port: ${SERVER_PORT:8080}
   servlet:
-    context-path: /api
+    context-path: /
+    encoding:
+      enabled: ${SERVER_SERVLET_ENCODING_ENABLED:true}
+      force: ${SERVER_SERVLET_ENCODING_FORCE:true}
+      charset: ${SERVER_SERVLET_ENCODING_CHARSET:UTF-8}
+  forward-headers-strategy: ${SERVER_FORWARD_HEADERS_STRATEGY:framework}
+  compression:
+    enabled: ${SERVER_COMPRESSION_ENABLED:true}
+    mime-types: ${SERVER_COMPRESSION_MIME_TYPES:application/json,text/html,text/css,text/javascript,application/javascript,application/xml,text/plain}
+    min-response-size: ${SERVER_COMPRESSION_MIN_RESPONSE_SIZE:1024}
+  error:
+    include-message: ${SERVER_ERROR_INCLUDE_MESSAGE:never}
+    include-binding-errors: ${SERVER_ERROR_INCLUDE_BINDING_ERRORS:never}
+    include-exception: ${SERVER_ERROR_INCLUDE_EXCEPTION:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE:health,info}
+  endpoint:
+    health:
+      show-details: ${MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS:when_authorized}
+      probes:
+        enabled: ${MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED:true}
 
 logging:
   level:
-    root: WARN
-    org.springframework: INFO
+    root: ${LOGGING_LEVEL_ROOT:WARN}
+    org.springframework: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK:INFO}
+  pattern:
+    level: "%5p [%X{X-Correlation-Id}]"
+
+security:
+  jwt:
+    enabled: ${JWT_ENABLED:true}
+    issuer: ${JWT_ISSUER:redemaisfarma-api}
+    secret: ${JWT_SECRET}
+    access-token:
+      ttl-seconds: ${JWT_ACCESS_TOKEN_TTL_SECONDS:3600}
+    refresh-token:
+      ttl-seconds: ${JWT_REFRESH_TOKEN_TTL_SECONDS:2592000}
+
+jwt:
+  enabled: ${JWT_ENABLED:true}
+  issuer: ${JWT_ISSUER:redemaisfarma-api}
+  secret: ${JWT_SECRET}
+  accessTokenExpirationMinutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:60}
+  refreshTokenExpirationMinutes: ${JWT_REFRESH_TOKEN_EXPIRATION_MINUTES:43200}
+
+app:
+  web:
+    base-url: ${APP_WEB_BASE_URL}
+    cors:
+      allowed-origins: ${APP_WEB_CORS_ALLOWED_ORIGENS:}
+  mail:
+    enabled: ${APP_MAIL_ENABLED:true}
+    from: ${APP_MAIL_FROM}
+    bcc: ${APP_MAIL_BCC:}
+    css-url: ${APP_MAIL_CSS_URL:}
+    send-timeout-ms: ${APP_MAIL_SEND_TIMEOUT_MS:10000}
+    noop: ${APP_MAIL_NOOP:false}
+  kafka:
+    groups:
+      pedidos: ${APP_KAFKA_GROUP_PEDIDOS:pedidos-consumer}

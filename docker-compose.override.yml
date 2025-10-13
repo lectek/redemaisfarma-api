@@ -1,0 +1,44 @@
+services:
+  firebird:
+    image: jacobalberty/firebird:2.5-ss
+    restart: unless-stopped
+    ports:
+      - "${HOST_FB_PORT:-3054}:3050"
+    environment:
+      ISC_PASSWORD: "${ISC_PASSWORD:-masterkey}"
+      FIREBIRD_DATABASE: "${FIREBIRD_DATABASE:-digifarma6.FDB}"
+      TZ: "${TZ:-America/Sao_Paulo}"
+    volumes:
+      - ./infra/firebird/data:/firebird/data:rw
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 3050 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  app:
+    # herda da definição original do serviço "app" no docker-compose.yml
+    # aqui só sobrescrevemos/adicionamos variáveis
+    depends_on:
+      firebird:
+        condition: service_healthy
+    environment:
+      # habilita o job de sincronização do legado
+      LEGACY_SYNC_ENABLED: "true"
+
+      # níveis de log
+      LOGGING_LEVEL_ROOT: "INFO"
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK: "DEBUG"
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY: "DEBUG"
+      LOGGING_LEVEL_BR_COM_REDEMAISFARMA: "DEBUG"
+
+      # detalhes de erro no response (ajuda a debugar 500)
+      SERVER_ERROR_INCLUDE_MESSAGE: "always"
+      SERVER_ERROR_INCLUDE_BINDING_ERRORS: "always"
+      SERVER_ERROR_INCLUDE_STACKTRACE: "ALWAYS"
+
+      # actuator (expor GET e ver níveis atuais)
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,loggers"
+      MANAGEMENT_ENDPOINT_LOGGERS_ENABLED: "true"
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "ALWAYS"
