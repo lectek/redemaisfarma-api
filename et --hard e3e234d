@@ -1,0 +1,20 @@
+[33me3e234d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mRECOVER_FROM_DOCKER[m[33m)[m HEAD@{0}: reset: moving to HEAD
+[33me3e234d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mRECOVER_FROM_DOCKER[m[33m)[m HEAD@{1}: checkout: moving from RECOVER_FROM_DOCKER to RECOVER_FROM_DOCKER
+[33me3e234d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mRECOVER_FROM_DOCKER[m[33m)[m HEAD@{2}: branch: Reset to HEAD
+[33me3e234d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mRECOVER_FROM_DOCKER[m[33m)[m HEAD@{3}: commit: checkpoint antes do mirror do docker
+[33m5a66acf[m[33m ([m[1;32mchore/cleanup-migrations-prodsal[m[33m)[m HEAD@{4}: checkout: moving from chore/cleanup-migrations-prodsal to RECOVER_FROM_DOCKER
+[33m5a66acf[m[33m ([m[1;32mchore/cleanup-migrations-prodsal[m[33m)[m HEAD@{5}: commit: recupera: aplica stash com trabalho local
+[33md8e928c[m HEAD@{6}: reset: moving to HEAD
+[33md8e928c[m HEAD@{7}: commit: chore(repo): ignorar logs locais (.log/.tmp, app-logs/)
+[33m7350d98[m[33m ([m[1;32mimportacao-firebird[m[33m)[m HEAD@{8}: checkout: moving from importacao-firebird to chore/cleanup-migrations-prodsal
+[33m7350d98[m[33m ([m[1;32mimportacao-firebird[m[33m)[m HEAD@{9}: commit: Rename template: pages/Cadastro-Cliente.html -> pages/cadastro-cliente.html
+[33m6e0a93a[m HEAD@{10}: commit: refactor: move Form/Model p/ *DTO, ajustes de imports e remoção de BOM
+[33mbaadbce[m[33m ([m[1;33mtag: [m[1;33mv0.0.2[m[33m, [m[1;31morigin/importacao-firebird[m[33m)[m HEAD@{11}: commit: chore: bump version to 0.0.2-SNAPSHOT
+[33m3e4b780[m HEAD@{12}: commit: feat: classe principal da aplicação
+[33m0ff5ccc[m HEAD@{13}: commit: chore: corrige .gitignore e remove arquivos jar versionados
+[33m46ceb21[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{14}: checkout: moving from main to importacao-firebird
+[33m46ceb21[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{15}: Branch: renamed refs/heads/develop to refs/heads/main
+[33m46ceb21[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{17}: commit: Versão atual do template-base
+[33m76a09da[m HEAD@{18}: commit: descrição breve das alterações feitas
+[33m37ef26b[m HEAD@{19}: commit: chore: corrigir nome .gitignore e mover entidades para pasta de produção
+[33m750b207[m HEAD@{20}: commit (initial): chore: bootstrap projeto com pom, README, LICENSE e estrutura
