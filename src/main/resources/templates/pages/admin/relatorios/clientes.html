@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Relatórios • Clientes</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="layout">
+<aside th:replace="~{fragments/sidebar :: sidebar('relatorios')}"></aside>
+<main class="container stack mt-4 mb-6">
+  <h1 class="page-title">Clientes</h1>
+  <section class="card table-responsive">
+    <table class="table">
+      <thead><tr><th>Cliente</th><th>Pedidos</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr th:each="c : ${clientes}">
+          <td th:text="${c.nome}">Fulano</td>
+          <td th:text="${c.qtdPedidos}">0</td>
+          <td th:text="${#numbers.formatCurrency(c.valorTotal)}">R$0,00</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(clientes)}"><td colspan="3" class="text-center text-muted">Sem dados.</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main></div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body></html>

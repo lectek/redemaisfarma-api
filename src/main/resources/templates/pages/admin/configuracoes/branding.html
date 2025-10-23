@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Configurações • Branding/Design</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('conf-branding')}"></aside>
+
+  <main id="main-content" class="container stack mt-4 mb-6">
+    <h1 class="page-title">Branding & Design</h1>
+
+    <form class="form-grid card"
+          th:action="@{/admin/configuracoes/branding}"
+          method="post"
+          enctype="multipart/form-data"
+          th:object="${branding}">
+      <fieldset class="fieldset">
+        <legend>Logo</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="logoArquivo">Upload (SVG/PNG)</label>
+            <input id="logoArquivo" class="input" type="file" name="logoFile" accept=".svg,.png" />
+          </div>
+          <div class="form-group">
+            <label for="logoUrl">URL da logo</label>
+            <input id="logoUrl" class="input" type="url" th:field="*{logoUrl}" placeholder="https://..." />
+          </div>
+          <div class="form-group">
+            <label for="faviconUrl">Favicon (URL)</label>
+            <input id="faviconUrl" class="input" type="url" th:field="*{faviconUrl}" placeholder="https://..." />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend>Cores (tokens)</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="corPrimaria">Primária</label>
+            <input id="corPrimaria" class="input" type="color" th:field="*{corPrimaria}" />
+          </div>
+          <div class="form-group">
+            <label for="corSecundaria">Secundária</label>
+            <input id="corSecundaria" class="input" type="color" th:field="*{corSecundaria}" />
+          </div>
+          <div class="form-group">
+            <label for="corAcento">Acento</label>
+            <input id="corAcento" class="input" type="color" th:field="*{corAcento}" />
+          </div>
+        </div>
+        <p class="text-sm text-muted">Esses valores podem alimentar seu <code>tokens.css</code> automaticamente.</p>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend>Fonte & Tema</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fontFamily">Font-family</label>
+            <input id="fontFamily" class="input" th:field="*{fontFamily}" placeholder="Inter, Arial, sans-serif" />
+          </div>
+          <div class="form-group">
+            <label for="tema">Tema</label>
+            <select id="tema" class="select" th:field="*{tema}">
+              <option value="auto">Automático</option>
+              <option value="light">Claro</option>
+              <option value="dark">Escuro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="radius">Raio de borda (px)</label>
+            <input id="radius" class="input" th:field="*{radius}" placeholder="12" />
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Salvar</button>
+      </div>
+    </form>
+  </main>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

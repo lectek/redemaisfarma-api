@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Relatórios • Produtos</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="layout">
+<aside th:replace="~{fragments/sidebar :: sidebar('relatorios')}"></aside>
+<main class="container stack mt-4 mb-6">
+  <h1 class="page-title">Produtos mais vendidos</h1>
+  <section class="card table-responsive">
+    <table class="table">
+      <thead><tr><th>Produto</th><th>Quantidade</th><th>Faturamento</th></tr></thead>
+      <tbody>
+        <tr th:each="l : ${linhas}">
+          <td th:text="${l.nome}">Dipirona</td>
+          <td th:text="${l.qtd}">0</td>
+          <td th:text="${#numbers.formatCurrency(l.total)}">R$0,00</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(linhas)}"><td colspan="3" class="text-center text-muted">Sem dados.</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main></div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body></html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard • Admin</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body class="body-flex">
+  <header th:replace="~{fragments/header :: header}"></header>
+
+  <div class="layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('dashboard')}"></aside>
+
+    <main id="main-content" class="container stack mt-4 mb-6">
+      <h1 class="page-title">Dashboard</h1>
+
+      <!-- KPIs -->
+      <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-16">
+        <article th:replace="~{fragments/card :: kpi('Produtos', ${painelAdmin.qtdProdutos})}"></article>
+        <article th:replace="~{fragments/card :: kpi('Pedidos (total)', ${painelAdmin.totalPedidos})}"></article>
+        <article th:replace="~{fragments/card :: kpi('Clientes ativos', ${painelAdmin.clientesAtivos})}"></article>
+        <article th:replace="~{fragments/card :: kpi('Pendentes', ${painelAdmin.qtdPedidosPendentes})}"></article>
+      </section>
+
+      <!-- Gráfico -->
+      <section class="mt-6">
+        <article class="card card-chart">
+          <h2 class="card-title">Pedidos por status</h2>
+
+          <!-- canvas para o Chart.js -->
+          <div style="position:relative; height:320px">
+            <canvas id="grafico-vendas-dia" width="600" height="240"
+                    aria-label="Distribuição de pedidos por status" role="img"></canvas>
+          </div>
+
+          <!-- injeta os dados vindos do Controller -->
+          <script th:inline="javascript">
+            /*<![CDATA[*/
+            window.RMF_CHART_STATUS = {
+              labels: /*[[${chartStatusLabels}]]*/ [],
+              data:   /*[[${chartStatusData}]]*/ []
+            };
+            /*]]>*/
+          </script>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
+  <!-- JS dedicado do dashboard -->
+  <script defer th:src="@{/js/admin-dashboard.js}"></script>
+</body>
+</html>

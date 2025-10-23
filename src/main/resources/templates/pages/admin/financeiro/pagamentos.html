@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Financeiro • Pagamentos</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('financeiro')}"></aside>
+
+  <main id="main-content" class="container stack mt-4 mb-6">
+    <h1 class="page-title">Pagamentos</h1>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-16">
+      <article th:replace="~{fragments/card :: kpi('Recebido (mês)', ${resumo.recebidoMes})}"></article>
+      <article th:replace="~{fragments/card :: kpi('Pendente', ${resumo.pendente})}"></article>
+      <article th:replace="~{fragments/card :: kpi('Chargebacks', ${resumo.chargebacks})}"></article>
+    </section>
+
+    <section class="card mt-6 table-responsive">
+      <header class="card-header">
+        <h2 class="card-title">Transações</h2>
+        <div class="actions">
+          <a class="btn" th:href="@{/admin/financeiro/export?tipo=excel}">Exportar Excel</a>
+          <a class="btn" th:href="@{/admin/financeiro/export?tipo=pdf}">Exportar PDF</a>
+        </div>
+      </header>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th><th>Pedido</th><th>Cliente</th><th>Método</th><th>Valor</th><th>Status</th><th>Data</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="t : ${transacoes}">
+            <td th:text="${t.id}">1</td>
+            <td><a th:href="@{|/admin/pedidos/${t.pedidoId}|}" th:text="${t.pedidoNumero}">#0001</a></td>
+            <td th:text="${t.clienteNome}">Fulano</td>
+            <td th:text="${t.metodo}">PIX</td>
+            <td th:text="${#numbers.formatCurrency(t.valor)}">R$ 0,00</td>
+            <td><span class="badge" th:text="${t.status}">PAGO</span></td>
+            <td th:text="${#dates.format(t.criadoEm,'dd/MM/yyyy HH:mm')}">10/10/2025</td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(transacoes)}">
+            <td colspan="7" class="text-center text-muted">Sem transações.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

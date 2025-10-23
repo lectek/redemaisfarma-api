@@ -1,0 +1,131 @@
+<!-- src/main/resources/templates/admin/produtos/editar.html -->
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Editar produto • Admin</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container stack mt-4 mb-6" th:with="id=${produtoId} ?: ${produto?.id}">
+  <div class="between">
+    <h1 class="page-title">Editar produto</h1>
+    <a class="btn btn-ghost" th:href="@{/admin/produtos}">Voltar</a>
+  </div>
+
+  <div class="card p-4">
+    <form id="form-editar" class="grid grid-cols-1 md:grid-cols-2 gap-4" onsubmit="return false;">
+      <input type="hidden" id="id" th:value="${id}" />
+
+      <label class="stack">
+        <span>Nome</span>
+        <input class="input" id="nome" type="text" th:value="${produto?.nome}" required />
+      </label>
+
+      <label class="stack">
+        <span>Categoria</span>
+        <input class="input" id="categoria" type="text" th:value="${produto?.categoria}" list="datalist-cat" />
+        <datalist id="datalist-cat">
+          <option th:each="c: ${categorias}" th:value="${c}"></option>
+        </datalist>
+      </label>
+
+      <label class="stack md:col-span-2">
+        <span>Descrição</span>
+        <textarea class="input" id="descricao" rows="3" th:text="${produto?.descricao}"></textarea>
+      </label>
+
+      <label class="stack">
+        <span>Preço de venda</span>
+        <input class="input" id="preco" type="number" step="0.01" min="0" th:value="${produto?.precoVenda}" />
+      </label>
+
+      <label class="stack">
+        <span>Estoque</span>
+        <input class="input" id="estoque" type="number" step="1" min="0" th:value="${produto?.estoque}" />
+      </label>
+
+      <label class="stack">
+        <span>Código de barras (EAN)</span>
+        <input class="input" id="codigoBarras" type="text" th:value="${produto?.codigoBarras}" />
+      </label>
+
+      <label class="stack">
+        <span>Disponível</span>
+        <input id="disponivel" type="checkbox" th:checked="${produto == null ? true : produto.disponivel}" />
+      </label>
+
+      <label class="stack md:col-span-2">
+        <span>URL da imagem</span>
+        <input class="input" id="imagem" type="url" th:value="${produto?.imagem}" />
+      </label>
+
+      <div class="md:col-span-2 between mt-2">
+        <div class="row gap-2">
+          <button id="btn-salvar" class="btn btn-primary">Salvar</button>
+          <a class="btn btn-ghost" th:href="@{/admin/produtos}">Cancelar</a>
+        </div>
+        <span id="status" class="muted"></span>
+      </div>
+    </form>
+  </div>
+</main>
+
+<script>
+  async function carregarProduto(id) {
+    const r = await fetch(`/api/admin/produtos/${id}`);
+    if (r.ok) {
+      const p = await r.json();
+      // preencher campos apenas se não vierem do server-side
+      if (!document.getElementById('nome').value) {
+        document.getElementById('nome').value = p.nome ?? '';
+        document.getElementById('descricao').value = p.descricao ?? '';
+        document.getElementById('preco').value = p.preco ?? '';
+        document.getElementById('imagem').value = p.imagem ?? '';
+        document.getElementById('categoria').value = p.categoria ?? '';
+        document.getElementById('estoque').value = p.estoqueAtual ?? 0;
+        document.getElementById('codigoBarras').value = p.codigoBarras ?? '';
+        document.getElementById('disponivel').checked = p.situacao === 'ATIVO';
+      }
+    }
+  }
+
+  async function salvarProduto() {
+    const id = document.getElementById('id').value;
+    const dto = {
+      nome: document.getElementById('nome').value || null,
+      descricao: document.getElementById('descricao').value || null,
+      preco: parseFloat(document.getElementById('preco').value || '0'),
+      imagem: document.getElementById('imagem').value || null,
+      categoria: document.getElementById('categoria').value || null,
+      estoque: parseInt(document.getElementById('estoque').value || '0', 10),
+      codigoBarras: document.getElementById('codigoBarras').value || null,
+      ativo: document.getElementById('disponivel').checked
+    };
+
+    const $status = document.getElementById('status');
+    $status.textContent = 'Salvando...';
+
+    const r = await fetch(`/api/admin/produtos/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dto)
+    });
+
+    if (r.ok) {
+      $status.textContent = 'Salvo com sucesso.';
+    } else {
+      const msg = await r.text();
+      $status.textContent = 'Erro ao salvar: ' + (msg || r.status);
+    }
+  }
+
+  document.getElementById('btn-salvar')?.addEventListener('click', () => salvarProduto());
+  const id = document.getElementById('id')?.value;
+  if (id) carregarProduto(id);
+</script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: commonHead}"></head>
+<body class="body-flex" data-page="home">
+  <a href="#conteudo-home" class="skip-link">Pular para o conteúdo</a>
+  <header th:replace="~{fragments/header :: header}"></header>
+  <div class="main-offset" aria-hidden="true"></div>
+
+  <main id="conteudo-home" role="main" tabindex="-1" aria-label="Conteúdo principal">
+    <!-- HERO -->
+    <section class="section" aria-label="Apresentação">
+      <div class="container">
+        <div class="hero">
+          <h1 class="hero-title">Bem-vindo à RedeMaisFarma</h1>
+          <p class="hero-sub">Medicamentos, perfumaria e cuidados pessoais com entrega rápida.</p>
+
+          <form class="hero-search" th:action="@{/buscar}" method="get" role="search" aria-label="Buscar produtos">
+            <label class="sr-only" for="q">Buscar</label>
+            <input id="q" name="q" type="search" placeholder="Busque por produto ou marca" required autocomplete="off" inputmode="search"/>
+            <button class="btn" type="submit" aria-label="Buscar">Buscar</button>
+          </form>
+
+          <div class="hero-welcome" th:if="${showWelcome}">
+            <p class="muted">Dica: explore as ofertas e cadastre-se para receber cupons exclusivos. 🎁</p>
+          </div>
+
+          <ul class="hero-trust" aria-label="Diferenciais">
+            <li>Entrega rápida</li>
+            <li>Pagamento seguro</li>
+            <li>Atendimento humanizado</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARROSSEL – usa vm.destaque como SSR fallback -->
+    <section class="section" aria-label="Destaques da semana" th:if="${vm != null}">
+      <div class="container">
+        <header class="painel-header">
+          <h2>Destaques da semana</h2>
+          <p class="muted">Selecionados para você</p>
+        </header>
+        <div th:replace="~{fragments/cards :: carousel(${vm.destaque})}"></div>
+      </div>
+    </section>
+
+    <!-- PARA VOCÊ (personalizado) -->
+    <section class="section" aria-label="Para você"
+             th:if="${vm.paraVoce != null and !#lists.isEmpty(vm.paraVoce)}"
+             itemscope itemtype="https://schema.org/ItemList">
+      <div class="container">
+        <header class="painel-header">
+          <div class="row">
+            <div class="col-6 col-sm-12">
+              <h2>Para você</h2>
+              <meta itemprop="name" content="Para você"/>
+            </div>
+            <div class="col-6 col-sm-12" style="text-align:right">
+              <a class="btn" th:href="@{/produtos}" aria-label="Ver mais recomendações">Ver mais</a>
+            </div>
+          </div>
+        </header>
+
+        <div class="painel-grid">
+          <div th:each="p, iStat : ${vm.paraVoce}" itemprop="itemListElement" itemscope
+               itemtype="https://schema.org/ListItem">
+            <meta itemprop="position" th:content="${iStat.index + 1}"/>
+            <div th:replace="~{fragments/cards :: card(${p})}"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOVIDADES -->
+    <section class="section section--alt" aria-label="Novidades"
+             th:if="${vm.novidades != null and !#lists.isEmpty(vm.novidades)}"
+             itemscope itemtype="https://schema.org/ItemList">
+      <div class="container">
+        <header class="painel-header">
+          <div class="row">
+            <div class="col-6 col-sm-12">
+              <h2>Novidades</h2>
+              <meta itemprop="name" content="Novidades"/>
+            </div>
+            <div class="col-6 col-sm-12" style="text-align:right">
+              <a class="btn" th:href="@{/produtos?ordenar=recentes}" aria-label="Ver todas as novidades">Ver tudo</a>
+            </div>
+          </div>
+        </header>
+
+        <div class="painel-grid">
+          <div th:each="p, iStat : ${vm.novidades}" itemprop="itemListElement" itemscope
+               itemtype="https://schema.org/ListItem">
+            <meta itemprop="position" th:content="${iStat.index + 1}"/>
+            <div th:replace="~{fragments/cards :: card(${p})}"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIS VENDIDOS -->
+    <section class="section" aria-label="Mais vendidos"
+             th:if="${vm.maisVendidos != null and !#lists.isEmpty(vm.maisVendidos)}"
+             itemscope itemtype="https://schema.org/ItemList">
+      <div class="container">
+        <header class="painel-header">
+          <div class="row">
+            <div class="col-6 col-sm-12">
+              <h2>Mais vendidos</h2>
+              <meta itemprop="name" content="Mais vendidos"/>
+            </div>
+            <div class="col-6 col-sm-12" style="text-align:right">
+              <a class="btn" th:href="@{/produtos?ordenar=mais_vendidos}" aria-label="Ver todos os mais vendidos">Ver tudo</a>
+            </div>
+          </div>
+        </header>
+
+        <div class="painel-grid">
+          <div th:each="p, iStat : ${vm.maisVendidos}" itemprop="itemListElement" itemscope
+               itemtype="https://schema.org/ListItem">
+            <meta itemprop="position" th:content="${iStat.index + 1}"/>
+            <div th:replace="~{fragments/cards :: card(${p})}"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section section--alt" aria-label="Atendimento">
+      <div class="container card cta">
+        <h2>Precisa de ajuda?</h2>
+        <p>Fale com nosso time no WhatsApp para tirar dúvidas sobre remédios, receitas e entregas.</p>
+        <a class="btn" th:href="@{'https://wa.me/' + ${@appProps.whatsapp}}" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+      </div>
+    </section>
+  </main>
+
+  <footer th:replace="~{layout :: footer}"></footer>
+
+  <!-- JS -->
+  <script defer th:src="@{/js/header.js}"></script>
+  <script defer th:src="@{/js/components/carousel-destaques.js}"></script>
+
+  <!-- JSON-LD: WebSite + SearchAction -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "name":"RedeMaisFarma",
+    "url":"https://redemaisfarma.local",
+    "potentialAction":{
+      "@type":"SearchAction",
+      "target":"https://redemaisfarma.local/buscar?q={search_term_string}",
+      "query-input":"required name=search_term_string"
+    }
+  }
+  </script>
+</body>
+</html>

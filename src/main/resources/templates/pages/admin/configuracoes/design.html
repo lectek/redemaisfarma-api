@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Configurações • Design</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="layout">
+<aside th:replace="~{fragments/sidebar :: sidebar('conf-branding')}"></aside>
+<main class="container stack mt-4 mb-6">
+  <h1 class="page-title">Design (tokens/layout)</h1>
+  <form class="card form-grid" th:action="@{/admin/configuracoes/design}" method="post" th:object="${design}">
+    <div class="form-row">
+      <label class="checkbox"><input type="checkbox" th:field="*{darkByDefault}"/> Tema escuro por padrão</label>
+      <label class="checkbox"><input type="checkbox" th:field="*{usarBordasArredondadas}"/> Bordas 12px</label>
+      <label class="checkbox"><input type="checkbox" th:field="*{animacoes}"/> Animações ativas</label>
+    </div>
+    <div class="form-row">
+      <input class="input" th:field="*{fontFamily}" placeholder="Fonte (ex.: 'Inter, Arial')"/>
+      <input class="input" th:field="*{radius}" placeholder="Raio de borda (px)"/>
+      <input class="input" th:field="*{spacing}" placeholder="Base de espaçamento (px)"/>
+    </div>
+    <div class="form-actions"><button class="btn btn-primary">Salvar</button></div>
+  </form>
+</main></div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body></html>

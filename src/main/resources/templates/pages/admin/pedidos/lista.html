@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pedidos • Admin</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('pedidos')}"></aside>
+
+  <main id="main-content" class="container stack mt-4 mb-6">
+    <h1 class="page-title">Pedidos</h1>
+
+    <form class="form-row mb-4" th:action="@{/admin/pedidos}" method="get">
+      <input class="input" name="q" type="search" placeholder="Buscar por nº, cliente, status…" th:value="${param.q}" />
+      <select class="select" name="status" th:value="${param.status}">
+        <option value="">Todos</option>
+        <option value="AGUARDANDO">Aguardando pagamento</option>
+        <option value="PAGO">Pago</option>
+        <option value="SEPARACAO">Em separação</option>
+        <option value="ENTREGA">Em entrega</option>
+        <option value="FINALIZADO">Finalizado</option>
+      </select>
+      <button class="btn">Filtrar</button>
+    </form>
+
+    <section class="card table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th><th>Cliente</th><th>Data</th><th>Total</th><th>Status</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="p : ${pedidos}">
+            <td th:text="${p.numero}">0001</td>
+            <td th:text="${p.clienteNome}">Fulano</td>
+            <td th:text="${#dates.format(p.data,'dd/MM/yyyy HH:mm')}">10/10/2025</td>
+            <td th:text="${#numbers.formatCurrency(p.total)}">R$ 0,00</td>
+            <td><span class="badge" th:text="${p.status}">PAGO</span></td>
+            <td class="actions">
+              <a class="btn btn-ghost" th:href="@{|/admin/pedidos/${p.id}|}">Detalhes</a>
+              <button class="btn btn-ghost" type="button"
+                      th:attr="data-id=${p.id}"
+                      data-open="#modal-cancelar">Cancelar</button>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(pedidos)}">
+            <td colspan="6" class="text-center text-muted">Nenhum pedido encontrado.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Modal cancelar -->
+    <section th:replace="~{fragments/modal :: confirm('modal-cancelar','Cancelar pedido','Deseja realmente cancelar?','Cancelar pedido','Fechar')}"></section>
+  </main>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script defer>
+  // Exemplo de abertura do modal de confirmação
+  document.addEventListener('click', (e) => {
+    if (e.target.matches('[data-open]')) {
+      const sel = e.target.getAttribute('data-open');
+      const modal = document.querySelector(sel);
+      modal?.removeAttribute('hidden');
+      modal.querySelector('[data-confirm]')?.addEventListener('click', () => {
+        // aqui você chama seu endpoint de cancelamento usando o data-id
+        const id = e.target.getAttribute('data-id');
+        // fetch(`/admin/pedidos/${id}/cancelar`, { method: 'POST' })...
+        modal.setAttribute('hidden','');
+      }, { once: true });
+    }
+  });
+</script>
+</body>
+</html>

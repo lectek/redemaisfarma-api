@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Configurações • Gerais</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+  <link rel="stylesheet" th:href="@{/css/pages/configuracoes.css}"/>
+</head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('conf-geral')}"></aside>
+
+  <main id="main-content" class="container stack mt-4 mb-6">
+    <h1 class="page-title">Configurações Gerais</h1>
+
+    <form class="form-grid card" th:action="@{/admin/configuracoes/geral}" method="post" th:object="${cfg}">
+      <!-- Nome e identidade -->
+      <fieldset class="fieldset">
+        <legend>Identidade da Farmácia</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nomeSistema">Nome do Sistema</label>
+            <input id="nomeSistema" class="input" th:field="*{nomeSistema}" placeholder="RedeMais Farma"/>
+          </div>
+          <div class="form-group">
+            <label for="nomeFantasia">Nome Fantasia</label>
+            <input id="nomeFantasia" class="input" th:field="*{nomeFantasia}" placeholder="RedeMais Farma"/>
+          </div>
+          <div class="form-group">
+            <label for="razaoSocial">Razão Social</label>
+            <input id="razaoSocial" class="input" th:field="*{razaoSocial}" placeholder="Rede Mais Farma LTDA"/>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Contatos -->
+      <fieldset class="fieldset">
+        <legend>Contato</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">E-mail principal</label>
+            <input id="email" type="email" class="input" th:field="*{email}" placeholder="contato@redemaisfarma.com.br"/>
+          </div>
+          <div class="form-group">
+            <label for="telefone">Telefone</label>
+            <input id="telefone" type="tel" class="input" th:field="*{telefone}" placeholder="(83) 99999-9999"/>
+          </div>
+          <div class="form-group">
+            <label for="whatsapp">WhatsApp</label>
+            <input id="whatsapp" type="tel" class="input" th:field="*{whatsapp}" placeholder="(83) 98888-8888"/>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Endereço -->
+      <fieldset class="fieldset">
+        <legend>Endereço</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="endereco">Endereço</label>
+            <input id="endereco" class="input" th:field="*{endereco}" placeholder="Rua Exemplo, 123"/>
+          </div>
+          <div class="form-group">
+            <label for="cidade">Cidade</label>
+            <input id="cidade" class="input" th:field="*{cidade}" placeholder="João Pessoa"/>
+          </div>
+          <div class="form-group">
+            <label for="estado">Estado</label>
+            <input id="estado" class="input" th:field="*{estado}" placeholder="PB"/>
+          </div>
+          <div class="form-group">
+            <label for="cep">CEP</label>
+            <input id="cep" class="input" th:field="*{cep}" placeholder="58000-000"/>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Preferências -->
+      <fieldset class="fieldset">
+        <legend>Preferências</legend>
+        <div class="form-row">
+          <label class="checkbox"><input type="checkbox" th:field="*{habilitarCadastroRapido}"/> Cadastro rápido de cliente</label>
+          <label class="checkbox"><input type="checkbox" th:field="*{habilitarAssinaturas}"/> Assinaturas ativas</label>
+          <label class="checkbox"><input type="checkbox" th:field="*{habilitarNotificacoes}"/> Notificações automáticas</label>
+        </div>
+      </fieldset>
+
+      <!-- Botão salvar -->
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Salvar</button>
+      </div>
+    </form>
+  </main>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

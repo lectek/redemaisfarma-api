@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: commonHead}"></head>
+<body class="body-flex" data-page="home">
+  <a href="#conteudo-home" class="skip-link">Pular para o conteúdo</a>
+
+  <!-- Header global -->
+  <header th:replace="~{fragments/header :: header}"></header>
+  <div class="main-offset" aria-hidden="true"></div>
+
+  <main id="conteudo-home" role="main" tabindex="-1" aria-label="Conteúdo principal">
+
+    <!-- HERO • headline + busca + provas sociais -->
+    <section class="section hero hero--xl" aria-labelledby="hero-title">
+      <div class="container">
+        <div class="hero__grid">
+          <div class="hero__col">
+            <h1 id="hero-title" class="hero-title">
+              Cuidar da sua saúde ficou simples.
+            </h1>
+            <p class="hero-sub">
+              Medicamentos, perfumaria e cuidados pessoais com <strong>entrega rápida</strong> e <strong>preço justo</strong>.
+            </p>
+
+            <form class="hero-search" th:action="@{/buscar}" method="get" role="search" aria-label="Buscar produtos">
+              <label for="q" class="sr-only">Buscar</label>
+              <input id="q" name="q" type="search" placeholder="Busque por produto, marca ou código de barras…" autocomplete="off" inputmode="search" required />
+              <button class="btn btn--accent" type="submit" aria-label="Buscar">Buscar</button>
+            </form>
+
+            <ul class="hero-trust" aria-label="Diferenciais da RedeMaisFarma">
+              <li>✔️ Entrega no mesmo dia*</li>
+              <li>✔️ Pagamento seguro</li>
+              <li>✔️ Atendimento humanizado</li>
+            </ul>
+            <p class="muted hero-note">*Consulte disponibilidade para seu CEP.</p>
+          </div>
+
+          <figure class="hero__media" aria-hidden="true">
+            <img th:src="@{/img/hero-farmaceutica.jpg}" alt="" />
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATEGORIAS RÁPIDAS -->
+    <section class="section section--tight" aria-labelledby="cats-title">
+      <div class="container">
+        <header class="section-head">
+          <h2 id="cats-title">Compre por categoria</h2>
+          <p class="muted">Encontre rápido o que precisa</p>
+        </header>
+
+        <ul class="quick-cats__grid">
+          <li><a href="/medicamentos" class="cat-card" aria-label="Medicamentos"><span aria-hidden="true">💊</span><span>Medicamentos</span></a></li>
+          <li><a href="/vitaminas" class="cat-card" aria-label="Vitaminas e Suplementos"><span aria-hidden="true">🧴</span><span>Vitaminas</span></a></li>
+          <li><a href="/saude" class="cat-card" aria-label="Cuidados com a Saúde"><span aria-hidden="true">🩺</span><span>Saúde</span></a></li>
+          <li><a href="/cuidados-pessoais" class="cat-card" aria-label="Cuidados Pessoais"><span aria-hidden="true">🧼</span><span>Pessoais</span></a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- DESTAQUES (carrossel) -->
+    <section class="section" aria-labelledby="destaques-title">
+      <div class="container">
+        <header class="section-head">
+          <div>
+            <h2 id="destaques-title">Destaques da semana</h2>
+            <p class="muted">Ofertas e lançamentos selecionados</p>
+          </div>
+          <a class="link" href="/produtos?tag=destaques">Ver todos</a>
+        </header>
+
+        <div th:if="${vm != null and vm.destaque != null and !#lists.isEmpty(vm.destaque)}"
+             th:replace="~{fragments/cards :: carouselVM(${vm.destaque})}"></div>
+
+        <div th:if="${vm == null or vm.destaque == null or #lists.isEmpty(vm.destaque)}">
+          <section class="carousel" data-carousel>
+            <div id="carousel-viewport" class="carousel__viewport" aria-live="polite"></div>
+            <button id="carousel-prev" class="carousel__btn prev" type="button" aria-label="Anterior">‹</button>
+            <button id="carousel-next" class="carousel__btn next" type="button" aria-label="Próximo">›</button>
+            <div id="carousel-dots" class="carousel__dots" role="tablist" aria-label="Paginação"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- PARA VOCÊ -->
+    <section class="section section--alt" aria-labelledby="pv-title"
+             th:if="${vm != null and vm.paraVoce != null and !#lists.isEmpty(vm.paraVoce)}"
+             itemscope itemtype="https://schema.org/ItemList">
+      <div class="container">
+        <header class="section-head">
+          <div>
+            <h2 id="pv-title">Para você</h2>
+            <p class="muted">Recomendações com base no seu perfil</p>
+          </div>
+          <a class="link" href="/produtos?sort=recommended">Ver tudo</a>
+        </header>
+
+        <div class="painel-grid">
+          <div th:each="p, iStat : ${vm.paraVoce}" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <meta itemprop="position" th:content="${iStat.index + 1}" />
+            <div th:replace="~{fragments/cards :: card(${p})}"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOVIDADES -->
+    <section class="section" aria-labelledby="nov-title"
+             th:if="${vm != null and vm.novidades != null and !#lists.isEmpty(vm.novidades)}"
+             itemscope itemtype="https://schema.org/ItemList">
+      <div class="container">
+        <header class="section-head">
+          <div>
+            <h2 id="nov-title">Novidades</h2>
+            <p class="muted">Acabaram de chegar</p>
+          </div>
+          <a class="link" href="/produtos?sort=new">Ver tudo</a>
+        </header>
+
+        <div class="painel-grid">
+          <div th:each="p, iStat : ${vm.novidades}" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <meta itemprop="position" th:content="${iStat.index + 1}" />
+            <div th:replace="~{fragments/cards :: card(${p})}"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIS VENDIDOS -->
+    <section class="section section--alt" aria-labelledby="mv-title"
+             th:if="${vm != null and vm.maisVendidos != null and !#lists.isEmpty(vm.maisVendidos)}"
+             itemscope itemtype="https://schema.org/ItemList">
+      <div class="container">
+        <header class="section-head">
+          <div>
+            <h2 id="mv-title">Mais vendidos</h2>
+            <p class="muted">Os queridinhos da nossa comunidade</p>
+          </div>
+          <a class="link" href="/produtos?sort=best_sellers">Ver tudo</a>
+        </header>
+
+        <div class="painel-grid">
+          <div th:each="p, iStat : ${vm.maisVendidos}" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <meta itemprop="position" th:content="${iStat.index + 1}" />
+            <div th:replace="~{fragments/cards :: card(${p})}"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA WHATSAPP -->
+    <section class="section" aria-label="Atendimento humano">
+      <div class="container">
+        <div class="card cta">
+          <div class="cta__content">
+            <h2>Precisa de ajuda agora?</h2>
+            <p class="muted">Tire dúvidas sobre prescrição, disponibilidade e entrega com nosso time.</p>
+          </div>
+          <a class="btn btn--accent" th:href="@{'https://wa.me/' + ${@appProps.whatsapp}}" target="_blank" rel="noopener">
+            Falar no WhatsApp
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FALLBACK QUANDO VM VEM VAZIA -->
+    <section class="section" th:if="${vm == null or (#lists.isEmpty(vm.paraVoce) and #lists.isEmpty(vm.maisVendidos) and #lists.isEmpty(vm.novidades) and #lists.isEmpty(vm.destaque))}">
+      <div class="container">
+        <header class="section-head">
+          <div>
+            <h2>Produtos em destaque</h2>
+            <p class="muted">Carregando catálogo…</p>
+          </div>
+        </header>
+        <ul id="grid" class="product-grid" aria-live="polite"></ul>
+        <div class="list-status" id="listStatus" hidden>
+          <span id="listMessage"></span>
+          <button class="btn btn--ghost" id="loadMoreBtn" hidden>Carregar mais</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer th:replace="~{layout :: footer}"></footer>
+
+  <!-- Dados p/ scripts client-side -->
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    window.__DESTAQUES = /*[[${vm != null ? vm.destaque : null}]]*/ null;
+    /*]]>*/
+  </script>
+
+  <!-- JS -->
+  <script defer th:src="@{/js/header.js}"></script>
+  <script defer th:src="@{/js/components/carousel-destaques.js}"></script>
+  <script defer th:src="@{/js/home-fallback.js}"></script>
+</body>
+</html>

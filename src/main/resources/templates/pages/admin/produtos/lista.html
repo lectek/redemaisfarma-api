@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Produtos • Admin</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('produtos')}"></aside>
+
+  <main id="main-content" class="container stack mt-4 mb-6">
+    <div class="between">
+      <h1 class="page-title">Produtos</h1>
+      <a class="btn btn-primary" th:href="@{/admin/produtos/novo}">Novo produto</a>
+    </div>
+
+    <form class="form-row mb-4" th:action="@{/admin/produtos}" method="get">
+      <input class="input" name="q" type="search" placeholder="Buscar por nome, categoria, SKU…" th:value="${param.q}" />
+      <select class="select" name="categoria" th:value="${param.categoria}">
+        <option value="">Todas categorias</option>
+        <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}">Categoria</option>
+      </select>
+      <button class="btn">Filtrar</button>
+    </form>
+
+    <section class="card table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Imagem</th><th>Nome</th><th>Preço</th><th>Estoque</th><th>Categoria</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="p : ${produtos}">
+            <td><img th:src="${p.imagemUrl} ?: @{/img/placeholder.png}" alt="" width="48" height="48" loading="lazy"/></td>
+            <td th:text="${p.nome}">Dipirona 500mg</td>
+            <td th:text="${#numbers.formatCurrency(p.preco)}">R$ 0,00</td>
+            <td th:text="${p.estoque}">0</td>
+            <td th:text="${p.categoria}">Genérico</td>
+            <td class="actions">
+              <a class="btn btn-ghost" th:href="@{|/admin/produtos/${p.id}/editar|}">Editar</a>
+              <button class="btn btn-ghost" type="button" th:attr="data-id=${p.id}" data-open="#modal-excluir">Excluir</button>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(produtos)}">
+            <td colspan="6" class="text-center text-muted">Nenhum produto cadastrado.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section th:replace="~{fragments/modal :: confirm('modal-excluir','Excluir produto','Essa ação não pode ser desfeita.','Excluir','Cancelar')}"></section>
+  </main>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script defer>
+  document.addEventListener('click',(e)=>{
+    if(e.target.matches('[data-open]')){
+      const sel=e.target.getAttribute('data-open');
+      const modal=document.querySelector(sel);
+      modal?.removeAttribute('hidden');
+      modal.querySelector('[data-confirm]')?.addEventListener('click',()=>{
+        const id=e.target.getAttribute('data-id');
+        // fetch(`/admin/produtos/${id}`,{method:'DELETE'})...
+        modal.setAttribute('hidden','');
+      },{once:true});
+    }
+  });
+</script>
+</body>
+</html>

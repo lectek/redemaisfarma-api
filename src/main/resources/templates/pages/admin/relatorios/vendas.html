@@ -1,0 +1,31 @@
+<!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Relatórios • Vendas</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="layout">
+<aside th:replace="~{fragments/sidebar :: sidebar('relatorios')}"></aside>
+<main class="container stack mt-4 mb-6">
+  <h1 class="page-title">Vendas</h1>
+  <form class="form-row mb-4" th:action="@{/admin/relatorios/vendas}" method="get">
+    <input class="input" type="date" name="de" th:value="${param.de}"/>
+    <input class="input" type="date" name="ate" th:value="${param.ate}"/>
+    <button class="btn">Gerar</button>
+    <a class="btn" th:href="@{/admin/relatorios/vendas/export?tipo=pdf}">Exportar PDF</a>
+  </form>
+  <section class="card table-responsive">
+    <table class="table">
+      <thead><tr><th>Data</th><th>Pedidos</th><th>Total</th></tr></thead>
+      <tbody>
+        <tr th:each="r : ${linhas}">
+          <td th:text="${#dates.format(r.data,'dd/MM/yyyy')}">…</td>
+          <td th:text="${r.qtd}">0</td>
+          <td th:text="${#numbers.formatCurrency(r.total)}">R$0,00</td>
+        </tr>
+      </tbody>
+      <tfoot><tr><th>Total</th><th th:text="${sumQtd}">0</th><th th:text="${#numbers.formatCurrency(sumTotal)}">R$0,00</th></tr></tfoot>
+    </table>
+  </section>
+</main></div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body></html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Configurações • Permissões</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="layout">
+<aside th:replace="~{fragments/sidebar :: sidebar('conf-permissoes')}"></aside>
+<main class="container stack mt-4 mb-6">
+  <h1 class="page-title">Permissões</h1>
+  <section class="card table-responsive">
+    <table class="table">
+      <thead><tr><th>Recurso</th><th>ADMIN</th><th>FARMACÊUTICO</th><th>CAIXA</th></tr></thead>
+      <tbody>
+        <tr th:each="r : ${recursos}">
+          <td th:text="${r.nome}">Pedidos</td>
+          <td><input type="checkbox" th:checked="${r.admin}" th:attr="data-role='ADMIN',data-res=${r.id}"/></td>
+          <td><input type="checkbox" th:checked="${r.farmaceutico}" th:attr="data-role='FARMACEUTICO',data-res=${r.id}"/></td>
+          <td><input type="checkbox" th:checked="${r.caixa}" th:attr="data-role='CAIXA',data-res=${r.id}"/></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</main></div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body></html>

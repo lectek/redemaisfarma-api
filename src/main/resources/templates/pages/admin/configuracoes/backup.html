@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Configurações • Backup</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="layout">
+<aside th:replace="~{fragments/sidebar :: sidebar('conf-backup')}"></aside>
+<main class="container stack mt-4 mb-6">
+  <h1 class="page-title">Backup & Restauração</h1>
+  <section class="card">
+    <h2 class="card-title">Backup agora</h2>
+    <form th:action="@{/admin/configuracoes/backup/now}" method="post">
+      <button class="btn btn-primary">Gerar backup</button>
+    </form>
+  </section>
+  <section class="card mt-4 table-responsive">
+    <h2 class="card-title">Histórico</h2>
+    <table class="table">
+      <thead><tr><th>Arquivo</th><th>Data</th><th>Ações</th></tr></thead>
+      <tbody>
+        <tr th:each="b : ${backups}">
+          <td th:text="${b.nome}">backup-2025-01-01.zip</td>
+          <td th:text="${#dates.format(b.data,'dd/MM/yyyy HH:mm')}">…</td>
+          <td class="actions">
+            <a class="btn btn-ghost" th:href="@{|/admin/configuracoes/backup/download/${b.id}|}">Baixar</a>
+            <form th:action="@{|/admin/configuracoes/backup/restore/${b.id}|}" method="post" class="inline"><button class="btn btn-ghost">Restaurar</button></form>
+          </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(backups)}"><td colspan="3" class="text-center text-muted">Nenhum backup.</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main></div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body></html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Catálogo • Produtos</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('produtos')}"></aside>
+
+  <main class="container stack mt-4 mb-8" id="conteudo">
+    <div class="between mb-4">
+      <h1 class="page-title">Catálogo</h1>
+
+      <!-- Filtro rápido -->
+      <form class="form-row gap-2" id="form-busca">
+        <input class="input" id="q" name="q" placeholder="Buscar por nome ou EAN…"/>
+        <button class="btn" type="submit">Buscar</button>
+        <button class="btn btn-ghost" type="button" id="btn-limpar">Limpar</button>
+      </form>
+    </div>
+
+    <!-- Info do contexto (admin/cliente) -->
+    <div class="alert info mb-3" th:if="${isAdmin}">Modo administrador: você pode editar produtos.</div>
+
+    <!-- Grid de cards -->
+    <section id="catalogo-grid" class="grid grid-4 gap-4" aria-live="polite"></section>
+
+    <!-- Paginação simples -->
+    <div class="center mt-6">
+      <button class="btn btn-ghost" id="btn-prev" disabled>Anterior</button>
+      <span id="paginacao-info" class="mx-3 text-muted">Página 1</span>
+      <button class="btn" id="btn-next" disabled>Próxima</button>
+    </div>
+  </main>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<!-- Modal de edição (reaproveita teu components/modal.css) -->
+<div class="modal" id="modal-editar" aria-hidden="true">
+  <div class="modal-content card max-w-2xl">
+    <button class="modal-close" aria-label="Fechar">&times;</button>
+    <h2 class="h3 mb-3">Editar produto</h2>
+
+    <form id="form-editar" class="stack gap-3">
+      <input type="hidden" id="edit-id"/>
+
+      <label class="stack">
+        <span>Nome</span>
+        <input class="input" id="edit-nome" required maxlength="150"/>
+      </label>
+
+      <label class="stack">
+        <span>Descrição</span>
+        <textarea class="input" id="edit-desc" rows="3" maxlength="255"></textarea>
+      </label>
+
+      <div class="form-row gap-3">
+        <label class="stack">
+          <span>Preço de venda (R$)</span>
+          <input class="input" id="edit-preco" type="number" min="0.01" step="0.01" required/>
+        </label>
+        <label class="stack">
+          <span>Estoque</span>
+          <input class="input" id="edit-estoque" type="number" min="0" step="1"/>
+        </label>
+      </div>
+
+      <div class="form-row gap-3">
+        <label class="stack">
+          <span>Disponível</span>
+          <select class="input" id="edit-disponivel">
+            <option value="true">Sim</option>
+            <option value="false">Não</option>
+          </select>
+        </label>
+        <label class="stack flex-1">
+          <span>Categoria</span>
+          <input class="input" id="edit-categoria" maxlength="100"/>
+        </label>
+      </div>
+
+      <label class="stack">
+        <span>Imagem (URL)</span>
+        <input class="input" id="edit-imagem-url" maxlength="255" placeholder="https://…"/>
+      </label>
+
+      <div class="form-row gap-3">
+        <label class="stack">
+          <span>Trocar imagem (arquivo)</span>
+          <input class="input" id="edit-imagem-file" type="file" accept="image/*"/>
+        </label>
+        <div class="stack">
+          <span class="text-muted">Código de barras (EAN)</span>
+          <span id="edit-ean" class="code bg-muted px-2 py-1 radius-sm"></span>
+        </div>
+      </div>
+
+      <div class="right mt-2">
+        <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+        <button type="submit" class="btn">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Thymeleaf injeta o contexto para o JS -->
+<script th:inline="javascript">
+  window.CATALOGO_CTX = {
+    isAdmin: /*[[${isAdmin}]]*/ false
+  };
+</script>
+
+<script th:src="@{/js/pages/catalogo.js}"></script>
+</body>
+</html>

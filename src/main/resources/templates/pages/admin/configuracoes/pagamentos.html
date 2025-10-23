@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Configurações • Pagamentos</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+
+<div class="layout">
+  <aside th:replace="~{fragments/sidebar :: sidebar('conf-pagamentos')}"></aside>
+
+  <main id="main-content" class="container stack mt-4 mb-6">
+    <h1 class="page-title">Configurações — Pagamentos</h1>
+
+    <form class="form-grid" th:action="@{/admin/configuracoes/pagamentos}" method="post" th:object="${cfg}">
+      <fieldset class="fieldset">
+        <legend>Gateways</legend>
+        <div class="form-row">
+          <label class="checkbox"><input type="checkbox" th:field="*{pixAtivo}"/> PIX</label>
+          <label class="checkbox"><input type="checkbox" th:field="*{cartaoAtivo}"/> Cartão</label>
+          <label class="checkbox"><input type="checkbox" th:field="*{boletoAtivo}"/> Boleto</label>
+          <label class="checkbox"><input type="checkbox" th:field="*{dinheiroAtivo}"/> Dinheiro</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend>Taxas & Parcelamento</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taxaCartao">Taxa Cartão (%)</label>
+            <input id="taxaCartao" class="input" type="number" step="0.01" th:field="*{taxaCartao}" placeholder="2.99" />
+          </div>
+          <div class="form-group">
+            <label for="maxParcelas">Máx. Parcelas</label>
+            <input id="maxParcelas" class="input" type="number" min="1" max="12" th:field="*{maxParcelas}" placeholder="6" />
+          </div>
+          <div class="form-group">
+            <label for="parcelaMin">Parcela mínima (R$)</label>
+            <input id="parcelaMin" class="input" type="number" step="0.01" th:field="*{parcelaMin}" placeholder="20.00" />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend>Credenciais do Gateway</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="gateway">Fornecedor</label>
+            <select id="gateway" class="select" th:field="*{gateway}">
+              <option value="pagarme">Pagar.me</option>
+              <option value="pagseguro">PagSeguro</option>
+              <option value="mercadopago">Mercado Pago</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="pubKey">Public Key</label>
+            <input id="pubKey" class="input" type="text" th:field="*{publicKey}" />
+          </div>
+          <div class="form-group">
+            <label for="secKey">Secret Key</label>
+            <input id="secKey" class="input" type="password" th:field="*{secretKey}" autocomplete="new-password" />
+          </div>
+          <div class="form-group">
+            <label for="webhook">Webhook URL</label>
+            <input id="webhook" class="input" type="url" th:field="*{webhookUrl}" placeholder="https://.../webhooks/pagamentos" />
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Salvar</button>
+      </div>
+    </form>
+  </main>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

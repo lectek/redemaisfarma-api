@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Configurações — Admin</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body class="layout">
+  <th:block th:replace="~{fragments/header :: header}"></th:block>
+  <div class="layout__content">
+    <th:block th:replace="~{fragments/sidebar :: sidebar}"></th:block>
+
+    <main class="page">
+      <header class="page__header">
+        <h1 class="page__title">Configurações do Sistema</h1>
+        <div class="page__actions">
+          <a th:href="@{/admin/settings/new}" class="btn btn--primary">Nova configuração</a>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="card__body">
+          <form class="form form--inline" th:action="@{/admin/settings}" method="get">
+            <div class="form__row">
+              <input class="input" type="text" name="q" placeholder="Buscar por chave ou descrição"
+                     th:value="${q}"/>
+              <select class="select" name="size">
+                <option th:selected="${size == 10}" th:value="10">10</option>
+                <option th:selected="${size == 20}" th:value="20">20</option>
+                <option th:selected="${size == 50}" th:value="50">50</option>
+              </select>
+              <button class="btn" type="submit">Filtrar</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__body">
+          <table class="table table--striped">
+            <thead>
+              <tr>
+                <th>Chave</th>
+                <th>Valor</th>
+                <th>Descrição</th>
+                <th>Atualizado</th>
+                <th class="u-text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="it : ${pageData.content}">
+                <td><span class="text--mono" th:text="${it.chave}">carrinho.min_valor</span></td>
+                <td th:text="${it.valor}">R$ 99,90</td>
+                <td th:text="${it.descricao}">descrição</td>
+                <td th:text="${#temporals.format(it.atualizadoEm, 'dd/MM/yyyy HH:mm')}">--</td>
+                <td class="u-text-right">
+                  <a th:href="@{|/admin/settings/${it.id}/edit|}" class="btn btn--sm">Editar</a>
+                  <form th:action="@{|/admin/settings/${it.id}/delete|}" method="post" class="form form--inline">
+                    <button class="btn btn--danger btn--sm" type="submit"
+                            onclick="return confirm('Excluir esta configuração?')">Excluir</button>
+                  </form>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(pageData.content)}">
+                <td colspan="5" class="u-text-center u-color-muted">Nenhum registro</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card__footer" th:if="${pageData.totalPages > 1}">
+          <nav class="pagination">
+            <a class="pagination__prev btn"
+               th:classappend="${pageData.first} ? 'is-disabled'"
+               th:href="@{/admin/settings(page=${pageData.number-1}, size=${size}, q=${q})}">Anterior</a>
+
+            <span class="pagination__info">
+              Página <span th:text="${pageData.number + 1}">1</span>
+              de <span th:text="${pageData.totalPages}">1</span>
+              — <span th:text="${pageData.totalElements}">0</span> itens
+            </span>
+
+            <a class="pagination__next btn"
+               th:classappend="${pageData.last} ? 'is-disabled'"
+               th:href="@{/admin/settings(page=${pageData.number+1}, size=${size}, q=${q})}">Próxima</a>
+          </nav>
+        </div>
+      </section>
+    </main>
+  </div>
+  <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+</body>
+</html>

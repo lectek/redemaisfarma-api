@@ -1,0 +1,44 @@
+<!-- src/main/resources/templates/produtos/lista.html -->
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Produtos • RedeMaisFarma</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main id="main-content" class="container stack mt-4 mb-6">
+  <h1 class="page-title">Produtos</h1>
+
+  <form class="form-row mb-4" th:action="@{/produtos}" method="get" role="search">
+    <input class="input" name="q" type="search" placeholder="Busque por nome, categoria ou código de barras…"
+           th:value="${q}" />
+    <button class="btn">Buscar</button>
+  </form>
+
+  <section th:if="${#lists.isEmpty(page.content)}" class="card p-4 text-center text-muted">
+    Nenhum produto encontrado para a sua busca.
+  </section>
+
+  <section th:if="${!#lists.isEmpty(page.content)}" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <article th:each="produto : ${page.content}">
+      <th:block th:replace="~{fragments/cards :: card(${produto})}"></th:block>
+    </article>
+  </section>
+
+  <!-- Paginação simples -->
+  <nav class="pagination mt-4" th:if="${page.totalPages > 1}" aria-label="Paginação">
+    <a class="btn" th:classappend="${page.first} ? ' disabled'"
+       th:href="@{/produtos(q=${q}, page=${page.number-1}, size=${page.size})}">Anterior</a>
+    <span class="muted">Página <span th:text="${page.number+1}">1</span> de <span th:text="${page.totalPages}">1</span></span>
+    <a class="btn" th:classappend="${page.last} ? ' disabled'"
+       th:href="@{/produtos(q=${q}, page=${page.number+1}, size=${page.size})}">Próxima</a>
+  </nav>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
