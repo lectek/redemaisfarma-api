@@ -1,81 +1,42 @@
-<!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" data-theme="light">
-<head th:fragment="commonHead">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Sistema Embalando - Loja de produtos para pets com carinho e tecnologia." />
-  <meta name="theme-color" content="#f43f5e" />
-  <meta property="og:title" content="Embalando • Loja de Produtos Pet" />
-  <meta property="og:description" content="Compre os melhores acessórios para pets com segurança e agilidade." />
-  <meta property="og:type" content="website" />
-  <meta property="og:locale" content="pt_BR" />
-  <meta name="robots" content="index, follow" />
-  <meta name="author" content="LekTec" />
-  <link rel="icon" type="image/png" href="/images/favicon.png" />
-  <title th:text="${title} ?: 'Embalando • Loja de Produtos Pet'">Embalando</title>
+<!-- templates/fragments/header.html -->
+<header class="site-header" role="banner" th:fragment="header">
+  <!-- atalho para conteúdo principal -->
+  <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
 
-  <!-- CSS principal e layout -->
-  <link rel="stylesheet" th:href="@{/css/main.css}" />
-</head>
+  <div class="header-inner container-fluid">
+    <a th:href="@{/}" class="logo" aria-label="Página inicial">
+      <img th:src="@{/images/logofarma.jpg}" alt="RedeMaisFarma" height="40" />
+    </a>
 
-<body class="body-flex" data-page="layout">
-  <!-- Acessibilidade -->
-  <a href="#main-content" class="skip-link">Pular para o conteúdo</a>
+    <button class="nav-toggle"
+            data-role="nav-toggle"
+            aria-label="Abrir menu"
+            aria-controls="primary-nav"
+            aria-expanded="false">
+      <span class="menu-icon" aria-hidden="true"></span>
+    </button>
 
-  <!-- Cabeçalho com fragmento -->
-  <header role="banner" class="site-header" th:fragment="header">
-    <a href="#main-content" class="skip-link">Pular para conteúdo principal</a>
+    <nav id="primary-nav" class="primary-nav" aria-label="Menu principal">
+      <ul class="nav-list">
+        <li><a th:href="@{/}"             class="menu-button" data-section="">Início</a></li>
+        <li><a th:href="@{/produtos}"     class="menu-button" data-section="produtos">Produtos</a></li>
+        <li><a th:href="@{/ofertas}"      class="menu-button" data-section="ofertas">Ofertas</a></li>
+        <li><a th:href="@{/contato}"      class="menu-button" data-section="contato">Contato</a></li>
+        <li><a th:href="@{/checkout}"     class="menu-button" data-section="checkout">Checkout</a></li>
 
-    <div class="header-grid">
-      <!-- LOGO -->
-      <a th:href="@{/}" class="logo" aria-label="Página inicial">
-        <img src="/images/logo-embalando.png" alt="Logo Embalando" class="logo" />
-      </a>
-       <div class="barra-inferior">
-          <a th:href="@{/produtos}" class="btn">Catálogo</a>
-          <a th:href="@{/checkout}" class="btn">Checkout</a>
-          <a th:href="@{/carrinho}" class="btn">Carrinho</a>
-          <a th:href="@{/sobre}" class="btn">Sobre nós</a>
-        </div>
-      <!-- 🔧 Botões do Painel Administrativo -->
-      <nav class="painel-nav">
-        <a href="/admin/painel" class="menu-button">Painel</a>
-        <a href="/admin/produtos" class="menu-button">Produtos</a>
-        <a href="/admin/pedidos" class="menu-button">Pedidos</a>
-        <a href="/admin/clientes" class="menu-button">Clientes</a>
-      </nav>
-
-      <!-- CONTAINER BUSCA + BOTÕES -->
-      <div class="busca-e-botoes">
-        <!-- BARRA SUPERIOR: campo de busca -->
-        <form class="barra-superior" role="search" th:action="@{/buscar}" method="get" aria-label="Busca no site">
-          <input type="search" name="q" placeholder="Pesquisar…" required />
-          <button type="submit" aria-label="Buscar produto">🔍</button>
-        </form>
-
-      <!-- ÍCONES + IDIOMA -->
-      <div class="header-icons">
-        <a th:href="@{/notificacoes}" class="icon-link" aria-label="Notificações">
-          <svg width="24" height="24"><!-- ícone --></svg>
-        </a>
-        <a th:href="@{/perfil}" class="icon-link" aria-label="Perfil">
-          <svg width="24" height="24"><!-- ícone --></svg>
-        </a>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- Conteúdo principal injetável -->
-  <main id="main-content" role="main" tabindex="-1" th:fragment="conteudo" aria-label="Conteúdo principal da página">
-    <!-- As páginas inserem seu conteúdo aqui -->
-  </main>
-
-  <!-- Rodapé com fragmento -->
-  <footer th:replace="~{fragments/footer :: footer}" role="contentinfo"></footer>
-
-  <!-- JavaScript global -->
-  <script defer th:src="@{/js/layout.js}"></script>
-</body>
-</html>
+        <li th:if="${#authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
+          <a th:href="@{/admin/painel}"    class="menu-button" data-section="admin/painel">Painel</a>
+        </li>
+        <li th:if="${#authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
+          <a th:href="@{/admin/produtos}"  class="menu-button" data-section="admin/produtos">Produtos</a>
+        </li>
+        <li th:if="${#authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
+          <a th:href="@{/admin/pedidos}"   class="menu-button" data-section="admin/pedidos">Pedidos</a>
+        </li>
+        <li th:if="${#authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
+          <a th:href="@{/admin/clientes}"  class="menu-button" data-section="admin/clientes">Clientes</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>

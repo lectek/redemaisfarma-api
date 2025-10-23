@@ -1,135 +1,48 @@
-/* confirms.css - Estilo profissional para página de confirmação (LekTeC Farma) */
-
-:root {
-  --confirm-bg: #ffffff;
-  --confirm-primary: #0077cc;
-  --confirm-primary-dark: #005fa3;
-  --confirm-text: #1f2937;
-  --confirm-muted: #6b7280;
-  --confirm-border: #e5e7eb;
-  --confirm-shadow: rgba(0, 0, 0, 0.05);
-  --confirm-radius: 12px;
-  --confirm-font: 'Inter', 'Segoe UI', sans-serif;
-
-  --confirm-sm: 0.875rem;
-  --confirm-md: 1rem;
-  --confirm-lg: 1.25rem;
-  --confirm-xl: 1.75rem;
-
-  --confirm-gap: 1.5rem;
-  --confirm-transition: 0.3s ease;
+/* confirms.css - patch DS */
+:root{
+  --confirm-bg: var(--layout-bg);
+  --confirm-primary: var(--color-secondary);
+  --confirm-primary-dark: color-mix(in oklab, var(--color-secondary) 80%, black);
+  --confirm-text: var(--layout-dark);
+  --confirm-muted: var(--color-neutral-5);
+  --confirm-border: var(--layout-border);
+  --confirm-shadow: var(--shadow-1);
+  --confirm-radius: var(--radius-lg);
+  --confirm-font: var(--font-sans);
+  --confirm-sm:.875rem; --confirm-md:1rem; --confirm-lg:1.25rem; --confirm-xl:1.75rem;
+  --confirm-gap:1.5rem; --confirm-transition:.25s ease;
 }
 
-body {
-  font-family: var(--confirm-font);
-  background: var(--confirm-bg);
-  color: var(--confirm-text);
-  margin: 0;
-  padding: 0;
-  line-height: 1.6;
-  scroll-behavior: smooth;
+body{ font-family:var(--confirm-font); background:var(--confirm-bg); color:var(--confirm-text); }
+
+.confirm-container{
+  max-width:800px; margin:3rem auto; padding:2rem;
+  background:var(--layout-card); border-radius:var(--confirm-radius);
+  box-shadow:var(--confirm-shadow); animation: fadeIn .6s ease;
+}
+.confirm-container h1{ font-size:var(--confirm-xl); color:var(--color-primary); margin-bottom:1rem; font-weight:800; }
+.confirm-container p{ font-size:var(--confirm-md); margin-bottom:1rem; }
+
+.nota-fiscal-form{ margin-top:2rem; }
+.nota-fiscal-form h2{ font-size:var(--confirm-lg); margin-bottom:1rem; }
+.nota-fiscal-form label{ display:block; margin-bottom:.75rem; font-size:var(--confirm-md); cursor:pointer; }
+.nota-fiscal-form input[type="radio"]{ margin-right:.5rem; accent-color:var(--confirm-primary); }
+
+.btn-confirmar{
+  margin-top:1rem; background:var(--confirm-primary); color:#fff;
+  padding:.75rem 1.5rem; font-size:var(--confirm-md); border:0; border-radius:8px; cursor:pointer; font-weight:700;
+  transition: background var(--confirm-transition), transform .15s;
+}
+.btn-confirmar:hover{ background:var(--confirm-primary-dark); transform: translateY(-1px); }
+.btn-confirmar:focus-visible{ outline:0; box-shadow:var(--focus-ring); }
+
+.mensagem-confirmacao{
+  margin-top:1.5rem; padding:1rem; background:#f0f9ff; border-left:4px solid var(--confirm-primary);
+  border-radius:var(--confirm-radius); font-size:var(--confirm-md); font-weight:600;
 }
 
-.confirm-container {
-  max-width: 800px;
-  margin: 3rem auto;
-  padding: 2rem;
-  background: var(--confirm-bg);
-  border-radius: var(--confirm-radius);
-  box-shadow: 0 4px 12px var(--confirm-shadow);
-  animation: fadeIn 0.6s ease;
-}
+/* A11y */
+*:focus{ outline:0; box-shadow:var(--focus-ring); }
 
-.confirm-container h1 {
-  font-size: var(--confirm-xl);
-  color: var(--confirm-primary-dark);
-  margin-bottom: 1rem;
-  font-weight: 700;
-}
-
-.confirm-container p {
-  font-size: var(--confirm-md);
-  color: var(--confirm-text);
-  margin-bottom: 1rem;
-}
-
-.nota-fiscal-form {
-  margin-top: 2rem;
-}
-
-.nota-fiscal-form h2 {
-  font-size: var(--confirm-lg);
-  margin-bottom: 1rem;
-  color: var(--confirm-text);
-}
-
-.nota-fiscal-form label {
-  display: block;
-  margin-bottom: 0.75rem;
-  font-size: var(--confirm-md);
-  color: var(--confirm-text);
-  cursor: pointer;
-}
-
-.nota-fiscal-form input[type="radio"] {
-  margin-right: 0.5rem;
-  accent-color: var(--confirm-primary);
-}
-
-.btn-confirmar {
-  margin-top: 1rem;
-  background: var(--confirm-primary);
-  color: #fff;
-  padding: 0.75rem 1.5rem;
-  font-size: var(--confirm-md);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background var(--confirm-transition), transform 0.2s;
-}
-
-.btn-confirmar:hover {
-  background: var(--confirm-primary-dark);
-  transform: translateY(-2px);
-}
-
-.mensagem-confirmacao {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background: #f0f9ff;
-  border-left: 4px solid var(--confirm-primary);
-  border-radius: var(--confirm-radius);
-  font-size: var(--confirm-md);
-  color: var(--confirm-text);
-  font-weight: 500;
-}
-
-/* Acessibilidade */
-*:focus {
-  outline: 2px solid var(--confirm-primary);
-  outline-offset: 3px;
-}
-
-/* Responsivo */
-@media (max-width: 600px) {
-  .confirm-container {
-    padding: 1.5rem;
-  }
-
-  .btn-confirmar {
-    width: 100%;
-  }
-}
-
-/* Animação */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* Anim */
+@keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }

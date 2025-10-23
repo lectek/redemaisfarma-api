@@ -1,60 +1,229 @@
+/* ===============================
+   SIDEBAR • RedeMaisFarma (refinado)
+   - Mantém o visual
+   - A11y/foco consistente
+   - Mobile drawer com overlay
+   - Helpers de layout (push do conteúdo)
+   - Performance e safe-area
+=============================== */
+
 .sidebar {
-  width: 240px;
-  min-height: 100vh;
-  background-color: var(--color-neutral-2);
-  padding: 1rem;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
+  width: 260px;
+  min-height: 100dvh;
   position: sticky;
   top: 0;
+  background: var(--color-primary); /* verde sólido */
+  color: #fff;
+  padding: clamp(14px, 2vw, 18px);
+  border-right: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 16px;
+  box-shadow: var(--shadow-1);
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+
+  /* desempenho e suavidade */
+  will-change: transform;
+  transform: translateZ(0);
+  contain: content;
 }
 
+/* Header / brand */
 .sidebar__logo {
-  margin-bottom: 2rem;
   display: flex;
   align-items: center;
+  gap: .6rem;
+  margin-bottom: .25rem;
 }
 
 .sidebar__brand {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: bold;
-  font-size: 1.25rem;
-  color: var(--color-primary-text);
+  gap: .6rem;
+  color: #fff;
   text-decoration: none;
+  font-weight: 800;
+  font-size: 1.1rem;
 }
 
 .sidebar__icon {
   width: 24px;
   height: 24px;
-  fill: var(--color-primary);
+  fill: currentColor;
 }
 
+/* Navegação */
 .sidebar__list {
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: .25rem;
+  display: grid;
+  gap: .25rem;
 }
 
 .sidebar__link {
-  display: block;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  color: var(--color-primary-text);
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .6rem .75rem;
+  color: #e8f3ef;
   text-decoration: none;
-  border-radius: var(--radius-md);
-  transition: background 0.3s;
+  border-radius: 12px;
+  transition: background .18s ease, color .18s ease, transform .06s ease;
+  min-height: 44px; /* alvo touch confortável */
 }
 
 .sidebar__link:hover {
-  background-color: var(--color-neutral-3);
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
 }
 
-/* Responsivo */
+.sidebar__link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in oklab, #ffffff 45%, transparent);
+}
+
+.sidebar__link.is-active {
+  background: rgba(0, 0, 0, .18); /* mais escuro, mantém contraste */
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Compacto opcional */
+.sidebar--compact { width: 88px; }
+.sidebar--compact .sidebar__brand span,
+.sidebar--compact .sidebar__link span { display: none; }
+.sidebar--compact .sidebar__link { justify-content: center; }
+
+/* 🌙 Dark mode (mantém verde; ajusta borda/sombra) */
+:root[data-theme="dark"] .sidebar {
+  border-right-color: rgba(0, 0, 0, .25);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .35);
+}
+
+/* ===============================
+   📱 Mobile: drawer lateral
+   – Use .sidebar + .sidebar-overlay (irmão)
+=============================== */
 @media (max-width: 768px) {
   .sidebar {
-    display: none; /* Exibe via toggle com JS se quiser */
+    position: fixed;
+    inset: env(safe-area-inset-top) auto env(safe-area-inset-bottom) 0;
+    z-index: 60;
+    transform: translate3d(-102%, 0, 0);
+    transition: transform .25s ease;
+    height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-width: min(84%, 320px);
+    margin: 0;
+    border-radius: 0 16px 16px 0;
+    touch-action: pan-y;
+  }
+  .sidebar.is-open {
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* Overlay separado para não poluir a árvore da sidebar */
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 59;
+    background: rgba(15, 23, 42, .45);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease;
+  }
+  .sidebar-overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* ===== Hamburger → Chevron (‹) ===== */
+.sidebar-toggle .menu-icon,
+.sidebar-toggle .menu-icon::before,
+.sidebar-toggle .menu-icon::after {
+  transition:
+    transform 180ms ease,
+    width 180ms ease,
+    opacity 150ms ease,
+    background-color 180ms ease;
+  transform-origin: right center;
+}
+
+.sidebar-toggle .menu-icon {
+  position: relative;
+  width: 20px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  display: block;
+}
+
+.sidebar-toggle .menu-icon::before,
+.sidebar-toggle .menu-icon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 20px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+.sidebar-toggle .menu-icon::before { top: -6px; }
+.sidebar-toggle .menu-icon::after  { top:  6px; }
+
+.sidebar-toggle.is-open .menu-icon { background: transparent; }
+.sidebar-toggle.is-open .menu-icon::before,
+.sidebar-toggle.is-open .menu-icon::after {
+  width: 14px;
+  transform: translateX(-2px);
+}
+.sidebar-toggle.is-open .menu-icon::before { transform: rotate(-40deg) translateX(-2px); }
+.sidebar-toggle.is-open .menu-icon::after  { transform: rotate( 40deg) translateX(-2px); }
+
+/* ===============================
+   🔧 Helpers de layout
+   – Empurrar conteúdo quando a sidebar é fixa no desktop
+=============================== */
+@media (min-width: 1024px) {
+  .layout--with-sidebar {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: clamp(16px, 2vw, 24px);
+    align-items: start;
+  }
+  .layout--with-sidebar .sidebar {
+    position: sticky;
+    top: clamp(8px, 1.5vw, 16px);
+  }
+}
+
+/* ===============================
+   ♿️ Alto contraste (Windows/UA)
+=============================== */
+@media (forced-colors: active) {
+  .sidebar,
+  .sidebar__link.is-active {
+    border: 1px solid CanvasText;
+  }
+  .sidebar__link:focus-visible {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}
+
+/* ===============================
+   📴 Motion-safe
+=============================== */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar-overlay,
+  .sidebar-toggle .menu-icon,
+  .sidebar-toggle .menu-icon::before,
+  .sidebar-toggle .menu-icon::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
   }
 }

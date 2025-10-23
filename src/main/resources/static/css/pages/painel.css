@@ -1,210 +1,88 @@
-/* ============================
-🎛️ Painel Administrativo RedeMaisFarma
-Adaptado com as cores da identidade LekTeC/Farma
-============================ */
+/* ===============================
+   Layout Profissional do Painel – RedeMaisFarma
+   (header sticky, nav mobile, cards, helpers)
+   =============================== */
 
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #fefefe;
-  margin: 0;
-  padding: 0;
-  color: #1e293b;
+:root{
+  --layout-bg:#f9fafb; --layout-card:#ffffff; --layout-dark:#1f2937;
+  --layout-accent:#000000; --layout-accent-hover:#333333;
+  --layout-border:#e5e7eb; --layout-radius:12px;
+  --layout-shadow:0 10px 30px rgba(0,0,0,.06);
+  --header-h:64px; --container-w:1280px; --safe-pad:clamp(12px,2vw,24px);
+  --z-header:1100; --z-backdrop:1190; --z-nav:1200; --z-fab:900;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --layout-bg:#0f172a; --layout-card:#0b1220; --layout-dark:#e5e7eb;
+    --layout-border:#1e293b; --layout-shadow:0 10px 30px rgba(0,0,0,.35);
+    --layout-accent:#e5e7eb; --layout-accent-hover:#cbd5e1;
+  }
 }
 
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #165baa; /* Azul LekTeC */
-  color: white;
-  padding: 1rem 2rem;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+html,body{width:100%;overflow-x:hidden}
+body{background:var(--layout-bg);color:#111827;line-height:1.6;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+@media (prefers-color-scheme: dark){ body{color:#e5e7eb} }
+.no-scroll{overflow:hidden}
+.container-fluid{max-width:var(--container-w);margin-inline:auto;padding-inline:var(--safe-pad)}
+
+/* Header sticky */
+.site-header,.navbar{
+  position:sticky;top:0;z-index:var(--z-header);height:var(--header-h);
+  display:flex;align-items:center;gap:1rem;padding-inline:var(--safe-pad);
+  background:var(--layout-dark);color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.08);
+  backdrop-filter:saturate(120%) blur(6px);
+  border-bottom-left-radius:16px;border-bottom-right-radius:16px;
+}
+.site-header.scrolled,.navbar.scrolled{box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.header-inner{width:100%;display:flex;align-items:center;gap:12px}
+.logo{height:48px;display:inline-flex;align-items:center}
+.logo img{max-height:40px;display:block}
+
+/* Nav mobile off-canvas */
+.primary-nav{
+  position:fixed;inset:var(--header-h) 0 0 0;background:var(--layout-card);
+  z-index:var(--z-nav);padding:16px var(--safe-pad) 24px;max-height:calc(100dvh - var(--header-h));
+  overflow:auto;border-top:1px solid var(--layout-border);
+  opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .18s,transform .18s;
+}
+html.nav-open .primary-nav, .primary-nav.open{opacity:1;transform:none;pointer-events:auto}
+.primary-nav .nav-list{display:flex;flex-direction:column;gap:14px}
+.primary-nav .nav-list a{display:block;padding:10px 8px;border-radius:10px;color:#111827;text-decoration:none}
+.primary-nav .nav-list a:hover{background:#f3f4f6}
+.nav-backdrop{
+  position:fixed;inset:0;top:var(--header-h);background:rgba(0,0,0,.35);
+  backdrop-filter:blur(1px);z-index:var(--z-backdrop);opacity:0;pointer-events:none;transition:opacity .18s;
+}
+html.nav-open .nav-backdrop{opacity:1;pointer-events:auto}
+
+/* Conteúdo */
+main{padding-block:2rem}
+main .container,main.container{max-width:var(--container-w);margin-inline:auto;padding-inline:var(--safe-pad)}
+.painel-header{text-align:center;margin-bottom:2rem}
+.painel-header h1{font-size:clamp(1.6rem,2.4vw,2.2rem);margin-bottom:.25rem;color:var(--layout-dark)}
+
+/* Grid de cards */
+.painel-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:clamp(16px,2vw,24px);
+}
+.card{
+  background:var(--layout-card);border:1px solid var(--layout-border);border-radius:var(--layout-radius);
+  padding:clamp(16px,2vw,28px);box-shadow:var(--layout-shadow);
+  display:flex;flex-direction:column;justify-content:space-between;
+  transition:transform .2s, box-shadow .2s, border-color .2s;
+}
+@media (hover:hover){ .card:hover{ transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,.10); } }
+.card h2{font-size:1.25rem;color:#111827;margin-bottom:.5rem;font-weight:700}
+.card p {color:#4b5563;flex-grow:1;font-size:.95rem;margin-bottom:1rem}
+
+/* Footer sticky minimal opcional */
+.footer--sticky{
+  position:sticky;bottom:0;background:var(--layout-dark);color:#fff;text-align:center;
+  padding:1rem;box-shadow:0 -4px 12px rgba(0,0,0,.08);z-index:10;
 }
 
-.navbar .left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.navbar .logo {
-  height: 36px;
-}
-
-.menu-button {
-  background: transparent;
-  color: white;
-  border: none;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.menu-button:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-}
-
-main {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: auto;
-}
-
-.painel-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.painel-header h1 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  color: #165baa;
-}
-
-.painel-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
-
-.card {
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
-}
-
-.card h2 {
-  font-size: 1.3rem;
-  margin-bottom: 0.5rem;
-  color: #1f2937;
-}
-
-.card p {
-  flex-grow: 1;
-  color: #4b5563;
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
-}
-
-.btn-acessar {
-  align-self: flex-start;
-  padding: 0.6rem 1.2rem;
-  background-color: #f43f5e; /* Rosa Farma */
-  color: white;
-  text-decoration: none;
-  border-radius: 6px;
-  font-weight: 600;
-  transition: background-color 0.2s ease;
-}
-
-.btn-acessar:hover {
-  background-color: #be123c;
-}
-
-.footer--sticky {
-  background-color: #165baa;
-  color: white;
-  text-align: center;
-  padding: 1rem;
-  font-size: 0.9rem;
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
-}
-
-.painel-resumo {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-}
-
-.resumo-header h2 {
-  font-size: 1.4rem;
-  margin-bottom: 0.25rem;
-  color: #1f2937;
-}
-
-.resumo-metricas {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.card-metrica {
-  background: #f1f5f9;
-  border-radius: 10px;
-  padding: 1rem;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #1f2937;
-}
-
-.card-metrica span {
-  display: block;
-  margin-top: 0.5rem;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #0f172a;
-}
-
-.resumo-categorias,
-.resumo-alertas {
-  margin-top: 2rem;
-}
-
-.resumo-categorias h3,
-.resumo-alertas h3 {
-  font-size: 1.1rem;
-  color: #165baa;
-  margin-bottom: 0.5rem;
-}
-
-.resumo-categorias ul,
-.resumo-alertas ul {
-  list-style: disc;
-  padding-left: 1.5rem;
-  color: #475569;
-}
-
-.resumo-alertas li {
-  color: #b91c1c;
-  font-weight: 500;
-}
-
-/* 🌒 Dark Mode */
-:root {
-  --bg-light: #fefefe;
-  --bg-dark: #0f172a;
-  --text-light: #ffffff;
-  --text-dark: #0f172a;
-}
-
-body[data-theme='dark'] {
-  background-color: var(--bg-dark);
-  color: var(--text-light);
-}
-
-body[data-theme='dark'] .card,
-body[data-theme='dark'] .painel-resumo {
-  background-color: #1e293b;
-  color: #f1f5f9;
+/* Responsivo */
+@media (max-width:768px){
+  :root{--header-h:56px}
 }

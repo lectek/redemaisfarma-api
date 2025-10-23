@@ -1,69 +1,62 @@
-/* ===============================
-🎨 TOKENS GLOBAIS - SISTEMA EMBALANDO
-=============================== */
-
+/* 🎛 TOKENS — design system (cores, tipografia, spacing, sombras) */
 :root {
-  /* 🎨 Paleta principal */
-  --color-primary:     #000000;
-  --color-primary-hover: #333333;
-  --color-secondary:   #1e3a8a;
-  --color-success:     #10b981;
-  --color-error:       #ef4444;
-  --color-warning:     #f59e0b;
+  /* Brand & feedback */
+  --color-primary:#22a653;
+  --color-primary-hover:#1a8444;
+  --color-secondary:#2a7de1;
+  --color-success:#2ec27e;
+  --color-error:#e5484d;
+  --color-warning:#f5a524;
 
-  /* 🎨 Tons neutros */
-  --color-neutral-1: #ffffff;
-  --color-neutral-2: #f9fafb;
-  --color-neutral-3: #e5e7eb;
-  --color-neutral-4: #d1d5db;
-  --color-neutral-5: #9ca3af;
-  --color-dark:      #111827;
-  --color-light:     #f3f4f6;
+  /* Neutros */
+  --color-neutral-1:#ffffff;
+  --color-neutral-2:#f6f7fb;
+  --color-neutral-3:#e6e7eb;
+  --color-neutral-4:#cfd3d8;
+  --color-neutral-5:#707784;
+  --color-dark:#0f172a;
+  --color-light:#e5e7eb;
 
-  /* 🔠 Tipografia */
-  --font-sans: 'Inter', sans-serif;
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
+  /* Tipografia */
+  --font-sans:'Inter', system-ui, Segoe UI, Roboto, Arial, "Noto Sans";
+  --font-size-xs:.75rem; --font-size-sm:.875rem; --font-size-base:1rem;
+  --font-size-lg:1.125rem; --font-size-xl:1.25rem; --font-size-2xl:1.5rem;
 
-  /* 📦 Espaçamento */
-  --gap-4: 0.25rem;
-  --gap-8: 0.5rem;
-  --gap-12: 0.75rem;
-  --gap-16: 1rem;
-  --gap-24: 1.5rem;
-  --gap-32: 2rem;
-  --gap-64: 4rem;
+  /* Espaçamento */
+  --gap-4:.25rem; --gap-8:.5rem; --gap-12:.75rem; --gap-16:1rem;
+  --gap-24:1.5rem; --gap-32:2rem; --gap-64:4rem;
 
-  /* 🟦 Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-full: 999px;
+  /* Radius */
+  --radius-sm:8px; --radius-md:12px; --radius-lg:16px; --radius-xl:20px; --radius-full:999px;
 
-  /* 🌫️ Sombras */
-  --shadow-0: none;
-  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-2: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-3: 0 10px 30px rgba(0, 0, 0, 0.06);
-  --shadow-inset: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+  /* Sombras */
+  --shadow-0:none;
+  --shadow-1:0 1px 2px rgba(2,6,23,.06);
+  --shadow-2:0 6px 18px rgba(2,6,23,.08);
+  --shadow-3:0 12px 30px rgba(2,6,23,.12);
+  --shadow-inset:inset 0 1px 3px rgba(2,6,23,.05);
 
-  /* 💡 Layout reutilizável */
-  --layout-bg: var(--color-neutral-2);
-  --layout-card: var(--color-neutral-1);
-  --layout-dark: var(--color-dark);
-  --layout-accent: var(--color-primary);
-  --layout-accent-hover: var(--color-primary-hover);
-  --layout-border: var(--color-neutral-3);
-  --layout-radius: var(--radius-lg);
-  --layout-shadow: var(--shadow-3);
+  /* Layout */
+  --layout-bg:var(--color-neutral-2);
+  --layout-card:var(--color-neutral-1);
+  --layout-dark:var(--color-dark);
+  --layout-accent:var(--color-primary);
+  --layout-accent-hover:var(--color-primary-hover);
+  --layout-border:var(--color-neutral-3);
+  --layout-radius:var(--radius-lg);
+  --layout-shadow:var(--shadow-3);
 
-  /* 🕓 Transições */
-  --transition-fast: 150ms ease-in;
-  --transition-base: 300ms ease-in-out;
-  --transition-slow: 500ms ease;
+  /* Transições & foco */
+  --transition-fast:150ms ease-in; --transition-base:300ms ease-in-out; --transition-slow:500ms ease;
+  --focus-ring:0 0 0 3px color-mix(in oklab, var(--color-secondary) 28%, transparent);
+
+  /* Ações específicas */
+  --action-500:#1f6feb; --action-600:#1a5ed3; --action-700:#174fb4;
+}
+
+:root[data-theme="dark"]{
+  --color-neutral-1:#0f172a; --color-neutral-2:#0b1220; --color-neutral-3:#1e293b;
+  --color-neutral-4:#334155; --color-neutral-5:#94a3b8; --color-light:#e5e7eb;
+  --layout-bg:var(--color-neutral-2); --layout-card:var(--color-neutral-1);
+  --layout-border:var(--color-neutral-3); --layout-shadow:0 10px 28px rgba(0,0,0,.35);
 }

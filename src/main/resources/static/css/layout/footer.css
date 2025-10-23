@@ -1,262 +1,149 @@
-:root {
-  /* 🎨 Cores base e tema atualizadas */
-  --color-footer-bg: #101624;
-  --color-footer-text: #f9fafb;
-  --color-footer-link: #cbd5e1;
-  --color-footer-hover: #ffffff;
-  --color-footer-border: #2c3e50;
-  --color-footer-accent: #14b8a6;
-  --color-footer-muted: #94a3b8;
-  --color-footer-focus-ring: rgba(20, 184, 166, 0.4);
-  --color-footer-highlight: #0f766e;
-  --color-footer-danger: #ef4444;
+/* =========================================================
+   🔻 Footer Minimal – variante enxuta + hotfixes
+   - usa as mesmas tokens já definidas no :root
+   - blinda tamanho dos ícones SVG
+   - evita herdar min-height 44px dos links/botões
+   ========================================================= */
 
-  /* 📐 Layout e espaçamentos */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 32px;
-  --spacing-xl: 48px;
-  --spacing-2xl: 64px;
-  --radius-xs: 2px;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
+/* Esconde grid tradicional quando usar o minimal */
+.site-footer--minimal .footer-grid { display: none !important; }
 
-  /* 💬 Tipografia */
-  --font-footer: 'Inter', 'Segoe UI', sans-serif;
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.25rem;
-  --font-weight-bold: 700;
-
-  --breakpoint-xs: 360px;
-  --breakpoint-sm: 480px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --max-width: 1200px;
-
-  --transition-fast: 150ms;
-  --transition-medium: 300ms;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-footer-bg: #0b0f19;
-    --color-footer-text: #e2e8f0;
-    --color-footer-link: #94a3b8;
-    --color-footer-hover: #ffffff;
-    --color-footer-border: #1e293b;
-  }
-}
-
-.site-footer {
-  background: var(--color-footer-bg);
-  color: var(--color-footer-text);
-  font-family: var(--font-footer);
-  font-size: var(--font-size-sm);
-  padding: var(--spacing-2xl) var(--spacing-lg);
-  border-top: 1px solid var(--color-footer-border);
-  line-height: 1.75;
-  position: relative;
-  z-index: 100;
-  transition: background var(--transition-medium);
-}
-
-.footer-grid {
-  display: grid;
-  gap: var(--spacing-xl);
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+/* Barra minimal: linha com 3 itens */
+.site-footer--minimal .minimal{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  gap: var(--spacing-sm) !important;
+  align-items:center !important;
+  justify-content:center !important;
   max-width: var(--max-width);
-  margin-inline: auto;
-  padding-inline: var(--spacing-md);
-  transition: gap var(--transition-fast);
+  margin-inline:auto;
+  padding: var(--spacing-md) var(--spacing-sm);
 }
 
-.footer-column {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  padding-bottom: var(--spacing-lg);
-}
+/* Item clicável (Instagram, WhatsApp, Endereço) */
+.site-footer--minimal .contact-item{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap: var(--spacing-sm) !important;
+  padding: 8px 12px !important;
+  border:1px solid var(--color-footer-border) !important;
+  border-radius: 999px !important;
+  color: var(--color-footer-link) !important;
+  text-decoration:none !important;
 
-.site-footer a,
-.site-footer button {
-  color: var(--color-footer-link);
-  text-decoration: none;
-  min-height: 44px;
-  font-size: var(--font-size-sm);
-  transition: all var(--transition-fast) ease;
+  /* NÃO herdar min-height global */
+  min-height: unset !important;
+  line-height: 1.2;
   background: transparent;
-  border: none;
-  cursor: pointer;
 }
-
-.site-footer a:hover,
-.site-footer a:focus,
-.site-footer button:hover,
-.site-footer button:focus {
-  color: var(--color-footer-hover);
+.site-footer--minimal .contact-item:hover,
+.site-footer--minimal .contact-item:focus-visible{
+  color: var(--color-footer-hover) !important;
+  border-color: var(--color-footer-accent) !important;
   outline: 2px solid var(--color-footer-accent);
   outline-offset: 3px;
-  background-color: rgba(255, 255, 255, 0.02);
-  border-radius: var(--radius-sm);
 }
 
-.footer-column form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
+/* 🔒 Hotfix: tamanho dos SVGs (evita “ícone gigante”) */
+.site-footer--minimal svg{
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
+  display: inline-block !important;
+  flex: 0 0 18px !important;
+  vertical-align: middle;
+}
+.site-footer--minimal svg, .site-footer--minimal svg *{
+  fill: currentColor !important;
+  stroke: none !important;
 }
 
-.footer-column input[type="email"] {
-  padding: var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-footer-border);
-  font-size: var(--font-size-sm);
-  background-color: #f9fafb;
-  color: #1e293b;
-  transition: box-shadow var(--transition-fast);
+/* Se houver pseudo-elementos decorativos globais, desativa-os aqui */
+.site-footer--minimal::before,
+.site-footer--minimal::after,
+.site-footer--minimal .minimal::before,
+.site-footer--minimal .minimal::after{
+  content: none !important;
+  background: none !important;
 }
 
-.footer-column input[type="email"]:focus {
-  box-shadow: 0 0 0 3px var(--color-footer-focus-ring);
-  outline: none;
-}
-
-.footer-column .btn {
-  background: var(--color-footer-accent);
-  color: #fff;
-  border: none;
+/* Créditos enxutos */
+.site-footer--minimal .credits{
+  border-top: 1px solid var(--color-footer-border);
+  color: var(--color-footer-muted);
+  text-align:center;
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-weight: var(--font-weight-bold);
-  transition: background var(--transition-medium);
 }
 
-.footer-column .btn:hover {
-  background: var(--color-footer-highlight);
-}
-
-.lang-selector button {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-footer-border);
-  background: transparent;
-  color: var(--color-footer-text);
-  transition: border-color var(--transition-fast);
-}
-
-.lang-selector button:focus {
-  border-color: var(--color-footer-accent);
-  outline: none;
-}
-
-.footer-column ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: var(--font-size-sm);
-}
-
-.footer-column ul li {
-  margin-bottom: var(--spacing-xs);
-}
-
-.footer-column ul ul {
-  margin-top: var(--spacing-xs);
-  padding-left: var(--spacing-sm);
-}
-
-.footer-column.social,
-.footer-column.badges,
-.footer-column.payments {
-  display: flex;
+/* Ajuste tipográfico do <small> nos créditos */
+.site-footer--minimal .credits small{
+  font-size: .95rem;             /* legível mas discreto */
+  letter-spacing: .1px;
+  display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: .35rem;
+  line-height: 1.3;
 }
 
-.footer-column img {
-  height: auto;
-  max-height: 36px;
-  object-fit: contain;
-  transition: transform var(--transition-fast);
+/* Link de crédito (lektec.tech) dentro dos créditos */
+.site-footer--minimal .credits .credit-link{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--color-footer-link);
+  text-decoration: none;
+  min-height: unset; /* não herdar min-height global */
+  line-height: 1.2;
+}
+.site-footer--minimal .credits .credit-link:hover{
+  color: var(--color-footer-hover);
+  text-decoration: underline;
+}
+.site-footer--minimal .credits .credit-link:focus-visible{
+  outline: 2px solid var(--color-footer-accent);
+  outline-offset: 3px;
+  border-radius: .4rem;
 }
 
-.footer-column img:hover {
-  transform: scale(1.05);
+/* Pontinho separador antes do crédito (opcional) */
+.site-footer--minimal .credits .credit-sep::before{
+  content: "•";
+  margin: 0 .5ch;
+  color: var(--color-footer-border);
 }
 
-.footer-column a img[alt*="Play"],
-.footer-column a img[alt*="App"] {
-  margin-top: var(--spacing-sm);
-  max-height: 40px;
+/* Botão “voltar ao topo” (se estiver presente) */
+.btn-to-top{
+  position: fixed; right: 16px; bottom: 16px; z-index: 900;
+  width: 44px; height: 44px; border-radius: 999px; border: 0; cursor: pointer;
+  background: var(--color-footer-accent); color: #06281d; font-weight: var(--font-weight-bold);
+  box-shadow: 0 8px 22px rgba(0,0,0,.25);
 }
+.btn-to-top:hover{ filter: brightness(1.05); }
 
-.footer-column.credits {
-  font-size: var(--font-size-xs);
-  color: var(--color-footer-muted);
-}
-
-.footer-column.credits small {
-  display: block;
-  margin-bottom: var(--spacing-xs);
-}
-
-.footer-column:hover {
-  background-color: rgba(255, 255, 255, 0.015);
-  transition: background-color var(--transition-fast);
-  padding: var(--spacing-sm);
-  border-radius: var(--radius-md);
-}
-
-@media print {
-  .site-footer {
-    background: none;
-    color: black;
-    border: none;
-    box-shadow: none;
+/* Responsividade suave */
+@media (max-width: 480px){
+  .site-footer--minimal .minimal{
+    gap: var(--spacing-xs, 6px) !important;
+    padding: var(--spacing-sm) var(--spacing-xs, 6px);
+  }
+  .site-footer--minimal .contact-item{
+    padding: 8px 10px !important;
+  }
+  .site-footer--minimal .credits small{
+    font-size: .9rem;
   }
 }
 
-@media (max-width: var(--breakpoint-sm)) {
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-md);
-    padding-inline: var(--spacing-sm);
+/* Dark mode opcional (se usar prefers-color-scheme) */
+@media (prefers-color-scheme: dark){
+  .site-footer--minimal .credits{
+    color: var(--color-footer-muted, #9CA3AF);
+    border-top-color: var(--color-footer-border, #374151);
   }
-  .site-footer {
-    padding: var(--spacing-xl) var(--spacing-sm);
-  }
-}
-
-.skip-link {
-  position: absolute;
-  top: -3rem;
-  left: var(--spacing-sm);
-  background: var(--color-footer-accent);
-  color: #fff;
-  padding: var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  transition: top var(--transition-fast);
-  z-index: 1000;
-}
-
-.skip-link:focus {
-  top: var(--spacing-sm);
-}
-
-.error-message {
-  color: var(--color-footer-danger);
-  font-size: var(--font-size-xs);
-  min-height: 1rem;
-}
-
-#newsletter-status {
-  font-size: var(--font-size-xs);
-  color: var(--color-footer-accent);
-  margin-top: var(--spacing-xs);
 }

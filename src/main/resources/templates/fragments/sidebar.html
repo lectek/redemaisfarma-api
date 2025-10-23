@@ -1,21 +1,64 @@
 <!-- fragments/sidebar.html -->
-<aside class="sidebar" th:fragment="sidebar" role="complementary" aria-label="Menu lateral">
+<aside class="sidebar"
+       th:fragment="sidebar"
+       role="complementary"
+       aria-label="Menu lateral"
+       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
   <nav class="sidebar__nav">
     <div class="sidebar__logo">
       <a th:href="@{/}" class="sidebar__brand">
-        <svg xmlns="http://www.w3.org/2000/svg" class="sidebar__icon" viewBox="0 0 24 24" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" class="sidebar__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8.009 8.009 0 0 1-8 8Z"/>
         </svg>
-        <span>Embalando</span>
+        <span>FarmaVida</span>
       </a>
     </div>
 
     <ul class="sidebar__list">
-      <li><a th:href="@{/}" class="sidebar__link">🏠 Início</a></li>
-      <li><a th:href="@{/produtos}" class="sidebar__link">📦 Catálogo</a></li>
-      <li><a th:href="@{/carrinho}" class="sidebar__link">🛒 Carrinho</a></li>
-      <li><a th:href="@{/checkout}" class="sidebar__link">💳 Checkout</a></li>
-      <li><a th:href="@{/sobre}" class="sidebar__link">ℹ️ Sobre nós</a></li>
+      <li>
+        <a th:href="@{/}"
+           class="sidebar__link"
+           th:classappend="${active}=='home' ? ' is-active' : ''"
+           th:attr="aria-current=${active}=='home' ? 'page' : null">🏠 <span>Início</span></a>
+      </li>
+      <li>
+        <a th:href="@{/produtos}"
+           class="sidebar__link"
+           th:classappend="${active}=='produtos' ? ' is-active' : ''"
+           th:attr="aria-current=${active}=='produtos' ? 'page' : null">📦 <span>Catálogo</span></a>
+      </li>
+      <li>
+        <a th:href="@{/carrinho}"
+           class="sidebar__link"
+           th:classappend="${active}=='carrinho' ? ' is-active' : ''"
+           th:attr="aria-current=${active}=='carrinho' ? 'page' : null">🛒 <span>Carrinho</span></a>
+      </li>
+      <li>
+        <a th:href="@{/checkout}"
+           class="sidebar__link"
+           th:classappend="${active}=='checkout' ? ' is-active' : ''"
+           th:attr="aria-current=${active}=='checkout' ? 'page' : null">💳 <span>Checkout</span></a>
+      </li>
+      <li>
+        <a th:href="@{/sobre}"
+           class="sidebar__link"
+           th:classappend="${active}=='sobre' ? ' is-active' : ''"
+           th:attr="aria-current=${active}=='sobre' ? 'page' : null">ℹ️ <span>Sobre nós</span></a>
+      </li>
+
+      <!-- ====== Admin ====== -->
+      <li sec:authorize="hasRole('ADMIN')">
+        <a th:href="@{/admin}"
+           class="sidebar__link"
+           th:classappend="${active}=='admin' ? ' is-active' : ''"
+           th:attr="aria-current=${active}=='admin' ? 'page' : null">🛠️ <span>Painel Admin</span></a>
+      </li>
+      <li sec:authorize="hasRole('ADMIN')">
+        <a th:href="@{/admin/settings}"
+           class="sidebar__link"
+           th:classappend="${active}=='admin-settings' ? ' is-active' : ''"
+           th:attr="aria-current=${active}=='admin-settings' ? 'page' : null">⚙️ <span>Configurações</span></a>
+      </li>
     </ul>
   </nav>
 </aside>

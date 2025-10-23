@@ -8,7 +8,7 @@ spring:
 
   datasource:
     firebird:
-      url: jdbc:firebirdsql://${FIREBIRD_HOST:localhost}:${FIREBIRD_PORT:3050}/${FIREBIRD_DB:digifarma6.fdb}?encoding=WIN1252&authPlugins=Legacy_Auth&wireCrypt=DISABLED
+      jdbc-url: jdbc:firebirdsql://${FIREBIRD_HOST:redemaisfarma-firebird}:${FIREBIRD_PORT:3050}/${FIREBIRD_DB:digifarma6.fdb}?encoding=WIN1252&authPlugins=Legacy_Auth&wireCrypt=DISABLED
       username: ${FIREBIRD_USER:SYSDBA}
       password: ${FIREBIRD_PASSWORD:masterkey}
       driver-class-name: org.firebirdsql.jdbc.FBDriver

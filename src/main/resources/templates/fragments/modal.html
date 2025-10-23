@@ -1,26 +1,55 @@
-<!-- Modal HTML Profissional e Responsivo -->
-<div id="modal-embalando" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+<!-- src/main/resources/templates/fragments/modal.html -->
+<!-- Modal reutilizável (Thymeleaf) -->
+<div th:fragment="modal(
+        id='modal-embalando',
+        title='Detalhes',
+        bodyText=${null},
+        bodyFrag=${null},
+        confirmLabel='Confirmar',
+        cancelLabel='Cancelar',
+        showConfirm=${true},
+        confirmAttrs=${null}   /* map: ex. ${#{'data-action':'/carrinho/adicionar','data-id':produto.id}} */
+     )"
+     th:attr="id=${id}"
+     class="modal"
+     role="dialog"
+     aria-modal="true"
+     th:aria-labelledby="${id} + '-title'"
+     hidden>
+
   <!-- Fundo escurecido -->
   <div class="modal-backdrop" data-close-modal></div>
 
   <!-- Caixa de conteúdo -->
-  <div class="modal-content" role="document">
-    <!-- Cabeçalho do modal -->
+  <div class="modal-content" role="document" tabindex="-1">
+    <!-- Cabeçalho -->
     <header class="modal-header">
-      <h2 id="modal-title">Detalhes do Produto</h2>
+      <h2 th:attr="id=${id} + '-title'"
+          th:text="${title}">Título do Modal</h2>
       <button class="modal-close" aria-label="Fechar" data-close-modal>&times;</button>
     </header>
 
-    <!-- Corpo do modal -->
-    <div class="modal-body">
-      <p>Este produto contém ração premium com 20kg e desconto exclusivo para assinantes.</p>
-      <!-- Pode colocar um formulário ou botão aqui -->
+    <!-- Corpo -->
+    <div class="modal-body" th:if="${bodyText != null}" th:utext="${bodyText}">
+      <!-- Conteúdo simples por texto/HTML (bodyText) -->
+      <!-- Quando bodyFrag for usado, este bloco é omitido -->
+    </div>
+    <div class="modal-body" th:if="${bodyFrag != null}" th:insert="${bodyFrag}">
+      <!-- Ou injete um fragmento externo (bodyFrag) -->
     </div>
 
-    <!-- Rodapé do modal -->
+    <!-- Rodapé -->
     <footer class="modal-footer">
-      <button class="btn-cancelar" data-close-modal>Cancelar</button>
-      <button class="btn-confirmar">Adicionar ao carrinho</button>
+      <button type="button" class="btn-cancelar" data-close-modal
+              th:text="${cancelLabel}">Cancelar</button>
+
+      <button type="button"
+              class="btn-confirmar"
+              th:if="${showConfirm}"
+              th:text="${confirmLabel}"
+              th:attrappend="${confirmAttrs}">
+        Confirmar
+      </button>
     </footer>
   </div>
 </div>

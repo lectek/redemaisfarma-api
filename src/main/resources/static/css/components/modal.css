@@ -1,147 +1,29 @@
 /* =============================
-📦 MODAL • Estilo Profissional Embalando
-============================= */
+   Modal genérico
+   ============================= */
 
-.modal {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 2rem;
-  font-family: 'Inter', sans-serif;
+.modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;padding:2rem}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px)}
+.modal-content{
+  background:var(--layout-card,#fff);color:var(--layout-dark,#1f2937);
+  border-radius:var(--layout-radius,12px);box-shadow:var(--layout-shadow);
+  width:min(500px,92vw);display:flex;flex-direction:column;overflow:hidden;animation:modalIn .28s ease-out;
+  border:1px solid var(--layout-border,#e5e7eb);
 }
+.modal-header{padding:1rem 1.5rem;border-bottom:1px solid var(--layout-border);display:flex;justify-content:space-between;align-items:center;font-weight:700;background:var(--color-neutral-2,#f9fafb)}
+.modal-header h2{font-size:1.125rem;margin:0}
+.modal-close{background:transparent;border:0;font-size:1.5rem;cursor:pointer;color:var(--color-neutral-5,#6b7280)}
+.modal-close:hover{color:var(--layout-accent,#111827)}
+.modal-body{padding:1.5rem}
+.modal-footer{display:flex;justify-content:flex-end;gap:.75rem;padding:1rem 1.5rem;border-top:1px solid var(--layout-border);background:var(--color-neutral-2,#f9fafb)}
+.modal-footer .btn-cancelar{padding:.5rem 1.25rem;border-radius:8px;background:var(--layout-border);color:var(--layout-dark)}
+.modal-footer .btn-confirmar{padding:.5rem 1.25rem;border-radius:8px;background:var(--color-primary,#22a653);color:#fff}
+.modal-footer .btn-confirmar:hover{filter:brightness(.97)}
 
-/* Fundo escurecido */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(2px);
-}
+@keyframes modalIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
 
-/* Conteúdo do modal */
-.modal-content {
-  background-color: var(--color-neutral-1, #ffffff);
-  color: var(--color-primary-text, #1f2937);
-  border-radius: var(--radius-lg, 8px);
-  box-shadow: var(--shadow-3, 0 6px 12px rgba(0, 0, 0, 0.2));
-  width: 100%;
-  max-width: 500px;
-  z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: fadeInScale 0.3s ease-out;
-}
-
-/* Cabeçalho */
-.modal-header {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--color-neutral-3, #e5e7eb);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  background-color: var(--color-neutral-2, #f9fafb);
-}
-
-.modal-header h2 {
-  font-size: 1.25rem;
-  margin: 0;
-}
-
-/* Botão de fechar */
-.modal-close {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--color-neutral-5, #4b5563);
-  transition: color 0.2s;
-}
-.modal-close:hover {
-  color: var(--color-primary-hover, #005fa3);
-}
-
-/* Corpo do modal */
-.modal-body {
-  padding: 1.5rem;
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-/* Rodapé */
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  border-top: 1px solid var(--color-neutral-3, #e5e7eb);
-  background-color: var(--color-neutral-2, #f9fafb);
-}
-
-/* Botões do rodapé */
-.modal-footer .btn-cancelar,
-.modal-footer .btn-confirmar {
-  padding: 0.5rem 1.25rem;
-  border-radius: var(--radius-md, 6px);
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 0.95rem;
-  border: none;
-  transition: background 0.2s, transform 0.2s;
-}
-
-.modal-footer .btn-cancelar {
-  background-color: var(--color-neutral-3, #e5e7eb);
-  color: var(--color-primary-text, #1f2937);
-}
-.modal-footer .btn-cancelar:hover {
-  background-color: var(--color-neutral-4, #9ca3af);
-}
-
-.modal-footer .btn-confirmar {
-  background-color: var(--color-primary, #0077cc);
-  color: #fff;
-}
-.modal-footer .btn-confirmar:hover {
-  background-color: var(--color-primary-hover, #005fa3);
-  transform: scale(1.02);
-}
-
-/* Animação */
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Responsividade */
-@media (max-width: 480px) {
-  .modal-content {
-    padding: 0;
-    border-radius: var(--radius-md, 6px);
-  }
-
-  .modal-header,
-  .modal-body,
-  .modal-footer {
-    padding: 1rem;
-  }
-
-  .modal-footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .modal-footer button {
-    width: 100%;
-  }
+@media (max-width:480px){
+  .modal-content{border-radius:10px}
+  .modal-footer{flex-direction:column;align-items:stretch}
+  .modal-footer button{width:100%}
 }

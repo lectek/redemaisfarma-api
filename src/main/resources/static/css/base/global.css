@@ -1,133 +1,36 @@
-/* ================================
-   🌐 GLOBAL.CSS — Base Universal
-   Reset + Tipografia + Utilidades
-   ================================ */
-
-/* Box model universal */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* 🌐 GLOBAL — base universal */
+html{font-size:16px;scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:var(--font-sans);line-height:1.6;background:var(--layout-bg);color:var(--layout-dark);overflow-x:hidden}
+::selection{background:var(--color-secondary);color:#fff}
+img,video,svg,canvas{max-width:100%;height:auto;display:block}
+a{color:var(--color-secondary);transition:color var(--transition-base)}
+a:hover{color:color-mix(in oklab,var(--color-secondary) 85%,white)}
+button{font:inherit;border:none;background:none;cursor:pointer}
+:where(a,button,input,select,textarea)[tabindex]:focus-visible,
+:where(a,button,input,select,textarea):focus-visible{
+  outline:0; box-shadow:0 0 0 3px rgba(42,125,225,.25), var(--focus-ring); border-radius:var(--radius-sm);
 }
-
-/* HTML & Body base */
-html {
-  font-size: 16px; /* Base para rem */
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+input,select,textarea{
+  font:inherit;border:1px solid var(--layout-border);border-radius:12px;padding:.7rem 1rem;width:100%;
+  background:var(--color-neutral-1);color:var(--layout-dark);
+  transition:border-color var(--transition-fast),box-shadow var(--transition-fast),background var(--transition-fast);
 }
-
-body {
-  font-family: 'Inter', 'Segoe UI', sans-serif;
-  line-height: 1.6;
-  background-color: #ffffff;
-  color: #1f2937;
-  overflow-x: hidden;
-}
-
-/* Texto selecionado */
-::selection {
-  background-color: #0077cc;
-  color: white;
-}
-
-/* Elementos visuais padrão */
-img,
-video,
-svg,
-canvas {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Links */
-a {
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.2s ease-in-out;
-}
-a:hover {
-  color: #0077cc;
-}
-
-/* Listas */
-ul,
-ol {
-  list-style: none;
-  padding-left: 0;
-}
-
-/* Botões */
-button {
-  font: inherit;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-button:focus {
-  outline: 2px solid #0077cc;
-  outline-offset: 2px;
-}
-
-/* Inputs e campos */
-input,
-select,
-textarea {
-  font: inherit;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  width: 100%;
-  transition: border-color 0.2s;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  border-color: #0077cc;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.2);
-}
-
-/* Responsividade base */
-@media (max-width: 768px) {
-  html {
-    font-size: 15px;
-  }
-}
-@media (max-width: 480px) {
-  html {
-    font-size: 14px;
-  }
-}
-
-/* Acessibilidade */
-.visually-hidden {
-  position: absolute !important;
-  height: 1px; width: 1px;
-  overflow: hidden;
-  clip: rect(1px, 1px, 1px, 1px);
-  white-space: nowrap;
-}
-
-/* Dark mode base */
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #111827;
-    color: #f3f4f6;
-  }
-  input,
-  textarea,
-  select {
-    background-color: #1f2937;
-    color: #f3f4f6;
-    border-color: #374151;
-  }
-  a:hover {
-    color: #60a5fa;
-  }
-}
+input::placeholder,textarea::placeholder{color:var(--color-neutral-5)}
+input:focus,select:focus,textarea:focus{border-color:var(--color-secondary);box-shadow:var(--focus-ring)}
+.container{max-width:1200px;margin-inline:auto;padding-inline:24px}
+.grid{display:grid;gap:20px}
+.card{background:var(--layout-card);border:1px solid var(--layout-border);border-radius:var(--layout-radius);box-shadow:var(--shadow-1)}
+.card--elev{box-shadow:var(--shadow-2)}
+.card-head{padding:18px 20px;border-bottom:1px solid var(--layout-border);font-weight:700}
+.card-body{padding:20px}
+h1,h2,h3,h4,h5,h6{color:var(--layout-dark);font-weight:800;line-height:1.25}
+h1{font-size:2rem} h2{font-size:1.5rem} h3{font-size:1.25rem}
+.muted{color:var(--color-neutral-5)}
+.visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+@media (max-width:768px){html{font-size:15px}}
+@media (max-width:480px){html{font-size:14px}}
+:root[data-theme="dark"] body{background:var(--layout-bg);color:var(--color-light)}
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea{background:var(--color-neutral-1);color:var(--color-light);border-color:var(--layout-border)}
+:root[data-theme="dark"] a:hover{color:color-mix(in oklab,var(--color-secondary) 70%, white)}

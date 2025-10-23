@@ -1,88 +1,327 @@
-/* index.css - Página inicial do sistema RedeMaisFarma */
+/* pages/index.css — Home (profissional)
+   Depende dos tokens já definidos em: base/tokens.css e base/global.css */
 
-:root {
-  --home-bg: #f3f4f6;
-  --home-card-bg: #ffffff;
-  --home-card-shadow: rgba(0, 0, 0, 0.04);
-  --home-card-radius: 14px;
-  --home-title-color: #0d9488; /* teal-600 */
-  --home-text: #374151;
-  --home-accent: #10b981;
-}
-
-main.home-container {
-  margin-left: 280px; /* espaço da sidebar */
-  padding: 2rem 3rem;
-  background-color: var(--home-bg);
-  min-height: 100vh;
-  transition: margin 0.3s ease;
-}
-
-@media (max-width: 768px) {
-  main.home-container {
-    margin-left: 0;
-    padding: 1.5rem;
-  }
-}
-
-/* Título da página */
-main.home-container h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--home-title-color);
-  margin-bottom: 2rem;
-}
-
-/* Cards principais */
-.home-cards {
+/* ============================
+   Estrutura geral da página
+============================ */
+.home{
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: clamp(16px, 3vw, 32px);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
+  gap: clamp(20px, 3vw, 32px);
 }
 
-.card-farma {
-  background-color: var(--home-card-bg);
-  border-radius: var(--home-card-radius);
-  padding: 1.5rem;
-  box-shadow: 0 6px 16px var(--home-card-shadow);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1rem;
-  transition: transform 0.2s ease, box-shadow 0.3s ease;
+/* Ritmo vertical padrão das seções */
+.section{ padding-block: clamp(18px, 4vw, 42px); }
+.section--alt{
+  background: color-mix(in oklab, var(--layout-card) 60%, var(--layout-bg));
+  border-radius: 16px;
 }
 
-.card-farma:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-}
-
-.card-farma h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--home-text);
-}
-
-.card-farma p {
-  font-size: 0.95rem;
-  color: #6b7280;
-  line-height: 1.4;
-}
-
-/* Botão dentro do card */
-.card-farma button {
-  margin-top: auto;
-  background-color: var(--home-accent);
+/* ============================
+   HERO (banner de abertura)
+============================ */
+.hero{
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  align-items: center;
+  gap: clamp(16px, 3vw, 32px);
+  border-radius: var(--radius-xl, 20px);
+  padding: clamp(20px, 3vw, 36px);
   color: #fff;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.3s ease;
+  box-shadow: var(--shadow-3, 0 12px 30px rgba(2,6,23,.12));
+  background:
+    radial-gradient(1200px 180px at 30% -40%, color-mix(in oklab, #fff 16%, transparent), transparent 70%),
+    linear-gradient(90deg, var(--color-primary, #22a653) 0%, #1abc9c 100%);
 }
 
-.card-farma button:hover {
-  background-color: #059669; /* verde mais escuro */
+/* Compat: grid interno opcional do hero */
+.hero__grid{
+  display:grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: clamp(16px, 3vw, 32px);
+  align-items:center;
+}
+
+.hero__text h1{
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  line-height: 1.15;
+  letter-spacing: .2px;
+  margin: 0 0 .35rem 0;
+  font-weight: 800;
+}
+.hero__text p{
+  font-size: clamp(1rem, 1.3vw, 1.15rem);
+  opacity: .95;
+  margin: 0 0 1rem 0;
+}
+.hero__text .btn,
+.btn--accent{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .7rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 800;
+  border: 0;
+  color: var(--color-primary-text, #0f172a);
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(2,6,23,.18);
+  transition: transform .12s ease, filter .2s ease;
+}
+.hero__text .btn:hover{ transform: translateY(-1px); filter: brightness(1.03); }
+.hero__image img{
+  width: 100%;
+  height: auto;
+  border-radius: clamp(10px, 1.2vw, 16px);
+  box-shadow: var(--shadow-2, 0 6px 18px rgba(2,6,23,.08));
+}
+
+/* ============================
+   Barra de busca (padrão)
+============================ */
+.search-bar{
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+}
+.search-bar input{
+  flex: 1;
+  min-width: 220px;
+  padding: .8rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--layout-border, #e6e7eb);
+  background: var(--color-neutral-1, #fff);
+  color: var(--layout-dark, #0f172a);
+  transition: border-color var(--transition-fast,150ms ease), box-shadow var(--transition-fast,150ms ease);
+}
+.search-bar input:focus{
+  border-color: var(--color-secondary, #2a7de1);
+  box-shadow: var(--focus-ring, 0 0 0 3px rgba(42,125,225,.25));
+}
+.search-bar .btn{
+  background: var(--color-primary, #22a653);
+  color: #fff;
+  padding: .8rem 1.2rem;
+  border-radius: 12px;
+  font-weight: 700;
+  border: 0;
+  transition: filter .2s ease, transform .12s ease;
+}
+.search-bar .btn:hover{ filter: brightness(1.05); transform: translateY(-1px); }
+
+/* ============================
+   Cabeçalho de seção + links
+============================ */
+.section-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: .5rem;
+}
+.section-head h2{
+  font-size: clamp(1.15rem, 1.8vw, 1.4rem);
+  font-weight: 800;
+}
+.section-head .link{
+  font-weight: 700;
+  color: var(--color-secondary, #2a7de1);
+  text-decoration: none;
+}
+.section-head .link:hover{ text-decoration: underline; }
+.section-head p.muted{ margin: .2rem 0 0 0; }
+
+/* ============================
+   Categorias rápidas
+============================ */
+.quick-cats{ margin-top: .25rem; }
+.quick-cats h2{
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 800;
+  margin-bottom: .6rem;
+}
+.quick-cats__grid{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px,1fr));
+  gap: clamp(12px, 2vw, 18px);
+}
+.cat-card{
+  display: grid;
+  place-items: center;
+  gap: .45rem;
+  padding: 1rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-primary, #22a653);
+  background: var(--layout-card, #fff);
+  border: 1px solid var(--layout-border, #e6e7eb);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: var(--shadow-1, 0 1px 2px rgba(2,6,23,.06));
+  transition: transform .12s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+}
+.cat-card:hover{
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2, 0 6px 18px rgba(2,6,23,.08));
+  border-color: color-mix(in oklab, var(--color-primary) 35%, var(--layout-border));
+  background: color-mix(in oklab, var(--color-primary) 6%, var(--layout-card));
+}
+
+/* ============================
+   Grid de produtos (cards)
+============================ */
+.product-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap: clamp(12px, 2vw, 18px);
+  list-style: none;
+}
+.product-card{
+  background: var(--layout-card, #fff);
+  border: 1px solid var(--layout-border, #e6e7eb);
+  border-radius: var(--layout-radius, 12px);
+  box-shadow: var(--shadow-1, 0 1px 2px rgba(2,6,23,.06));
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+  text-align: center;
+  transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.product-card:hover{
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2, 0 6px 18px rgba(2,6,23,.08));
+  border-color: color-mix(in oklab, var(--layout-border) 75%, #000);
+}
+.product-card img{
+  width: 110px; height: 110px; object-fit: contain; margin-inline: auto;
+}
+.product-card__title{ font-weight: 700; color: var(--layout-dark, #0f172a); }
+.product-card__price{ font-weight: 900; color: var(--color-primary, #22a653); }
+.btn--add{
+  background: var(--color-primary, #22a653);
+  color: #fff; border-radius: 10px; padding: .6rem 1rem; border: 0; font-weight: 700;
+}
+.btn--add:hover{ filter: brightness(1.05); }
+
+/* ============================
+   Carrossel (fallback CSR)
+============================ */
+.carousel{
+  position: relative;
+  background: var(--layout-card, #fff);
+  border: 1px solid var(--layout-border, #e6e7eb);
+  border-radius: var(--layout-radius, 12px);
+  box-shadow: var(--shadow-2, 0 6px 18px rgba(2,6,23,.08));
+  padding: clamp(10px, 1.5vw, 16px);
+}
+.carousel__viewport{ min-height: 260px; }
+.carousel__btn{
+  position: absolute; inset-block-start: 50%;
+  translate: 0 -50%;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 0; cursor: pointer;
+  background: rgba(0,0,0,.06);
+}
+.carousel__btn:hover{ background: rgba(0,0,0,.1); }
+.carousel__btn.prev{ inset-inline-start: 8px; }
+.carousel__btn.next{ inset-inline-end: 8px; }
+.carousel__dots{
+  display: flex; gap: 6px; justify-content: center; padding-top: 8px;
+}
+.carousel__dots .dot{
+  width: 8px; height: 8px; border-radius: 999px; background: var(--color-neutral-4,#cfd3d8); border: 0;
+}
+.carousel__dots .dot.active{ width: 20px; background: var(--color-primary,#22a653); }
+
+/* ============================
+   Alertas e status de lista
+============================ */
+.alert{
+  background: #ecfdf5;
+  border-left: 4px solid var(--color-success,#2ec27e);
+  padding: 1rem;
+  border-radius: 12px;
+  color: #065f46;
+}
+.alert-info{
+  background: #e0f2fe;
+  border-left-color: var(--color-secondary,#2a7de1);
+  color: #0c4a6e;
+}
+.list-status{
+  display: grid; gap: 8px; justify-items: center;
+  padding: 12px;
+  color: var(--color-neutral-5,#707784);
+}
+
+/* ============================
+   CTA card (ex.: WhatsApp)
+============================ */
+.cta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  padding:clamp(16px,2.5vw,24px);
+}
+.cta .btn{ border-radius:999px; font-weight:800; }
+@media (max-width:700px){
+  .cta{ flex-direction:column; align-items:flex-start; }
+}
+
+/* ============================
+   Compat Layer (HTML x CSS)
+   - Mantém o visual mesmo com nomes de classe diferentes
+============================ */
+/* HERO: alias hero__col -> hero__text */
+.hero__text, .hero__col { /* compartilham estilo do texto do hero */ }
+.hero__media img{ /* alias da imagem do hero */
+  width: 100%;
+  height: auto;
+  border-radius: clamp(10px, 1.2vw, 16px);
+  box-shadow: var(--shadow-2, 0 6px 18px rgba(2,6,23,.08));
+}
+
+/* BUSCA: alias hero-search -> search-bar */
+.hero-search{ display:flex; gap:.6rem; align-items:center; }
+.hero-search input{
+  flex:1; min-width:220px; padding:.8rem 1rem; border-radius:12px;
+  border:1px solid var(--layout-border, #e6e7eb);
+  background: var(--color-neutral-1, #fff);
+  color: var(--layout-dark, #0f172a);
+  transition: border-color var(--transition-fast,150ms ease),
+              box-shadow var(--transition-fast,150ms ease);
+}
+.hero-search input:focus{
+  border-color: var(--color-secondary, #2a7de1);
+  box-shadow: var(--focus-ring, 0 0 0 3px rgba(42,125,225,.25));
+}
+.hero-search .btn{
+  background: var(--color-primary, #22a653);
+  color:#fff; padding:.8rem 1.2rem; border-radius:12px; font-weight:700; border:0;
+  transition: filter .2s ease, transform .12s ease;
+}
+.hero-search .btn:hover{ filter:brightness(1.05); transform:translateY(-1px); }
+
+/* Quando usar hero__grid no HTML */
+@media (max-width: 992px){
+  .hero,
+  .hero__grid{ grid-template-columns: 1fr; text-align: center; }
+  .hero__image,
+  .hero__media{ order: -1; }
+}
+
+/* ============================
+   Responsividade geral
+============================ */
+@media (max-width: 680px){
+  .quick-cats__grid{ grid-template-columns: repeat(2, minmax(140px,1fr)); }
+  .search-bar{ flex-direction: column; align-items: stretch; }
+  .search-bar .btn{ width: 100%; }
+}
+@media (prefers-reduced-motion: reduce){
+  .hero, .cat-card, .product-card, .btn, .carousel__btn { transition-duration: .01ms !important; }
 }
