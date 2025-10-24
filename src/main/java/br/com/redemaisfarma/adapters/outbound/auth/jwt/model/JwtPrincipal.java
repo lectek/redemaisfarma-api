@@ -1,16 +1,19 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  io.jsonwebtoken.Claims
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.model;
 
 import io.jsonwebtoken.Claims;
-
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Principal normalizado extraído do JWT.
- */
-public class JwtPrincipal implements Serializable {
+public class JwtPrincipal
+implements Serializable {
     private final String subject;
     private final Long userId;
     private final String tenant;
@@ -21,8 +24,7 @@ public class JwtPrincipal implements Serializable {
     private final String jti;
     private final Claims rawClaims;
 
-    public JwtPrincipal(String subject, Long userId, String tenant, List<String> roles, String issuer,
-            List<String> audience, Instant expiresAt, String jti, Claims rawClaims) {
+    public JwtPrincipal(String subject, Long userId, String tenant, List<String> roles, String issuer, List<String> audience, Instant expiresAt, String jti, Claims rawClaims) {
         this.subject = subject;
         this.userId = userId;
         this.tenant = tenant;
@@ -35,56 +37,54 @@ public class JwtPrincipal implements Serializable {
     }
 
     public String getSubject() {
-        return subject;
+        return this.subject;
     }
 
     public Long getUserId() {
-        return userId;
+        return this.userId;
     }
 
     public String getTenant() {
-        return tenant;
+        return this.tenant;
     }
 
     public List<String> getRoles() {
-        return roles;
+        return this.roles;
     }
 
     public String getIssuer() {
-        return issuer;
+        return this.issuer;
     }
 
     public List<String> getAudience() {
-        return audience;
+        return this.audience;
     }
 
     public Instant getExpiresAt() {
-        return expiresAt;
+        return this.expiresAt;
     }
 
     public String getJti() {
-        return jti;
+        return this.jti;
     }
 
     public Claims getRawClaims() {
-        return rawClaims;
+        return this.rawClaims;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof JwtPrincipal))
+        }
+        if (!(o instanceof JwtPrincipal)) {
             return false;
-        JwtPrincipal that = (JwtPrincipal) o;
-        return Objects.equals(subject, that.subject) && Objects.equals(userId, that.userId)
-                && Objects.equals(tenant, that.tenant) && Objects.equals(roles, that.roles)
-                && Objects.equals(issuer, that.issuer) && Objects.equals(audience, that.audience)
-                && Objects.equals(expiresAt, that.expiresAt) && Objects.equals(jti, that.jti);
+        }
+        JwtPrincipal that = (JwtPrincipal)o;
+        return Objects.equals(this.subject, that.subject) && Objects.equals(this.userId, that.userId) && Objects.equals(this.tenant, that.tenant) && Objects.equals(this.roles, that.roles) && Objects.equals(this.issuer, that.issuer) && Objects.equals(this.audience, that.audience) && Objects.equals(this.expiresAt, that.expiresAt) && Objects.equals(this.jti, that.jti);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(subject, userId, tenant, roles, issuer, audience, expiresAt, jti);
+        return Objects.hash(this.subject, this.userId, this.tenant, this.roles, this.issuer, this.audience, this.expiresAt, this.jti);
     }
 }
+

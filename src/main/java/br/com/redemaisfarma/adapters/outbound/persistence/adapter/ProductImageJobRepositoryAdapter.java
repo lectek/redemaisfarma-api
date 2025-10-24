@@ -1,88 +1,103 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  br.com.redemaisfarma.application.port.outbound.ProductImageJobRepository
+ *  br.com.redemaisfarma.application.port.outbound.ProductImageJobRepository$Job
+ *  br.com.redemaisfarma.application.port.outbound.ProductImageJobRepository$Status
+ *  org.springframework.data.domain.PageRequest
+ *  org.springframework.data.domain.Pageable
+ *  org.springframework.stereotype.Repository
+ *  org.springframework.transaction.annotation.Transactional
+ */
 package br.com.redemaisfarma.adapters.outbound.persistence.adapter;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProductImageJobEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.ProductImageJobJpaRepository;
 import br.com.redemaisfarma.application.port.outbound.ProductImageJobRepository;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
-public class ProductImageJobRepositoryAdapter implements ProductImageJobRepository {
-
+public class ProductImageJobRepositoryAdapter
+implements ProductImageJobRepository {
     private final ProductImageJobJpaRepository jpa;
 
     public ProductImageJobRepositoryAdapter(ProductImageJobJpaRepository jpa) {
         this.jpa = jpa;
     }
 
-    @Override
     @Transactional
-    public Job createQueued(Long productId, String fingerprint) {
-        var e = new ProductImageJobEntity();
+    public ProductImageJobRepository.Job createQueued(Long productId, String fingerprint) {
+        ProductImageJobEntity e = new ProductImageJobEntity();
         e.setProductId(productId);
-        e.setStatus(Status.QUEUED.name());
+        e.setStatus(ProductImageJobRepository.Status.QUEUED.name());
         e.setFingerprint(fingerprint);
-        // createdAt/updatedAt são tratados pela base (default/on update) ou @PrePersist
-        e = jpa.save(e);
-        return map(e);
+        e = (ProductImageJobEntity)this.jpa.save(e);
+        return this.map(e);
     }
 
-    @Override @Transactional public void markRunning(Long jobId) { update(jobId, Status.RUNNING, null, null); }
-    @Override @Transactional public void markDone(Long jobId, String resultUrl) { update(jobId, Status.DONE, resultUrl, null); }
-    @Override @Transactional public void markError(Long jobId, String errorMsg) { update(jobId, Status.ERROR, null, errorMsg); }
-    @Override @Transactional public void markSkipped(Long jobId, String reason) { update(jobId, Status.SKIPPED, null, reason); }
+    @Transactional
+    public void markRunning(Long jobId) {
+        this.update(jobId, ProductImageJobRepository.Status.RUNNING, null, null);
+    }
 
-    @Override
-    public Optional<Job> findLastByProduct(Long productId) {
-        var e = jpa.findTopByProductIdOrderByCreatedAtDesc(productId);
+    @Transactional
+    public void markDone(Long jobId, String resultUrl) {
+        this.update(jobId, ProductImageJobRepository.Status.DONE, resultUrl, null);
+    }
+
+    @Transactional
+    public void markError(Long jobId, String errorMsg) {
+        this.update(jobId, ProductImageJobRepository.Status.ERROR, null, errorMsg);
+    }
+
+    @Transactional
+    public void markSkipped(Long jobId, String reason) {
+        this.update(jobId, ProductImageJobRepository.Status.SKIPPED, null, reason);
+    }
+
+    public Optional<ProductImageJobRepository.Job> findLastByProduct(Long productId) {
+        ProductImageJobEntity e = this.jpa.findTopByProductIdOrderByCreatedAtDesc(productId);
         return Optional.ofNullable(e).map(this::map);
     }
 
-    @Override
-    public List<Job> findByStatus(Status status, int limit, int offset) {
+    public List<ProductImageJobRepository.Job> findByStatus(ProductImageJobRepository.Status status, int limit, int offset) {
         int size = Math.max(1, limit);
         int pageIndex = Math.max(0, offset / size);
-        var pageReq = PageRequest.of(pageIndex, size);
-        return jpa.findByStatusOrderByCreatedAtAsc(status.name(), pageReq)
-                  .getContent()     // <- usa Page do Spring Data
-                  .stream()
-                  .map(this::map)
-                  .toList();
+        PageRequest pageReq = PageRequest.of((int)pageIndex, (int)size);
+        return this.jpa.findByStatusOrderByCreatedAtAsc(status.name(), (Pageable)pageReq).getContent().stream().map(this::map).toList();
     }
 
-    @Override
     public boolean existsByProductIdAndFingerprint(Long productId, String fingerprint) {
-        return jpa.existsByProductIdAndFingerprint(productId, fingerprint);
+        return this.jpa.existsByProductIdAndFingerprint(productId, fingerprint);
     }
 
-    // ---- internals ----
-    private void update(Long id, Status st, String url, String err) {
-        var e = jpa.findById(id).orElseThrow();
+    private void update(Long id, ProductImageJobRepository.Status st, String url, String err) {
+        ProductImageJobEntity e = (ProductImageJobEntity)this.jpa.findById(id).orElseThrow();
         e.setStatus(st.name());
-        if (url != null) e.setResultUrl(url);
-        if (err != null) e.setErrorMsg(err);
-        // updatedAt fica a cargo do banco (ON UPDATE) ou @PreUpdate caso você adicione
-        jpa.save(e);
+        if (url != null) {
+            e.setResultUrl(url);
+        }
+        if (err != null) {
+            e.setErrorMsg(err);
+        }
+        this.jpa.save(e);
     }
 
-    private Job map(ProductImageJobEntity e) {
-        Status st;
-        try { st = (e.getStatus() != null) ? Status.valueOf(e.getStatus()) : Status.QUEUED; }
-        catch (IllegalArgumentException ex) { st = Status.ERROR; }
-
-        return new Job(
-            e.getId(),
-            e.getProductId(),
-            st,
-            e.getResultUrl(),
-            e.getErrorMsg(),
-            e.getFingerprint(),
-            e.getCreatedAt(),
-            e.getUpdatedAt()
-        );
+    private ProductImageJobRepository.Job map(ProductImageJobEntity e) {
+        ProductImageJobRepository.Status st;
+        try {
+            st = e.getStatus() != null ? ProductImageJobRepository.Status.valueOf((String)e.getStatus()) : ProductImageJobRepository.Status.QUEUED;
+        }
+        catch (IllegalArgumentException ex) {
+            st = ProductImageJobRepository.Status.ERROR;
+        }
+        return new ProductImageJobRepository.Job(e.getId(), e.getProductId(), st, e.getResultUrl(), e.getErrorMsg(), e.getFingerprint(), e.getCreatedAt(), e.getUpdatedAt());
     }
 }
+

@@ -1,82 +1,148 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.persistence.Column
+ *  jakarta.persistence.Entity
+ *  jakarta.persistence.EntityListeners
+ *  jakarta.persistence.GeneratedValue
+ *  jakarta.persistence.GenerationType
+ *  jakarta.persistence.Id
+ *  jakarta.persistence.Index
+ *  jakarta.persistence.PrePersist
+ *  jakarta.persistence.PreUpdate
+ *  jakarta.persistence.Table
+ *  jakarta.persistence.Version
+ *  jakarta.validation.constraints.Email
+ *  jakarta.validation.constraints.Email$List
+ *  jakarta.validation.constraints.NotBlank
+ *  jakarta.validation.constraints.NotBlank$List
+ *  jakarta.validation.constraints.Size
+ *  jakarta.validation.constraints.Size$List
+ *  org.springframework.data.annotation.CreatedDate
+ *  org.springframework.data.annotation.LastModifiedDate
+ *  org.springframework.data.jpa.domain.support.AuditingEntityListener
+ */
 package br.com.redemaisfarma.adapters.outbound.persistence.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.Objects;
-
-/**
- * Entidade Cliente da RedeMaisFarma. - Validações de domínio - Auditoria (created_at/updated_at) - Versionamento
- * otimista
- */
 @Entity
-@Table(name = "cliente")
-@EntityListeners(AuditingEntityListener.class)
-public class ClienteEntity implements Serializable {
-
+@Table(name="cliente", indexes={@Index(name="uk_cliente_email", columnList="email", unique=true), @Index(name="uk_cliente_cpf", columnList="cpf", unique=true)})
+@EntityListeners(value={AuditingEntityListener.class})
+public class ClienteEntity
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
-
-    @NotBlank(message = "O nome é obrigatório")
-    @Size(max = 120, message = "O nome pode ter no máximo 120 caracteres")
-    @Column(nullable = false, length = 120)
-    private String nome;
-
-    @NotBlank(message = "O e-mail é obrigatório")
-    @Email(message = "Informe um e-mail válido")
-    @Size(max = 150, message = "O e-mail pode ter no máximo 150 caracteres")
-    @Column(unique = true, nullable = false, length = 150)
-    private String email;
-
-    @Size(max = 20, message = "O telefone pode ter no máximo 20 caracteres")
-    @Column(length = 20)
-    private String telefone;
-
-    @NotBlank(message = "O CPF é obrigatório")
-    @Size(min = 11, max = 14, message = "O CPF deve ter entre 11 e 14 caracteres")
-    @Column(unique = true, nullable = false, length = 14)
-    private String cpf;
-
-    @NotBlank(message = "A senha é obrigatória")
-    @Size(min = 6, max = 255, message = "A senha deve ter entre 6 e 255 caracteres")
-    @Column(nullable = false, length = 255)
-    private String senha;
-
+    @NotBlank(message="O nome \u00e9 obrigat\u00f3rio")
+@NotBlank(message="O nome \u00e9 obrigat\u00f3rio")
+    @Size(max=100, message="O nome pode ter no m\u00e1ximo 100 caracteres")
+@Size(max=100, message="O nome pode ter no m\u00e1ximo 100 caracteres")
+    @Column(nullable=false, length=100)
+    private @NotBlank(message="O nome \u00e9 obrigat\u00f3rio")
+@NotBlank(message="O nome \u00e9 obrigat\u00f3rio") @Size(max=100, message="O nome pode ter no m\u00e1ximo 100 caracteres")
+@Size(max=100, message="O nome pode ter no m\u00e1ximo 100 caracteres") String nome;
+    @NotBlank(message="O e-mail \u00e9 obrigat\u00f3rio")
+@NotBlank(message="O e-mail \u00e9 obrigat\u00f3rio")
+    @Email(message="Informe um e-mail v\u00e1lido")
+@Email(message="Informe um e-mail v\u00e1lido")
+    @Size(max=150, message="O e-mail pode ter no m\u00e1ximo 150 caracteres")
+@Size(max=150, message="O e-mail pode ter no m\u00e1ximo 150 caracteres")
+    @Column(unique=true, nullable=false, length=150)
+    private @NotBlank(message="O e-mail \u00e9 obrigat\u00f3rio")
+@NotBlank(message="O e-mail \u00e9 obrigat\u00f3rio") @Email(message="Informe um e-mail v\u00e1lido")
+@Email(message="Informe um e-mail v\u00e1lido") @Size(max=150, message="O e-mail pode ter no m\u00e1ximo 150 caracteres")
+@Size(max=150, message="O e-mail pode ter no m\u00e1ximo 150 caracteres") String email;
+    @Size(max=25, message="O telefone pode ter no m\u00e1ximo 25 caracteres")
+@Size(max=25, message="O telefone pode ter no m\u00e1ximo 25 caracteres")
+    @Column(length=25)
+    private @Size(max=25, message="O telefone pode ter no m\u00e1ximo 25 caracteres")
+@Size(max=25, message="O telefone pode ter no m\u00e1ximo 25 caracteres") String telefone;
+    @NotBlank(message="O CPF \u00e9 obrigat\u00f3rio")
+@NotBlank(message="O CPF \u00e9 obrigat\u00f3rio")
+    @Size(min=11, max=14, message="O CPF deve ter entre 11 e 14 caracteres")
+@Size(min=11, max=14, message="O CPF deve ter entre 11 e 14 caracteres")
+    @Column(unique=true, nullable=false, length=14)
+    private @NotBlank(message="O CPF \u00e9 obrigat\u00f3rio")
+@NotBlank(message="O CPF \u00e9 obrigat\u00f3rio") @Size(min=11, max=14, message="O CPF deve ter entre 11 e 14 caracteres")
+@Size(min=11, max=14, message="O CPF deve ter entre 11 e 14 caracteres") String cpf;
+    @NotBlank(message="A senha \u00e9 obrigat\u00f3ria")
+@NotBlank(message="A senha \u00e9 obrigat\u00f3ria")
+    @Size(min=8, max=255, message="A senha deve ter entre 8 e 255 caracteres")
+@Size(min=8, max=255, message="A senha deve ter entre 8 e 255 caracteres")
+    @Column(nullable=false, length=255)
+    private @NotBlank(message="A senha \u00e9 obrigat\u00f3ria")
+@NotBlank(message="A senha \u00e9 obrigat\u00f3ria") @Size(min=8, max=255, message="A senha deve ter entre 8 e 255 caracteres")
+@Size(min=8, max=255, message="A senha deve ter entre 8 e 255 caracteres") String senha;
+    @Column(name="data_nascimento")
+    private LocalDate dataDeNascimento;
+    @Column(nullable=false)
+    private boolean ativo = true;
     @CreatedDate
-    @Column(name = "created_at", updatable = false)
+    @Column(name="created_at", updatable=false)
     private LocalDateTime createdAt;
-
     @LastModifiedDate
-    @Column(name = "updated_at")
+    @Column(name="updated_at")
     private LocalDateTime updatedAt;
-
     @Version
-    @Column(nullable = false)
+    @Column(nullable=false)
     private Long version;
 
     public ClienteEntity() {
     }
 
-    public ClienteEntity(Long id, String nome, String email, String telefone, String cpf, String senha) {
+    public ClienteEntity(Long id, String nome, String email, String telefone, String cpf, String senha, LocalDate dataDeNascimento, boolean ativo) {
         this.id = id;
         this.nome = nome;
         this.email = email;
         this.telefone = telefone;
         this.cpf = cpf;
         this.senha = senha;
+        this.dataDeNascimento = dataDeNascimento;
+        this.ativo = ativo;
     }
 
-    // Getters/Setters
+    @PrePersist
+    protected void onPrePersist() {
+        if (this.email != null) {
+            this.email = this.email.trim().toLowerCase();
+        }
+        if (this.version == null) {
+            this.version = 0L;
+        }
+    }
+
+    @PreUpdate
+    protected void onPreUpdate() {
+        if (this.email != null) {
+            this.email = this.email.trim().toLowerCase();
+        }
+    }
+
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -84,7 +150,7 @@ public class ClienteEntity implements Serializable {
     }
 
     public String getNome() {
-        return nome;
+        return this.nome;
     }
 
     public void setNome(String nome) {
@@ -92,7 +158,7 @@ public class ClienteEntity implements Serializable {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -100,7 +166,7 @@ public class ClienteEntity implements Serializable {
     }
 
     public String getTelefone() {
-        return telefone;
+        return this.telefone;
     }
 
     public void setTelefone(String telefone) {
@@ -108,7 +174,7 @@ public class ClienteEntity implements Serializable {
     }
 
     public String getCpf() {
-        return cpf;
+        return this.cpf;
     }
 
     public void setCpf(String cpf) {
@@ -116,15 +182,31 @@ public class ClienteEntity implements Serializable {
     }
 
     public String getSenha() {
-        return senha;
+        return this.senha;
     }
 
     public void setSenha(String senha) {
         this.senha = senha;
     }
 
+    public LocalDate getDataDeNascimento() {
+        return this.dataDeNascimento;
+    }
+
+    public void setDataDeNascimento(LocalDate dataDeNascimento) {
+        this.dataDeNascimento = dataDeNascimento;
+    }
+
+    public boolean isAtivo() {
+        return this.ativo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        this.ativo = ativo;
+    }
+
     public LocalDateTime getCreatedAt() {
-        return createdAt;
+        return this.createdAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
@@ -132,7 +214,7 @@ public class ClienteEntity implements Serializable {
     }
 
     public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+        return this.updatedAt;
     }
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
@@ -140,31 +222,30 @@ public class ClienteEntity implements Serializable {
     }
 
     public Long getVersion() {
-        return version;
+        return this.version;
     }
 
     public void setVersion(Long version) {
         this.version = version;
     }
 
-    // equals/hashCode por id
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof ClienteEntity that))
+        }
+        if (!(o instanceof ClienteEntity)) {
             return false;
-        return id != null && id.equals(that.id);
+        }
+        ClienteEntity that = (ClienteEntity)o;
+        return this.id != null && this.id.equals(that.id);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(this.id);
     }
 
-    @Override
     public String toString() {
-        return "ClienteEntity{" + "id=" + id + ", nome='" + nome + '\'' + ", email='" + email + '\'' + ", telefone='"
-                + telefone + '\'' + ", cpf='" + cpf + '\'' + ", version=" + version + '}';
+        return "ClienteEntity{id=" + String.valueOf(this.id) + ", nome='" + this.nome + "', email='" + this.email + "', telefone='" + this.telefone + "', cpf='" + this.cpf + "', dataDeNascimento=" + String.valueOf(this.dataDeNascimento) + ", ativo=" + this.ativo + ", version=" + String.valueOf(this.version) + "}";
     }
 }
+

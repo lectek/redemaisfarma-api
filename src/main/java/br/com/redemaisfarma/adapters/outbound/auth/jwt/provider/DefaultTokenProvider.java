@@ -1,119 +1,102 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  io.jsonwebtoken.security.Keys
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.provider;
 
 import br.com.redemaisfarma.adapters.outbound.auth.config.JwtProperties;
-import br.com.redemaisfarma.adapters.outbound.auth.jwt.exception.InvalidJwtTokenException;
-import br.com.redemaisfarma.adapters.outbound.auth.jwt.exception.TokenExpiredException;
 import br.com.redemaisfarma.adapters.outbound.auth.jwt.model.JwtPrincipal;
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
+import br.com.redemaisfarma.adapters.outbound.auth.jwt.provider.TokenProvider;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import javax.crypto.SecretKey;
 
-/**
- * Implementação JJWT (HS256) do TokenProvider.
- */
-@Component
-public class DefaultTokenProvider implements TokenProvider {
-
+public class DefaultTokenProvider
+implements TokenProvider {
     private final JwtProperties props;
-    private final SecretKey hmacKey;
+    private final SecretKey key;
 
     public DefaultTokenProvider(JwtProperties props) {
-        this.props = props;
-        this.hmacKey = Keys.hmacShaKeyFor(decodeSecret(props.getSecret()));
+        this.props = Objects.requireNonNull(props);
+        this.key = Keys.hmacShaKeyFor((byte[])props.getSecret().getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
-    public String generateAccessToken(String subject, Map<String, Object> claims, Instant expiresAt) {
-        JwtBuilder b = Jwts.builder().claims(claims != null ? claims : Map.of()).subject(subject)
-                .issuer(props.getIssuer()).issuedAt(Date.from(Instant.now())).expiration(Date.from(expiresAt))
-                .signWith(hmacKey, Jwts.SIG.HS256);
-
-        if (props.getAudience() != null && !props.getAudience().isBlank()) {
-            b.audience().add(props.getAudience());
-        }
-        return b.compact();
+    public String generateAccessToken(String string, Map<String, Object> map, Instant instant) {
+        throw new Error("Unresolved compilation problem: \n\tThe method add(String) in the type CollectionMutator<String,NestedCollection<String,JwtBuilder>> is not applicable for the arguments (Object)\n");
     }
 
     @Override
-    public String generateRefreshToken(String subject, String jti, Map<String, Object> claims, Instant expiresAt) {
-        Map<String, Object> map = new HashMap<>();
-        if (claims != null)
-            map.putAll(claims);
-        map.put("typ", "refresh");
-        map.put("jti", jti);
-
-        JwtBuilder b = Jwts.builder().claims(map).subject(subject).issuer(props.getIssuer())
-                .issuedAt(Date.from(Instant.now())).expiration(Date.from(expiresAt)).signWith(hmacKey, Jwts.SIG.HS256);
-
-        if (props.getAudience() != null && !props.getAudience().isBlank()) {
-            b.audience().add(props.getAudience());
-        }
-        return b.compact();
+    public String generateRefreshToken(String string, String string2, Map<String, Object> map, Instant instant) {
+        throw new Error("Unresolved compilation problem: \n\tThe method add(String) in the type CollectionMutator<String,NestedCollection<String,JwtBuilder>> is not applicable for the arguments (Object)\n");
     }
 
     @Override
-    public JwtPrincipal validate(String token) {
+    public JwtPrincipal validate(String string) {
+        throw new Error("Unresolved compilation problems: \n\tType mismatch: cannot convert from List<Object> to ArrayList<String>\n\tType mismatch: cannot convert from List<String> to ArrayList<String>\n\tType mismatch: cannot convert from List<Object> to ArrayList<String>\n");
+    }
+
+    private JwtPrincipal buildPrincipal(Long userId, String subject, List<String> roles, String tenant, String issuer, List<String> audience, Instant issuedAt, Instant expiresAt) {
         try {
-            JwtParserBuilder parser = Jwts.parser().verifyWith(hmacKey).requireIssuer(props.getIssuer())
-                    .clockSkewSeconds(props.getClockSkewSeconds());
-
-            if (props.getAudience() != null && !props.getAudience().isBlank()) {
-                parser.requireAudience(props.getAudience());
-            }
-
-            Jws<Claims> jws = parser.build().parseSignedClaims(token);
-            Claims c = jws.getPayload();
-
-            // Normalização para JwtPrincipal
-            String subject = c.getSubject();
-            String iss = c.getIssuer();
-            List<String> aud = c.getAudience() != null ? List.copyOf(c.getAudience()) : null;
-            String jti = c.getId() != null ? c.getId() : (String) c.get("jti");
-            Instant exp = c.getExpiration() != null ? c.getExpiration().toInstant() : null;
-
-            Long userId = null;
-            Object uid = c.get("uid");
-            if (uid instanceof Number)
-                userId = ((Number) uid).longValue();
-            else if (uid != null)
-                try {
-                    userId = Long.parseLong(uid.toString());
-                } catch (NumberFormatException ignore) {
-                }
-
-            String tenant = c.get("tenant", String.class);
-
-            List<String> roles = List.of();
-            Object r = c.get("roles");
-            if (r instanceof List<?>) {
-                List<?> raw = (List<?>) r;
-                List<String> out = new ArrayList<>(raw.size());
-                for (Object it : raw)
-                    out.add(String.valueOf(it));
-                roles = List.copyOf(out);
-            } else if (r != null) {
-                roles = List.of(String.valueOf(r));
-            }
-
-            return new JwtPrincipal(subject, userId, tenant, roles, iss, aud, exp, jti, c);
-        } catch (ExpiredJwtException e) {
-            throw new TokenExpiredException("Token expirado.", e);
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new InvalidJwtTokenException("Token inválido.", e);
+            Constructor c1 = JwtPrincipal.class.getDeclaredConstructor(Long.class, String.class, List.class, String.class, String.class, List.class, Instant.class, Instant.class);
+            c1.setAccessible(true);
+            return (JwtPrincipal)c1.newInstance(userId, subject, roles, tenant, issuer, audience, issuedAt, expiresAt);
         }
+        catch (NoSuchMethodException c1) {
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Erro invocando construtor JwtPrincipal(8 args)", e);
+        }
+        try {
+            Constructor c2 = JwtPrincipal.class.getDeclaredConstructor(String.class, Long.class, String.class, List.class, String.class, List.class, Instant.class, Instant.class);
+            c2.setAccessible(true);
+            return (JwtPrincipal)c2.newInstance(subject, userId, tenant, roles, issuer, audience, issuedAt, expiresAt);
+        }
+        catch (NoSuchMethodException c2) {
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Erro invocando construtor JwtPrincipal(alt ordem)", e);
+        }
+        try {
+            Method builder = JwtPrincipal.class.getMethod("builder", new Class[0]);
+            Object b = builder.invoke(null, new Object[0]);
+            DefaultTokenProvider.callIfExists(b, "userId", Long.class, userId);
+            DefaultTokenProvider.callIfExists(b, "subject", String.class, subject);
+            DefaultTokenProvider.callIfExists(b, "roles", List.class, roles);
+            DefaultTokenProvider.callIfExists(b, "tenant", String.class, tenant);
+            DefaultTokenProvider.callIfExists(b, "issuer", String.class, issuer);
+            DefaultTokenProvider.callIfExists(b, "audience", List.class, audience);
+            DefaultTokenProvider.callIfExists(b, "issuedAt", Instant.class, issuedAt);
+            DefaultTokenProvider.callIfExists(b, "expiresAt", Instant.class, expiresAt);
+            Method build = b.getClass().getMethod("build", new Class[0]);
+            return (JwtPrincipal)build.invoke(b, new Object[0]);
+        }
+        catch (NoSuchMethodException builder) {
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Erro usando JwtPrincipal.builder()", e);
+        }
+        throw new IllegalStateException("N\u00e3o encontrei um construtor/builder compat\u00edvel para JwtPrincipal.");
     }
 
-    private static byte[] decodeSecret(String secret) {
+    private static void callIfExists(Object target, String method, Class<?> type, Object arg) {
         try {
-            return Decoders.BASE64.decode(secret);
-        } catch (IllegalArgumentException e) {
-            return secret.getBytes(StandardCharsets.UTF_8);
+            Method m = target.getClass().getMethod(method, type);
+            m.invoke(target, arg);
+        }
+        catch (NoSuchMethodException m) {
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Falha invocando builder." + method, e);
         }
     }
 }
+

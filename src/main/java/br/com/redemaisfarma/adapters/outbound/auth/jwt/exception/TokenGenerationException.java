@@ -1,9 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.exception;
 
-/**
- * Lançada quando ocorre erro na geração de um JWT (access ou refresh).
- */
-public class TokenGenerationException extends RuntimeException {
+public class TokenGenerationException
+extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public TokenGenerationException(String message) {
@@ -14,3 +15,4 @@ public class TokenGenerationException extends RuntimeException {
         super(message, cause);
     }
 }
+

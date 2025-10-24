@@ -1,49 +1,48 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  br.com.redemaisfarma.domain.Cliente
+ */
 package br.com.redemaisfarma.application.service;
 
 import br.com.redemaisfarma.domain.Cliente;
 import java.util.List;
 
-/**
- * Service de Cliente com API "oficial" em inglês e aliases em PT-BR
- * para compatibilidade retroativa com controllers antigos.
- */
 public interface ClienteService {
+    public Cliente findById(Long var1);
 
-    // ===== API oficial (use estes na implementação) =====
-    Cliente findById(Long id);
-    List<Cliente> list();
-    Cliente create(Cliente cliente);
-    Cliente update(Long id, Cliente cliente);
-    void delete(Long id);
+    public List<Cliente> list();
 
-    // ===== ALIASES em PT-BR (compatibilidade) =====
-    /** @deprecated prefira {@link #findById(Long)} */
+    public Cliente create(Cliente var1);
+
+    public Cliente update(Long var1, Cliente var2);
+
+    public void delete(Long var1);
+
     @Deprecated
-    default Cliente buscarPorId(Long id) {
-        return findById(id);
+    default public Cliente buscarPorId(Long id) {
+        return this.findById(id);
     }
 
-    /** @deprecated prefira {@link #list()} */
     @Deprecated
-    default List<Cliente> listarTodos() {
-        return list();
+    default public List<Cliente> listarTodos() {
+        return this.list();
     }
 
-    /** @deprecated prefira {@link #create(Cliente)} */
     @Deprecated
-    default Cliente salvar(Cliente cliente) {
-        return create(cliente);
+    default public Cliente salvar(Cliente cliente) {
+        return this.create(cliente);
     }
 
-    /** @deprecated prefira {@link #update(Long, Cliente)} */
     @Deprecated
-    default Cliente atualizar(Long id, Cliente cliente) {
-        return update(id, cliente);
+    default public Cliente atualizar(Long id, Cliente cliente) {
+        return this.update(id, cliente);
     }
 
-    /** @deprecated prefira {@link #delete(Long)} */
     @Deprecated
-    default void deletar(Long id) {
-        delete(id);
+    default public void deletar(Long id) {
+        this.delete(id);
     }
 }
+

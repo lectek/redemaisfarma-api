@@ -1,20 +1,26 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonFormat
+ *  com.fasterxml.jackson.annotation.JsonFormat$Shape
+ */
 package br.com.redemaisfarma.adapters.outbound.messaging.kafka.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-/** Envelope padrão para todos os eventos publicados. */
-public class EventEnvelope<T> implements Serializable {
+public class EventEnvelope<T>
+implements Serializable {
     private String eventId;
     private String eventType;
-    private String source; // serviço emissor
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private String source;
+    @JsonFormat(shape=JsonFormat.Shape.STRING)
     private Instant occurredAt;
-    private String tenantId; // opcional
+    private String tenantId;
     private T data;
 
     public EventEnvelope() {
@@ -33,9 +39,8 @@ public class EventEnvelope<T> implements Serializable {
         this.occurredAt = Instant.now();
     }
 
-    // getters/setters
     public String getEventId() {
-        return eventId;
+        return this.eventId;
     }
 
     public void setEventId(String eventId) {
@@ -43,7 +48,7 @@ public class EventEnvelope<T> implements Serializable {
     }
 
     public String getEventType() {
-        return eventType;
+        return this.eventType;
     }
 
     public void setEventType(String eventType) {
@@ -51,7 +56,7 @@ public class EventEnvelope<T> implements Serializable {
     }
 
     public String getSource() {
-        return source;
+        return this.source;
     }
 
     public void setSource(String source) {
@@ -59,7 +64,7 @@ public class EventEnvelope<T> implements Serializable {
     }
 
     public Instant getOccurredAt() {
-        return occurredAt;
+        return this.occurredAt;
     }
 
     public void setOccurredAt(Instant occurredAt) {
@@ -67,7 +72,7 @@ public class EventEnvelope<T> implements Serializable {
     }
 
     public String getTenantId() {
-        return tenantId;
+        return this.tenantId;
     }
 
     public void setTenantId(String tenantId) {
@@ -75,24 +80,26 @@ public class EventEnvelope<T> implements Serializable {
     }
 
     public T getData() {
-        return data;
+        return this.data;
     }
 
     public void setData(T data) {
         this.data = data;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof EventEnvelope<?> that))
+        }
+        if (!(o instanceof EventEnvelope)) {
             return false;
-        return Objects.equals(eventId, that.eventId);
+        }
+        EventEnvelope that = (EventEnvelope)o;
+        return Objects.equals(this.eventId, that.eventId);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(eventId);
+        return Objects.hash(this.eventId);
     }
 }
+

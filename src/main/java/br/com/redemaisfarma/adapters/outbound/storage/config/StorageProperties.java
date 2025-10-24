@@ -1,29 +1,29 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.validation.constraints.NotBlank
+ *  org.springframework.boot.context.properties.ConfigurationProperties
+ *  org.springframework.validation.annotation.Validated
+ */
 package br.com.redemaisfarma.adapters.outbound.storage.config;
 
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.constraints.NotBlank;
-
 @Validated
-@ConfigurationProperties(prefix = "storage")
+@ConfigurationProperties(prefix="storage")
 public class StorageProperties {
-
-    /** provider: local | s3 */
     @NotBlank
     private String provider = "local";
-
-    // Local
-    private String localBasePath = "storage"; // relativo ao working dir
-
-    // S3
+    private String localBasePath = "storage";
     private String s3Bucket;
     private String s3Region;
-    /** prefixo/pasta dentro do bucket, opcional */
     private String s3Prefix;
 
     public String getProvider() {
-        return provider;
+        return this.provider;
     }
 
     public void setProvider(String provider) {
@@ -31,7 +31,7 @@ public class StorageProperties {
     }
 
     public String getLocalBasePath() {
-        return localBasePath;
+        return this.localBasePath;
     }
 
     public void setLocalBasePath(String localBasePath) {
@@ -39,7 +39,7 @@ public class StorageProperties {
     }
 
     public String getS3Bucket() {
-        return s3Bucket;
+        return this.s3Bucket;
     }
 
     public void setS3Bucket(String s3Bucket) {
@@ -47,7 +47,7 @@ public class StorageProperties {
     }
 
     public String getS3Region() {
-        return s3Region;
+        return this.s3Region;
     }
 
     public void setS3Region(String s3Region) {
@@ -55,10 +55,11 @@ public class StorageProperties {
     }
 
     public String getS3Prefix() {
-        return s3Prefix;
+        return this.s3Prefix;
     }
 
     public void setS3Prefix(String s3Prefix) {
         this.s3Prefix = s3Prefix;
     }
 }
+

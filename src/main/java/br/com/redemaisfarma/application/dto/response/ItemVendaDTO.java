@@ -1,74 +1,65 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonFormat
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ */
 package br.com.redemaisfarma.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
-/**
- * DTO de resposta contendo os dados de um item da venda.
- */
-@Schema(name = "ItemVendaDTO", description = "Item individual presente em uma venda")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class ItemVendaDTO implements Serializable {
+@Schema(name="ItemVendaDTO", description="Item individual presente em uma venda")
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+public class ItemVendaDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Schema(description = "ID do produto", example = "456")
-    @JsonProperty("produtoId")
+    @Schema(description="ID do produto", example="456")
+    @JsonProperty(value="produtoId")
     private Long produtoId;
-
-    @Schema(description = "SKU do produto", example = "PRD-001-ABC")
-    @JsonProperty("sku")
+    @Schema(description="SKU do produto", example="PRD-001-ABC")
+    @JsonProperty(value="sku")
     private String sku;
-
-    @Schema(description = "Nome do produto", example = "Dipirona 500mg")
-    @JsonProperty("nomeProduto")
+    @Schema(description="Nome do produto", example="Dipirona 500mg")
+    @JsonProperty(value="nomeProduto")
     private String nomeProduto;
-
-    @Schema(description = "Quantidade vendida", example = "2")
-    @JsonProperty("quantidade")
+    @Schema(description="Quantidade vendida", example="2")
+    @JsonProperty(value="quantidade")
     private Integer quantidade;
-
-    @Schema(description = "Preço unitário (sem desconto)", example = "12.50")
-    @JsonProperty("precoUnitario")
+    @Schema(description="Pre\u00e7o unit\u00e1rio (sem desconto)", example="12.50")
+    @JsonProperty(value="precoUnitario")
     private BigDecimal precoUnitario;
-
-    @Schema(description = "Percentual de desconto aplicado ao item (0-100)", example = "5.00")
-    @JsonProperty("percentualDesconto")
+    @Schema(description="Percentual de desconto aplicado ao item (0-100)", example="5.00")
+    @JsonProperty(value="percentualDesconto")
     private BigDecimal percentualDesconto;
-
-    @Schema(description = "Valor absoluto de desconto aplicado ao item", example = "0.62")
-    @JsonProperty("valorDesconto")
+    @Schema(description="Valor absoluto de desconto aplicado ao item", example="0.62")
+    @JsonProperty(value="valorDesconto")
     private BigDecimal valorDesconto;
-
-    @Schema(description = "Subtotal do item (quantidade x unitário - desconto)", example = "23.38")
-    @JsonProperty("total")
+    @Schema(description="Subtotal do item (quantidade x unit\u00e1rio - desconto)", example="23.38")
+    @JsonProperty(value="total")
     private BigDecimal total;
-
-    @Schema(description = "Código do lote (quando aplicável)", example = "Lote1234")
-    @JsonProperty("lote")
+    @Schema(description="C\u00f3digo do lote (quando aplic\u00e1vel)", example="Lote1234")
+    @JsonProperty(value="lote")
     private String lote;
-
-    @Schema(description = "Validade do produto (quando aplicável)", type = "string", format = "date", example = "2026-12-31")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @JsonProperty("validade")
+    @Schema(description="Validade do produto (quando aplic\u00e1vel)", type="string", format="date", example="2026-12-31")
+    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonProperty(value="validade")
     private LocalDate validade;
-
-    // ----------------------------------------------------------------------
-    // Construtores
-    // ----------------------------------------------------------------------
 
     public ItemVendaDTO() {
     }
 
-    public ItemVendaDTO(Long produtoId, String sku, String nomeProduto, Integer quantidade, BigDecimal precoUnitario,
-            BigDecimal percentualDesconto, BigDecimal valorDesconto, BigDecimal total, String lote,
-            LocalDate validade) {
+    public ItemVendaDTO(Long produtoId, String sku, String nomeProduto, Integer quantidade, BigDecimal precoUnitario, BigDecimal percentualDesconto, BigDecimal valorDesconto, BigDecimal total, String lote, LocalDate validade) {
         this.produtoId = produtoId;
         this.sku = sku;
         this.nomeProduto = nomeProduto;
@@ -81,12 +72,8 @@ public class ItemVendaDTO implements Serializable {
         this.validade = validade;
     }
 
-    // ----------------------------------------------------------------------
-    // Getters e Setters
-    // ----------------------------------------------------------------------
-
     public Long getProdutoId() {
-        return produtoId;
+        return this.produtoId;
     }
 
     public void setProdutoId(Long produtoId) {
@@ -94,7 +81,7 @@ public class ItemVendaDTO implements Serializable {
     }
 
     public String getSku() {
-        return sku;
+        return this.sku;
     }
 
     public void setSku(String sku) {
@@ -102,7 +89,7 @@ public class ItemVendaDTO implements Serializable {
     }
 
     public String getNomeProduto() {
-        return nomeProduto;
+        return this.nomeProduto;
     }
 
     public void setNomeProduto(String nomeProduto) {
@@ -110,7 +97,7 @@ public class ItemVendaDTO implements Serializable {
     }
 
     public Integer getQuantidade() {
-        return quantidade;
+        return this.quantidade;
     }
 
     public void setQuantidade(Integer quantidade) {
@@ -118,7 +105,7 @@ public class ItemVendaDTO implements Serializable {
     }
 
     public BigDecimal getPrecoUnitario() {
-        return precoUnitario;
+        return this.precoUnitario;
     }
 
     public void setPrecoUnitario(BigDecimal precoUnitario) {
@@ -126,7 +113,7 @@ public class ItemVendaDTO implements Serializable {
     }
 
     public BigDecimal getPercentualDesconto() {
-        return percentualDesconto;
+        return this.percentualDesconto;
     }
 
     public void setPercentualDesconto(BigDecimal percentualDesconto) {
@@ -134,7 +121,7 @@ public class ItemVendaDTO implements Serializable {
     }
 
     public BigDecimal getValorDesconto() {
-        return valorDesconto;
+        return this.valorDesconto;
     }
 
     public void setValorDesconto(BigDecimal valorDesconto) {
@@ -142,7 +129,7 @@ public class ItemVendaDTO implements Serializable {
     }
 
     public BigDecimal getTotal() {
-        return total;
+        return this.total;
     }
 
     public void setTotal(BigDecimal total) {
@@ -150,7 +137,7 @@ public class ItemVendaDTO implements Serializable {
     }
 
     public String getLote() {
-        return lote;
+        return this.lote;
     }
 
     public void setLote(String lote) {
@@ -158,43 +145,30 @@ public class ItemVendaDTO implements Serializable {
     }
 
     public LocalDate getValidade() {
-        return validade;
+        return this.validade;
     }
 
     public void setValidade(LocalDate validade) {
         this.validade = validade;
     }
 
-    // ----------------------------------------------------------------------
-    // Utilitários
-    // ----------------------------------------------------------------------
-
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof ItemVendaDTO))
+        }
+        if (!(o instanceof ItemVendaDTO)) {
             return false;
-        ItemVendaDTO that = (ItemVendaDTO) o;
-        return Objects.equals(produtoId, that.produtoId) && Objects.equals(sku, that.sku)
-                && Objects.equals(nomeProduto, that.nomeProduto) && Objects.equals(quantidade, that.quantidade)
-                && Objects.equals(precoUnitario, that.precoUnitario)
-                && Objects.equals(percentualDesconto, that.percentualDesconto)
-                && Objects.equals(valorDesconto, that.valorDesconto) && Objects.equals(total, that.total)
-                && Objects.equals(lote, that.lote) && Objects.equals(validade, that.validade);
+        }
+        ItemVendaDTO that = (ItemVendaDTO)o;
+        return Objects.equals(this.produtoId, that.produtoId) && Objects.equals(this.sku, that.sku) && Objects.equals(this.nomeProduto, that.nomeProduto) && Objects.equals(this.quantidade, that.quantidade) && Objects.equals(this.precoUnitario, that.precoUnitario) && Objects.equals(this.percentualDesconto, that.percentualDesconto) && Objects.equals(this.valorDesconto, that.valorDesconto) && Objects.equals(this.total, that.total) && Objects.equals(this.lote, that.lote) && Objects.equals(this.validade, that.validade);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(produtoId, sku, nomeProduto, quantidade, precoUnitario, percentualDesconto, valorDesconto,
-                total, lote, validade);
+        return Objects.hash(this.produtoId, this.sku, this.nomeProduto, this.quantidade, this.precoUnitario, this.percentualDesconto, this.valorDesconto, this.total, this.lote, this.validade);
     }
 
-    @Override
     public String toString() {
-        return "ItemVendaDTO{" + "produtoId=" + produtoId + ", sku='" + sku + '\'' + ", nomeProduto='" + nomeProduto
-                + '\'' + ", quantidade=" + quantidade + ", precoUnitario=" + precoUnitario + ", percentualDesconto="
-                + percentualDesconto + ", valorDesconto=" + valorDesconto + ", total=" + total + ", lote='" + lote
-                + '\'' + ", validade=" + validade + '}';
+        return "ItemVendaDTO{produtoId=" + this.produtoId + ", sku='" + this.sku + "', nomeProduto='" + this.nomeProduto + "', quantidade=" + this.quantidade + ", precoUnitario=" + String.valueOf(this.precoUnitario) + ", percentualDesconto=" + String.valueOf(this.percentualDesconto) + ", valorDesconto=" + String.valueOf(this.valorDesconto) + ", total=" + String.valueOf(this.total) + ", lote='" + this.lote + "', validade=" + String.valueOf(this.validade) + "}";
     }
 }
+

@@ -1,36 +1,40 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ */
 package br.com.redemaisfarma.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.Serializable;
 import java.util.Objects;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "ClienteDTO", description = "Dados básicos do cliente")
-public class ClienteDTO implements Serializable {
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@Schema(name="ClienteDTO", description="Dados b\u00e1sicos do cliente")
+public class ClienteDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Schema(description = "ID do cliente", example = "42")
-    @JsonProperty("id")
+    @Schema(description="ID do cliente", example="42")
+    @JsonProperty(value="id")
     private Long id;
-
-    @Schema(description = "Nome do cliente", example = "João Silva")
-    @JsonProperty("nome")
+    @Schema(description="Nome do cliente", example="Jo\u00e3o Silva")
+    @JsonProperty(value="nome")
     private String nome;
-
-    @Schema(description = "E-mail do cliente", example = "joao@exemplo.com")
-    @JsonProperty("email")
+    @Schema(description="E-mail do cliente", example="joao@exemplo.com")
+    @JsonProperty(value="email")
     private String email;
-
-    @Schema(description = "CPF do cliente", example = "12345678901")
-    @JsonProperty("cpf")
+    @Schema(description="CPF do cliente", example="12345678901")
+    @JsonProperty(value="cpf")
     private String cpf;
 
-    // Getters/Setters
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -38,7 +42,7 @@ public class ClienteDTO implements Serializable {
     }
 
     public String getNome() {
-        return nome;
+        return this.nome;
     }
 
     public void setNome(String nome) {
@@ -46,7 +50,7 @@ public class ClienteDTO implements Serializable {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -54,25 +58,26 @@ public class ClienteDTO implements Serializable {
     }
 
     public String getCpf() {
-        return cpf;
+        return this.cpf;
     }
 
     public void setCpf(String cpf) {
         this.cpf = cpf;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof ClienteDTO))
+        }
+        if (!(o instanceof ClienteDTO)) {
             return false;
-        ClienteDTO that = (ClienteDTO) o;
-        return Objects.equals(id, that.id);
+        }
+        ClienteDTO that = (ClienteDTO)o;
+        return Objects.equals(this.id, that.id);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(this.id);
     }
 }
+

@@ -1,20 +1,28 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+ *  org.springframework.data.redis.core.StringRedisTemplate
+ *  org.springframework.stereotype.Repository
+ */
 package br.com.redemaisfarma.adapters.outbound.cache.adapter;
 
-import br.com.redemaisfarma.adapters.outbound.auth.jwt.store.TokenBlacklistRepository;
+import br.com.redemaisfarma.adapters.outbound.auth.jwt.store.TokenBlacklist;
 import br.com.redemaisfarma.adapters.outbound.cache.config.RedisProperties;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Repository;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Objects;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Repository;
 
-@Repository
-public class RedisTokenBlacklistRepository implements TokenBlacklistRepository {
-
+@Repository(value="redisTokenBlacklist")
+@ConditionalOnProperty(prefix="jwt.blacklist", name={"strategy"}, havingValue="redis")
+public class RedisTokenBlacklistRepository
+implements TokenBlacklist {
     private final StringRedisTemplate redis;
     private final RedisProperties props;
 
@@ -24,27 +32,17 @@ public class RedisTokenBlacklistRepository implements TokenBlacklistRepository {
     }
 
     @Override
-    public void save(String tokenOrJti, Instant expiresAt) {
-        if (tokenOrJti == null || expiresAt == null)
-            return;
-        String key = buildKey(tokenOrJti);
-        Duration ttl = Duration.between(Instant.now(), expiresAt);
-        if (ttl.isNegative()) {
-            ttl = Duration.ofSeconds(1);
-        }
-        redis.opsForValue().set(key, "1", ttl);
+    public boolean isBlacklisted(String string) {
+        throw new Error("Unresolved compilation problem: \n\tThe method hasKey(String) in the type RedisTemplate<String,String> is not applicable for the arguments (Object)\n");
     }
 
     @Override
-    public boolean exists(String tokenOrJti) {
-        if (tokenOrJti == null)
-            return false;
-        String key = buildKey(tokenOrJti);
-        return Boolean.TRUE.equals(redis.hasKey(key));
+    public void blacklist(String string, Instant instant) {
+        throw new Error("Unresolved compilation problems: \n\tThe method set(String, String, Duration) in the type ValueOperations<String,String> is not applicable for the arguments (Object, Object, Duration)\n\tThe method set(String, String, Duration) in the type ValueOperations<String,String> is not applicable for the arguments (Object, Object, Duration)\n");
     }
 
     private String buildKey(String raw) {
-        return props.getKeyPrefix() + props.getBlacklistNamespace() + sha256Url(raw);
+        return this.props.getKeyPrefix() + this.props.getBlacklistNamespace() + RedisTokenBlacklistRepository.sha256Url(raw);
     }
 
     private static String sha256Url(String s) {
@@ -52,8 +50,10 @@ public class RedisTokenBlacklistRepository implements TokenBlacklistRepository {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] digest = md.digest(s.getBytes(StandardCharsets.UTF_8));
             return Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             return Base64.getUrlEncoder().withoutPadding().encodeToString(s.getBytes(StandardCharsets.UTF_8));
         }
     }
 }
+

@@ -1,128 +1,137 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonFormat
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.annotation.JsonProperty$Access
+ *  io.swagger.v3.oas.annotations.media.Schema
+ *  jakarta.validation.constraints.AssertTrue
+ *  jakarta.validation.constraints.Min
+ *  jakarta.validation.constraints.NotBlank
+ *  jakarta.validation.constraints.NotNull
+ *  jakarta.validation.constraints.PastOrPresent
+ *  jakarta.validation.constraints.Size
+ */
 package br.com.redemaisfarma.application.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
-
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "ConfirmacaoMedicacaoRequestDTO", description = "Dados de confirmação de medicação do cliente")
-public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@Schema(name="ConfirmacaoMedicacaoRequestDTO", description="Dados de confirma\u00e7\u00e3o de medica\u00e7\u00e3o do cliente")
+public class ConfirmacaoMedicacaoRequestDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Schema(description = "ID do cliente", example = "123", required = true)
-    @NotNull(message = "{confirmacaoMedicacao.clienteId.notNull}")
-    @Min(value = 1, message = "{confirmacaoMedicacao.clienteId.min}")
-    @JsonProperty("clienteId")
-    private Long clienteId;
-
-    @Schema(description = "ID da confirmação", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty(value = "confirmacaoId", access = JsonProperty.Access.READ_ONLY)
+    @Schema(description="ID do cliente", example="123", required=true)
+    @NotNull(message="{confirmacaoMedicacao.clienteId.notNull}")
+    @Min(value=1L, message="{confirmacaoMedicacao.clienteId.min}")
+    @JsonProperty(value="clienteId")
+    private @NotNull(message="{confirmacaoMedicacao.clienteId.notNull}") @Min(value=1L, message="{confirmacaoMedicacao.clienteId.min}") Long clienteId;
+    @Schema(description="ID da confirma\u00e7\u00e3o", example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value="confirmacaoId", access=JsonProperty.Access.READ_ONLY)
     private UUID confirmacaoId;
-
-    @Schema(description = "ID do lembrete associado", example = "4fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty("lembreteId")
+    @Schema(description="ID do lembrete associado", example="4fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value="lembreteId")
     private UUID lembreteId;
-
-    @Schema(description = "Nome do medicamento", example = "Dipirona 500mg", required = true)
-    @NotBlank(message = "{confirmacaoMedicacao.nomeMedicamento.notBlank}")
-    @Size(max = 100, message = "{confirmacaoMedicacao.nomeMedicamento.size}")
-    @JsonProperty("nomeMedicamento")
-    private String nomeMedicamento;
-
-    @Schema(description = "Horário agendado para ingestão do medicamento", type = "string", format = "date-time", example = "2025-07-04T08:00:00", required = true)
-    @NotNull(message = "{confirmacaoMedicacao.horarioAgendado.notNull}")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("horarioAgendado")
-    private LocalDateTime horarioAgendado;
-
-    @Schema(description = "Horário em que a medicação foi confirmada", type = "string", format = "date-time", example = "2025-07-04T08:05:00", required = true)
-    @NotNull(message = "{confirmacaoMedicacao.horarioConfirmado.notNull}")
-    @PastOrPresent(message = "{confirmacaoMedicacao.horarioConfirmado.pastOrPresent}")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("horarioConfirmado")
-    private LocalDateTime horarioConfirmado;
-
-    @Schema(description = "Indicador se o medicamento foi tomado", required = true)
-    @NotNull(message = "{confirmacaoMedicacao.tomou.notNull}")
-    @JsonProperty("tomou")
-    private Boolean tomou;
-
-    @Schema(description = "Indica se a confirmação foi automática pelo sistema", example = "false")
-    @NotNull(message = "{confirmacaoMedicacao.automatico.notNull}")
-    @JsonProperty("automatico")
-    private Boolean automatico = Boolean.FALSE;
-
-    @Schema(description = "Observações adicionais", example = "Cliente relatou leve tontura")
-    @Size(max = 500, message = "{confirmacaoMedicacao.observacao.size}")
-    @JsonProperty("observacao")
-    private String observacao;
-
-    @Schema(description = "ID do tenant", example = "redemaisfarma-001", required = true)
-    @NotBlank(message = "{confirmacaoMedicacao.tenantId.notBlank}")
-    @Size(max = 100, message = "{confirmacaoMedicacao.tenantId.size}")
-    @JsonProperty("tenantId")
-    private String tenantId;
-
-    @Schema(description = "Token de rastreamento", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty(value = "traceId")
+    @Schema(description="Nome do medicamento", example="Dipirona 500mg", required=true)
+    @NotBlank(message="{confirmacaoMedicacao.nomeMedicamento.notBlank}")
+    @Size(max=100, message="{confirmacaoMedicacao.nomeMedicamento.size}")
+    @JsonProperty(value="nomeMedicamento")
+    private @NotBlank(message="{confirmacaoMedicacao.nomeMedicamento.notBlank}") @Size(max=100, message="{confirmacaoMedicacao.nomeMedicamento.size}") String nomeMedicamento;
+    @Schema(description="Hor\u00e1rio agendado para ingest\u00e3o do medicamento", type="string", format="date-time", example="2025-07-04T08:00:00", required=true)
+    @NotNull(message="{confirmacaoMedicacao.horarioAgendado.notNull}")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="horarioAgendado")
+    private @NotNull(message="{confirmacaoMedicacao.horarioAgendado.notNull}") LocalDateTime horarioAgendado;
+    @Schema(description="Hor\u00e1rio em que a medica\u00e7\u00e3o foi confirmada", type="string", format="date-time", example="2025-07-04T08:05:00", required=true)
+    @NotNull(message="{confirmacaoMedicacao.horarioConfirmado.notNull}")
+    @PastOrPresent(message="{confirmacaoMedicacao.horarioConfirmado.pastOrPresent}")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="horarioConfirmado")
+    private @NotNull(message="{confirmacaoMedicacao.horarioConfirmado.notNull}") @PastOrPresent(message="{confirmacaoMedicacao.horarioConfirmado.pastOrPresent}") LocalDateTime horarioConfirmado;
+    @Schema(description="Indicador se o medicamento foi tomado", required=true)
+    @NotNull(message="{confirmacaoMedicacao.tomou.notNull}")
+    @JsonProperty(value="tomou")
+    private @NotNull(message="{confirmacaoMedicacao.tomou.notNull}") Boolean tomou;
+    @Schema(description="Indica se a confirma\u00e7\u00e3o foi autom\u00e1tica pelo sistema", example="false")
+    @NotNull(message="{confirmacaoMedicacao.automatico.notNull}")
+    @JsonProperty(value="automatico")
+    private @NotNull(message="{confirmacaoMedicacao.automatico.notNull}") Boolean automatico = Boolean.FALSE;
+    @Schema(description="Observa\u00e7\u00f5es adicionais", example="Cliente relatou leve tontura")
+    @Size(max=500, message="{confirmacaoMedicacao.observacao.size}")
+    @JsonProperty(value="observacao")
+    private @Size(max=500, message="{confirmacaoMedicacao.observacao.size}") String observacao;
+    @Schema(description="ID do tenant", example="redemaisfarma-001", required=true)
+    @NotBlank(message="{confirmacaoMedicacao.tenantId.notBlank}")
+    @Size(max=100, message="{confirmacaoMedicacao.tenantId.size}")
+    @JsonProperty(value="tenantId")
+    private @NotBlank(message="{confirmacaoMedicacao.tenantId.notBlank}") @Size(max=100, message="{confirmacaoMedicacao.tenantId.size}") String tenantId;
+    @Schema(description="Token de rastreamento", example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value="traceId")
     private UUID traceId;
-
-    @Schema(description = "Data e hora de criação do registro", type = "string", format = "date-time", example = "2025-07-04T08:05:00", required = true)
-    @NotNull(message = "{confirmacaoMedicacao.dataCriacao.notNull}")
-    @PastOrPresent(message = "{confirmacaoMedicacao.dataCriacao.pastOrPresent}")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty(value = "dataCriacao", access = JsonProperty.Access.READ_ONLY)
-    private LocalDateTime dataCriacao;
-
-    @Schema(description = "Data e hora da última atualização do registro", type = "string", format = "date-time", example = "2025-07-04T08:10:00")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty(value = "dataAtualizacao", access = JsonProperty.Access.READ_ONLY)
+    @Schema(description="Data e hora de cria\u00e7\u00e3o do registro", type="string", format="date-time", example="2025-07-04T08:05:00", required=true)
+    @NotNull(message="{confirmacaoMedicacao.dataCriacao.notNull}")
+    @PastOrPresent(message="{confirmacaoMedicacao.dataCriacao.pastOrPresent}")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="dataCriacao", access=JsonProperty.Access.READ_ONLY)
+    private @NotNull(message="{confirmacaoMedicacao.dataCriacao.notNull}") @PastOrPresent(message="{confirmacaoMedicacao.dataCriacao.pastOrPresent}") LocalDateTime dataCriacao;
+    @Schema(description="Data e hora da \u00faltima atualiza\u00e7\u00e3o do registro", type="string", format="date-time", example="2025-07-04T08:10:00")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="dataAtualizacao", access=JsonProperty.Access.READ_ONLY)
     private LocalDateTime dataAtualizacao;
 
-    // ---- Consistência de dados
-    @AssertTrue(message = "{confirmacaoMedicacao.horarios.ordemValida}")
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    public boolean isOrdemHorariosValida() {
-        if (horarioAgendado == null || horarioConfirmado == null)
+    @AssertTrue(message="{confirmacaoMedicacao.horarios.ordemValida}")
+    @JsonProperty(access=JsonProperty.Access.READ_ONLY)
+    public @AssertTrue(message="{confirmacaoMedicacao.horarios.ordemValida}") boolean isOrdemHorariosValida() {
+        if (this.horarioAgendado == null || this.horarioConfirmado == null) {
             return false;
-        return !horarioConfirmado.isBefore(horarioAgendado);
+        }
+        return !this.horarioConfirmado.isBefore(this.horarioAgendado);
     }
 
-    @AssertTrue(message = "{confirmacaoMedicacao.automatico.requerLembrete}")
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    public boolean isAutomaticoComLembrete() {
-        if (automatico == null)
+    @AssertTrue(message="{confirmacaoMedicacao.automatico.requerLembrete}")
+    @JsonProperty(access=JsonProperty.Access.READ_ONLY)
+    public @AssertTrue(message="{confirmacaoMedicacao.automatico.requerLembrete}") boolean isAutomaticoComLembrete() {
+        if (this.automatico == null) {
             return false;
-        if (automatico)
-            return lembreteId != null;
+        }
+        if (this.automatico.booleanValue()) {
+            return this.lembreteId != null;
+        }
         return true;
     }
 
-    @AssertTrue(message = "{confirmacaoMedicacao.tomou.requerConfirmado}")
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    public boolean isTomouRegras() {
-        if (tomou == null)
+    @AssertTrue(message="{confirmacaoMedicacao.tomou.requerConfirmado}")
+    @JsonProperty(access=JsonProperty.Access.READ_ONLY)
+    public @AssertTrue(message="{confirmacaoMedicacao.tomou.requerConfirmado}") boolean isTomouRegras() {
+        if (this.tomou == null) {
             return false;
-        if (tomou)
-            return horarioConfirmado != null;
+        }
+        if (this.tomou.booleanValue()) {
+            return this.horarioConfirmado != null;
+        }
         return true;
     }
 
-    // ---- Construtores
     public ConfirmacaoMedicacaoRequestDTO() {
     }
 
-    public ConfirmacaoMedicacaoRequestDTO(Long clienteId, UUID confirmacaoId, UUID lembreteId, String nomeMedicamento,
-            LocalDateTime horarioAgendado, LocalDateTime horarioConfirmado, Boolean tomou, Boolean automatico,
-            String observacao, String tenantId, UUID traceId, LocalDateTime dataCriacao,
-            LocalDateTime dataAtualizacao) {
+    public ConfirmacaoMedicacaoRequestDTO(Long clienteId, UUID confirmacaoId, UUID lembreteId, String nomeMedicamento, LocalDateTime horarioAgendado, LocalDateTime horarioConfirmado, Boolean tomou, Boolean automatico, String observacao, String tenantId, UUID traceId, LocalDateTime dataCriacao, LocalDateTime dataAtualizacao) {
         this.clienteId = clienteId;
         this.confirmacaoId = confirmacaoId;
         this.lembreteId = lembreteId;
@@ -138,10 +147,8 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
         this.dataAtualizacao = dataAtualizacao;
     }
 
-    // ---- Getters/Setters (inalterados)
-
     public Long getClienteId() {
-        return clienteId;
+        return this.clienteId;
     }
 
     public void setClienteId(Long clienteId) {
@@ -149,7 +156,7 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
     }
 
     public UUID getConfirmacaoId() {
-        return confirmacaoId;
+        return this.confirmacaoId;
     }
 
     public void setConfirmacaoId(UUID confirmacaoId) {
@@ -157,7 +164,7 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
     }
 
     public UUID getLembreteId() {
-        return lembreteId;
+        return this.lembreteId;
     }
 
     public void setLembreteId(UUID lembreteId) {
@@ -165,7 +172,7 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
     }
 
     public String getNomeMedicamento() {
-        return nomeMedicamento;
+        return this.nomeMedicamento;
     }
 
     public void setNomeMedicamento(String nomeMedicamento) {
@@ -173,7 +180,7 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
     }
 
     public LocalDateTime getHorarioAgendado() {
-        return horarioAgendado;
+        return this.horarioAgendado;
     }
 
     public void setHorarioAgendado(LocalDateTime horarioAgendado) {
@@ -181,7 +188,7 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
     }
 
     public LocalDateTime getHorarioConfirmado() {
-        return horarioConfirmado;
+        return this.horarioConfirmado;
     }
 
     public void setHorarioConfirmado(LocalDateTime horarioConfirmado) {
@@ -189,7 +196,7 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
     }
 
     public Boolean getTomou() {
-        return tomou;
+        return this.tomou;
     }
 
     public void setTomou(Boolean tomou) {
@@ -197,7 +204,7 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
     }
 
     public Boolean getAutomatico() {
-        return automatico;
+        return this.automatico;
     }
 
     public void setAutomatico(Boolean automatico) {
@@ -205,7 +212,7 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
     }
 
     public String getObservacao() {
-        return observacao;
+        return this.observacao;
     }
 
     public void setObservacao(String observacao) {
@@ -213,7 +220,7 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
     }
 
     public String getTenantId() {
-        return tenantId;
+        return this.tenantId;
     }
 
     public void setTenantId(String tenantId) {
@@ -221,7 +228,7 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
     }
 
     public UUID getTraceId() {
-        return traceId;
+        return this.traceId;
     }
 
     public void setTraceId(UUID traceId) {
@@ -229,7 +236,7 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
     }
 
     public LocalDateTime getDataCriacao() {
-        return dataCriacao;
+        return this.dataCriacao;
     }
 
     public void setDataCriacao(LocalDateTime dataCriacao) {
@@ -237,43 +244,30 @@ public class ConfirmacaoMedicacaoRequestDTO implements Serializable {
     }
 
     public LocalDateTime getDataAtualizacao() {
-        return dataAtualizacao;
+        return this.dataAtualizacao;
     }
 
     public void setDataAtualizacao(LocalDateTime dataAtualizacao) {
         this.dataAtualizacao = dataAtualizacao;
     }
 
-    // ---- util
-    @Override
-    public boolean equals(Object o) { /* igual ao seu */
-        if (this == o)
+    public boolean equals(Object o) {
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (o == null || this.getClass() != o.getClass()) {
             return false;
-        ConfirmacaoMedicacaoRequestDTO that = (ConfirmacaoMedicacaoRequestDTO) o;
-        return Objects.equals(clienteId, that.clienteId) && Objects.equals(confirmacaoId, that.confirmacaoId)
-                && Objects.equals(lembreteId, that.lembreteId) && Objects.equals(nomeMedicamento, that.nomeMedicamento)
-                && Objects.equals(horarioAgendado, that.horarioAgendado)
-                && Objects.equals(horarioConfirmado, that.horarioConfirmado) && Objects.equals(tomou, that.tomou)
-                && Objects.equals(automatico, that.automatico) && Objects.equals(observacao, that.observacao)
-                && Objects.equals(tenantId, that.tenantId) && Objects.equals(traceId, that.traceId)
-                && Objects.equals(dataCriacao, that.dataCriacao)
-                && Objects.equals(dataAtualizacao, that.dataAtualizacao);
+        }
+        ConfirmacaoMedicacaoRequestDTO that = (ConfirmacaoMedicacaoRequestDTO)o;
+        return Objects.equals(this.clienteId, that.clienteId) && Objects.equals(this.confirmacaoId, that.confirmacaoId) && Objects.equals(this.lembreteId, that.lembreteId) && Objects.equals(this.nomeMedicamento, that.nomeMedicamento) && Objects.equals(this.horarioAgendado, that.horarioAgendado) && Objects.equals(this.horarioConfirmado, that.horarioConfirmado) && Objects.equals(this.tomou, that.tomou) && Objects.equals(this.automatico, that.automatico) && Objects.equals(this.observacao, that.observacao) && Objects.equals(this.tenantId, that.tenantId) && Objects.equals(this.traceId, that.traceId) && Objects.equals(this.dataCriacao, that.dataCriacao) && Objects.equals(this.dataAtualizacao, that.dataAtualizacao);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(clienteId, confirmacaoId, lembreteId, nomeMedicamento, horarioAgendado, horarioConfirmado,
-                tomou, automatico, observacao, tenantId, traceId, dataCriacao, dataAtualizacao);
+        return Objects.hash(this.clienteId, this.confirmacaoId, this.lembreteId, this.nomeMedicamento, this.horarioAgendado, this.horarioConfirmado, this.tomou, this.automatico, this.observacao, this.tenantId, this.traceId, this.dataCriacao, this.dataAtualizacao);
     }
 
-    @Override
-    public String toString() { /* igual ao seu */
-        return "ConfirmacaoMedicacaoRequestDTO{" + "clienteId=" + clienteId + ", confirmacaoId=" + confirmacaoId
-                + ", lembreteId=" + lembreteId + ", nomeMedicamento='" + nomeMedicamento + '\'' + ", horarioAgendado="
-                + horarioAgendado + ", horarioConfirmado=" + horarioConfirmado + ", tomou=" + tomou + ", automatico="
-                + automatico + ", observacao='" + observacao + '\'' + ", tenantId='" + tenantId + '\'' + ", traceId="
-                + traceId + ", dataCriacao=" + dataCriacao + ", dataAtualizacao=" + dataAtualizacao + '}';
+    public String toString() {
+        return "ConfirmacaoMedicacaoRequestDTO{clienteId=" + this.clienteId + ", confirmacaoId=" + String.valueOf(this.confirmacaoId) + ", lembreteId=" + String.valueOf(this.lembreteId) + ", nomeMedicamento='" + this.nomeMedicamento + "', horarioAgendado=" + String.valueOf(this.horarioAgendado) + ", horarioConfirmado=" + String.valueOf(this.horarioConfirmado) + ", tomou=" + this.tomou + ", automatico=" + this.automatico + ", observacao='" + this.observacao + "', tenantId='" + this.tenantId + "', traceId=" + String.valueOf(this.traceId) + ", dataCriacao=" + String.valueOf(this.dataCriacao) + ", dataAtualizacao=" + String.valueOf(this.dataAtualizacao) + "}";
     }
 }
+

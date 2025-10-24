@@ -1,78 +1,45 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.data.jpa.repository.JpaRepository
+ *  org.springframework.data.jpa.repository.Modifying
+ *  org.springframework.data.jpa.repository.Query
+ *  org.springframework.data.repository.query.Param
+ */
 package br.com.redemaisfarma.adapters.outbound.persistence.jpa;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+public interface UsuarioJpaRepository
+extends JpaRepository<UsuarioEntity, Long> {
+    @Query(value="select u from UsuarioEntity u\nwhere lower(u.email) = lower(:id)\n   or u.cpf = :id\n")
+    public Optional<UsuarioEntity> findByEmailOrCpf(@Param(value="id") String var1);
 
-@Repository
-@Transactional(readOnly = true)
-public interface UsuarioJpaRepository extends JpaRepository<UsuarioEntity, Long> {
+    @Query(value="select case when (u.tentativasFalhas >= 5) then true else false end\nfrom UsuarioEntity u\nwhere lower(u.email) = lower(:id) or u.cpf = :id\n")
+    public Boolean isBlockedByEmailOrCpf(@Param(value="id") String var1);
 
-    // Busca por e-mail (case-insensitive) ou CPF já normalizado
-    @Query("""
-            SELECT u
-              FROM UsuarioEntity u
-             WHERE lower(u.email) = lower(:identifier) OR u.cpf = :identifier
-            """)
-    Optional<UsuarioEntity> findByEmailOrCpf(@Param("identifier") String identifier);
-
-    boolean existsByEmail(String email);
-
-    boolean existsByCpf(String cpf);
-
-    List<UsuarioEntity> findByClienteVipTrue();
-
-    // ++ tentativas (trata null com coalesce)
     @Modifying
-    @Transactional
-    @Query("""
-            UPDATE UsuarioEntity u
-               SET u.tentativasFalhas = coalesce(u.tentativasFalhas, 0) + 1
-             WHERE lower(u.email) = lower(:identifier) OR u.cpf = :identifier
-            """)
-    void registrarTentativaFalha(@Param("identifier") String identifier);
+    @Query(value="update UsuarioEntity u set u.tentativasFalhas = u.tentativasFalhas + 1 where lower(u.email)=lower(:id) or u.cpf=:id")
+    public void registrarTentativaFalha(@Param(value="id") String var1);
 
-    // reset tentativas
     @Modifying
-    @Transactional
-    @Query("""
-            UPDATE UsuarioEntity u
-               SET u.tentativasFalhas = 0
-             WHERE lower(u.email) = lower(:identifier) OR u.cpf = :identifier
-            """)
-    void resetarTentativasFalhas(@Param("identifier") String identifier);
+    @Query(value="update UsuarioEntity u set u.tentativasFalhas = 0 where lower(u.email)=lower(:id) or u.cpf=:id")
+    public void resetarTentativasFalhas(@Param(value="id") String var1);
 
-    // bloqueio por tentativas (retorna wrapper para evitar NPE)
-    @Query("""
-            SELECT CASE WHEN coalesce(u.tentativasFalhas, 0) >= 5 THEN true ELSE false END
-              FROM UsuarioEntity u
-             WHERE lower(u.email) = lower(:identifier) OR u.cpf = :identifier
-            """)
-    Boolean isBlockedByEmailOrCpf(@Param("identifier") String identifier);
-
-    // VIP (Optional para ausência)
-    @Query("""
-            SELECT u.clienteVip
-              FROM UsuarioEntity u
-             WHERE lower(u.email) = lower(:identifier) OR u.cpf = :identifier
-            """)
-    Optional<Boolean> verificarClienteVip(@Param("identifier") String identifier);
-
-    // último acesso
     @Modifying
-    @Transactional
-    @Query("""
-            UPDATE UsuarioEntity u
-               SET u.ultimoAcesso = :data
-             WHERE u.id = :userId
-            """)
-    int updateUltimoAcesso(@Param("userId") Long userId, @Param("data") LocalDateTime data);
+    @Query(value="update UsuarioEntity u set u.ultimoAcesso = :when where u.id = :id")
+    public int updateUltimoAcesso(@Param(value="id") Long var1, @Param(value="when") LocalDateTime var2);
+
+    @Query(value="select u.clienteVip from UsuarioEntity u\nwhere lower(u.email)=lower(:id) or u.cpf=:id\n")
+    public Optional<Boolean> verificarClienteVip(@Param(value="id") String var1);
+
+    public boolean existsByEmail(String var1);
 }
+

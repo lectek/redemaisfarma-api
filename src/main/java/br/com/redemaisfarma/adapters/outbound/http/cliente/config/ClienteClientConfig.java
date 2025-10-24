@@ -1,8 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.beans.factory.annotation.Qualifier
+ *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+ *  org.springframework.boot.context.properties.EnableConfigurationProperties
+ *  org.springframework.context.annotation.Bean
+ *  org.springframework.context.annotation.Configuration
+ *  org.springframework.http.MediaType
+ *  org.springframework.web.reactive.function.client.ExchangeStrategies
+ *  org.springframework.web.reactive.function.client.WebClient
+ *  org.springframework.web.reactive.function.client.WebClient$Builder
+ */
 package br.com.redemaisfarma.adapters.outbound.http.cliente.config;
 
-import br.com.redemaisfarma.adapters.outbound.http.cliente.client.ClienteHttpClient;
 import br.com.redemaisfarma.adapters.outbound.http.cliente.client.ClienteClient;
+import br.com.redemaisfarma.adapters.outbound.http.cliente.client.ClienteHttpClient;
+import br.com.redemaisfarma.adapters.outbound.http.cliente.config.ClienteClientProperties;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,33 +28,21 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-@EnableConfigurationProperties(ClienteClientProperties.class)
+@EnableConfigurationProperties(value={ClienteClientProperties.class})
+@ConditionalOnProperty(prefix="integrations.cliente", name={"enabled"}, havingValue="true", matchIfMissing=false)
 public class ClienteClientConfig {
-
-    /**
-     * WebClient dedicado ao serviço de Cliente, baseado no builder comum. - Usa baseUrl vinda das properties - Define
-     * Accept/Content-Type como JSON - Pode customizar codecs/limites por cliente
-     */
-    @Bean("clienteWebClient")
+    @Bean(value={"clienteWebClient"})
     public WebClient clienteWebClient(WebClient.Builder webClientBuilder, ClienteClientProperties props) {
-
-        // Aumentar buffer se precisar lidar com payloads grandes
-        ExchangeStrategies strategies = ExchangeStrategies.builder()
-                .codecs(cfg -> cfg.defaultCodecs().maxInMemorySize(props.getMaxInMemorySize())).build();
-
-        return webClientBuilder.clone() // não “contamina” outros clientes que usem o mesmo builder
-                .baseUrl(props.getBaseUrl()).defaultHeaders(h -> {
-                    h.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
-                    h.setContentType(MediaType.APPLICATION_JSON);
-                }).exchangeStrategies(strategies).build();
+        ExchangeStrategies strategies = ExchangeStrategies.builder().codecs(cfg -> cfg.defaultCodecs().maxInMemorySize(props.getMaxInMemorySize())).build();
+        return webClientBuilder.clone().baseUrl(props.getBaseUrl()).defaultHeaders(h -> {
+            h.setAccept(List.of(MediaType.APPLICATION_JSON));
+            h.setContentType(MediaType.APPLICATION_JSON);
+        }).exchangeStrategies(strategies).build();
     }
 
-    /**
-     * Adapter/Client de domínio que usa o WebClient dedicado.
-     */
     @Bean
-    public ClienteClient clienteClient(@Qualifier("clienteWebClient") WebClient clienteWebClient,
-            ClienteClientProperties props) {
+    public ClienteClient clienteClient(@Qualifier(value="clienteWebClient") WebClient clienteWebClient, ClienteClientProperties props) {
         return new ClienteHttpClient(clienteWebClient, props);
     }
 }
+

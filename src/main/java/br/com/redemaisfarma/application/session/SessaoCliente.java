@@ -1,26 +1,23 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.application.session;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-/**
- * Representa os dados da sessÃ£o do cliente autenticado.
- */
-public class SessaoCliente implements Serializable {
-
+public class SessaoCliente
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private Long id;
     private String nome;
     private String email;
     private boolean clienteVip;
     private LocalDateTime dataUltimoAcesso;
 
-    // Construtor vazio (necessÃ¡rio para serializaÃ§Ã£o/deserializaÃ§Ã£o)
     public SessaoCliente() {
     }
 
-    // Construtor completo
     public SessaoCliente(Long id, String nome, String email, boolean clienteVip, LocalDateTime dataUltimoAcesso) {
         this.id = id;
         this.nome = nome;
@@ -29,18 +26,16 @@ public class SessaoCliente implements Serializable {
         this.dataUltimoAcesso = dataUltimoAcesso;
     }
 
-    // âœ… Construtor alternativo (usado no LoginController)
     public SessaoCliente(Long id, String nome, String email, LocalDateTime dataUltimoAcesso) {
         this.id = id;
         this.nome = nome;
         this.email = email;
         this.dataUltimoAcesso = dataUltimoAcesso;
-        this.clienteVip = false; // padrÃ£o se nÃ£o for informado
+        this.clienteVip = false;
     }
 
-    // Getters e Setters
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -48,7 +43,7 @@ public class SessaoCliente implements Serializable {
     }
 
     public String getNome() {
-        return nome;
+        return this.nome;
     }
 
     public void setNome(String nome) {
@@ -56,7 +51,7 @@ public class SessaoCliente implements Serializable {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -64,7 +59,7 @@ public class SessaoCliente implements Serializable {
     }
 
     public boolean isClienteVip() {
-        return clienteVip;
+        return this.clienteVip;
     }
 
     public void setClienteVip(boolean clienteVip) {
@@ -72,14 +67,13 @@ public class SessaoCliente implements Serializable {
     }
 
     public LocalDateTime getDataUltimoAcesso() {
-        return dataUltimoAcesso;
+        return this.dataUltimoAcesso;
     }
 
     public void setDataUltimoAcesso(LocalDateTime dataUltimoAcesso) {
         this.dataUltimoAcesso = dataUltimoAcesso;
     }
 
-    // MÃ©todo utilitÃ¡rio
     public boolean isClienteLogado() {
         return this.id != null;
     }

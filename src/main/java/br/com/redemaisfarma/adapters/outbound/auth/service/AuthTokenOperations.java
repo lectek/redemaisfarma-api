@@ -1,28 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.service;
 
 import br.com.redemaisfarma.adapters.outbound.auth.jwt.model.TokenPair;
-
 import java.util.List;
 import java.util.Map;
 
 public interface AuthTokenOperations {
+    public TokenPair issueTokens(Long var1, String var2, String var3, List<String> var4, String var5, String var6);
 
-    TokenPair issueTokens(Long userId,
-                          String username,
-                          String tenantId,
-                          List<String> roles,
-                          String userAgent,
-                          String ip);
+    public TokenPair refreshUsing(String var1, String var2, String var3);
 
-    TokenPair refreshUsing(String refreshTokenValue, String userAgent, String ip);
+    public void revokeRefreshToken(String var1);
 
-    void revokeRefreshToken(String refreshTokenValue);
+    public void revokeAllForUser(Long var1, String var2);
 
-    void revokeAllForUser(Long userId, String tenantId);
+    public Map<String, Object> validateAccessToken(String var1);
 
-    Map<String, Object> validateAccessToken(String jwt);
+    public Map<String, Object> parseAccessToken(String var1);
 
-    Map<String, Object> parseAccessToken(String jwt);
-
-    void revokeAccessToken(String accessToken);
+    public void revokeAccessToken(String var1);
 }
+

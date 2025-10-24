@@ -1,95 +1,128 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.validation.constraints.NotBlank
+ *  jakarta.validation.constraints.NotNull
+ *  jakarta.validation.constraints.Size
+ *  org.hibernate.validator.constraints.URL
+ */
 package br.com.redemaisfarma.application.view.admin;
 
 import br.com.redemaisfarma.domain.financeiro.config.GatewayConfig;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.hibernate.validator.constraints.URL;
-
 import java.io.Serializable;
 import java.util.Objects;
+import org.hibernate.validator.constraints.URL;
 
-/**
- * Form/DTO usado nas telas admin para criar/editar configurações de gateway.
- * Mantém apenas campos necessários à UI e validações de entrada.
- */
-public class GatewayConfigForm implements Serializable {
-
+public class GatewayConfigForm
+implements Serializable {
     private Long id;
+    @NotBlank(message="Nome de exibi\u00e7\u00e3o \u00e9 obrigat\u00f3rio")
+    @Size(max=120, message="Nome pode ter no m\u00e1ximo 120 caracteres")
+    private @NotBlank(message="Nome de exibi\u00e7\u00e3o \u00e9 obrigat\u00f3rio") @Size(max=120, message="Nome pode ter no m\u00e1ximo 120 caracteres") String nome;
+    @NotBlank(message="Provedor \u00e9 obrigat\u00f3rio")
+    @Size(max=60, message="Provedor pode ter no m\u00e1ximo 60 caracteres")
+    private @NotBlank(message="Provedor \u00e9 obrigat\u00f3rio") @Size(max=60, message="Provedor pode ter no m\u00e1ximo 60 caracteres") String provedor;
+    @NotBlank(message="API Key \u00e9 obrigat\u00f3ria")
+    @Size(max=255, message="API Key pode ter no m\u00e1ximo 255 caracteres")
+    private @NotBlank(message="API Key \u00e9 obrigat\u00f3ria") @Size(max=255, message="API Key pode ter no m\u00e1ximo 255 caracteres") String apiKey;
+    @Size(max=255, message="API Secret pode ter no m\u00e1ximo 255 caracteres")
+    private @Size(max=255, message="API Secret pode ter no m\u00e1ximo 255 caracteres") String apiSecret;
+    @URL(message="Webhook URL inv\u00e1lida")
+    @Size(max=512, message="Webhook URL pode ter no m\u00e1ximo 512 caracteres")
+    private @URL(message="Webhook URL inv\u00e1lida") @Size(max=512, message="Webhook URL pode ter no m\u00e1ximo 512 caracteres") String webhookUrl;
+    @NotNull(message="Campo 'ativo' \u00e9 obrigat\u00f3rio")
+    private @NotNull(message="Campo 'ativo' \u00e9 obrigat\u00f3rio") Boolean ativo = Boolean.TRUE;
+    @NotNull(message="Timeout \u00e9 obrigat\u00f3rio")
+    private @NotNull(message="Timeout \u00e9 obrigat\u00f3rio") Integer timeoutMs = 10000;
+    @NotNull(message="Quantidade de tentativas \u00e9 obrigat\u00f3ria")
+    private @NotNull(message="Quantidade de tentativas \u00e9 obrigat\u00f3ria") Integer maxRetries = 3;
+    @Size(max=4000, message="Metadados pode ter no m\u00e1ximo 4000 caracteres")
+    private @Size(max=4000, message="Metadados pode ter no m\u00e1ximo 4000 caracteres") String metadata;
 
-    @NotBlank(message = "Nome de exibição é obrigatório")
-    @Size(max = 120, message = "Nome pode ter no máximo 120 caracteres")
-    private String nome;
+    public Long getId() {
+        return this.id;
+    }
 
-    /**
-     * Identificador do provedor (ex.: "pagarme", "stone", "cielo").
-     * Mantido como string para não travar a UI caso um novo provedor surja.
-     */
-    @NotBlank(message = "Provedor é obrigatório")
-    @Size(max = 60, message = "Provedor pode ter no máximo 60 caracteres")
-    private String provedor;
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    @NotBlank(message = "API Key é obrigatória")
-    @Size(max = 255, message = "API Key pode ter no máximo 255 caracteres")
-    private String apiKey;
+    public String getNome() {
+        return this.nome;
+    }
 
-    @Size(max = 255, message = "API Secret pode ter no máximo 255 caracteres")
-    private String apiSecret;
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-    @URL(message = "Webhook URL inválida")
-    @Size(max = 512, message = "Webhook URL pode ter no máximo 512 caracteres")
-    private String webhookUrl;
+    public String getProvedor() {
+        return this.provedor;
+    }
 
-    @NotNull(message = "Campo 'ativo' é obrigatório")
-    private Boolean ativo = Boolean.TRUE;
+    public void setProvedor(String provedor) {
+        this.provedor = provedor;
+    }
 
-    /** Timeout em milissegundos para chamadas ao provedor */
-    @NotNull(message = "Timeout é obrigatório")
-    private Integer timeoutMs = 10000;
+    public String getApiKey() {
+        return this.apiKey;
+    }
 
-    /** Tentativas de reenvio em caso de falha transitória */
-    @NotNull(message = "Quantidade de tentativas é obrigatória")
-    private Integer maxRetries = 3;
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
 
-    /** Campo livre (JSON/Texto) para parâmetros específicos do provedor */
-    @Size(max = 4000, message = "Metadados pode ter no máximo 4000 caracteres")
-    private String metadata;
+    public String getApiSecret() {
+        return this.apiSecret;
+    }
 
-    public GatewayConfigForm() {}
+    public void setApiSecret(String apiSecret) {
+        this.apiSecret = apiSecret;
+    }
 
-    // region Getters/Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public String getWebhookUrl() {
+        return this.webhookUrl;
+    }
 
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
+    public void setWebhookUrl(String webhookUrl) {
+        this.webhookUrl = webhookUrl;
+    }
 
-    public String getProvedor() { return provedor; }
-    public void setProvedor(String provedor) { this.provedor = provedor; }
+    public Boolean getAtivo() {
+        return this.ativo;
+    }
 
-    public String getApiKey() { return apiKey; }
-    public void setApiKey(String apiKey) { this.apiKey = apiKey; }
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
+    }
 
-    public String getApiSecret() { return apiSecret; }
-    public void setApiSecret(String apiSecret) { this.apiSecret = apiSecret; }
+    public Integer getTimeoutMs() {
+        return this.timeoutMs;
+    }
 
-    public String getWebhookUrl() { return webhookUrl; }
-    public void setWebhookUrl(String webhookUrl) { this.webhookUrl = webhookUrl; }
+    public void setTimeoutMs(Integer timeoutMs) {
+        this.timeoutMs = timeoutMs;
+    }
 
-    public Boolean getAtivo() { return ativo; }
-    public void setAtivo(Boolean ativo) { this.ativo = ativo; }
+    public Integer getMaxRetries() {
+        return this.maxRetries;
+    }
 
-    public Integer getTimeoutMs() { return timeoutMs; }
-    public void setTimeoutMs(Integer timeoutMs) { this.timeoutMs = timeoutMs; }
+    public void setMaxRetries(Integer maxRetries) {
+        this.maxRetries = maxRetries;
+    }
 
-    public Integer getMaxRetries() { return maxRetries; }
-    public void setMaxRetries(Integer maxRetries) { this.maxRetries = maxRetries; }
+    public String getMetadata() {
+        return this.metadata;
+    }
 
-    public String getMetadata() { return metadata; }
-    public void setMetadata(String metadata) { this.metadata = metadata; }
-    // endregion
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
 
-    /** Converte o form em entidade de domínio. */
     public GatewayConfig toEntity() {
         GatewayConfig e = new GatewayConfig();
         e.setId(this.id);
@@ -105,9 +138,8 @@ public class GatewayConfigForm implements Serializable {
         return e;
     }
 
-    /** Constrói um form a partir da entidade (útil para edição). */
     public static GatewayConfigForm fromEntity(GatewayConfig e) {
-        Objects.requireNonNull(e, "Entidade não pode ser nula");
+        Objects.requireNonNull(e, "Entidade n\u00e3o pode ser nula");
         GatewayConfigForm f = new GatewayConfigForm();
         f.setId(e.getId());
         f.setNome(e.getNome());
@@ -122,3 +154,4 @@ public class GatewayConfigForm implements Serializable {
         return f;
     }
 }
+

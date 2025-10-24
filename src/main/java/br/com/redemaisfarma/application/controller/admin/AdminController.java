@@ -1,93 +1,84 @@
-// src/main/java/br/com/redemaisfarma/application/controller/admin/AdminController.java
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.stereotype.Controller
+ *  org.springframework.ui.Model
+ *  org.springframework.web.bind.annotation.GetMapping
+ *  org.springframework.web.bind.annotation.PathVariable
+ *  org.springframework.web.bind.annotation.RequestMapping
+ */
 package br.com.redemaisfarma.application.controller.admin;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/admin")
+@RequestMapping(value={"/admin"})
 public class AdminController {
-
     private static final String VIEW_PREFIX = "pages/admin/";
 
     private String viewRoot(String page) {
-        return VIEW_PREFIX + page; // admin/{page}.html
-    }
-    private String view2(String section, String page) {
-        return VIEW_PREFIX + section + "/" + page; // admin/{section}/{page}.html
-    }
-    private String view3(String section, String sub, String page) {
-        return VIEW_PREFIX + section + "/" + sub + "/" + page; // admin/{section}/{sub}/{page}.html
+        return VIEW_PREFIX + page;
     }
 
-    // Helpers
+    private String view2(String section, String page) {
+        return VIEW_PREFIX + section + "/" + page;
+    }
+
+    private String view3(String section, String sub, String page) {
+        return VIEW_PREFIX + section + "/" + sub + "/" + page;
+    }
+
     private static String titleize(String s) {
-        if (s == null || s.isBlank()) return "";
-        // "regras-desconto" -> "Regras Desconto"
+        if (s == null || s.isBlank()) {
+            return "";
+        }
         String[] parts = s.split("[-_]");
         StringBuilder b = new StringBuilder();
         for (String p : parts) {
             if (p.isBlank()) continue;
-            b.append(Character.toUpperCase(p.charAt(0)))
-             .append(p.substring(1));
+            b.append(Character.toUpperCase(p.charAt(0))).append(p.substring(1));
             b.append(' ');
         }
         return b.toString().trim();
     }
+
     private static void setCommon(Model model, String pageTitle, String active) {
-        model.addAttribute("pageTitle", pageTitle);
-        model.addAttribute("active", active); // use no header/nav para marcar menu
+        model.addAttribute("pageTitle", (Object)pageTitle);
+        model.addAttribute("active", (Object)active);
     }
 
-    /* =========================
-       Raiz do Admin
-       ========================= */
-    @GetMapping({"", "/"})
+    @GetMapping(value={"", "/"})
     public String root(Model model) {
-        // escolha "dashboard" como landing (troque para "index" se preferir)
-        setCommon(model, "Dashboard", "dashboard");
-        return viewRoot("dashboard");
+        AdminController.setCommon(model, "Dashboard", "dashboard");
+        return this.viewRoot("dashboard");
     }
 
-    // Redirects de compatibilidade
-    @GetMapping("/painel")
-    public String redirectPainel() { return "redirect:/admin"; }
+    @GetMapping(value={"/painel"})
+    public String redirectPainel() {
+        return "redirect:/admin";
+    }
 
-    /* =========================
-       1) Páginas na raiz: /admin/{page} -> admin/{page}.html
-       Ex.: /admin/design  => templates/pages/admin/design.html
-       ========================= */
-    @GetMapping("/{page}")
+    @GetMapping(value={"/{page}"})
     public String pageRoot(@PathVariable String page, Model model) {
-        setCommon(model, titleize(page), page);
-        return viewRoot(page);
+        AdminController.setCommon(model, AdminController.titleize(page), page);
+        return this.viewRoot(page);
     }
 
-    /* =========================
-       2) Dois níveis: /admin/{section}/{page}
-       Ex.: /admin/produtos/lista => templates/pages/admin/produtos/lista.html
-       ========================= */
-    @GetMapping("/{section}/{page}")
-    public String page2(@PathVariable String section,
-                        @PathVariable String page,
-                        Model model) {
-        setCommon(model, titleize(page), section);
-        return view2(section, page);
+    @GetMapping(value={"/{section}/{page}"})
+    public String page2(@PathVariable String section, @PathVariable String page, Model model) {
+        AdminController.setCommon(model, AdminController.titleize(page), section);
+        return this.view2(section, page);
     }
 
-    /* =========================
-       3) Três níveis: /admin/{section}/{sub}/{page}
-       Ex.: /admin/marketing/emails/campanhas =>
-            templates/pages/admin/marketing/emails/campanhas.html
-       ========================= */
-    @GetMapping("/{section}/{sub}/{page}")
-    public String page3(@PathVariable String section,
-                        @PathVariable String sub,
-                        @PathVariable String page,
-                        Model model) {
-        // active fica no 1º nível (section), que costuma ser o item do menu lateral
-        setCommon(model, titleize(page), section);
-        return view3(section, sub, page);
+    @GetMapping(value={"/{section}/{sub}/{page}"})
+    public String page3(@PathVariable String section, @PathVariable String sub, @PathVariable String page, Model model) {
+        AdminController.setCommon(model, AdminController.titleize(page), section);
+        return this.view3(section, sub, page);
     }
 }
+

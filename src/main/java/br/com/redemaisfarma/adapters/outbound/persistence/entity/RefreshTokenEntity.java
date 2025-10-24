@@ -1,56 +1,63 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.persistence.Column
+ *  jakarta.persistence.Entity
+ *  jakarta.persistence.GeneratedValue
+ *  jakarta.persistence.GenerationType
+ *  jakarta.persistence.Id
+ *  jakarta.persistence.Index
+ *  jakarta.persistence.Table
+ *  jakarta.persistence.UniqueConstraint
+ */
 package br.com.redemaisfarma.adapters.outbound.persistence.entity;
 
-import jakarta.persistence.*;
-import java.io.Serializable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.Objects;
-import java.util.UUID;
 
 @Entity
-@Table(name = "refresh_tokens", indexes = {
-        @Index(name = "ix_refresh_token_token", columnList = "token", unique = true),
-        @Index(name = "ix_refresh_token_user_tenant", columnList = "user_id, tenant_id") })
-public class RefreshTokenEntity implements Serializable {
+@Table(name="refresh_tokens", indexes={@Index(name="ix_refresh_token_user_tenant", columnList="user_id, tenant_id"), @Index(name="ix_refresh_token_expires_at", columnList="expires_at")}, uniqueConstraints={@UniqueConstraint(name="uk_refresh_token_token", columnNames={"token"})})
+public class RefreshTokenEntity {
     @Id
-     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false, updatable = false)
-    private UUID id;
-
-    @Column(name = "user_id", nullable = false)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name="id", nullable=false, updatable=false)
+    private Long id;
+    @Column(name="user_id", nullable=false)
     private Long userId;
-
-    @Column(name = "tenant_id", nullable = false, length = 100)
+    @Column(name="tenant_id", nullable=false, length=100)
     private String tenantId;
-
-    @Column(name = "token", nullable = false, unique = true, length = 512)
+    @Column(name="token", nullable=false, length=512)
     private String token;
-
-    @Column(name = "issued_at", nullable = false)
+    @Column(name="issued_at", nullable=false, columnDefinition="DATETIME(6)")
     private Instant issuedAt;
-
-    @Column(name = "expires_at", nullable = false)
+    @Column(name="expires_at", nullable=false, columnDefinition="DATETIME(6)")
     private Instant expiresAt;
-
-    @Column(name = "revoked_at")
+    @Column(name="revoked_at", columnDefinition="DATETIME(6)")
     private Instant revokedAt;
-
-    @Column(name = "user_agent", length = 512)
+    @Column(name="ip_address", length=64)
+    private String ipAddress;
+    @Column(name="user_agent", length=512)
     private String userAgent;
 
-    @Column(name = "ip_address", length = 64)
-    private String ipAddress;
-
-    // getters e setters
-    public UUID getId() {
-        return id;
+    public Long getId() {
+        return this.id;
     }
 
-    public void setId(UUID id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
     public Long getUserId() {
-        return userId;
+        return this.userId;
     }
 
     public void setUserId(Long userId) {
@@ -58,7 +65,7 @@ public class RefreshTokenEntity implements Serializable {
     }
 
     public String getTenantId() {
-        return tenantId;
+        return this.tenantId;
     }
 
     public void setTenantId(String tenantId) {
@@ -66,7 +73,7 @@ public class RefreshTokenEntity implements Serializable {
     }
 
     public String getToken() {
-        return token;
+        return this.token;
     }
 
     public void setToken(String token) {
@@ -74,7 +81,7 @@ public class RefreshTokenEntity implements Serializable {
     }
 
     public Instant getIssuedAt() {
-        return issuedAt;
+        return this.issuedAt;
     }
 
     public void setIssuedAt(Instant issuedAt) {
@@ -82,7 +89,7 @@ public class RefreshTokenEntity implements Serializable {
     }
 
     public Instant getExpiresAt() {
-        return expiresAt;
+        return this.expiresAt;
     }
 
     public void setExpiresAt(Instant expiresAt) {
@@ -90,41 +97,49 @@ public class RefreshTokenEntity implements Serializable {
     }
 
     public Instant getRevokedAt() {
-        return revokedAt;
+        return this.revokedAt;
     }
 
     public void setRevokedAt(Instant revokedAt) {
         this.revokedAt = revokedAt;
     }
 
-    public String getUserAgent() {
-        return userAgent;
-    }
-
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
-    }
-
     public String getIpAddress() {
-        return ipAddress;
+        return this.ipAddress;
     }
 
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (!(o instanceof RefreshTokenEntity))
-            return false;
-        RefreshTokenEntity that = (RefreshTokenEntity) o;
-        return Objects.equals(id, that.id);
+    public String getUserAgent() {
+        return this.userAgent;
     }
 
-    @Override
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof RefreshTokenEntity)) {
+            return false;
+        }
+        RefreshTokenEntity that = (RefreshTokenEntity)o;
+        if (this.id != null && that.id != null) {
+            return Objects.equals(this.id, that.id);
+        }
+        return Objects.equals(this.token, that.token);
+    }
+
     public int hashCode() {
-        return Objects.hash(id);
+        return this.id != null ? Objects.hash(this.id) : Objects.hash(this.token);
+    }
+
+    public String toString() {
+        return "RefreshTokenEntity{id=" + String.valueOf(this.id) + ", userId=" + String.valueOf(this.userId) + ", tenantId='" + this.tenantId + "', token='***redacted***'}";
     }
 }
+

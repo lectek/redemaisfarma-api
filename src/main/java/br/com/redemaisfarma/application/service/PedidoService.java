@@ -1,34 +1,58 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  br.com.redemaisfarma.domain.Pedido
+ */
 package br.com.redemaisfarma.application.service;
 
-import br.com.redemaisfarma.adapters.outbound.persistence.jpa.PedidoJPARepository;
 import br.com.redemaisfarma.domain.Pedido;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
-@Service
-public class PedidoService {
+public interface PedidoService {
+    public Pedido findById(Long var1);
 
-    private final PedidoJPARepository pedidoRepository;
+    public List<Pedido> list();
 
-    public PedidoService(PedidoJPARepository pedidoRepository) {
-        this.pedidoRepository = pedidoRepository;
+    public Pedido create(Pedido var1);
+
+    public Pedido update(Long var1, Pedido var2);
+
+    public void delete(Long var1);
+
+    default public Optional<Pedido> findByIdOptional(Long id) {
+        try {
+            return Optional.ofNullable(this.findById(id));
+        }
+        catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 
-    public Pedido salvar(Pedido pedido) {
-        return pedidoRepository.save(pedido);
+    @Deprecated
+    default public Pedido buscarPorId(Long id) {
+        return this.findById(id);
     }
 
-    public List<Pedido> listarTodos() {
-        return pedidoRepository.findAll();
+    @Deprecated
+    default public List<Pedido> listarTodos() {
+        return this.list();
     }
 
-    public Optional<Pedido> buscarPorId(Long id) {
-        return pedidoRepository.findById(id);
+    @Deprecated
+    default public Pedido salvar(Pedido pedido) {
+        return this.create(pedido);
     }
 
-    public void deletar(Long id) {
-        pedidoRepository.deleteById(id);
+    @Deprecated
+    default public Pedido atualizar(Long id, Pedido pedido) {
+        return this.update(id, pedido);
+    }
+
+    @Deprecated
+    default public void deletar(Long id) {
+        this.delete(id);
     }
 }
+

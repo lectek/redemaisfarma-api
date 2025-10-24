@@ -1,28 +1,33 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.data.jpa.repository.JpaRepository
+ *  org.springframework.data.jpa.repository.Modifying
+ *  org.springframework.data.jpa.repository.Query
+ *  org.springframework.data.repository.query.Param
+ *  org.springframework.stereotype.Repository
+ */
 package br.com.redemaisfarma.adapters.outbound.persistence.jpa;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.RefreshTokenEntity;
+import java.time.Instant;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
+@Repository
+public interface RefreshTokenJpaRepository
+extends JpaRepository<RefreshTokenEntity, Long> {
+    public Optional<RefreshTokenEntity> findByToken(String var1);
 
-public interface RefreshTokenJpaRepository extends JpaRepository<RefreshTokenEntity, UUID> {
+    public long deleteByExpiresAtBefore(Instant var1);
 
-    Optional<RefreshTokenEntity> findByToken(String token);
-
-    long deleteByExpiresAtBefore(Instant now);
-
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("""
-            update RefreshTokenEntity r
-               set r.revokedAt = :when
-             where r.userId = :userId
-               and r.revokedAt is null
-               and (:tenantId is null or r.tenantId = :tenantId)
-            """)
-    int revokeAllForUser(@Param("userId") Long userId, @Param("tenantId") String tenantId, @Param("when") Instant when);
+    @Modifying(clearAutomatically=true, flushAutomatically=true)
+    @Query(value="update RefreshTokenEntity r\n   set r.revokedAt = :when\n where r.userId = :userId\n   and r.revokedAt is null\n   and (:tenantId is null or r.tenantId = :tenantId)\n")
+    public int revokeAllForUser(@Param(value="userId") Long var1, @Param(value="tenantId") String var2, @Param(value="when") Instant var3);
 }
+

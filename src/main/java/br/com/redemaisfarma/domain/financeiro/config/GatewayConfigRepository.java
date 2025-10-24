@@ -1,25 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.data.jpa.repository.JpaRepository
+ */
 package br.com.redemaisfarma.domain.financeiro.config;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
+import br.com.redemaisfarma.domain.financeiro.config.GatewayConfig;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface GatewayConfigRepository extends JpaRepository<GatewayConfig, Long> {
+public interface GatewayConfigRepository
+extends JpaRepository<GatewayConfig, Long> {
+    public Optional<GatewayConfig> findFirstByProvedorIgnoreCaseAndAtivoTrue(String var1);
 
-    // ativa exclusiva por provedor (case-insensitive)
-    Optional<GatewayConfig> findFirstByProvedorIgnoreCaseAndAtivoTrue(String provedor);
+    public Optional<GatewayConfig> findTopByProvedorIgnoreCaseOrderByAtualizadoEmDesc(String var1);
 
-    // último registro por provedor
-    Optional<GatewayConfig> findTopByProvedorIgnoreCaseOrderByAtualizadoEmDesc(String provedor);
+    public List<GatewayConfig> findByProvedorIgnoreCaseOrderByAtualizadoEmDesc(String var1);
 
-    // listagens
-    List<GatewayConfig> findByProvedorIgnoreCaseOrderByAtualizadoEmDesc(String provedor);
-    List<GatewayConfig> findByAtivoAndProvedorIgnoreCaseOrderByAtualizadoEmDesc(boolean ativo, String provedor);
-    List<GatewayConfig> findByAtivoOrderByAtualizadoEmDesc(boolean ativo);
-    List<GatewayConfig> findAllByOrderByAtualizadoEmDesc();
+    public List<GatewayConfig> findByAtivoAndProvedorIgnoreCaseOrderByAtualizadoEmDesc(boolean var1, String var2);
 
-    // unicidade (provedor + nome)
-    boolean existsByProvedorIgnoreCaseAndNomeIgnoreCase(String provedor, String nome);
-    boolean existsByProvedorIgnoreCaseAndNomeIgnoreCaseAndIdNot(String provedor, String nome, Long id);
+    public List<GatewayConfig> findByAtivoOrderByAtualizadoEmDesc(boolean var1);
+
+    public List<GatewayConfig> findAllByOrderByAtualizadoEmDesc();
+
+    public boolean existsByProvedorIgnoreCaseAndNomeIgnoreCase(String var1, String var2);
+
+    public boolean existsByProvedorIgnoreCaseAndNomeIgnoreCaseAndIdNot(String var1, String var2, Long var3);
 }
+

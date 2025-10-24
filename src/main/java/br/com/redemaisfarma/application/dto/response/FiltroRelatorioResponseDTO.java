@@ -1,10 +1,21 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonFormat
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ */
 package br.com.redemaisfarma.application.dto.response;
 
+import br.com.redemaisfarma.application.dto.response.AtendenteDTO;
+import br.com.redemaisfarma.application.dto.response.ClienteResumoDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,77 +24,56 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * DTO de resposta para relatórios gerenciais, financeiros e operacionais.
- */
-@Schema(name = "FiltroRelatorioResponseDTO", description = "Resultado do relatório com dados agregados e detalhes")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class FiltroRelatorioResponseDTO implements Serializable {
+@Schema(name="FiltroRelatorioResponseDTO", description="Resultado do relat\u00f3rio com dados agregados e detalhes")
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+public class FiltroRelatorioResponseDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Schema(description = "ID único da geração do relatório", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty("relatorioId")
+    @Schema(description="ID \u00fanico da gera\u00e7\u00e3o do relat\u00f3rio", example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value="relatorioId")
     private UUID relatorioId;
-
-    @Schema(description = "Timestamp de geração do relatório", type = "string", format = "date-time", example = "2025-07-04T16:30:00")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("dataGeracao")
+    @Schema(description="Timestamp de gera\u00e7\u00e3o do relat\u00f3rio", type="string", format="date-time", example="2025-07-04T16:30:00")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="dataGeracao")
     private LocalDateTime dataGeracao;
-
-    @Schema(description = "Username do solicitante", example = "joao.silva")
-    @JsonProperty("usuarioSolicitante")
+    @Schema(description="Username do solicitante", example="joao.silva")
+    @JsonProperty(value="usuarioSolicitante")
     private String usuarioSolicitante;
-
-    @Schema(description = "ID do tenant (multi-inquilino)", example = "redemaisfarma-001")
-    @JsonProperty("tenantId")
+    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001")
+    @JsonProperty(value="tenantId")
     private String tenantId;
-
-    @Schema(description = "Filtros aplicados (campo -> valor)", example = "{\"dataInicial\":\"2025-01-01\",\"dataFinal\":\"2025-06-30\"}")
-    @JsonProperty("filtrosAplicados")
+    @Schema(description="Filtros aplicados (campo -> valor)", example="{\"dataInicial\":\"2025-01-01\",\"dataFinal\":\"2025-06-30\"}")
+    @JsonProperty(value="filtrosAplicados")
     private Map<String, String> filtrosAplicados;
-
-    @Schema(description = "Tempo de processamento (ms)", example = "1234")
-    @JsonProperty("tempoProcessamentoMs")
+    @Schema(description="Tempo de processamento (ms)", example="1234")
+    @JsonProperty(value="tempoProcessamentoMs")
     private Long tempoProcessamentoMs;
-
-    // Observação: mantido o nome 'metricasAggregadas' para não quebrar consumo existente.
-    @Schema(description = "Métricas agregadas como chave-valor", example = "{\"totalVendas\":1000.50,\"numeroPedidos\":150}")
-    @JsonProperty("metricasAggregadas")
+    @Schema(description="M\u00e9tricas agregadas como chave-valor", example="{\"totalVendas\":1000.50,\"numeroPedidos\":150}")
+    @JsonProperty(value="metricasAggregadas")
     private Map<String, BigDecimal> metricasAggregadas;
-
-    @Schema(description = "Informações de paginação do resultado")
-    @JsonProperty("paginacao")
+    @Schema(description="Informa\u00e7\u00f5es de pagina\u00e7\u00e3o do resultado")
+    @JsonProperty(value="paginacao")
     private PaginacaoDTO paginacao;
-
-    @Schema(description = "Lista de critérios de ordenação", example = "[\"dataVenda,DESC\"]")
-    @JsonProperty("ordenacao")
+    @Schema(description="Lista de crit\u00e9rios de ordena\u00e7\u00e3o", example="[\"dataVenda,DESC\"]")
+    @JsonProperty(value="ordenacao")
     private List<String> ordenacao;
-
-    @Schema(description = "Lista de vendas detalhadas")
-    @JsonProperty("detalhesVendas")
+    @Schema(description="Lista de vendas detalhadas")
+    @JsonProperty(value="detalhesVendas")
     private List<VendaDTO> detalhesVendas;
-
-    @Schema(description = "Lista de produtos detalhados")
-    @JsonProperty("detalhesProdutos")
+    @Schema(description="Lista de produtos detalhados")
+    @JsonProperty(value="detalhesProdutos")
     private List<ProdutoDTO> detalhesProdutos;
-
-    @Schema(description = "Lista de clientes detalhados")
-    @JsonProperty("detalhesClientes")
+    @Schema(description="Lista de clientes detalhados")
+    @JsonProperty(value="detalhesClientes")
     private List<ClienteResumoDTO> detalhesClientes;
-
-    @Schema(description = "Lista de atendentes detalhados")
-    @JsonProperty("detalhesAtendentes")
+    @Schema(description="Lista de atendentes detalhados")
+    @JsonProperty(value="detalhesAtendentes")
     private List<AtendenteDTO> detalhesAtendentes;
 
-    // Construtores
     public FiltroRelatorioResponseDTO() {
     }
 
-    public FiltroRelatorioResponseDTO(UUID relatorioId, LocalDateTime dataGeracao, String usuarioSolicitante,
-            String tenantId, Map<String, String> filtrosAplicados, Long tempoProcessamentoMs,
-            Map<String, BigDecimal> metricasAggregadas, PaginacaoDTO paginacao, List<String> ordenacao,
-            List<VendaDTO> detalhesVendas, List<ProdutoDTO> detalhesProdutos, List<ClienteResumoDTO> detalhesClientes,
-            List<AtendenteDTO> detalhesAtendentes) {
+    public FiltroRelatorioResponseDTO(UUID relatorioId, LocalDateTime dataGeracao, String usuarioSolicitante, String tenantId, Map<String, String> filtrosAplicados, Long tempoProcessamentoMs, Map<String, BigDecimal> metricasAggregadas, PaginacaoDTO paginacao, List<String> ordenacao, List<VendaDTO> detalhesVendas, List<ProdutoDTO> detalhesProdutos, List<ClienteResumoDTO> detalhesClientes, List<AtendenteDTO> detalhesAtendentes) {
         this.relatorioId = relatorioId;
         this.dataGeracao = dataGeracao;
         this.usuarioSolicitante = usuarioSolicitante;
@@ -99,9 +89,8 @@ public class FiltroRelatorioResponseDTO implements Serializable {
         this.detalhesAtendentes = detalhesAtendentes;
     }
 
-    // Getters/Setters
     public UUID getRelatorioId() {
-        return relatorioId;
+        return this.relatorioId;
     }
 
     public void setRelatorioId(UUID relatorioId) {
@@ -109,7 +98,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
     }
 
     public LocalDateTime getDataGeracao() {
-        return dataGeracao;
+        return this.dataGeracao;
     }
 
     public void setDataGeracao(LocalDateTime dataGeracao) {
@@ -117,7 +106,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
     }
 
     public String getUsuarioSolicitante() {
-        return usuarioSolicitante;
+        return this.usuarioSolicitante;
     }
 
     public void setUsuarioSolicitante(String usuarioSolicitante) {
@@ -125,7 +114,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
     }
 
     public String getTenantId() {
-        return tenantId;
+        return this.tenantId;
     }
 
     public void setTenantId(String tenantId) {
@@ -133,7 +122,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
     }
 
     public Map<String, String> getFiltrosAplicados() {
-        return filtrosAplicados;
+        return this.filtrosAplicados;
     }
 
     public void setFiltrosAplicados(Map<String, String> filtrosAplicados) {
@@ -141,7 +130,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
     }
 
     public Long getTempoProcessamentoMs() {
-        return tempoProcessamentoMs;
+        return this.tempoProcessamentoMs;
     }
 
     public void setTempoProcessamentoMs(Long tempoProcessamentoMs) {
@@ -149,7 +138,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
     }
 
     public Map<String, BigDecimal> getMetricasAggregadas() {
-        return metricasAggregadas;
+        return this.metricasAggregadas;
     }
 
     public void setMetricasAggregadas(Map<String, BigDecimal> metricasAggregadas) {
@@ -157,7 +146,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
     }
 
     public PaginacaoDTO getPaginacao() {
-        return paginacao;
+        return this.paginacao;
     }
 
     public void setPaginacao(PaginacaoDTO paginacao) {
@@ -165,7 +154,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
     }
 
     public List<String> getOrdenacao() {
-        return ordenacao;
+        return this.ordenacao;
     }
 
     public void setOrdenacao(List<String> ordenacao) {
@@ -173,7 +162,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
     }
 
     public List<VendaDTO> getDetalhesVendas() {
-        return detalhesVendas;
+        return this.detalhesVendas;
     }
 
     public void setDetalhesVendas(List<VendaDTO> detalhesVendas) {
@@ -181,7 +170,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
     }
 
     public List<ProdutoDTO> getDetalhesProdutos() {
-        return detalhesProdutos;
+        return this.detalhesProdutos;
     }
 
     public void setDetalhesProdutos(List<ProdutoDTO> detalhesProdutos) {
@@ -189,7 +178,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
     }
 
     public List<ClienteResumoDTO> getDetalhesClientes() {
-        return detalhesClientes;
+        return this.detalhesClientes;
     }
 
     public void setDetalhesClientes(List<ClienteResumoDTO> detalhesClientes) {
@@ -197,72 +186,48 @@ public class FiltroRelatorioResponseDTO implements Serializable {
     }
 
     public List<AtendenteDTO> getDetalhesAtendentes() {
-        return detalhesAtendentes;
+        return this.detalhesAtendentes;
     }
 
     public void setDetalhesAtendentes(List<AtendenteDTO> detalhesAtendentes) {
         this.detalhesAtendentes = detalhesAtendentes;
     }
 
-    // equals/hashCode/toString
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof FiltroRelatorioResponseDTO that))
+        }
+        if (!(o instanceof FiltroRelatorioResponseDTO)) {
             return false;
-        return Objects.equals(relatorioId, that.relatorioId) && Objects.equals(dataGeracao, that.dataGeracao)
-                && Objects.equals(usuarioSolicitante, that.usuarioSolicitante)
-                && Objects.equals(tenantId, that.tenantId) && Objects.equals(filtrosAplicados, that.filtrosAplicados)
-                && Objects.equals(tempoProcessamentoMs, that.tempoProcessamentoMs)
-                && Objects.equals(metricasAggregadas, that.metricasAggregadas)
-                && Objects.equals(paginacao, that.paginacao) && Objects.equals(ordenacao, that.ordenacao)
-                && Objects.equals(detalhesVendas, that.detalhesVendas)
-                && Objects.equals(detalhesProdutos, that.detalhesProdutos)
-                && Objects.equals(detalhesClientes, that.detalhesClientes)
-                && Objects.equals(detalhesAtendentes, that.detalhesAtendentes);
+        }
+        FiltroRelatorioResponseDTO that = (FiltroRelatorioResponseDTO)o;
+        return Objects.equals(this.relatorioId, that.relatorioId) && Objects.equals(this.dataGeracao, that.dataGeracao) && Objects.equals(this.usuarioSolicitante, that.usuarioSolicitante) && Objects.equals(this.tenantId, that.tenantId) && Objects.equals(this.filtrosAplicados, that.filtrosAplicados) && Objects.equals(this.tempoProcessamentoMs, that.tempoProcessamentoMs) && Objects.equals(this.metricasAggregadas, that.metricasAggregadas) && Objects.equals(this.paginacao, that.paginacao) && Objects.equals(this.ordenacao, that.ordenacao) && Objects.equals(this.detalhesVendas, that.detalhesVendas) && Objects.equals(this.detalhesProdutos, that.detalhesProdutos) && Objects.equals(this.detalhesClientes, that.detalhesClientes) && Objects.equals(this.detalhesAtendentes, that.detalhesAtendentes);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(relatorioId, dataGeracao, usuarioSolicitante, tenantId, filtrosAplicados,
-                tempoProcessamentoMs, metricasAggregadas, paginacao, ordenacao, detalhesVendas, detalhesProdutos,
-                detalhesClientes, detalhesAtendentes);
+        return Objects.hash(this.relatorioId, this.dataGeracao, this.usuarioSolicitante, this.tenantId, this.filtrosAplicados, this.tempoProcessamentoMs, this.metricasAggregadas, this.paginacao, this.ordenacao, this.detalhesVendas, this.detalhesProdutos, this.detalhesClientes, this.detalhesAtendentes);
     }
 
-    @Override
     public String toString() {
-        return "FiltroRelatorioResponseDTO{" + "relatorioId=" + relatorioId + ", dataGeracao=" + dataGeracao
-                + ", usuarioSolicitante='" + usuarioSolicitante + '\'' + ", tenantId='" + tenantId + '\''
-                + ", filtrosAplicados=" + filtrosAplicados + ", tempoProcessamentoMs=" + tempoProcessamentoMs
-                + ", metricasAggregadas=" + metricasAggregadas + ", paginacao=" + paginacao + ", ordenacao=" + ordenacao
-                + ", detalhesVendas=" + detalhesVendas + ", detalhesProdutos=" + detalhesProdutos
-                + ", detalhesClientes=" + detalhesClientes + ", detalhesAtendentes=" + detalhesAtendentes + '}';
+        return "FiltroRelatorioResponseDTO{relatorioId=" + String.valueOf(this.relatorioId) + ", dataGeracao=" + String.valueOf(this.dataGeracao) + ", usuarioSolicitante='" + this.usuarioSolicitante + "', tenantId='" + this.tenantId + "', filtrosAplicados=" + String.valueOf(this.filtrosAplicados) + ", tempoProcessamentoMs=" + this.tempoProcessamentoMs + ", metricasAggregadas=" + String.valueOf(this.metricasAggregadas) + ", paginacao=" + String.valueOf(this.paginacao) + ", ordenacao=" + String.valueOf(this.ordenacao) + ", detalhesVendas=" + String.valueOf(this.detalhesVendas) + ", detalhesProdutos=" + String.valueOf(this.detalhesProdutos) + ", detalhesClientes=" + String.valueOf(this.detalhesClientes) + ", detalhesAtendentes=" + String.valueOf(this.detalhesAtendentes) + "}";
     }
 
-    // =======================================
-    // DTOs internos
-    // =======================================
-
-    @Schema(name = "PaginacaoDTO", description = "Dados de paginação dos resultados")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class PaginacaoDTO implements Serializable {
+    @Schema(name="PaginacaoDTO", description="Dados de pagina\u00e7\u00e3o dos resultados")
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    public static class PaginacaoDTO
+    implements Serializable {
         private static final long serialVersionUID = 1L;
-
-        @Schema(description = "Página atual (zero-based)", example = "0")
-        @JsonProperty("pagina")
+        @Schema(description="P\u00e1gina atual (zero-based)", example="0")
+        @JsonProperty(value="pagina")
         private Integer pagina;
-
-        @Schema(description = "Tamanho da página", example = "50")
-        @JsonProperty("tamanho")
+        @Schema(description="Tamanho da p\u00e1gina", example="50")
+        @JsonProperty(value="tamanho")
         private Integer tamanho;
-
-        @Schema(description = "Total de páginas", example = "20")
-        @JsonProperty("totalPaginas")
+        @Schema(description="Total de p\u00e1ginas", example="20")
+        @JsonProperty(value="totalPaginas")
         private Integer totalPaginas;
-
-        @Schema(description = "Total de registros", example = "1000")
-        @JsonProperty("totalRegistros")
+        @Schema(description="Total de registros", example="1000")
+        @JsonProperty(value="totalRegistros")
         private Long totalRegistros;
 
         public PaginacaoDTO() {
@@ -276,7 +241,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
         }
 
         public Integer getPagina() {
-            return pagina;
+            return this.pagina;
         }
 
         public void setPagina(Integer pagina) {
@@ -284,7 +249,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
         }
 
         public Integer getTamanho() {
-            return tamanho;
+            return this.tamanho;
         }
 
         public void setTamanho(Integer tamanho) {
@@ -292,7 +257,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
         }
 
         public Integer getTotalPaginas() {
-            return totalPaginas;
+            return this.totalPaginas;
         }
 
         public void setTotalPaginas(Integer totalPaginas) {
@@ -300,127 +265,49 @@ public class FiltroRelatorioResponseDTO implements Serializable {
         }
 
         public Long getTotalRegistros() {
-            return totalRegistros;
+            return this.totalRegistros;
         }
 
         public void setTotalRegistros(Long totalRegistros) {
             this.totalRegistros = totalRegistros;
         }
 
-        @Override
         public boolean equals(Object o) {
-            if (this == o)
+            if (this == o) {
                 return true;
-            if (!(o instanceof PaginacaoDTO that))
+            }
+            if (!(o instanceof PaginacaoDTO)) {
                 return false;
-            return Objects.equals(pagina, that.pagina) && Objects.equals(tamanho, that.tamanho)
-                    && Objects.equals(totalPaginas, that.totalPaginas)
-                    && Objects.equals(totalRegistros, that.totalRegistros);
+            }
+            PaginacaoDTO that = (PaginacaoDTO)o;
+            return Objects.equals(this.pagina, that.pagina) && Objects.equals(this.tamanho, that.tamanho) && Objects.equals(this.totalPaginas, that.totalPaginas) && Objects.equals(this.totalRegistros, that.totalRegistros);
         }
 
-        @Override
         public int hashCode() {
-            return Objects.hash(pagina, tamanho, totalPaginas, totalRegistros);
+            return Objects.hash(this.pagina, this.tamanho, this.totalPaginas, this.totalRegistros);
         }
 
-        @Override
         public String toString() {
-            return "PaginacaoDTO{" + "pagina=" + pagina + ", tamanho=" + tamanho + ", totalPaginas=" + totalPaginas
-                    + ", totalRegistros=" + totalRegistros + '}';
+            return "PaginacaoDTO{pagina=" + this.pagina + ", tamanho=" + this.tamanho + ", totalPaginas=" + this.totalPaginas + ", totalRegistros=" + this.totalRegistros + "}";
         }
     }
 
-    @Schema(name = "VendaDTO", description = "Dados resumidos de cada venda")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class VendaDTO implements Serializable {
+    @Schema(name="ProdutoDTO", description="Dados resumidos de cada produto")
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    public static class ProdutoDTO
+    implements Serializable {
         private static final long serialVersionUID = 1L;
-
-        @Schema(description = "ID da venda", example = "456")
-        @JsonProperty("vendaId")
-        private UUID vendaId;
-
-        @Schema(description = "Data da venda", type = "string", format = "date-time", example = "2025-07-01T10:00:00")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        @JsonProperty("dataVenda")
-        private LocalDateTime dataVenda;
-
-        @Schema(description = "Valor total da venda", example = "200.00")
-        @JsonProperty("valorVenda")
-        private BigDecimal valorVenda;
-
-        public VendaDTO() {
-        }
-
-        public VendaDTO(UUID vendaId, LocalDateTime dataVenda, BigDecimal valorVenda) {
-            this.vendaId = vendaId;
-            this.dataVenda = dataVenda;
-            this.valorVenda = valorVenda;
-        }
-
-        public UUID getVendaId() {
-            return vendaId;
-        }
-
-        public void setVendaId(UUID vendaId) {
-            this.vendaId = vendaId;
-        }
-
-        public LocalDateTime getDataVenda() {
-            return dataVenda;
-        }
-
-        public void setDataVenda(LocalDateTime dataVenda) {
-            this.dataVenda = dataVenda;
-        }
-
-        public BigDecimal getValorVenda() {
-            return valorVenda;
-        }
-
-        public void setValorVenda(BigDecimal valorVenda) {
-            this.valorVenda = valorVenda;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (!(o instanceof VendaDTO that))
-                return false;
-            return Objects.equals(vendaId, that.vendaId) && Objects.equals(dataVenda, that.dataVenda)
-                    && Objects.equals(valorVenda, that.valorVenda);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(vendaId, dataVenda, valorVenda);
-        }
-
-        @Override
-        public String toString() {
-            return "VendaDTO{" + "vendaId=" + vendaId + ", dataVenda=" + dataVenda + ", valorVenda=" + valorVenda + '}';
-        }
-    }
-
-    @Schema(name = "ProdutoDTO", description = "Dados resumidos de cada produto")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class ProdutoDTO implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        @Schema(description = "ID do produto", example = "789")
-        @JsonProperty("produtoId")
+        @Schema(description="ID do produto", example="789")
+        @JsonProperty(value="produtoId")
         private Long produtoId;
-
-        @Schema(description = "Nome do produto", example = "Dipirona 500mg")
-        @JsonProperty("nome")
+        @Schema(description="Nome do produto", example="Dipirona 500mg")
+        @JsonProperty(value="nome")
         private String nome;
-
-        @Schema(description = "Categoria do produto", example = "ANALGESICO")
-        @JsonProperty("categoria")
+        @Schema(description="Categoria do produto", example="ANALGESICO")
+        @JsonProperty(value="categoria")
         private String categoria;
-
-        @Schema(description = "Valor total vendido (no período)", example = "1234.56")
-        @JsonProperty("valorTotalVendido")
+        @Schema(description="Valor total vendido (no per\u00edodo)", example="1234.56")
+        @JsonProperty(value="valorTotalVendido")
         private BigDecimal valorTotalVendido;
 
         public ProdutoDTO() {
@@ -434,7 +321,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
         }
 
         public Long getProdutoId() {
-            return produtoId;
+            return this.produtoId;
         }
 
         public void setProdutoId(Long produtoId) {
@@ -442,7 +329,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
         }
 
         public String getNome() {
-            return nome;
+            return this.nome;
         }
 
         public void setNome(String nome) {
@@ -450,7 +337,7 @@ public class FiltroRelatorioResponseDTO implements Serializable {
         }
 
         public String getCategoria() {
-            return categoria;
+            return this.categoria;
         }
 
         public void setCategoria(String categoria) {
@@ -458,33 +345,100 @@ public class FiltroRelatorioResponseDTO implements Serializable {
         }
 
         public BigDecimal getValorTotalVendido() {
-            return valorTotalVendido;
+            return this.valorTotalVendido;
         }
 
         public void setValorTotalVendido(BigDecimal valorTotalVendido) {
             this.valorTotalVendido = valorTotalVendido;
         }
 
-        @Override
         public boolean equals(Object o) {
-            if (this == o)
+            if (this == o) {
                 return true;
-            if (!(o instanceof ProdutoDTO that))
+            }
+            if (!(o instanceof ProdutoDTO)) {
                 return false;
-            return Objects.equals(produtoId, that.produtoId) && Objects.equals(nome, that.nome)
-                    && Objects.equals(categoria, that.categoria)
-                    && Objects.equals(valorTotalVendido, that.valorTotalVendido);
+            }
+            ProdutoDTO that = (ProdutoDTO)o;
+            return Objects.equals(this.produtoId, that.produtoId) && Objects.equals(this.nome, that.nome) && Objects.equals(this.categoria, that.categoria) && Objects.equals(this.valorTotalVendido, that.valorTotalVendido);
         }
 
-        @Override
         public int hashCode() {
-            return Objects.hash(produtoId, nome, categoria, valorTotalVendido);
+            return Objects.hash(this.produtoId, this.nome, this.categoria, this.valorTotalVendido);
         }
 
-        @Override
         public String toString() {
-            return "ProdutoDTO{" + "produtoId=" + produtoId + ", nome='" + nome + '\'' + ", categoria='" + categoria
-                    + '\'' + ", valorTotalVendido=" + valorTotalVendido + '}';
+            return "ProdutoDTO{produtoId=" + this.produtoId + ", nome='" + this.nome + "', categoria='" + this.categoria + "', valorTotalVendido=" + String.valueOf(this.valorTotalVendido) + "}";
+        }
+    }
+
+    @Schema(name="VendaDTO", description="Dados resumidos de cada venda")
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    public static class VendaDTO
+    implements Serializable {
+        private static final long serialVersionUID = 1L;
+        @Schema(description="ID da venda", example="456")
+        @JsonProperty(value="vendaId")
+        private UUID vendaId;
+        @Schema(description="Data da venda", type="string", format="date-time", example="2025-07-01T10:00:00")
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+        @JsonProperty(value="dataVenda")
+        private LocalDateTime dataVenda;
+        @Schema(description="Valor total da venda", example="200.00")
+        @JsonProperty(value="valorVenda")
+        private BigDecimal valorVenda;
+
+        public VendaDTO() {
+        }
+
+        public VendaDTO(UUID vendaId, LocalDateTime dataVenda, BigDecimal valorVenda) {
+            this.vendaId = vendaId;
+            this.dataVenda = dataVenda;
+            this.valorVenda = valorVenda;
+        }
+
+        public UUID getVendaId() {
+            return this.vendaId;
+        }
+
+        public void setVendaId(UUID vendaId) {
+            this.vendaId = vendaId;
+        }
+
+        public LocalDateTime getDataVenda() {
+            return this.dataVenda;
+        }
+
+        public void setDataVenda(LocalDateTime dataVenda) {
+            this.dataVenda = dataVenda;
+        }
+
+        public BigDecimal getValorVenda() {
+            return this.valorVenda;
+        }
+
+        public void setValorVenda(BigDecimal valorVenda) {
+            this.valorVenda = valorVenda;
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof VendaDTO)) {
+                return false;
+            }
+            VendaDTO that = (VendaDTO)o;
+            return Objects.equals(this.vendaId, that.vendaId) && Objects.equals(this.dataVenda, that.dataVenda) && Objects.equals(this.valorVenda, that.valorVenda);
+        }
+
+        public int hashCode() {
+            return Objects.hash(this.vendaId, this.dataVenda, this.valorVenda);
+        }
+
+        public String toString() {
+            return "VendaDTO{vendaId=" + String.valueOf(this.vendaId) + ", dataVenda=" + String.valueOf(this.dataVenda) + ", valorVenda=" + String.valueOf(this.valorVenda) + "}";
         }
     }
 }
+

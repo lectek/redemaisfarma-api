@@ -1,16 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.http.model;
 
+import br.com.redemaisfarma.adapters.outbound.http.model.PageMetadata;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Contêiner de paginação genérico. Use em qualquer client HTTP. (Independente do DTO específico de cada integração.)
- */
-public class PageResponse<T> implements Serializable {
+public class PageResponse<T>
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private List<T> content;
     private PageMetadata metadata;
 
@@ -25,7 +26,7 @@ public class PageResponse<T> implements Serializable {
     }
 
     public List<T> getContent() {
-        return content;
+        return this.content;
     }
 
     public void setContent(List<T> content) {
@@ -33,30 +34,30 @@ public class PageResponse<T> implements Serializable {
     }
 
     public PageMetadata getMetadata() {
-        return metadata;
+        return this.metadata;
     }
 
     public void setMetadata(PageMetadata metadata) {
         this.metadata = metadata != null ? metadata : new PageMetadata();
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof PageResponse))
+        }
+        if (!(o instanceof PageResponse)) {
             return false;
-        PageResponse<?> that = (PageResponse<?>) o;
-        return Objects.equals(content, that.content) && Objects.equals(metadata, that.metadata);
+        }
+        PageResponse that = (PageResponse)o;
+        return Objects.equals(this.content, that.content) && Objects.equals(this.metadata, that.metadata);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(content, metadata);
+        return Objects.hash(this.content, this.metadata);
     }
 
-    @Override
     public String toString() {
-        return "PageResponse{contentSize=" + (content == null ? 0 : content.size()) + ", metadata=" + metadata + '}';
+        return "PageResponse{contentSize=" + (this.content == null ? 0 : this.content.size()) + ", metadata=" + String.valueOf(this.metadata) + "}";
     }
 }
+

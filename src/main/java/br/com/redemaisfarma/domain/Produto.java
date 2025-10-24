@@ -1,11 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.domain;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Produto {
-
     private Long id;
     private String nome;
     private String descricao;
@@ -13,7 +16,6 @@ public class Produto {
     private String imagem;
     private String categoria;
     private String codigoBarras;
-
     private BigDecimal precoCusto;
     private Integer estoque;
     private Boolean disponivel;
@@ -25,9 +27,7 @@ public class Produto {
     public Produto() {
     }
 
-    public Produto(Long id, String nome, String descricao, BigDecimal precoVenda, String imagem, String categoria,
-            String codigoBarras, BigDecimal precoCusto, Integer estoque, Boolean disponivel, String fabricante,
-            String codigoOriginal, String unidade, LocalDateTime dataCadastro) {
+    public Produto(Long id, String nome, String descricao, BigDecimal precoVenda, String imagem, String categoria, String codigoBarras, BigDecimal precoCusto, Integer estoque, Boolean disponivel, String fabricante, String codigoOriginal, String unidade, LocalDateTime dataCadastro) {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
@@ -44,10 +44,8 @@ public class Produto {
         this.dataCadastro = dataCadastro;
     }
 
-    // Getters e Setters abaixo (iguais aos anteriores)
-
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -55,7 +53,7 @@ public class Produto {
     }
 
     public String getNome() {
-        return nome;
+        return this.nome;
     }
 
     public void setNome(String nome) {
@@ -63,7 +61,7 @@ public class Produto {
     }
 
     public String getDescricao() {
-        return descricao;
+        return this.descricao;
     }
 
     public void setDescricao(String descricao) {
@@ -71,7 +69,7 @@ public class Produto {
     }
 
     public BigDecimal getPrecoVenda() {
-        return precoVenda;
+        return this.precoVenda;
     }
 
     public void setPrecoVenda(BigDecimal precoVenda) {
@@ -79,7 +77,7 @@ public class Produto {
     }
 
     public String getImagem() {
-        return imagem;
+        return this.imagem;
     }
 
     public void setImagem(String imagem) {
@@ -87,7 +85,7 @@ public class Produto {
     }
 
     public String getCategoria() {
-        return categoria;
+        return this.categoria;
     }
 
     public void setCategoria(String categoria) {
@@ -95,7 +93,7 @@ public class Produto {
     }
 
     public String getCodigoBarras() {
-        return codigoBarras;
+        return this.codigoBarras;
     }
 
     public void setCodigoBarras(String codigoBarras) {
@@ -103,7 +101,7 @@ public class Produto {
     }
 
     public BigDecimal getPrecoCusto() {
-        return precoCusto;
+        return this.precoCusto;
     }
 
     public void setPrecoCusto(BigDecimal precoCusto) {
@@ -111,7 +109,7 @@ public class Produto {
     }
 
     public Integer getEstoque() {
-        return estoque;
+        return this.estoque;
     }
 
     public void setEstoque(Integer estoque) {
@@ -119,7 +117,7 @@ public class Produto {
     }
 
     public Boolean getDisponivel() {
-        return disponivel;
+        return this.disponivel;
     }
 
     public void setDisponivel(Boolean disponivel) {
@@ -127,7 +125,7 @@ public class Produto {
     }
 
     public String getFabricante() {
-        return fabricante;
+        return this.fabricante;
     }
 
     public void setFabricante(String fabricante) {
@@ -135,7 +133,7 @@ public class Produto {
     }
 
     public String getCodigoOriginal() {
-        return codigoOriginal;
+        return this.codigoOriginal;
     }
 
     public void setCodigoOriginal(String codigoOriginal) {
@@ -143,7 +141,7 @@ public class Produto {
     }
 
     public String getUnidade() {
-        return unidade;
+        return this.unidade;
     }
 
     public void setUnidade(String unidade) {
@@ -151,7 +149,7 @@ public class Produto {
     }
 
     public LocalDateTime getDataCadastro() {
-        return dataCadastro;
+        return this.dataCadastro;
     }
 
     public void setDataCadastro(LocalDateTime dataCadastro) {
@@ -159,34 +157,32 @@ public class Produto {
     }
 
     public void aplicarDesconto(BigDecimal percentual) {
-        if (percentual == null || percentual.compareTo(BigDecimal.ZERO) <= 0
-                || percentual.compareTo(BigDecimal.ONE) >= 0) {
-            throw new IllegalArgumentException("Percentual de desconto inválido: " + percentual);
+        if (percentual == null || percentual.compareTo(BigDecimal.ZERO) <= 0 || percentual.compareTo(BigDecimal.ONE) >= 0) {
+            throw new IllegalArgumentException("Percentual de desconto inv\u00e1lido: " + String.valueOf(percentual));
         }
-        this.precoVenda = this.precoVenda.multiply(BigDecimal.ONE.subtract(percentual));
+        if (this.precoVenda == null) {
+            throw new IllegalStateException("Pre\u00e7o de venda n\u00e3o definido para aplicar desconto");
+        }
+        this.precoVenda = this.precoVenda.multiply(BigDecimal.ONE.subtract(percentual)).setScale(2, RoundingMode.HALF_UP);
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (o == null || getClass() != o.getClass())
+        }
+        if (!(o instanceof Produto)) {
             return false;
-        Produto produto = (Produto) o;
-        return Objects.equals(id, produto.id);
+        }
+        Produto that = (Produto)o;
+        return Objects.equals(this.id, that.id);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(this.id);
     }
 
-    @Override
     public String toString() {
-        return "Produto{" + "id=" + id + ", nome='" + nome + '\'' + ", descricao='" + descricao + '\'' + ", precoVenda="
-                + precoVenda + ", imagem='" + imagem + '\'' + ", categoria='" + categoria + '\'' + ", codigoBarras='"
-                + codigoBarras + '\'' + ", precoCusto=" + precoCusto + ", estoque=" + estoque + ", disponivel="
-                + disponivel + ", fabricante='" + fabricante + '\'' + ", codigoOriginal='" + codigoOriginal + '\''
-                + ", unidade='" + unidade + '\'' + ", dataCadastro=" + dataCadastro + '}';
+        return "Produto{id=" + this.id + ", nome='" + this.nome + "', descricao='" + this.descricao + "', precoVenda=" + String.valueOf(this.precoVenda) + ", imagem='" + this.imagem + "', categoria='" + this.categoria + "', codigoBarras='" + this.codigoBarras + "', precoCusto=" + String.valueOf(this.precoCusto) + ", estoque=" + this.estoque + ", disponivel=" + this.disponivel + ", fabricante='" + this.fabricante + "', codigoOriginal='" + this.codigoOriginal + "', unidade='" + this.unidade + "', dataCadastro=" + String.valueOf(this.dataCadastro) + "}";
     }
 }
+

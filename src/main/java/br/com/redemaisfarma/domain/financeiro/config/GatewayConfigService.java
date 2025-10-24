@@ -1,51 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.domain.financeiro.config;
 
+import br.com.redemaisfarma.domain.financeiro.config.GatewayConfig;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Porta do domínio para gerenciar configurações de gateway.
- * A implementação pode estar no módulo de aplicação (ex.: um Service que usa Repository).
- */
 public interface GatewayConfigService {
+    public List<GatewayConfig> listar(Boolean var1, String var2);
 
-    /**
-     * Lista todas as configurações, com filtros simples opcionais.
-     *
-     * @param onlyActive se true, retorna somente ativos; se null, ignora filtro
-     * @param provider   filtra por provedor (case-insensitive); se null, ignora filtro
-     */
-    List<GatewayConfig> listar(Boolean onlyActive, String provider);
+    public Optional<GatewayConfig> buscarPorId(Long var1);
 
-    Optional<GatewayConfig> buscarPorId(Long id);
+    public Optional<GatewayConfig> buscarAtivaPorProvedor(String var1);
 
-    /**
-     * Busca a configuração ativa para um provedor específico.
-     * @param provider identificador do provedor (ex.: "pagarme")
-     */
-    Optional<GatewayConfig> buscarAtivaPorProvedor(String provider);
+    public GatewayConfig criar(GatewayConfig var1);
 
-    /**
-     * Cria nova configuração.
-     * Implementações devem validar unicidade (provedor + nome) e regras de negócio.
-     */
-    GatewayConfig criar(GatewayConfig nova);
+    public GatewayConfig atualizar(Long var1, GatewayConfig var2);
 
-    /**
-     * Atualiza a configuração existente.
-     * Implementações devem manter integridade (ex.: não permitir dois ativos exclusivos,
-     * se isso fizer parte da sua regra) e auditar mudanças sensíveis (apiKey/secret).
-     */
-    GatewayConfig atualizar(Long id, GatewayConfig alterada);
+    public void remover(Long var1);
 
-    /**
-     * Remove uma configuração.
-     * Implementações podem impedir a remoção se houver vínculo operacional.
-     */
-    void remover(Long id);
-
-    /**
-     * Ativa/Desativa uma configuração de forma idempotente.
-     */
-    GatewayConfig ativar(Long id, boolean ativo);
+    public GatewayConfig ativar(Long var1, boolean var2);
 }
+

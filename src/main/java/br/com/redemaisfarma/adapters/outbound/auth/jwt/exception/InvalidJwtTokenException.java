@@ -1,7 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.exception;
 
-/** Lançada quando o JWT (access/refresh) é inválido (assinatura, claims, etc.). */
-public class InvalidJwtTokenException extends RuntimeException {
+public class InvalidJwtTokenException
+extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public InvalidJwtTokenException(String message) {
@@ -12,3 +15,4 @@ public class InvalidJwtTokenException extends RuntimeException {
         super(message, cause);
     }
 }
+

@@ -1,61 +1,65 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  br.com.redemaisfarma.application.dto.response.PainelAdminResponseDTO
+ *  br.com.redemaisfarma.domain.enums.StatusPedido
+ *  org.springframework.beans.factory.ObjectProvider
+ *  org.springframework.context.annotation.Profile
+ *  org.springframework.stereotype.Service
+ *  org.springframework.transaction.annotation.Transactional
+ */
 package br.com.redemaisfarma.application.service;
 
-import br.com.redemaisfarma.application.dto.response.PainelAdminResponseDTO;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.PedidoRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
+import br.com.redemaisfarma.application.dto.response.PainelAdminResponseDTO;
 import br.com.redemaisfarma.domain.enums.StatusPedido;
+import java.time.LocalDateTime;
+import java.util.EnumMap;
+import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
 @Service
-@Profile("!test")
+@Profile(value={"!test"})
 public class AdminMetricsService {
-
     private final ObjectProvider<ProdutoRepository> produtoRepo;
-    private final ObjectProvider<PedidoRepository>  pedidoRepo;
+    private final ObjectProvider<PedidoRepository> pedidoRepo;
     private final ObjectProvider<ClienteRepository> clienteRepo;
 
-    public AdminMetricsService(ObjectProvider<ProdutoRepository> produtoRepo,
-                               ObjectProvider<PedidoRepository> pedidoRepo,
-                               ObjectProvider<ClienteRepository> clienteRepo) {
+    public AdminMetricsService(ObjectProvider<ProdutoRepository> produtoRepo, ObjectProvider<PedidoRepository> pedidoRepo, ObjectProvider<ClienteRepository> clienteRepo) {
         this.produtoRepo = produtoRepo;
-        this.pedidoRepo  = pedidoRepo;
+        this.pedidoRepo = pedidoRepo;
         this.clienteRepo = clienteRepo;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly=true)
     public PainelAdminResponseDTO montarPainel() {
-        var p = new PainelAdminResponseDTO();
+        PainelAdminResponseDTO p = new PainelAdminResponseDTO();
         p.setAdminNome("Alex Morais");
-
-        // contadores principais (com fallback simples)
-        p.setQtdProdutos(produtoRepo.getIfAvailable() != null ? produtoRepo.getIfAvailable().count() : 250L);
-        p.setTotalPedidos(pedidoRepo.getIfAvailable()  != null ? pedidoRepo.getIfAvailable().count()  : 350L);
-        p.setClientesAtivos(clienteRepo.getIfAvailable()!= null ? clienteRepo.getIfAvailable().count(): 120L);
-
-        // pendentes x entregues
-        if (pedidoRepo.getIfAvailable() != null) {
-            var pr = pedidoRepo.getIfAvailable();
+        p.setQtdProdutos(this.produtoRepo.getIfAvailable() != null ? ((ProdutoRepository)this.produtoRepo.getIfAvailable()).count() : 250L);
+        p.setTotalPedidos(this.pedidoRepo.getIfAvailable() != null ? ((PedidoRepository)this.pedidoRepo.getIfAvailable()).count() : 350L);
+        p.setClientesAtivos(this.clienteRepo.getIfAvailable() != null ? ((ClienteRepository)this.clienteRepo.getIfAvailable()).count() : 120L);
+        if (this.pedidoRepo.getIfAvailable() != null) {
+            PedidoRepository pr = (PedidoRepository)this.pedidoRepo.getIfAvailable();
             p.setQtdPedidosPendentes(pr.countByStatus(StatusPedido.AGUARDANDO_PAGAMENTO));
             p.setQtdPedidosEntregues(pr.countByStatus(StatusPedido.ENTREGUE));
-
-            // mapa por status (para gráficos)
-            Map<StatusPedido, Long> porStatus = new EnumMap<>(StatusPedido.class);
-            for (StatusPedido s : StatusPedido.values()) {
+            EnumMap<StatusPedido, Long> porStatus = new EnumMap<StatusPedido, Long>(StatusPedido.class);
+            StatusPedido[] statusPedidoArray = StatusPedido.values();
+            int n = statusPedidoArray.length;
+            int n2 = 0;
+            while (n2 < n) {
+                StatusPedido s = statusPedidoArray[n2];
                 porStatus.put(s, pr.countByStatus(s));
+                ++n2;
             }
             p.setPedidosPorStatus(porStatus);
         } else {
-            // fallback mock
-            Map<StatusPedido, Long> porStatus = new EnumMap<>(StatusPedido.class);
+            EnumMap<StatusPedido, Long> porStatus = new EnumMap<StatusPedido, Long>(StatusPedido.class);
             porStatus.put(StatusPedido.ABERTO, 40L);
             porStatus.put(StatusPedido.AGUARDANDO_PAGAMENTO, 12L);
             porStatus.put(StatusPedido.PAGO, 90L);
@@ -63,22 +67,16 @@ public class AdminMetricsService {
             porStatus.put(StatusPedido.ENTREGUE, 121L);
             porStatus.put(StatusPedido.CANCELADO, 5L);
             p.setPedidosPorStatus(porStatus);
-            p.setQtdPedidosPendentes(porStatus.get(StatusPedido.AGUARDANDO_PAGAMENTO));
-            p.setQtdPedidosEntregues(porStatus.get(StatusPedido.ENTREGUE));
+            p.setQtdPedidosPendentes(((Long)porStatus.get(StatusPedido.AGUARDANDO_PAGAMENTO)).longValue());
+            p.setQtdPedidosEntregues(((Long)porStatus.get(StatusPedido.ENTREGUE)).longValue());
         }
-
-        // demais métricas (ainda mock)
         p.setTotalLucro(18452.75);
         p.setTicketMedio(124.75);
         p.setSatisfacaoCliente(92.3);
-        p.setCategoriasMaisVendidas(List.of("Rações", "Coleiras", "Brinquedos"));
-        p.setDataUltimoPedido(LocalDateTime.now().minusHours(2));
-        p.setAlertas(List.of(
-                "12 pedidos aguardando envio",
-                "3 produtos com estoque abaixo de 5 unidades",
-                "Novo cliente VIP cadastrado hoje"
-        ));
-
+        p.setCategoriasMaisVendidas(List.of("Ra\u00e7\u00f5es", "Coleiras", "Brinquedos"));
+        p.setDataUltimoPedido(LocalDateTime.now().minusHours(2L));
+        p.setAlertas(List.of("12 pedidos aguardando envio", "3 produtos com estoque abaixo de 5 unidades", "Novo cliente VIP cadastrado hoje"));
         return p;
     }
 }
+

@@ -1,16 +1,18 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.http.model;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-/** Metadados de paginação genéricos usados por vários clientes HTTP. */
-public class PageMetadata implements Serializable {
+public class PageMetadata
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    private int page; // página atual (0-based)
-    private int size; // tamanho da página
-    private long totalElements; // total de registros
-    private int totalPages; // total de páginas
+    private int page;
+    private int size;
+    private long totalElements;
+    private int totalPages;
 
     public PageMetadata() {
     }
@@ -23,7 +25,7 @@ public class PageMetadata implements Serializable {
     }
 
     public int getPage() {
-        return page;
+        return this.page;
     }
 
     public void setPage(int page) {
@@ -31,7 +33,7 @@ public class PageMetadata implements Serializable {
     }
 
     public int getSize() {
-        return size;
+        return this.size;
     }
 
     public void setSize(int size) {
@@ -39,7 +41,7 @@ public class PageMetadata implements Serializable {
     }
 
     public long getTotalElements() {
-        return totalElements;
+        return this.totalElements;
     }
 
     public void setTotalElements(long totalElements) {
@@ -47,32 +49,30 @@ public class PageMetadata implements Serializable {
     }
 
     public int getTotalPages() {
-        return totalPages;
+        return this.totalPages;
     }
 
     public void setTotalPages(int totalPages) {
         this.totalPages = totalPages;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof PageMetadata))
+        }
+        if (!(o instanceof PageMetadata)) {
             return false;
-        PageMetadata that = (PageMetadata) o;
-        return page == that.page && size == that.size && totalElements == that.totalElements
-                && totalPages == that.totalPages;
+        }
+        PageMetadata that = (PageMetadata)o;
+        return this.page == that.page && this.size == that.size && this.totalElements == that.totalElements && this.totalPages == that.totalPages;
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(page, size, totalElements, totalPages);
+        return Objects.hash(this.page, this.size, this.totalElements, this.totalPages);
     }
 
-    @Override
     public String toString() {
-        return "PageMetadata{page=" + page + ", size=" + size + ", totalElements=" + totalElements + ", totalPages="
-                + totalPages + '}';
+        return "PageMetadata{page=" + this.page + ", size=" + this.size + ", totalElements=" + this.totalElements + ", totalPages=" + this.totalPages + "}";
     }
 }
+

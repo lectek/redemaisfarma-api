@@ -1,67 +1,61 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ */
 package br.com.redemaisfarma.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-@Schema(name = "ItemAtualizarPedidoDTO", description = "Item do pedido após atualização")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class ItemAtualizarPedidoDTO implements Serializable {
+@Schema(name="ItemAtualizarPedidoDTO", description="Item do pedido ap\u00f3s atualiza\u00e7\u00e3o")
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+public class ItemAtualizarPedidoDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Schema(description = "ID do produto", example = "101")
-    @JsonProperty("produtoId")
+    @Schema(description="ID do produto", example="101")
+    @JsonProperty(value="produtoId")
     private Long produtoId;
-
-    @Schema(description = "SKU do produto", example = "PRD-001-ABC")
-    @JsonProperty("sku")
+    @Schema(description="SKU do produto", example="PRD-001-ABC")
+    @JsonProperty(value="sku")
     private String sku;
-
-    @Schema(description = "Nome do produto", example = "Dipirona 500mg")
-    @JsonProperty("nomeProduto")
+    @Schema(description="Nome do produto", example="Dipirona 500mg")
+    @JsonProperty(value="nomeProduto")
     private String nomeProduto;
-
-    @Schema(description = "URL da imagem (se houver)", example = "https://cdn.farma/img/produto1.jpg")
-    @JsonProperty("imagemUrl")
+    @Schema(description="URL da imagem (se houver)", example="https://cdn.farma/img/produto1.jpg")
+    @JsonProperty(value="imagemUrl")
     private String imagemUrl;
-
-    @Schema(description = "Unidade de venda", example = "UN")
-    @JsonProperty("unidade")
+    @Schema(description="Unidade de venda", example="UN")
+    @JsonProperty(value="unidade")
     private String unidade;
-
-    @Schema(description = "Quantidade atual do item", example = "3")
-    @JsonProperty("quantidade")
+    @Schema(description="Quantidade atual do item", example="3")
+    @JsonProperty(value="quantidade")
     private Integer quantidade;
-
-    @Schema(description = "Preço unitário vigente", example = "12.50")
-    @JsonProperty("precoUnitario")
+    @Schema(description="Pre\u00e7o unit\u00e1rio vigente", example="12.50")
+    @JsonProperty(value="precoUnitario")
     private BigDecimal precoUnitario;
-
-    @Schema(description = "Percentual de desconto aplicado no item (0-100)", example = "5.00")
-    @JsonProperty("percentualDesconto")
+    @Schema(description="Percentual de desconto aplicado no item (0-100)", example="5.00")
+    @JsonProperty(value="percentualDesconto")
     private BigDecimal percentualDesconto;
-
-    @Schema(description = "Valor absoluto de desconto no item", example = "1.25")
-    @JsonProperty("valorDesconto")
+    @Schema(description="Valor absoluto de desconto no item", example="1.25")
+    @JsonProperty(value="valorDesconto")
     private BigDecimal valorDesconto;
-
-    @Schema(description = "Subtotal do item (qtd x unitário - desconto)", example = "36.25")
-    @JsonProperty("total")
+    @Schema(description="Subtotal do item (qtd x unit\u00e1rio - desconto)", example="36.25")
+    @JsonProperty(value="total")
     private BigDecimal total;
 
-    // -------------------------
-    // Construtores
-    // -------------------------
     public ItemAtualizarPedidoDTO() {
     }
 
-    public ItemAtualizarPedidoDTO(Long produtoId, String sku, String nomeProduto, String imagemUrl, String unidade,
-            Integer quantidade, BigDecimal precoUnitario, BigDecimal percentualDesconto, BigDecimal valorDesconto,
-            BigDecimal total) {
+    public ItemAtualizarPedidoDTO(Long produtoId, String sku, String nomeProduto, String imagemUrl, String unidade, Integer quantidade, BigDecimal precoUnitario, BigDecimal percentualDesconto, BigDecimal valorDesconto, BigDecimal total) {
         this.produtoId = produtoId;
         this.sku = sku;
         this.nomeProduto = nomeProduto;
@@ -74,11 +68,8 @@ public class ItemAtualizarPedidoDTO implements Serializable {
         this.total = total;
     }
 
-    // -------------------------
-    // Getters / Setters
-    // -------------------------
     public Long getProdutoId() {
-        return produtoId;
+        return this.produtoId;
     }
 
     public void setProdutoId(Long produtoId) {
@@ -86,7 +77,7 @@ public class ItemAtualizarPedidoDTO implements Serializable {
     }
 
     public String getSku() {
-        return sku;
+        return this.sku;
     }
 
     public void setSku(String sku) {
@@ -94,7 +85,7 @@ public class ItemAtualizarPedidoDTO implements Serializable {
     }
 
     public String getNomeProduto() {
-        return nomeProduto;
+        return this.nomeProduto;
     }
 
     public void setNomeProduto(String nomeProduto) {
@@ -102,7 +93,7 @@ public class ItemAtualizarPedidoDTO implements Serializable {
     }
 
     public String getImagemUrl() {
-        return imagemUrl;
+        return this.imagemUrl;
     }
 
     public void setImagemUrl(String imagemUrl) {
@@ -110,7 +101,7 @@ public class ItemAtualizarPedidoDTO implements Serializable {
     }
 
     public String getUnidade() {
-        return unidade;
+        return this.unidade;
     }
 
     public void setUnidade(String unidade) {
@@ -118,7 +109,7 @@ public class ItemAtualizarPedidoDTO implements Serializable {
     }
 
     public Integer getQuantidade() {
-        return quantidade;
+        return this.quantidade;
     }
 
     public void setQuantidade(Integer quantidade) {
@@ -126,7 +117,7 @@ public class ItemAtualizarPedidoDTO implements Serializable {
     }
 
     public BigDecimal getPrecoUnitario() {
-        return precoUnitario;
+        return this.precoUnitario;
     }
 
     public void setPrecoUnitario(BigDecimal precoUnitario) {
@@ -134,7 +125,7 @@ public class ItemAtualizarPedidoDTO implements Serializable {
     }
 
     public BigDecimal getPercentualDesconto() {
-        return percentualDesconto;
+        return this.percentualDesconto;
     }
 
     public void setPercentualDesconto(BigDecimal percentualDesconto) {
@@ -142,7 +133,7 @@ public class ItemAtualizarPedidoDTO implements Serializable {
     }
 
     public BigDecimal getValorDesconto() {
-        return valorDesconto;
+        return this.valorDesconto;
     }
 
     public void setValorDesconto(BigDecimal valorDesconto) {
@@ -150,41 +141,30 @@ public class ItemAtualizarPedidoDTO implements Serializable {
     }
 
     public BigDecimal getTotal() {
-        return total;
+        return this.total;
     }
 
     public void setTotal(BigDecimal total) {
         this.total = total;
     }
 
-    // -------------------------
-    // equals / hashCode / toString
-    // -------------------------
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof ItemAtualizarPedidoDTO that))
+        }
+        if (!(o instanceof ItemAtualizarPedidoDTO)) {
             return false;
-        return Objects.equals(produtoId, that.produtoId) && Objects.equals(sku, that.sku)
-                && Objects.equals(nomeProduto, that.nomeProduto) && Objects.equals(imagemUrl, that.imagemUrl)
-                && Objects.equals(unidade, that.unidade) && Objects.equals(quantidade, that.quantidade)
-                && Objects.equals(precoUnitario, that.precoUnitario)
-                && Objects.equals(percentualDesconto, that.percentualDesconto)
-                && Objects.equals(valorDesconto, that.valorDesconto) && Objects.equals(total, that.total);
+        }
+        ItemAtualizarPedidoDTO that = (ItemAtualizarPedidoDTO)o;
+        return Objects.equals(this.produtoId, that.produtoId) && Objects.equals(this.sku, that.sku) && Objects.equals(this.nomeProduto, that.nomeProduto) && Objects.equals(this.imagemUrl, that.imagemUrl) && Objects.equals(this.unidade, that.unidade) && Objects.equals(this.quantidade, that.quantidade) && Objects.equals(this.precoUnitario, that.precoUnitario) && Objects.equals(this.percentualDesconto, that.percentualDesconto) && Objects.equals(this.valorDesconto, that.valorDesconto) && Objects.equals(this.total, that.total);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(produtoId, sku, nomeProduto, imagemUrl, unidade, quantidade, precoUnitario,
-                percentualDesconto, valorDesconto, total);
+        return Objects.hash(this.produtoId, this.sku, this.nomeProduto, this.imagemUrl, this.unidade, this.quantidade, this.precoUnitario, this.percentualDesconto, this.valorDesconto, this.total);
     }
 
-    @Override
     public String toString() {
-        return "ItemAtualizarPedidoDTO{" + "produtoId=" + produtoId + ", sku='" + sku + '\'' + ", nomeProduto='"
-                + nomeProduto + '\'' + ", imagemUrl='" + imagemUrl + '\'' + ", unidade='" + unidade + '\''
-                + ", quantidade=" + quantidade + ", precoUnitario=" + precoUnitario + ", percentualDesconto="
-                + percentualDesconto + ", valorDesconto=" + valorDesconto + ", total=" + total + '}';
+        return "ItemAtualizarPedidoDTO{produtoId=" + this.produtoId + ", sku='" + this.sku + "', nomeProduto='" + this.nomeProduto + "', imagemUrl='" + this.imagemUrl + "', unidade='" + this.unidade + "', quantidade=" + this.quantidade + ", precoUnitario=" + String.valueOf(this.precoUnitario) + ", percentualDesconto=" + String.valueOf(this.percentualDesconto) + ", valorDesconto=" + String.valueOf(this.valorDesconto) + ", total=" + String.valueOf(this.total) + "}";
     }
 }
+

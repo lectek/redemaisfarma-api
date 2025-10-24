@@ -1,18 +1,24 @@
-// src/main/java/br/com/redemaisfarma/adapters/outbound/persistence/jpa/otp/OtpCodeRepository.java
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.data.jpa.repository.JpaRepository
+ */
 package br.com.redemaisfarma.adapters.outbound.persistence.jpa.otp;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
+import br.com.redemaisfarma.adapters.outbound.persistence.jpa.otp.OtpCodeEntity;
 import java.time.Instant;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface OtpCodeRepository extends JpaRepository<OtpCodeEntity, Long> {
+public interface OtpCodeRepository
+extends JpaRepository<OtpCodeEntity, Long> {
+    public Optional<OtpCodeEntity> findByDeliveryId(String var1);
 
-    Optional<OtpCodeEntity> findByDeliveryId(String deliveryId);
+    public Optional<OtpCodeEntity> findFirstByDestinationOrderByCreatedAtDesc(String var1);
 
-    Optional<OtpCodeEntity> findFirstByDestinationOrderByCreatedAtDesc(String destination);
+    public long deleteByExpiresAtBefore(Instant var1);
 
-    long deleteByExpiresAtBefore(Instant now);
-
-    Optional<OtpCodeEntity> findByVerificationToken(String verificationToken);
+    public Optional<OtpCodeEntity> findByVerificationToken(String var1);
 }
+

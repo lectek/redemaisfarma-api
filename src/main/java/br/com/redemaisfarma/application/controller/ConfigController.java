@@ -1,6 +1,21 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.beans.factory.annotation.Autowired
+ *  org.springframework.context.MessageSource
+ *  org.springframework.core.env.Environment
+ *  org.springframework.stereotype.Controller
+ *  org.springframework.ui.Model
+ *  org.springframework.web.bind.annotation.GetMapping
+ *  org.springframework.web.bind.annotation.RequestMapping
+ */
 package br.com.redemaisfarma.application.controller;
 
 import br.com.redemaisfarma.application.config.AppConfigProperties;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.core.env.Environment;
@@ -9,51 +24,37 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * Controller responsável por exibir configurações do sistema de forma limpa.
- */
 @Controller
-@RequestMapping("/config")
+@RequestMapping(value={"/config"})
 public class ConfigController {
-
     private final AppConfigProperties appConfig;
     private final Environment environment;
-
-    private final List<ConfigItem> baseItems = new ArrayList<>();
+    private final List<ConfigItem> baseItems = new ArrayList<ConfigItem>();
     private LocalDateTime lastRefreshTime;
 
     @Autowired
     public ConfigController(AppConfigProperties appConfig, Environment environment, MessageSource messages) {
         this.appConfig = appConfig;
         this.environment = environment;
-
-        buildBaseItems();
+        this.buildBaseItems();
     }
 
     @GetMapping
     public String exibirConfiguracoes(Model model) {
-        model.addAttribute("configList", baseItems);
-        model.addAttribute("lastRefreshTime", lastRefreshTime);
+        model.addAttribute("configList", this.baseItems);
+        model.addAttribute("lastRefreshTime", (Object)this.lastRefreshTime);
         return "fragments/config :: config";
     }
 
     private void buildBaseItems() {
-        baseItems.clear();
-        baseItems.add(new ConfigItem("Perfil do ambiente", appConfig.getEnvProfileLabel()));
-        baseItems.add(new ConfigItem("Porta da rede", appConfig.getNetworkPortLabel()));
-        baseItems.add(new ConfigItem("Java versão", System.getProperty("java.version")));
-        baseItems.add(new ConfigItem("Spring perfil ativo", String.join(", ", environment.getActiveProfiles())));
-
-        lastRefreshTime = LocalDateTime.now();
+        this.baseItems.clear();
+        this.baseItems.add(new ConfigItem("Perfil do ambiente", this.appConfig.getEnvProfileLabel()));
+        this.baseItems.add(new ConfigItem("Porta da rede", this.appConfig.getNetworkPortLabel()));
+        this.baseItems.add(new ConfigItem("Java vers\u00e3o", System.getProperty("java.version")));
+        this.baseItems.add(new ConfigItem("Spring perfil ativo", String.join((CharSequence)", ", this.environment.getActiveProfiles())));
+        this.lastRefreshTime = LocalDateTime.now();
     }
 
-    /**
-     * Classe interna simples representando um item de configuração.
-     */
     public static class ConfigItem {
         private final String label;
         private final String value;
@@ -64,11 +65,12 @@ public class ConfigController {
         }
 
         public String getLabel() {
-            return label;
+            return this.label;
         }
 
         public String getValue() {
-            return value;
+            return this.value;
         }
     }
 }
+

@@ -1,4 +1,11 @@
-// src/main/java/br/com/redemaisfarma/config/RefreshTokenStoreConfig.java
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.context.annotation.Bean
+ *  org.springframework.context.annotation.Configuration
+ *  org.springframework.context.annotation.Primary
+ */
 package br.com.redemaisfarma.config;
 
 import br.com.redemaisfarma.adapters.outbound.auth.jwt.store.RefreshTokenJpaStore;
@@ -9,10 +16,10 @@ import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class RefreshTokenStoreConfig {
-
     @Bean
     @Primary
     public RefreshTokenStore refreshTokenStore(RefreshTokenJpaStore jpaStore) {
-        return jpaStore; // usa JPA por padrão
+        return jpaStore;
     }
 }
+

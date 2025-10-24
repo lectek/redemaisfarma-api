@@ -1,37 +1,49 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.validation.constraints.Min
+ *  jakarta.validation.constraints.Min$List
+ *  jakarta.validation.constraints.NotBlank
+ *  org.springframework.boot.context.properties.ConfigurationProperties
+ *  org.springframework.validation.annotation.Validated
+ */
 package br.com.redemaisfarma.adapters.outbound.cache.config;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 @Validated
-@ConfigurationProperties(prefix = "redis")
+@ConfigurationProperties(prefix="redis")
 public class RedisProperties {
-
+    private boolean enabled = true;
     @NotBlank
     private String host = "localhost";
-
-    @Min(1)
-    private int port = 6379;
-
-    private String password; // opcional
+    @Min(value=1L)
+@Min(value=1L)
+    private @Min(value=1L)
+@Min(value=1L) int port = 6379;
+    private String password;
     private int database = 0;
     private boolean ssl = false;
-    private long timeoutMs = 2000;
-
-    /** Prefixo para chaves do sistema (ex.: "rmf:"). */
+    private long timeoutMs = 2000L;
     @NotBlank
     private String keyPrefix = "rmf:";
-
-    /** Namespace da blacklist (fica: keyPrefix + blacklistNamespace + hash). */
     @NotBlank
     private String blacklistNamespace = "auth:blacklist:";
 
-    // getters/setters
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public String getHost() {
-        return host;
+        return this.host;
     }
 
     public void setHost(String host) {
@@ -39,7 +51,7 @@ public class RedisProperties {
     }
 
     public int getPort() {
-        return port;
+        return this.port;
     }
 
     public void setPort(int port) {
@@ -47,7 +59,7 @@ public class RedisProperties {
     }
 
     public String getPassword() {
-        return password;
+        return this.password;
     }
 
     public void setPassword(String password) {
@@ -55,7 +67,7 @@ public class RedisProperties {
     }
 
     public int getDatabase() {
-        return database;
+        return this.database;
     }
 
     public void setDatabase(int database) {
@@ -63,7 +75,7 @@ public class RedisProperties {
     }
 
     public boolean isSsl() {
-        return ssl;
+        return this.ssl;
     }
 
     public void setSsl(boolean ssl) {
@@ -71,7 +83,7 @@ public class RedisProperties {
     }
 
     public long getTimeoutMs() {
-        return timeoutMs;
+        return this.timeoutMs;
     }
 
     public void setTimeoutMs(long timeoutMs) {
@@ -79,7 +91,7 @@ public class RedisProperties {
     }
 
     public String getKeyPrefix() {
-        return keyPrefix;
+        return this.keyPrefix;
     }
 
     public void setKeyPrefix(String keyPrefix) {
@@ -87,10 +99,11 @@ public class RedisProperties {
     }
 
     public String getBlacklistNamespace() {
-        return blacklistNamespace;
+        return this.blacklistNamespace;
     }
 
     public void setBlacklistNamespace(String blacklistNamespace) {
         this.blacklistNamespace = blacklistNamespace;
     }
 }
+

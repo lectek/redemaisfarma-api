@@ -1,24 +1,26 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package br.com.redemaisfarma.adapters.outbound.http.cliente.model;
 
+import br.com.redemaisfarma.adapters.outbound.http.cliente.model.ClienteExternal;
+import br.com.redemaisfarma.adapters.outbound.http.cliente.model.PageMetadataExternal;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.util.List;
 
-/**
- * Envelope de resposta paginada para clientes. Ajuste os nomes das propriedades caso o provedor externo use outras
- * chaves (ex.: "items" em vez de "content").
- */
-public class ClientePageExternal implements Serializable {
-
-    @JsonProperty("content")
+public class ClientePageExternal
+implements Serializable {
+    @JsonProperty(value="content")
     private List<ClienteExternal> content;
-
-    @JsonProperty("page")
+    @JsonProperty(value="page")
     private PageMetadataExternal page;
 
     public List<ClienteExternal> getContent() {
-        return content;
+        return this.content;
     }
 
     public void setContent(List<ClienteExternal> content) {
@@ -26,10 +28,11 @@ public class ClientePageExternal implements Serializable {
     }
 
     public PageMetadataExternal getPage() {
-        return page;
+        return this.page;
     }
 
     public void setPage(PageMetadataExternal page) {
         this.page = page;
     }
 }
+

@@ -1,24 +1,30 @@
-// src/main/java/br/com/redemaisfarma/config/WebConfig.java
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.context.annotation.Bean
+ *  org.springframework.context.annotation.Configuration
+ *  org.springframework.web.servlet.LocaleResolver
+ *  org.springframework.web.servlet.i18n.CookieLocaleResolver
+ */
 package br.com.redemaisfarma.config;
 
+import java.time.Duration;
+import java.util.Locale;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
-import java.time.Duration;
-import java.util.Locale;
-
 @Configuration
 public class WebConfig {
-
     @Bean
     public LocaleResolver localeResolver() {
-        var resolver = new CookieLocaleResolver();
+        CookieLocaleResolver resolver = new CookieLocaleResolver();
         resolver.setDefaultLocale(Locale.of("pt", "BR"));
-        resolver.setCookieMaxAge(Duration.ofDays(30));
+        resolver.setCookieMaxAge(Duration.ofDays(30L));
         resolver.setCookiePath("/");
-        // resolver.setCookieName("LANG"); // opcional
         return resolver;
     }
 }
+

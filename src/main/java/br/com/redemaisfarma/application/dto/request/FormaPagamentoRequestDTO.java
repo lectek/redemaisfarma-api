@@ -1,89 +1,103 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  com.fasterxml.jackson.annotation.JsonProperty$Access
+ *  io.swagger.v3.oas.annotations.media.Schema
+ *  jakarta.validation.constraints.AssertTrue
+ *  jakarta.validation.constraints.DecimalMin
+ *  jakarta.validation.constraints.Digits
+ *  jakarta.validation.constraints.Max
+ *  jakarta.validation.constraints.Min
+ *  jakarta.validation.constraints.NotBlank
+ *  jakarta.validation.constraints.NotNull
+ *  jakarta.validation.constraints.Pattern
+ *  jakarta.validation.constraints.Size
+ */
 package br.com.redemaisfarma.application.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
-
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-@Schema(name = "FormaPagamentoRequestDTO", description = "DTO para a forma de pagamento no momento da criação do pedido")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class FormaPagamentoRequestDTO implements Serializable {
+@Schema(name="FormaPagamentoRequestDTO", description="DTO para a forma de pagamento no momento da cria\u00e7\u00e3o do pedido")
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+public class FormaPagamentoRequestDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
+    @Schema(description="Tipo de pagamento escolhido", example="cartao_credito", required=true)
+    @NotBlank(message="{formaPagamento.tipo.notBlank}")
+    @Pattern(regexp="^(cartao_credito|cartao_debito|pix|boleto|dinheiro|carteira)$", message="{formaPagamento.tipo.pattern}")
+    @Size(max=30, message="{formaPagamento.tipo.size}")
+    @JsonProperty(value="tipoPagamento")
+    private @NotBlank(message="{formaPagamento.tipo.notBlank}") @Pattern(regexp="^(cartao_credito|cartao_debito|pix|boleto|dinheiro|carteira)$", message="{formaPagamento.tipo.pattern}") @Size(max=30, message="{formaPagamento.tipo.size}") String tipoPagamento;
+    @Schema(description="N\u00famero de parcelas (se aplic\u00e1vel)", example="3")
+    @Min(value=1L, message="{formaPagamento.parcelas.min}")
+    @Max(value=24L, message="{formaPagamento.parcelas.max}")
+    @JsonProperty(value="parcelas")
+    private @Min(value=1L, message="{formaPagamento.parcelas.min}") @Max(value=24L, message="{formaPagamento.parcelas.max}") Integer parcelas;
+    @Schema(description="Valor total desta forma de pagamento", example="150.00", required=true)
+    @NotNull(message="{formaPagamento.valor.notNull}")
+    @DecimalMin(value="0.01", inclusive=true, message="{formaPagamento.valor.min}")
+    @Digits(integer=12, fraction=2, message="{formaPagamento.valor.digits}")
+    @JsonProperty(value="valor")
+    private @NotNull(message="{formaPagamento.valor.notNull}") @DecimalMin(value="0.01", inclusive=true, message="{formaPagamento.valor.min}") @Digits(integer=12, fraction=2, message="{formaPagamento.valor.digits}") BigDecimal valor;
+    @Schema(description="Bandeira do cart\u00e3o (se cart\u00e3o)", example="VISA")
+    @Size(max=30, message="{formaPagamento.bandeira.size}")
+    @JsonProperty(value="bandeira")
+    private @Size(max=30, message="{formaPagamento.bandeira.size}") String bandeira;
 
-    // cartao_credito | cartao_debito | pix | boleto | dinheiro | carteira
-    @Schema(description = "Tipo de pagamento escolhido", example = "cartao_credito", required = true)
-    @NotBlank(message = "{formaPagamento.tipo.notBlank}")
-    @Pattern(regexp = "^(cartao_credito|cartao_debito|pix|boleto|dinheiro|carteira)$", message = "{formaPagamento.tipo.pattern}")
-    @Size(max = 30, message = "{formaPagamento.tipo.size}")
-    @JsonProperty("tipoPagamento")
-    private String tipoPagamento;
-
-    @Schema(description = "Número de parcelas (se aplicável)", example = "3")
-    @Min(value = 1, message = "{formaPagamento.parcelas.min}")
-    @Max(value = 24, message = "{formaPagamento.parcelas.max}")
-    @JsonProperty("parcelas")
-    private Integer parcelas;
-
-    @Schema(description = "Valor total desta forma de pagamento", example = "150.00", required = true)
-    @NotNull(message = "{formaPagamento.valor.notNull}")
-    @DecimalMin(value = "0.01", inclusive = true, message = "{formaPagamento.valor.min}")
-    @Digits(integer = 12, fraction = 2, message = "{formaPagamento.valor.digits}")
-    @JsonProperty("valor")
-    private BigDecimal valor;
-
-    @Schema(description = "Bandeira do cartão (se cartão)", example = "VISA")
-    @Size(max = 30, message = "{formaPagamento.bandeira.size}")
-    @JsonProperty("bandeira")
-    private String bandeira;
-
-    // --------------------- Validações compostas (regras de negócio) ---------------------
-
-    /**
-     * Parcelas obrigatórias para cartao_credito; proibidas (ou 1) para PIX/dinheiro/debito/carteira; boleto opcional.
-     */
-    @AssertTrue(message = "{formaPagamento.parcelas.coerencia}")
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    public boolean isParcelasCoerentes() {
-        if (tipoPagamento == null || valor == null || valor.signum() <= 0)
-            return false;
-
-        switch (tipoPagamento) {
-        case "cartao_credito":
-            // precisa informar parcelas entre 1..24
-            return parcelas != null && parcelas >= 1 && parcelas <= 24;
-        case "pix":
-        case "dinheiro":
-        case "cartao_debito":
-        case "carteira":
-            // sem parcelamento; aceitar null ou 1
-            return parcelas == null || parcelas == 1;
-        case "boleto":
-            // pode ser à vista (null/1) ou parcelado (1..24) se sua regra permitir
-            return parcelas == null || (parcelas >= 1 && parcelas <= 24);
-        default:
+    @AssertTrue(message="{formaPagamento.parcelas.coerencia}")
+    @JsonProperty(access=JsonProperty.Access.READ_ONLY)
+    public @AssertTrue(message="{formaPagamento.parcelas.coerencia}") boolean isParcelasCoerentes() {
+        if (this.tipoPagamento == null || this.valor == null || this.valor.signum() <= 0) {
             return false;
         }
+        switch (this.tipoPagamento) {
+            case "cartao_credito": {
+                return this.parcelas != null && this.parcelas >= 1 && this.parcelas <= 24;
+            }
+            case "pix": 
+            case "dinheiro": 
+            case "cartao_debito": 
+            case "carteira": {
+                return this.parcelas == null || this.parcelas == 1;
+            }
+            case "boleto": {
+                return this.parcelas == null || this.parcelas >= 1 && this.parcelas <= 24;
+            }
+        }
+        return false;
     }
 
-    /** Bandeira obrigatória apenas para cartões; proibida nos demais. */
-    @AssertTrue(message = "{formaPagamento.bandeira.coerencia}")
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    public boolean isBandeiraCoerente() {
-        if (tipoPagamento == null)
+    @AssertTrue(message="{formaPagamento.bandeira.coerencia}")
+    @JsonProperty(access=JsonProperty.Access.READ_ONLY)
+    public @AssertTrue(message="{formaPagamento.bandeira.coerencia}") boolean isBandeiraCoerente() {
+        boolean isCartao;
+        if (this.tipoPagamento == null) {
             return false;
-        boolean isCartao = "cartao_credito".equals(tipoPagamento) || "cartao_debito".equals(tipoPagamento);
+        }
+        boolean bl = isCartao = "cartao_credito".equals(this.tipoPagamento) || "cartao_debito".equals(this.tipoPagamento);
         if (isCartao) {
-            return bandeira != null && !bandeira.isBlank();
-        } else {
-            return bandeira == null || bandeira.isBlank();
+            return this.bandeira != null && !this.bandeira.isBlank();
         }
+        return this.bandeira == null || this.bandeira.isBlank();
     }
-
-    // --------------------- Construtores ---------------------
 
     public FormaPagamentoRequestDTO() {
     }
@@ -95,10 +109,8 @@ public class FormaPagamentoRequestDTO implements Serializable {
         this.bandeira = bandeira;
     }
 
-    // --------------------- Getters/Setters ---------------------
-
     public String getTipoPagamento() {
-        return tipoPagamento;
+        return this.tipoPagamento;
     }
 
     public void setTipoPagamento(String tipoPagamento) {
@@ -106,7 +118,7 @@ public class FormaPagamentoRequestDTO implements Serializable {
     }
 
     public Integer getParcelas() {
-        return parcelas;
+        return this.parcelas;
     }
 
     public void setParcelas(Integer parcelas) {
@@ -114,7 +126,7 @@ public class FormaPagamentoRequestDTO implements Serializable {
     }
 
     public BigDecimal getValor() {
-        return valor;
+        return this.valor;
     }
 
     public void setValor(BigDecimal valor) {
@@ -122,33 +134,30 @@ public class FormaPagamentoRequestDTO implements Serializable {
     }
 
     public String getBandeira() {
-        return bandeira;
+        return this.bandeira;
     }
 
     public void setBandeira(String bandeira) {
         this.bandeira = bandeira;
     }
 
-    // --------------------- utilitários ---------------------
-
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof FormaPagamentoRequestDTO that))
+        }
+        if (!(o instanceof FormaPagamentoRequestDTO)) {
             return false;
-        return Objects.equals(tipoPagamento, that.tipoPagamento) && Objects.equals(parcelas, that.parcelas)
-                && Objects.equals(valor, that.valor) && Objects.equals(bandeira, that.bandeira);
+        }
+        FormaPagamentoRequestDTO that = (FormaPagamentoRequestDTO)o;
+        return Objects.equals(this.tipoPagamento, that.tipoPagamento) && Objects.equals(this.parcelas, that.parcelas) && Objects.equals(this.valor, that.valor) && Objects.equals(this.bandeira, that.bandeira);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(tipoPagamento, parcelas, valor, bandeira);
+        return Objects.hash(this.tipoPagamento, this.parcelas, this.valor, this.bandeira);
     }
 
-    @Override
     public String toString() {
-        return "FormaPagamentoRequestDTO{" + "tipoPagamento='" + tipoPagamento + '\'' + ", parcelas=" + parcelas
-                + ", valor=" + valor + ", bandeira='" + bandeira + '\'' + '}';
+        return "FormaPagamentoRequestDTO{tipoPagamento='" + this.tipoPagamento + "', parcelas=" + this.parcelas + ", valor=" + String.valueOf(this.valor) + ", bandeira='" + this.bandeira + "'}";
     }
 }
+

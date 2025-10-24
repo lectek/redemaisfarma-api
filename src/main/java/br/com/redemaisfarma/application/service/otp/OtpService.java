@@ -1,46 +1,44 @@
-// src/main/java/br/com/redemaisfarma/application/service/otp/OtpService.java
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ *  org.springframework.context.annotation.Profile
+ *  org.springframework.core.env.Environment
+ *  org.springframework.stereotype.Service
+ */
 package br.com.redemaisfarma.application.service.otp;
 
 import br.com.redemaisfarma.adapters.outbound.email.adapter.MailSenderAdapter;
+import br.com.redemaisfarma.application.service.otp.OtpServicePort;
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-@Service("otpService")
-@Profile({"dev", "test"})
-public class OtpService implements OtpServicePort { // << implementa a porta
-
-    public enum Canal { email, sms }
-
+@Service(value="otpService")
+@Profile(value={"dev", "test"})
+public class OtpService
+implements OtpServicePort {
     private static final Logger log = LoggerFactory.getLogger(OtpService.class);
-
-    private static final Duration OTP_TTL = Duration.ofMinutes(10);
-    private static final Duration TOKEN_TTL = Duration.ofMinutes(10);
+    private static final Duration OTP_TTL = Duration.ofMinutes(10L);
+    private static final Duration TOKEN_TTL = Duration.ofMinutes(10L);
     private static final int MAX_ATTEMPTS = 5;
     private static final int COOLDOWN_SEC = 60;
-
     private final SecureRandom rnd = new SecureRandom();
-
-    // tipos internos só para estado
-    private record OtpEntry(
-        String canal, String destino, String code,
-        Instant createdAt, Instant expiresAt, int attempts
-    ) {}
-    private record TokenEntry(String deliveryId, String destinoNormalizado, Instant expiresAt) {}
-
-    private final Map<String, OtpEntry> deliveries = new ConcurrentHashMap<>();
-    private final Map<String, TokenEntry> tokens = new ConcurrentHashMap<>();
-    private final Map<String, Instant> lastSendByKey = new ConcurrentHashMap<>();
-    private final Map<String, String> lastDeliveryIdByKey = new ConcurrentHashMap<>();
-
+    private final Map<String, OtpEntry> deliveries = new ConcurrentHashMap<String, OtpEntry>();
+    private final Map<String, TokenEntry> tokens = new ConcurrentHashMap<String, TokenEntry>();
+    private final Map<String, Instant> lastSendByKey = new ConcurrentHashMap<String, Instant>();
+    private final Map<String, String> lastDeliveryIdByKey = new ConcurrentHashMap<String, String>();
     private final MailSenderAdapter mailer;
     private final Environment env;
 
@@ -50,99 +48,78 @@ public class OtpService implements OtpServicePort { // << implementa a porta
     }
 
     @Override
-    public StartResult start(String canalStr, String destino, String previousDeliveryId) {
+    public OtpServicePort.StartResult start(String canalStr, String destino, String previousDeliveryId) {
+        long secSinceLast;
         Canal canal = Canal.valueOf(canalStr.toLowerCase());
-        String normalizedDestino = normalizeDestino(canal, destino);
-        String key = key(canal, normalizedDestino);
-
+        String normalizedDestino = this.normalizeDestino(canal, destino);
+        String key = this.key(canal, normalizedDestino);
         Instant now = Instant.now();
-        Instant last = lastSendByKey.get(key);
-
+        Instant last = this.lastSendByKey.get(key);
         boolean bypassCooldown = false;
         if (previousDeliveryId != null && !previousDeliveryId.isBlank()) {
-            String lastDeliveryForKey = lastDeliveryIdByKey.get(key);
+            String lastDeliveryForKey = this.lastDeliveryIdByKey.get(key);
             bypassCooldown = previousDeliveryId.equals(lastDeliveryForKey);
         }
-
-        if (!bypassCooldown && last != null) {
-            long secSinceLast = Duration.between(last, now).getSeconds();
-            if (secSinceLast < COOLDOWN_SEC) {
-                throw new OtpException(
-                    "cooldown",
-                    "Aguarde " + (COOLDOWN_SEC - secSinceLast) + "s para reenviar."
-                );
-            }
+        if (!bypassCooldown && last != null && (secSinceLast = Duration.between(last, now).getSeconds()) < 60L) {
+            throw new OtpServicePort.OtpException("cooldown", "Aguarde " + (60L - secSinceLast) + "s para reenviar.");
         }
-
-        String code = generateCode6();
+        String code = this.generateCode6();
         String deliveryId = UUID.randomUUID().toString();
-
-        OtpEntry entry = new OtpEntry(
-            canal.name(), normalizedDestino, code, now, now.plus(OTP_TTL), 0
-        );
-        deliveries.put(deliveryId, entry);
-        lastSendByKey.put(key, now);
-        lastDeliveryIdByKey.put(key, deliveryId);
-
-        sendOtp(canal, normalizedDestino, code);
-
-        String demoCode = isProd() ? null : code;
-        return new StartResult(
-            deliveryId,
-            maskDestino(canal, normalizedDestino),
-            COOLDOWN_SEC,
-            (int) OTP_TTL.getSeconds(),
-            demoCode
-        );
+        OtpEntry entry = new OtpEntry(canal.name(), normalizedDestino, code, now, now.plus(OTP_TTL), 0);
+        this.deliveries.put(deliveryId, entry);
+        this.lastSendByKey.put(key, now);
+        this.lastDeliveryIdByKey.put(key, deliveryId);
+        this.sendOtp(canal, normalizedDestino, code);
+        String demoCode = this.isProd() ? null : code;
+        return new OtpServicePort.StartResult(deliveryId, this.maskDestino(canal, normalizedDestino), 60, (int)OTP_TTL.getSeconds(), demoCode);
     }
 
     @Override
     public String verify(String deliveryId, String codeRaw) {
-        OtpEntry e = deliveries.get(deliveryId);
-        if (e == null) throw new OtpException("expired", "Código expirado.");
-
+        OtpEntry e = this.deliveries.get(deliveryId);
+        if (e == null) {
+            throw new OtpServicePort.OtpException("expired", "C\u00f3digo expirado.");
+        }
         Instant now = Instant.now();
         if (now.isAfter(e.expiresAt)) {
-            deliveries.remove(deliveryId);
-            throw new OtpException("expired", "Código expirado.");
+            this.deliveries.remove(deliveryId);
+            throw new OtpServicePort.OtpException("expired", "C\u00f3digo expirado.");
         }
-        if (e.attempts >= MAX_ATTEMPTS) {
-            deliveries.remove(deliveryId);
-            throw new OtpException("too_many_attempts", "Muitas tentativas. Solicite novo código.");
+        if (e.attempts >= 5) {
+            this.deliveries.remove(deliveryId);
+            throw new OtpServicePort.OtpException("too_many_attempts", "Muitas tentativas. Solicite novo c\u00f3digo.");
         }
-
-        String code = (codeRaw == null ? "" : codeRaw.replaceAll("\\D", ""));
+        String code = codeRaw == null ? "" : codeRaw.replaceAll("\\D", "");
+        String string = code;
         if (!Objects.equals(e.code, code)) {
-            deliveries.put(deliveryId, new OtpEntry(
-                e.canal, e.destino, e.code, e.createdAt, e.expiresAt, e.attempts + 1
-            ));
-            throw new OtpException("invalid", "Código incorreto.");
+            this.deliveries.put(deliveryId, new OtpEntry(e.canal, e.destino, e.code, e.createdAt, e.expiresAt, e.attempts + 1));
+            throw new OtpServicePort.OtpException("invalid", "C\u00f3digo incorreto.");
         }
-
-        deliveries.remove(deliveryId);
+        this.deliveries.remove(deliveryId);
         String token = UUID.randomUUID().toString();
-        // guardamos o destino normalizado dentro do token para amarração posterior
-        tokens.put(token, new TokenEntry(deliveryId, e.destino, now.plus(TOKEN_TTL)));
+        this.tokens.put(token, new TokenEntry(deliveryId, e.destino, now.plus(TOKEN_TTL)));
         return token;
     }
 
     @Override
     public boolean consumeToken(String token) {
-        TokenEntry te = tokens.remove(token);
+        TokenEntry te = this.tokens.remove(token);
         return te != null && Instant.now().isBefore(te.expiresAt);
     }
 
     @Override
     public boolean consumeTokenForDestino(String token, String destino) {
-        if (token == null || token.isBlank()) return false;
-        TokenEntry te = tokens.remove(token);
-        if (te == null) return false;
-        if (Instant.now().isAfter(te.expiresAt)) return false;
-
-        // normaliza “chute” do canal: e-mail se contiver '@', senão SMS
-        String normalizedInput = normalizeByGuess(destino);
-
-        // para e-mail, usar comparação case-insensitive; para telefone, exata (apenas dígitos)
+        if (token == null || token.isBlank()) {
+            return false;
+        }
+        TokenEntry te = this.tokens.remove(token);
+        if (te == null) {
+            return false;
+        }
+        if (Instant.now().isAfter(te.expiresAt)) {
+            return false;
+        }
+        String normalizedInput = this.normalizeByGuess(destino);
         boolean isEmail = normalizedInput.contains("@");
         if (isEmail) {
             return normalizedInput.equalsIgnoreCase(te.destinoNormalizado);
@@ -150,57 +127,94 @@ public class OtpService implements OtpServicePort { // << implementa a porta
         return normalizedInput.equals(te.destinoNormalizado);
     }
 
-    // ---------- helpers ----------
     private boolean isProd() {
-        for (String p : env.getActiveProfiles()) if ("prod".equalsIgnoreCase(p)) return true;
+        String[] stringArray = this.env.getActiveProfiles();
+        int n = stringArray.length;
+        int n2 = 0;
+        while (n2 < n) {
+            String p = stringArray[n2];
+            if ("prod".equalsIgnoreCase(p)) {
+                return true;
+            }
+            ++n2;
+        }
         return false;
     }
-    private String key(Canal canal, String destino) { return canal.name() + '|' + destino; }
+
+    private String key(Canal canal, String destino) {
+        return canal.name() + "|" + destino;
+    }
+
     private String generateCode6() {
         StringBuilder sb = new StringBuilder(6);
-        for (int i = 0; i < 6; i++) sb.append(rnd.nextInt(10));
+        int i = 0;
+        while (i < 6) {
+            sb.append(this.rnd.nextInt(10));
+            ++i;
+        }
         return sb.toString();
     }
+
     private String normalizeDestino(Canal canal, String v) {
-        if (v == null) return "";
-        if (canal == Canal.email) return v.trim();
+        if (v == null) {
+            return "";
+        }
+        if (canal == Canal.email) {
+            return v.trim();
+        }
         return v.replaceAll("\\D", "");
     }
+
     private String normalizeByGuess(String v) {
-        if (v == null) return "";
-        if (v.contains("@")) return v.trim();        // e-mail
-        return v.replaceAll("\\D", "");              // telefone
+        if (v == null) {
+            return "";
+        }
+        if (v.contains("@")) {
+            return v.trim();
+        }
+        return v.replaceAll("\\D", "");
     }
+
     private String maskDestino(Canal canal, String v) {
         if (canal == Canal.email) {
-            int at = v.indexOf('@');
-            if (at <= 1) return "***";
-            String name = v.substring(0, at), domain = v.substring(at);
+            int at = v.indexOf(64);
+            if (at <= 1) {
+                return "***";
+            }
+            String name = v.substring(0, at);
+            String domain = v.substring(at);
             char first = name.charAt(0);
             char last = name.charAt(Math.max(0, name.length() - 1));
             return first + "****" + last + domain;
-        } else {
-            String d = v.replaceAll("\\D", "");
-            if (d.length() < 4) return "****";
-            return "****" + d.substring(d.length() - 4);
         }
+        String d = v.replaceAll("\\D", "");
+        if (d.length() < 4) {
+            return "****";
+        }
+        return "****" + d.substring(d.length() - 4);
     }
+
     private void sendOtp(Canal canal, String destino, String code) {
         if (canal == Canal.email) {
-            String subject = "Seu código RedeMaisFarma";
-            String html = """
-                <div style="font-family:system-ui,Segoe UI,Arial,sans-serif">
-                  <h2>Confirme seu cadastro</h2>
-                  <p>Use este código para verificar seu e-mail:</p>
-                  <p style="font-size:24px;letter-spacing:6px"><b>%s</b></p>
-                  <p>Ele expira em %d minutos.</p>
-                  <hr/><small>Se não foi você, ignore este e-mail.</small>
-                </div>
-            """.formatted(code, OTP_TTL.toMinutes());
-            mailer.send(destino, subject, html, null);
-            log.info("OTP email sent: to={} code=**** (masked)", destino);
+            String subject = "Seu c\u00f3digo RedeMaisFarma";
+            String html = "    <div style=\"font-family:system-ui,Segoe UI,Arial,sans-serif\">\n      <h2>Confirme seu cadastro</h2>\n      <p>Use este c\u00f3digo para verificar seu e-mail:</p>\n      <p style=\"font-size:24px;letter-spacing:6px\"><b>%s</b></p>\n      <p>Ele expira em %d minutos.</p>\n      <hr/><small>Se n\u00e3o foi voc\u00ea, ignore este e-mail.</small>\n    </div>\n".formatted(code, OTP_TTL.toMinutes());
+            this.mailer.send(destino, subject, html, null);
+            log.info("OTP email sent: to={} code=**** (masked)", (Object)destino);
         } else {
-            log.info("OTP sms requested: to={} code=**** (masked) [NO-OP]", destino);
+            log.info("OTP sms requested: to={} code=**** (masked) [NO-OP]", (Object)destino);
         }
     }
+
+    public static enum Canal {
+        email,
+        sms;
+
+    }
+
+    private record OtpEntry(String canal, String destino, String code, Instant createdAt, Instant expiresAt, int attempts) {
+    }
+
+    private record TokenEntry(String deliveryId, String destinoNormalizado, Instant expiresAt) {
+    }
 }
+

@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.http.model;
 
 import java.io.Serializable;
@@ -5,26 +8,21 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * Estrutura de erro inspirada na RFC 7807 (application/problem+json). Útil para padronizar tratamento de erros vindos
- * de integrações HTTP.
- */
-public class ProblemDetails implements Serializable {
+public class ProblemDetails
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    private String type; // URI do tipo de problema
-    private String title; // resumo legível
-    private int status; // HTTP status
-    private String detail; // descrição detalhada
-    private String instance; // URI da ocorrência
-    private OffsetDateTime timestamp; // quando ocorreu
-    private Map<String, Object> extras; // campos adicionais
+    private String type;
+    private String title;
+    private int status;
+    private String detail;
+    private String instance;
+    private OffsetDateTime timestamp;
+    private Map<String, Object> extras;
 
     public ProblemDetails() {
     }
 
-    public ProblemDetails(String type, String title, int status, String detail, String instance,
-            OffsetDateTime timestamp, Map<String, Object> extras) {
+    public ProblemDetails(String type, String title, int status, String detail, String instance, OffsetDateTime timestamp, Map<String, Object> extras) {
         this.type = type;
         this.title = title;
         this.status = status;
@@ -35,7 +33,7 @@ public class ProblemDetails implements Serializable {
     }
 
     public String getType() {
-        return type;
+        return this.type;
     }
 
     public void setType(String type) {
@@ -43,7 +41,7 @@ public class ProblemDetails implements Serializable {
     }
 
     public String getTitle() {
-        return title;
+        return this.title;
     }
 
     public void setTitle(String title) {
@@ -51,7 +49,7 @@ public class ProblemDetails implements Serializable {
     }
 
     public int getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(int status) {
@@ -59,7 +57,7 @@ public class ProblemDetails implements Serializable {
     }
 
     public String getDetail() {
-        return detail;
+        return this.detail;
     }
 
     public void setDetail(String detail) {
@@ -67,7 +65,7 @@ public class ProblemDetails implements Serializable {
     }
 
     public String getInstance() {
-        return instance;
+        return this.instance;
     }
 
     public void setInstance(String instance) {
@@ -75,7 +73,7 @@ public class ProblemDetails implements Serializable {
     }
 
     public OffsetDateTime getTimestamp() {
-        return timestamp;
+        return this.timestamp;
     }
 
     public void setTimestamp(OffsetDateTime timestamp) {
@@ -83,32 +81,31 @@ public class ProblemDetails implements Serializable {
     }
 
     public Map<String, Object> getExtras() {
-        return extras;
+        return this.extras;
     }
 
     public void setExtras(Map<String, Object> extras) {
         this.extras = extras;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof ProblemDetails))
+        }
+        if (!(o instanceof ProblemDetails)) {
             return false;
-        ProblemDetails that = (ProblemDetails) o;
-        return status == that.status && Objects.equals(type, that.type) && Objects.equals(title, that.title)
-                && Objects.equals(detail, that.detail) && Objects.equals(instance, that.instance)
-                && Objects.equals(timestamp, that.timestamp) && Objects.equals(extras, that.extras);
+        }
+        ProblemDetails that = (ProblemDetails)o;
+        return this.status == that.status && Objects.equals(this.type, that.type) && Objects.equals(this.title, that.title) && Objects.equals(this.detail, that.detail) && Objects.equals(this.instance, that.instance) && Objects.equals(this.timestamp, that.timestamp) && Objects.equals(this.extras, that.extras);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(type, title, status, detail, instance, timestamp, extras);
+        return Objects.hash(this.type, this.title, this.status, this.detail, this.instance, this.timestamp, this.extras);
     }
 
-    @Override
     public String toString() {
-        return "ProblemDetails{status=" + status + ", title='" + title + "', detail='" + detail + "'}";
+        return "ProblemDetails{status=" + this.status + ", title='" + this.title + "', detail='" + this.detail + "'}";
     }
 }
+
+

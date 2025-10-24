@@ -1,12 +1,26 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.store;
 
 import java.time.Instant;
 
-/**
- * Registra tokens revogados temporariamente (até exp). Pode ter uma impl. em Redis no futuro.
- */
 public interface TokenBlacklist {
-    void blacklist(String token, Instant until);
+    public boolean isBlacklisted(String var1);
 
-    boolean isBlacklisted(String token);
+    public void blacklist(String var1, Instant var2);
+
+    default public void purgeExpired() {
+    }
+
+    @Deprecated
+    default public void save(String tokenOrJti, Instant expiresAt) {
+        this.blacklist(tokenOrJti, expiresAt);
+    }
+
+    @Deprecated
+    default public boolean exists(String tokenOrJti) {
+        return this.isBlacklisted(tokenOrJti);
+    }
 }
+

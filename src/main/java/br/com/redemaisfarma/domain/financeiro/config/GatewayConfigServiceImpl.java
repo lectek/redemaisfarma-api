@@ -1,84 +1,81 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.stereotype.Service
+ *  org.springframework.transaction.annotation.Transactional
+ */
 package br.com.redemaisfarma.domain.financeiro.config;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import br.com.redemaisfarma.domain.financeiro.config.GatewayConfig;
+import br.com.redemaisfarma.domain.financeiro.config.GatewayConfigRepository;
+import br.com.redemaisfarma.domain.financeiro.config.GatewayConfigService;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class GatewayConfigServiceImpl implements GatewayConfigService {
-
+public class GatewayConfigServiceImpl
+implements GatewayConfigService {
     private final GatewayConfigRepository repo;
 
     public GatewayConfigServiceImpl(GatewayConfigRepository repo) {
         this.repo = repo;
     }
 
-    // =========================
-    // LISTAGEM / BUSCAS
-    // =========================
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly=true)
     public List<GatewayConfig> listar(Boolean onlyActive, String provider) {
         if (provider != null && !provider.isBlank()) {
             if (Boolean.TRUE.equals(onlyActive)) {
-                return repo.findByAtivoAndProvedorIgnoreCaseOrderByAtualizadoEmDesc(true, provider);
-            } else if (Boolean.FALSE.equals(onlyActive)) {
-                return repo.findByAtivoAndProvedorIgnoreCaseOrderByAtualizadoEmDesc(false, provider);
+                return this.repo.findByAtivoAndProvedorIgnoreCaseOrderByAtualizadoEmDesc(true, provider);
             }
-            return repo.findByProvedorIgnoreCaseOrderByAtualizadoEmDesc(provider);
+            if (Boolean.FALSE.equals(onlyActive)) {
+                return this.repo.findByAtivoAndProvedorIgnoreCaseOrderByAtualizadoEmDesc(false, provider);
+            }
+            return this.repo.findByProvedorIgnoreCaseOrderByAtualizadoEmDesc(provider);
         }
         if (Boolean.TRUE.equals(onlyActive)) {
-            return repo.findByAtivoOrderByAtualizadoEmDesc(true);
-        } else if (Boolean.FALSE.equals(onlyActive)) {
-            return repo.findByAtivoOrderByAtualizadoEmDesc(false);
+            return this.repo.findByAtivoOrderByAtualizadoEmDesc(true);
         }
-        return repo.findAllByOrderByAtualizadoEmDesc();
+        if (Boolean.FALSE.equals(onlyActive)) {
+            return this.repo.findByAtivoOrderByAtualizadoEmDesc(false);
+        }
+        return this.repo.findAllByOrderByAtualizadoEmDesc();
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly=true)
     public Optional<GatewayConfig> buscarPorId(Long id) {
-        return repo.findById(id);
+        return this.repo.findById(id);
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly=true)
     public Optional<GatewayConfig> buscarAtivaPorProvedor(String provider) {
-        return repo.findFirstByProvedorIgnoreCaseAndAtivoTrue(provider);
+        return this.repo.findFirstByProvedorIgnoreCaseAndAtivoTrue(provider);
     }
 
-    // =========================
-    // CRIAÇÃO / ATUALIZAÇÃO
-    // =========================
     @Override
     @Transactional
     public GatewayConfig criar(GatewayConfig nova) {
-        nova.setId(null); // força insert
-        validarObrigatorios(nova);
-        validarUnicidade(nova.getProvedor(), nova.getNome(), null);
-
-        // Se marcar como ativa, garante exclusividade
+        nova.setId(null);
+        this.validarObrigatorios(nova);
+        this.validarUnicidade(nova.getProvedor(), nova.getNome(), null);
         if (nova.isAtivo()) {
-            desativarAtivaAnterior(nova.getProvedor(), null);
+            this.desativarAtivaAnterior(nova.getProvedor(), null);
         }
-
-        return repo.save(nova);
+        return (GatewayConfig)this.repo.save(nova);
     }
 
     @Override
     @Transactional
     public GatewayConfig atualizar(Long id, GatewayConfig alterada) {
-        GatewayConfig atual = repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Config não encontrada: id=" + id));
-
-        // checa unicidade novo par (provedor, nome)
-        validarObrigatorios(alterada);
-        validarUnicidade(alterada.getProvedor(), alterada.getNome(), id);
-
-        // copia campos editáveis
+        GatewayConfig atual = (GatewayConfig)this.repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Config n\u00e3o encontrada: id=" + id));
+        this.validarObrigatorios(alterada);
+        this.validarUnicidade(alterada.getProvedor(), alterada.getNome(), id);
         atual.setNome(alterada.getNome());
         atual.setProvedor(alterada.getProvedor());
         atual.setApiKey(alterada.getApiKey());
@@ -87,87 +84,71 @@ public class GatewayConfigServiceImpl implements GatewayConfigService {
         atual.setTimeoutMs(alterada.getTimeoutMs());
         atual.setMaxRetries(alterada.getMaxRetries());
         atual.setMetadata(alterada.getMetadata());
-
-        // ativa/desativa conforme solicitado
         if (alterada.isAtivo() && !atual.isAtivo()) {
-            desativarAtivaAnterior(atual.getProvedor(), id);
+            this.desativarAtivaAnterior(atual.getProvedor(), id);
             atual.setAtivo(true);
         } else if (!alterada.isAtivo() && atual.isAtivo()) {
             atual.setAtivo(false);
         }
-
-        return repo.save(atual);
+        return (GatewayConfig)this.repo.save(atual);
     }
 
     @Override
     @Transactional
     public void remover(Long id) {
-        GatewayConfig cfg = repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Config não encontrada: id=" + id));
-
+        GatewayConfig cfg = (GatewayConfig)this.repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Config n\u00e3o encontrada: id=" + id));
         if (cfg.isAtivo()) {
-            // regra opcional: não permitir remover a ativa
-            throw new IllegalStateException("Não é permitido remover a configuração ATIVA do provedor " + cfg.getProvedor());
+            throw new IllegalStateException("N\u00e3o \u00e9 permitido remover a configura\u00e7\u00e3o ATIVA do provedor " + cfg.getProvedor());
         }
-        repo.deleteById(id);
+        this.repo.deleteById(id);
     }
 
     @Override
     @Transactional
     public GatewayConfig ativar(Long id, boolean ativo) {
-        GatewayConfig target = repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Config não encontrada: id=" + id));
-
+        GatewayConfig target = (GatewayConfig)this.repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Config n\u00e3o encontrada: id=" + id));
         if (ativo) {
             if (!target.isAtivo()) {
-                desativarAtivaAnterior(target.getProvedor(), id);
+                this.desativarAtivaAnterior(target.getProvedor(), id);
                 target.setAtivo(true);
-                target = repo.save(target);
+                target = (GatewayConfig)this.repo.save(target);
             }
-        } else {
-            if (target.isAtivo()) {
-                target.setAtivo(false);
-                target = repo.save(target);
-            }
+        } else if (target.isAtivo()) {
+            target.setAtivo(false);
+            target = (GatewayConfig)this.repo.save(target);
         }
         return target;
     }
 
-    // =========================
-    // HELPERS
-    // =========================
     private void validarObrigatorios(GatewayConfig c) {
         if (c.getProvedor() == null || c.getProvedor().isBlank()) {
-            throw new IllegalArgumentException("Provedor é obrigatório");
+            throw new IllegalArgumentException("Provedor \u00e9 obrigat\u00f3rio");
         }
         if (c.getNome() == null || c.getNome().isBlank()) {
-            throw new IllegalArgumentException("Nome é obrigatório");
+            throw new IllegalArgumentException("Nome \u00e9 obrigat\u00f3rio");
         }
         if (c.getApiKey() == null || c.getApiKey().isBlank()) {
-            throw new IllegalArgumentException("API Key é obrigatória");
+            throw new IllegalArgumentException("API Key \u00e9 obrigat\u00f3ria");
         }
     }
 
     private void validarUnicidade(String provedor, String nome, Long currentId) {
+        boolean exists;
         String p = provedor == null ? null : provedor.toLowerCase(Locale.ROOT);
         String n = nome == null ? null : nome.toLowerCase(Locale.ROOT);
-
-        boolean exists = (currentId == null)
-                ? repo.existsByProvedorIgnoreCaseAndNomeIgnoreCase(p, n)
-                : repo.existsByProvedorIgnoreCaseAndNomeIgnoreCaseAndIdNot(p, n, currentId);
-
+        boolean bl = exists = currentId == null ? this.repo.existsByProvedorIgnoreCaseAndNomeIgnoreCase(p, n) : this.repo.existsByProvedorIgnoreCaseAndNomeIgnoreCaseAndIdNot(p, n, currentId);
         if (exists) {
-            throw new IllegalStateException("Já existe configuração com esse Nome para o provedor " + provedor);
+            throw new IllegalStateException("J\u00e1 existe configura\u00e7\u00e3o com esse Nome para o provedor " + provedor);
         }
     }
 
-    /** Desativa a config ativa anterior do mesmo provedor (se houver). */
     private void desativarAtivaAnterior(String provedor, Long exceptId) {
-        repo.findFirstByProvedorIgnoreCaseAndAtivoTrue(provedor).ifPresent(old -> {
+        this.repo.findFirstByProvedorIgnoreCaseAndAtivoTrue(provedor).ifPresent(old -> {
             if (exceptId == null || !old.getId().equals(exceptId)) {
                 old.setAtivo(false);
-                repo.save(old);
+                this.repo.save(old);
             }
         });
     }
 }
+

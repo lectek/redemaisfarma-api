@@ -1,47 +1,43 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonFormat
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package br.com.redemaisfarma.adapters.outbound.http.cliente.model;
 
+import br.com.redemaisfarma.adapters.outbound.http.cliente.model.EnderecoExternal;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Modelo PRÓPRIO do outbound para a resposta do serviço externo de Cliente. Mantenha este contrato desacoplado das DTOs
- * de application.
- */
-public class ClienteExternal implements Serializable {
-
-    @JsonProperty("id")
+public class ClienteExternal
+implements Serializable {
+    @JsonProperty(value="id")
     private UUID id;
-
-    @JsonProperty("nome")
+    @JsonProperty(value="nome")
     private String nome;
-
-    @JsonProperty("cpf")
+    @JsonProperty(value="cpf")
     private String cpf;
-
-    @JsonProperty("email")
+    @JsonProperty(value="email")
     private String email;
-
-    @JsonProperty("telefone")
+    @JsonProperty(value="telefone")
     private String telefone;
-
-    @JsonProperty("dataNascimento")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonProperty(value="dataNascimento")
+    @JsonFormat(pattern="yyyy-MM-dd")
     private LocalDate dataNascimento;
-
-    @JsonProperty("ativo")
+    @JsonProperty(value="ativo")
     private Boolean ativo;
-
-    @JsonProperty("enderecos")
+    @JsonProperty(value="enderecos")
     private List<EnderecoExternal> enderecos;
 
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(UUID id) {
@@ -49,7 +45,7 @@ public class ClienteExternal implements Serializable {
     }
 
     public String getNome() {
-        return nome;
+        return this.nome;
     }
 
     public void setNome(String nome) {
@@ -57,7 +53,7 @@ public class ClienteExternal implements Serializable {
     }
 
     public String getCpf() {
-        return cpf;
+        return this.cpf;
     }
 
     public void setCpf(String cpf) {
@@ -65,7 +61,7 @@ public class ClienteExternal implements Serializable {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -73,7 +69,7 @@ public class ClienteExternal implements Serializable {
     }
 
     public String getTelefone() {
-        return telefone;
+        return this.telefone;
     }
 
     public void setTelefone(String telefone) {
@@ -81,7 +77,7 @@ public class ClienteExternal implements Serializable {
     }
 
     public LocalDate getDataNascimento() {
-        return dataNascimento;
+        return this.dataNascimento;
     }
 
     public void setDataNascimento(LocalDate dataNascimento) {
@@ -89,7 +85,7 @@ public class ClienteExternal implements Serializable {
     }
 
     public Boolean getAtivo() {
-        return ativo;
+        return this.ativo;
     }
 
     public void setAtivo(Boolean ativo) {
@@ -97,25 +93,26 @@ public class ClienteExternal implements Serializable {
     }
 
     public List<EnderecoExternal> getEnderecos() {
-        return enderecos;
+        return this.enderecos;
     }
 
     public void setEnderecos(List<EnderecoExternal> enderecos) {
         this.enderecos = enderecos;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof ClienteExternal))
+        }
+        if (!(o instanceof ClienteExternal)) {
             return false;
-        ClienteExternal that = (ClienteExternal) o;
-        return Objects.equals(id, that.id) && Objects.equals(cpf, that.cpf);
+        }
+        ClienteExternal that = (ClienteExternal)o;
+        return Objects.equals(this.id, that.id) && Objects.equals(this.cpf, that.cpf);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(id, cpf);
+        return Objects.hash(this.id, this.cpf);
     }
 }
+

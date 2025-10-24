@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.messaging.kafka.model;
 
 import java.io.Serializable;
@@ -6,8 +9,8 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-/** Exemplo de evento de domínio publicado quando um pedido é criado. */
-public class PedidoCreatedEvent implements Serializable {
+public class PedidoCreatedEvent
+implements Serializable {
     private UUID pedidoId;
     private Long usuarioId;
     private BigDecimal valorTotal;
@@ -24,7 +27,7 @@ public class PedidoCreatedEvent implements Serializable {
     }
 
     public UUID getPedidoId() {
-        return pedidoId;
+        return this.pedidoId;
     }
 
     public void setPedidoId(UUID pedidoId) {
@@ -32,7 +35,7 @@ public class PedidoCreatedEvent implements Serializable {
     }
 
     public Long getUsuarioId() {
-        return usuarioId;
+        return this.usuarioId;
     }
 
     public void setUsuarioId(Long usuarioId) {
@@ -40,7 +43,7 @@ public class PedidoCreatedEvent implements Serializable {
     }
 
     public BigDecimal getValorTotal() {
-        return valorTotal;
+        return this.valorTotal;
     }
 
     public void setValorTotal(BigDecimal valorTotal) {
@@ -48,24 +51,26 @@ public class PedidoCreatedEvent implements Serializable {
     }
 
     public Instant getCriadoEm() {
-        return criadoEm;
+        return this.criadoEm;
     }
 
     public void setCriadoEm(Instant criadoEm) {
         this.criadoEm = criadoEm;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof PedidoCreatedEvent that))
+        }
+        if (!(o instanceof PedidoCreatedEvent)) {
             return false;
-        return Objects.equals(pedidoId, that.pedidoId);
+        }
+        PedidoCreatedEvent that = (PedidoCreatedEvent)o;
+        return Objects.equals(this.pedidoId, that.pedidoId);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(pedidoId);
+        return Objects.hash(this.pedidoId);
     }
 }
+

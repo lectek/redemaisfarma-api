@@ -1,5 +1,39 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonFormat
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ *  jakarta.validation.constraints.AssertTrue
+ *  jakarta.validation.constraints.DecimalMax
+ *  jakarta.validation.constraints.DecimalMin
+ *  jakarta.validation.constraints.Digits
+ *  jakarta.validation.constraints.Min
+ *  jakarta.validation.constraints.NotBlank
+ *  jakarta.validation.constraints.NotNull
+ *  jakarta.validation.constraints.PastOrPresent
+ *  jakarta.validation.constraints.PositiveOrZero
+ *  jakarta.validation.constraints.Size
+ */
 package br.com.redemaisfarma.application.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -9,168 +43,105 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import jakarta.validation.constraints.*;
-import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.AssertTrue;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-
-/**
- * DTO de resposta para relatórios financeiros e operacionais da API RedeMaisFarma.
- *
- * Contém métricas agregadas, detalhes operacionais, filtros aplicados, metadados de auditoria e configurações de
- * exportação — pronto para dashboards, mobile e exportação.
- */
-@Schema(name = "RelatorioResponseDTO", description = "Dados agregados do relatório gerado")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class RelatorioResponseDTO implements Serializable {
+@Schema(name="RelatorioResponseDTO", description="Dados agregados do relat\u00f3rio gerado")
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+public class RelatorioResponseDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    // ----------------------------------------------------------------------
-    // Período e filtros utilizados
-    // ----------------------------------------------------------------------
-
-    @Schema(description = "Data de início do relatório", type = "string", format = "date", example = "2025-07-01", required = true)
-    @NotNull(message = "{relatorio.dataInicio.notNull}")
-    @JsonProperty("dataInicio")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate dataInicio;
-
-    @Schema(description = "Data de fim do relatório", type = "string", format = "date", example = "2025-07-31", required = true)
-    @NotNull(message = "{relatorio.dataFim.notNull}")
-    @JsonProperty("dataFim")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate dataFim;
-
-    @Schema(description = "Categoria principal de filtro", example = "FARMACEUTICOS")
-    @Size(max = 100, message = "{relatorio.categoriaFiltro.size}")
-    @JsonProperty("categoriaFiltro")
-    private String categoriaFiltro;
-
-    // ----------------------------------------------------------------------
-    // Métricas agregadas
-    // ----------------------------------------------------------------------
-
-    @Schema(description = "Total de vendas no período", example = "15000.50", required = true)
-    @NotNull(message = "{relatorio.totalVendas.notNull}")
-    @DecimalMin(value = "0.00", inclusive = true, message = "{relatorio.totalVendas.min}")
-    @Digits(integer = 14, fraction = 2, message = "{relatorio.totalVendas.digits}")
-    @JsonProperty("totalVendas")
-    private BigDecimal totalVendas;
-
-    @Schema(description = "Margem de lucro (%)", example = "25.50", required = true)
-    @NotNull(message = "{relatorio.margemLucro.notNull}")
-    @DecimalMin(value = "0.00", inclusive = true, message = "{relatorio.margemLucro.min}")
-    @DecimalMax(value = "100.00", inclusive = true, message = "{relatorio.margemLucro.max}")
-    @Digits(integer = 3, fraction = 2, message = "{relatorio.margemLucro.digits}")
-    @JsonProperty("margemLucro")
-    private BigDecimal margemLucro;
-
-    @Schema(description = "Quantidade de produtos vendidos", example = "1200", required = true)
-    @NotNull(message = "{relatorio.quantidadeProdutosVendidos.notNull}")
-    @Min(value = 0, message = "{relatorio.quantidadeProdutosVendidos.min}")
-    @JsonProperty("quantidadeProdutosVendidos")
-    private Long quantidadeProdutosVendidos;
-
-    @Schema(description = "Total de pedidos realizados", example = "300", required = true)
-    @NotNull(message = "{relatorio.totalPedidos.notNull}")
-    @Min(value = 0, message = "{relatorio.totalPedidos.min}")
-    @JsonProperty("totalPedidos")
-    private Long totalPedidos;
-
-    @Schema(description = "Ticket médio", example = "50.25")
-    @DecimalMin(value = "0.00", inclusive = true, message = "{relatorio.mediaTicket.min}")
-    @Digits(integer = 14, fraction = 2, message = "{relatorio.mediaTicket.digits}")
-    @JsonProperty("mediaTicket")
-    private BigDecimal mediaTicket;
-
-    // ----------------------------------------------------------------------
-    // Detalhamentos por dimensão
-    // ----------------------------------------------------------------------
-
-    @Schema(description = "Vendas por categoria (categoria -> valor)", example = "{\"REMEDIOS\":10000.00,\"PERFUMARIA\":5000.50}")
-    @JsonProperty("vendasPorCategoria")
-    private Map<@NotBlank @Size(max = 100) String, @NotNull @Digits(integer = 14, fraction = 2) BigDecimal> vendasPorCategoria;
-
-    @Schema(description = "Lucro por produto (produtoId -> valor)", example = "{\"001\":2000.00,\"002\":1500.00}")
-    @JsonProperty("lucroPorProduto")
-    private Map<@NotBlank @Size(max = 64) String, @NotNull @Digits(integer = 14, fraction = 2) BigDecimal> lucroPorProduto;
-
-    @Schema(description = "Produtos mais vendidos no período")
-    @JsonProperty("produtosMaisVendidos")
-    private List<@NotBlank @Size(max = 150) String> produtosMaisVendidos;
-
-    // ----------------------------------------------------------------------
-    // Metadados de geração e auditoria
-    // ----------------------------------------------------------------------
-
-    @Schema(description = "Data/hora de geração do relatório", type = "string", format = "date-time", example = "2025-08-01T08:00:00", required = true)
-    @NotNull(message = "{relatorio.dataGeracaoRelatorio.notNull}")
-    @PastOrPresent(message = "{relatorio.dataGeracaoRelatorio.pastOrPresent}")
-    @JsonProperty("dataGeracaoRelatorio")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime dataGeracaoRelatorio;
-
-    @Schema(description = "Usuário solicitante", example = "joao.silva", required = true)
-    @NotBlank(message = "{relatorio.usuarioSolicitante.notBlank}")
-    @Size(max = 100, message = "{relatorio.usuarioSolicitante.size}")
-    @JsonProperty("usuarioSolicitante")
-    private String usuarioSolicitante;
-
-    @Schema(description = "ID do tenant (multi-inquilino)", example = "redemaisfarma-001", required = true)
-    @NotBlank(message = "{relatorio.tenantId.notBlank}")
-    @Size(max = 100, message = "{relatorio.tenantId.size}")
-    @JsonProperty("tenantId")
-    private String tenantId;
-
-    @Schema(description = "Token de correlação (UUID)", example = "5fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty("traceId")
+    @Schema(description="Data de in\u00edcio do relat\u00f3rio", type="string", format="date", example="2025-07-01", required=true)
+    @NotNull(message="{relatorio.dataInicio.notNull}")
+    @JsonProperty(value="dataInicio")
+    @JsonFormat(pattern="yyyy-MM-dd")
+    private @NotNull(message="{relatorio.dataInicio.notNull}") LocalDate dataInicio;
+    @Schema(description="Data de fim do relat\u00f3rio", type="string", format="date", example="2025-07-31", required=true)
+    @NotNull(message="{relatorio.dataFim.notNull}")
+    @JsonProperty(value="dataFim")
+    @JsonFormat(pattern="yyyy-MM-dd")
+    private @NotNull(message="{relatorio.dataFim.notNull}") LocalDate dataFim;
+    @Schema(description="Categoria principal de filtro", example="FARMACEUTICOS")
+    @Size(max=100, message="{relatorio.categoriaFiltro.size}")
+    @JsonProperty(value="categoriaFiltro")
+    private @Size(max=100, message="{relatorio.categoriaFiltro.size}") String categoriaFiltro;
+    @Schema(description="Total de vendas no per\u00edodo", example="15000.50", required=true)
+    @NotNull(message="{relatorio.totalVendas.notNull}")
+    @DecimalMin(value="0.00", inclusive=true, message="{relatorio.totalVendas.min}")
+    @Digits(integer=14, fraction=2, message="{relatorio.totalVendas.digits}")
+    @JsonProperty(value="totalVendas")
+    private @NotNull(message="{relatorio.totalVendas.notNull}") @DecimalMin(value="0.00", inclusive=true, message="{relatorio.totalVendas.min}") @Digits(integer=14, fraction=2, message="{relatorio.totalVendas.digits}") BigDecimal totalVendas;
+    @Schema(description="Margem de lucro (%)", example="25.50", required=true)
+    @NotNull(message="{relatorio.margemLucro.notNull}")
+    @DecimalMin(value="0.00", inclusive=true, message="{relatorio.margemLucro.min}")
+    @DecimalMax(value="100.00", inclusive=true, message="{relatorio.margemLucro.max}")
+    @Digits(integer=3, fraction=2, message="{relatorio.margemLucro.digits}")
+    @JsonProperty(value="margemLucro")
+    private @NotNull(message="{relatorio.margemLucro.notNull}") @DecimalMin(value="0.00", inclusive=true, message="{relatorio.margemLucro.min}") @DecimalMax(value="100.00", inclusive=true, message="{relatorio.margemLucro.max}") @Digits(integer=3, fraction=2, message="{relatorio.margemLucro.digits}") BigDecimal margemLucro;
+    @Schema(description="Quantidade de produtos vendidos", example="1200", required=true)
+    @NotNull(message="{relatorio.quantidadeProdutosVendidos.notNull}")
+    @Min(value=0L, message="{relatorio.quantidadeProdutosVendidos.min}")
+    @JsonProperty(value="quantidadeProdutosVendidos")
+    private @NotNull(message="{relatorio.quantidadeProdutosVendidos.notNull}") @Min(value=0L, message="{relatorio.quantidadeProdutosVendidos.min}") Long quantidadeProdutosVendidos;
+    @Schema(description="Total de pedidos realizados", example="300", required=true)
+    @NotNull(message="{relatorio.totalPedidos.notNull}")
+    @Min(value=0L, message="{relatorio.totalPedidos.min}")
+    @JsonProperty(value="totalPedidos")
+    private @NotNull(message="{relatorio.totalPedidos.notNull}") @Min(value=0L, message="{relatorio.totalPedidos.min}") Long totalPedidos;
+    @Schema(description="Ticket m\u00e9dio", example="50.25")
+    @DecimalMin(value="0.00", inclusive=true, message="{relatorio.mediaTicket.min}")
+    @Digits(integer=14, fraction=2, message="{relatorio.mediaTicket.digits}")
+    @JsonProperty(value="mediaTicket")
+    private @DecimalMin(value="0.00", inclusive=true, message="{relatorio.mediaTicket.min}") @Digits(integer=14, fraction=2, message="{relatorio.mediaTicket.digits}") BigDecimal mediaTicket;
+    @Schema(description="Vendas por categoria (categoria -> valor)", example="{\"REMEDIOS\":10000.00,\"PERFUMARIA\":5000.50}")
+    @JsonProperty(value="vendasPorCategoria")
+    private Map<@NotBlank @Size(max=100) String, @NotNull @Digits(integer=14, fraction=2) BigDecimal> vendasPorCategoria;
+    @Schema(description="Lucro por produto (produtoId -> valor)", example="{\"001\":2000.00,\"002\":1500.00}")
+    @JsonProperty(value="lucroPorProduto")
+    private Map<@NotBlank @Size(max=64) String, @NotNull @Digits(integer=14, fraction=2) BigDecimal> lucroPorProduto;
+    @Schema(description="Produtos mais vendidos no per\u00edodo")
+    @JsonProperty(value="produtosMaisVendidos")
+    private List<@NotBlank @Size(max=150) String> produtosMaisVendidos;
+    @Schema(description="Data/hora de gera\u00e7\u00e3o do relat\u00f3rio", type="string", format="date-time", example="2025-08-01T08:00:00", required=true)
+    @NotNull(message="{relatorio.dataGeracaoRelatorio.notNull}")
+    @PastOrPresent(message="{relatorio.dataGeracaoRelatorio.pastOrPresent}")
+    @JsonProperty(value="dataGeracaoRelatorio")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    private @NotNull(message="{relatorio.dataGeracaoRelatorio.notNull}") @PastOrPresent(message="{relatorio.dataGeracaoRelatorio.pastOrPresent}") LocalDateTime dataGeracaoRelatorio;
+    @Schema(description="Usu\u00e1rio solicitante", example="joao.silva", required=true)
+    @NotBlank(message="{relatorio.usuarioSolicitante.notBlank}")
+    @Size(max=100, message="{relatorio.usuarioSolicitante.size}")
+    @JsonProperty(value="usuarioSolicitante")
+    private @NotBlank(message="{relatorio.usuarioSolicitante.notBlank}") @Size(max=100, message="{relatorio.usuarioSolicitante.size}") String usuarioSolicitante;
+    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", required=true)
+    @NotBlank(message="{relatorio.tenantId.notBlank}")
+    @Size(max=100, message="{relatorio.tenantId.size}")
+    @JsonProperty(value="tenantId")
+    private @NotBlank(message="{relatorio.tenantId.notBlank}") @Size(max=100, message="{relatorio.tenantId.size}") String tenantId;
+    @Schema(description="Token de correla\u00e7\u00e3o (UUID)", example="5fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value="traceId")
     private UUID traceId;
-
-    @Schema(description = "Duração da geração do relatório (ms)", example = "1500")
-    @PositiveOrZero(message = "{relatorio.duracaoConsulta.min}")
-    @JsonProperty("duracaoConsulta")
-    private Long duracaoConsulta;
-
-    @Schema(description = "Método de exportação do relatório", example = "PDF", allowableValues = { "PDF", "EXCEL",
-            "CSV", "JSON" })
-    @JsonProperty("metodoExportacao")
+    @Schema(description="Dura\u00e7\u00e3o da gera\u00e7\u00e3o do relat\u00f3rio (ms)", example="1500")
+    @PositiveOrZero(message="{relatorio.duracaoConsulta.min}")
+    @JsonProperty(value="duracaoConsulta")
+    private @PositiveOrZero(message="{relatorio.duracaoConsulta.min}") Long duracaoConsulta;
+    @Schema(description="M\u00e9todo de exporta\u00e7\u00e3o do relat\u00f3rio", example="PDF", allowableValues={"PDF", "EXCEL", "CSV", "JSON"})
+    @JsonProperty(value="metodoExportacao")
     private MetodoExportacao metodoExportacao;
+    @Schema(description="Status da gera\u00e7\u00e3o do relat\u00f3rio", example="SUCCESS", required=true, allowableValues={"SUCCESS", "EMPTY", "ERROR"})
+    @NotNull(message="{relatorio.statusConsulta.notNull}")
+    @JsonProperty(value="statusConsulta")
+    private @NotNull(message="{relatorio.statusConsulta.notNull}") StatusConsulta statusConsulta;
 
-    @Schema(description = "Status da geração do relatório", example = "SUCCESS", required = true, allowableValues = {
-            "SUCCESS", "EMPTY", "ERROR" })
-    @NotNull(message = "{relatorio.statusConsulta.notNull}")
-    @JsonProperty("statusConsulta")
-    private StatusConsulta statusConsulta;
-
-    // ----------------------------------------------------------------------
-    // Validações compostas
-    // ----------------------------------------------------------------------
-
-    @AssertTrue(message = "{relatorio.periodo.valido}")
-    public boolean isPeriodoValido() {
-        if (dataInicio == null || dataFim == null)
-            return true; // outras anotações já validam null
-        return !dataFim.isBefore(dataInicio);
+    @AssertTrue(message="{relatorio.periodo.valido}")
+    public @AssertTrue(message="{relatorio.periodo.valido}") boolean isPeriodoValido() {
+        if (this.dataInicio == null || this.dataFim == null) {
+            return true;
+        }
+        return !this.dataFim.isBefore(this.dataInicio);
     }
-
-    // ----------------------------------------------------------------------
-    // Construtores
-    // ----------------------------------------------------------------------
 
     public RelatorioResponseDTO() {
     }
 
-    public RelatorioResponseDTO(LocalDate dataInicio, LocalDate dataFim, String categoriaFiltro, BigDecimal totalVendas,
-            BigDecimal margemLucro, Long quantidadeProdutosVendidos, Long totalPedidos, BigDecimal mediaTicket,
-            Map<String, BigDecimal> vendasPorCategoria, Map<String, BigDecimal> lucroPorProduto,
-            List<String> produtosMaisVendidos, LocalDateTime dataGeracaoRelatorio, String usuarioSolicitante,
-            String tenantId, UUID traceId, Long duracaoConsulta, MetodoExportacao metodoExportacao,
-            StatusConsulta statusConsulta) {
+    public RelatorioResponseDTO(LocalDate dataInicio, LocalDate dataFim, String categoriaFiltro, BigDecimal totalVendas, BigDecimal margemLucro, Long quantidadeProdutosVendidos, Long totalPedidos, BigDecimal mediaTicket, Map<String, BigDecimal> vendasPorCategoria, Map<String, BigDecimal> lucroPorProduto, List<String> produtosMaisVendidos, LocalDateTime dataGeracaoRelatorio, String usuarioSolicitante, String tenantId, UUID traceId, Long duracaoConsulta, MetodoExportacao metodoExportacao, StatusConsulta statusConsulta) {
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;
         this.categoriaFiltro = categoriaFiltro;
@@ -191,12 +162,8 @@ public class RelatorioResponseDTO implements Serializable {
         this.statusConsulta = statusConsulta;
     }
 
-    // ----------------------------------------------------------------------
-    // Getters e Setters
-    // ----------------------------------------------------------------------
-
     public LocalDate getDataInicio() {
-        return dataInicio;
+        return this.dataInicio;
     }
 
     public void setDataInicio(LocalDate dataInicio) {
@@ -204,7 +171,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public LocalDate getDataFim() {
-        return dataFim;
+        return this.dataFim;
     }
 
     public void setDataFim(LocalDate dataFim) {
@@ -212,7 +179,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public String getCategoriaFiltro() {
-        return categoriaFiltro;
+        return this.categoriaFiltro;
     }
 
     public void setCategoriaFiltro(String categoriaFiltro) {
@@ -220,7 +187,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public BigDecimal getTotalVendas() {
-        return totalVendas;
+        return this.totalVendas;
     }
 
     public void setTotalVendas(BigDecimal totalVendas) {
@@ -228,7 +195,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public BigDecimal getMargemLucro() {
-        return margemLucro;
+        return this.margemLucro;
     }
 
     public void setMargemLucro(BigDecimal margemLucro) {
@@ -236,7 +203,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public Long getQuantidadeProdutosVendidos() {
-        return quantidadeProdutosVendidos;
+        return this.quantidadeProdutosVendidos;
     }
 
     public void setQuantidadeProdutosVendidos(Long quantidadeProdutosVendidos) {
@@ -244,7 +211,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public Long getTotalPedidos() {
-        return totalPedidos;
+        return this.totalPedidos;
     }
 
     public void setTotalPedidos(Long totalPedidos) {
@@ -252,7 +219,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public BigDecimal getMediaTicket() {
-        return mediaTicket;
+        return this.mediaTicket;
     }
 
     public void setMediaTicket(BigDecimal mediaTicket) {
@@ -260,7 +227,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public Map<String, BigDecimal> getVendasPorCategoria() {
-        return vendasPorCategoria;
+        return this.vendasPorCategoria;
     }
 
     public void setVendasPorCategoria(Map<String, BigDecimal> vendasPorCategoria) {
@@ -268,7 +235,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public Map<String, BigDecimal> getLucroPorProduto() {
-        return lucroPorProduto;
+        return this.lucroPorProduto;
     }
 
     public void setLucroPorProduto(Map<String, BigDecimal> lucroPorProduto) {
@@ -276,7 +243,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public List<String> getProdutosMaisVendidos() {
-        return produtosMaisVendidos;
+        return this.produtosMaisVendidos;
     }
 
     public void setProdutosMaisVendidos(List<String> produtosMaisVendidos) {
@@ -284,7 +251,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public LocalDateTime getDataGeracaoRelatorio() {
-        return dataGeracaoRelatorio;
+        return this.dataGeracaoRelatorio;
     }
 
     public void setDataGeracaoRelatorio(LocalDateTime dataGeracaoRelatorio) {
@@ -292,7 +259,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public String getUsuarioSolicitante() {
-        return usuarioSolicitante;
+        return this.usuarioSolicitante;
     }
 
     public void setUsuarioSolicitante(String usuarioSolicitante) {
@@ -300,7 +267,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public String getTenantId() {
-        return tenantId;
+        return this.tenantId;
     }
 
     public void setTenantId(String tenantId) {
@@ -308,7 +275,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public UUID getTraceId() {
-        return traceId;
+        return this.traceId;
     }
 
     public void setTraceId(UUID traceId) {
@@ -316,7 +283,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public Long getDuracaoConsulta() {
-        return duracaoConsulta;
+        return this.duracaoConsulta;
     }
 
     public void setDuracaoConsulta(Long duracaoConsulta) {
@@ -324,7 +291,7 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public MetodoExportacao getMetodoExportacao() {
-        return metodoExportacao;
+        return this.metodoExportacao;
     }
 
     public void setMetodoExportacao(MetodoExportacao metodoExportacao) {
@@ -332,65 +299,45 @@ public class RelatorioResponseDTO implements Serializable {
     }
 
     public StatusConsulta getStatusConsulta() {
-        return statusConsulta;
+        return this.statusConsulta;
     }
 
     public void setStatusConsulta(StatusConsulta statusConsulta) {
         this.statusConsulta = statusConsulta;
     }
 
-    // ----------------------------------------------------------------------
-    // Métodos utilitários
-    // ----------------------------------------------------------------------
-
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof RelatorioResponseDTO))
+        }
+        if (!(o instanceof RelatorioResponseDTO)) {
             return false;
-        RelatorioResponseDTO that = (RelatorioResponseDTO) o;
-        return Objects.equals(dataInicio, that.dataInicio) && Objects.equals(dataFim, that.dataFim)
-                && Objects.equals(categoriaFiltro, that.categoriaFiltro)
-                && Objects.equals(totalVendas, that.totalVendas) && Objects.equals(margemLucro, that.margemLucro)
-                && Objects.equals(quantidadeProdutosVendidos, that.quantidadeProdutosVendidos)
-                && Objects.equals(totalPedidos, that.totalPedidos) && Objects.equals(mediaTicket, that.mediaTicket)
-                && Objects.equals(vendasPorCategoria, that.vendasPorCategoria)
-                && Objects.equals(lucroPorProduto, that.lucroPorProduto)
-                && Objects.equals(produtosMaisVendidos, that.produtosMaisVendidos)
-                && Objects.equals(dataGeracaoRelatorio, that.dataGeracaoRelatorio)
-                && Objects.equals(usuarioSolicitante, that.usuarioSolicitante)
-                && Objects.equals(tenantId, that.tenantId) && Objects.equals(traceId, that.traceId)
-                && Objects.equals(duracaoConsulta, that.duracaoConsulta) && metodoExportacao == that.metodoExportacao
-                && statusConsulta == that.statusConsulta;
+        }
+        RelatorioResponseDTO that = (RelatorioResponseDTO)o;
+        return Objects.equals(this.dataInicio, that.dataInicio) && Objects.equals(this.dataFim, that.dataFim) && Objects.equals(this.categoriaFiltro, that.categoriaFiltro) && Objects.equals(this.totalVendas, that.totalVendas) && Objects.equals(this.margemLucro, that.margemLucro) && Objects.equals(this.quantidadeProdutosVendidos, that.quantidadeProdutosVendidos) && Objects.equals(this.totalPedidos, that.totalPedidos) && Objects.equals(this.mediaTicket, that.mediaTicket) && Objects.equals(this.vendasPorCategoria, that.vendasPorCategoria) && Objects.equals(this.lucroPorProduto, that.lucroPorProduto) && Objects.equals(this.produtosMaisVendidos, that.produtosMaisVendidos) && Objects.equals(this.dataGeracaoRelatorio, that.dataGeracaoRelatorio) && Objects.equals(this.usuarioSolicitante, that.usuarioSolicitante) && Objects.equals(this.tenantId, that.tenantId) && Objects.equals(this.traceId, that.traceId) && Objects.equals(this.duracaoConsulta, that.duracaoConsulta) && this.metodoExportacao == that.metodoExportacao && this.statusConsulta == that.statusConsulta;
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(dataInicio, dataFim, categoriaFiltro, totalVendas, margemLucro, quantidadeProdutosVendidos,
-                totalPedidos, mediaTicket, vendasPorCategoria, lucroPorProduto, produtosMaisVendidos,
-                dataGeracaoRelatorio, usuarioSolicitante, tenantId, traceId, duracaoConsulta, metodoExportacao,
-                statusConsulta);
+        return Objects.hash(new Object[]{this.dataInicio, this.dataFim, this.categoriaFiltro, this.totalVendas, this.margemLucro, this.quantidadeProdutosVendidos, this.totalPedidos, this.mediaTicket, this.vendasPorCategoria, this.lucroPorProduto, this.produtosMaisVendidos, this.dataGeracaoRelatorio, this.usuarioSolicitante, this.tenantId, this.traceId, this.duracaoConsulta, this.metodoExportacao, this.statusConsulta});
     }
 
-    @Override
     public String toString() {
-        return "RelatorioResponseDTO{" + "dataInicio=" + dataInicio + ", dataFim=" + dataFim + ", categoriaFiltro='"
-                + categoriaFiltro + '\'' + ", totalVendas=" + totalVendas + ", margemLucro=" + margemLucro
-                + ", quantidadeProdutosVendidos=" + quantidadeProdutosVendidos + ", totalPedidos=" + totalPedidos
-                + ", mediaTicket=" + mediaTicket + ", vendasPorCategoria=" + vendasPorCategoria + ", lucroPorProduto="
-                + lucroPorProduto + ", produtosMaisVendidos=" + produtosMaisVendidos + ", dataGeracaoRelatorio="
-                + dataGeracaoRelatorio + ", usuarioSolicitante='" + usuarioSolicitante + '\'' + ", tenantId='"
-                + tenantId + '\'' + ", traceId=" + traceId + ", duracaoConsulta=" + duracaoConsulta
-                + ", metodoExportacao=" + metodoExportacao + ", statusConsulta=" + statusConsulta + '}';
+        return "RelatorioResponseDTO{dataInicio=" + String.valueOf(this.dataInicio) + ", dataFim=" + String.valueOf(this.dataFim) + ", categoriaFiltro='" + this.categoriaFiltro + "', totalVendas=" + String.valueOf(this.totalVendas) + ", margemLucro=" + String.valueOf(this.margemLucro) + ", quantidadeProdutosVendidos=" + this.quantidadeProdutosVendidos + ", totalPedidos=" + this.totalPedidos + ", mediaTicket=" + String.valueOf(this.mediaTicket) + ", vendasPorCategoria=" + String.valueOf(this.vendasPorCategoria) + ", lucroPorProduto=" + String.valueOf(this.lucroPorProduto) + ", produtosMaisVendidos=" + String.valueOf(this.produtosMaisVendidos) + ", dataGeracaoRelatorio=" + String.valueOf(this.dataGeracaoRelatorio) + ", usuarioSolicitante='" + this.usuarioSolicitante + "', tenantId='" + this.tenantId + "', traceId=" + String.valueOf(this.traceId) + ", duracaoConsulta=" + this.duracaoConsulta + ", metodoExportacao=" + String.valueOf((Object)this.metodoExportacao) + ", statusConsulta=" + String.valueOf((Object)this.statusConsulta) + "}";
     }
 
-    // Enums
-    public enum MetodoExportacao {
-        PDF, EXCEL, CSV, JSON
+    public static enum MetodoExportacao {
+        PDF,
+        EXCEL,
+        CSV,
+        JSON;
+
     }
 
-    public enum StatusConsulta {
-        SUCCESS, EMPTY, ERROR
+    public static enum StatusConsulta {
+        SUCCESS,
+        EMPTY,
+        ERROR;
+
     }
 }
+

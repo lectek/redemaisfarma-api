@@ -1,69 +1,67 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonFormat
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ */
 package br.com.redemaisfarma.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Schema(name = "AuthResponse", description = "Dados retornados após autenticação")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class AuthResponse implements Serializable {
+@Schema(name="AuthResponse", description="Dados retornados ap\u00f3s autentica\u00e7\u00e3o")
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+public class AuthResponse
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Schema(description = "Token de acesso JWT", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
-    @JsonProperty("accessToken")
+    @Schema(description="Token de acesso JWT", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+    @JsonProperty(value="accessToken")
     private String accessToken;
-
-    @Schema(description = "Token de refresh JWT (pode não ser retornado)", example = "dGhpcyBpcyBhIHJlZnJlc2g...")
-    @JsonProperty("refreshToken")
+    @Schema(description="Token de refresh JWT (pode n\u00e3o ser retornado)", example="dGhpcyBpcyBhIHJlZnJlc2g...")
+    @JsonProperty(value="refreshToken")
     private String refreshToken;
-
-    @Schema(description = "ID do usuário autenticado", example = "42")
-    @JsonProperty("userId")
+    @Schema(description="ID do usu\u00e1rio autenticado", example="42")
+    @JsonProperty(value="userId")
     private Long userId;
-
-    @Schema(description = "Username do usuário", example = "joao.silva")
-    @JsonProperty("username")
+    @Schema(description="Username do usu\u00e1rio", example="joao.silva")
+    @JsonProperty(value="username")
     private String username;
-
-    @Schema(description = "E-mail do usuário", example = "joao.silva@farmacia.com")
-    @JsonProperty("email")
+    @Schema(description="E-mail do usu\u00e1rio", example="joao.silva@farmacia.com")
+    @JsonProperty(value="email")
     private String email;
-
-    @Schema(description = "Papéis/permissões do usuário", example = "[\"ROLE_USER\", \"ROLE_ADMIN\"]")
-    @JsonProperty("roles")
+    @Schema(description="Pap\u00e9is/permiss\u00f5es do usu\u00e1rio", example="[\"ROLE_USER\", \"ROLE_ADMIN\"]")
+    @JsonProperty(value="roles")
     private List<String> roles;
-
-    @Schema(description = "Expiração do accessToken", type = "string", format = "date-time", example = "2025-07-04T15:30:00")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("expiresAt")
+    @Schema(description="Expira\u00e7\u00e3o do accessToken", type="string", format="date-time", example="2025-07-04T15:30:00")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="expiresAt")
     private LocalDateTime expiresAt;
-
-    @Schema(description = "ID do tenant (multi-inquilino)", example = "redemaisfarma-001")
-    @JsonProperty("tenantId")
+    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001")
+    @JsonProperty(value="tenantId")
     private String tenantId;
-
-    @Schema(description = "Token de correlação (UUID)", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty("traceId")
+    @Schema(description="Token de correla\u00e7\u00e3o (UUID)", example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value="traceId")
     private UUID traceId;
-
-    @Schema(description = "Timestamp de emissão do token", type = "string", format = "date-time", example = "2025-07-04T14:00:00")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("issuedAt")
+    @Schema(description="Timestamp de emiss\u00e3o do token", type="string", format="date-time", example="2025-07-04T14:00:00")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="issuedAt")
     private LocalDateTime issuedAt;
 
     public AuthResponse() {
     }
 
-    // ===== Construtor compatível com AuthServiceImpl (9 parâmetros, sem email)
-    public AuthResponse(String accessToken, String refreshToken, Long userId, String username, List<String> roles,
-            LocalDateTime expiresAt, String tenantId, UUID traceId, LocalDateTime issuedAt) {
+    public AuthResponse(String accessToken, String refreshToken, Long userId, String username, List<String> roles, LocalDateTime expiresAt, String tenantId, UUID traceId, LocalDateTime issuedAt) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.userId = userId;
@@ -73,12 +71,10 @@ public class AuthResponse implements Serializable {
         this.tenantId = tenantId;
         this.traceId = traceId;
         this.issuedAt = issuedAt;
-        this.email = null; // opcional
+        this.email = null;
     }
 
-    // ===== Construtor com email (10 parâmetros)
-    public AuthResponse(String accessToken, String refreshToken, Long userId, String username, String email,
-            List<String> roles, LocalDateTime expiresAt, String tenantId, UUID traceId, LocalDateTime issuedAt) {
+    public AuthResponse(String accessToken, String refreshToken, Long userId, String username, String email, List<String> roles, LocalDateTime expiresAt, String tenantId, UUID traceId, LocalDateTime issuedAt) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.userId = userId;
@@ -91,9 +87,8 @@ public class AuthResponse implements Serializable {
         this.issuedAt = issuedAt;
     }
 
-    // Getters/Setters
     public String getAccessToken() {
-        return accessToken;
+        return this.accessToken;
     }
 
     public void setAccessToken(String accessToken) {
@@ -101,7 +96,7 @@ public class AuthResponse implements Serializable {
     }
 
     public String getRefreshToken() {
-        return refreshToken;
+        return this.refreshToken;
     }
 
     public void setRefreshToken(String refreshToken) {
@@ -109,7 +104,7 @@ public class AuthResponse implements Serializable {
     }
 
     public Long getUserId() {
-        return userId;
+        return this.userId;
     }
 
     public void setUserId(Long userId) {
@@ -117,7 +112,7 @@ public class AuthResponse implements Serializable {
     }
 
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     public void setUsername(String username) {
@@ -125,7 +120,7 @@ public class AuthResponse implements Serializable {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -133,7 +128,7 @@ public class AuthResponse implements Serializable {
     }
 
     public List<String> getRoles() {
-        return roles;
+        return this.roles;
     }
 
     public void setRoles(List<String> roles) {
@@ -141,7 +136,7 @@ public class AuthResponse implements Serializable {
     }
 
     public LocalDateTime getExpiresAt() {
-        return expiresAt;
+        return this.expiresAt;
     }
 
     public void setExpiresAt(LocalDateTime expiresAt) {
@@ -149,7 +144,7 @@ public class AuthResponse implements Serializable {
     }
 
     public String getTenantId() {
-        return tenantId;
+        return this.tenantId;
     }
 
     public void setTenantId(String tenantId) {
@@ -157,7 +152,7 @@ public class AuthResponse implements Serializable {
     }
 
     public UUID getTraceId() {
-        return traceId;
+        return this.traceId;
     }
 
     public void setTraceId(UUID traceId) {
@@ -165,37 +160,30 @@ public class AuthResponse implements Serializable {
     }
 
     public LocalDateTime getIssuedAt() {
-        return issuedAt;
+        return this.issuedAt;
     }
 
     public void setIssuedAt(LocalDateTime issuedAt) {
         this.issuedAt = issuedAt;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof AuthResponse))
+        }
+        if (!(o instanceof AuthResponse)) {
             return false;
-        AuthResponse that = (AuthResponse) o;
-        return Objects.equals(accessToken, that.accessToken) && Objects.equals(refreshToken, that.refreshToken)
-                && Objects.equals(userId, that.userId) && Objects.equals(username, that.username)
-                && Objects.equals(email, that.email) && Objects.equals(roles, that.roles)
-                && Objects.equals(expiresAt, that.expiresAt) && Objects.equals(tenantId, that.tenantId)
-                && Objects.equals(traceId, that.traceId) && Objects.equals(issuedAt, that.issuedAt);
+        }
+        AuthResponse that = (AuthResponse)o;
+        return Objects.equals(this.accessToken, that.accessToken) && Objects.equals(this.refreshToken, that.refreshToken) && Objects.equals(this.userId, that.userId) && Objects.equals(this.username, that.username) && Objects.equals(this.email, that.email) && Objects.equals(this.roles, that.roles) && Objects.equals(this.expiresAt, that.expiresAt) && Objects.equals(this.tenantId, that.tenantId) && Objects.equals(this.traceId, that.traceId) && Objects.equals(this.issuedAt, that.issuedAt);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(accessToken, refreshToken, userId, username, email, roles, expiresAt, tenantId, traceId,
-                issuedAt);
+        return Objects.hash(this.accessToken, this.refreshToken, this.userId, this.username, this.email, this.roles, this.expiresAt, this.tenantId, this.traceId, this.issuedAt);
     }
 
-    @Override
     public String toString() {
-        return "AuthResponse{" + "accessToken='[PROTECTED]'" + ", userId=" + userId + ", username='" + username + '\''
-                + ", email='" + email + '\'' + ", roles=" + roles + ", expiresAt=" + expiresAt + ", tenantId='"
-                + tenantId + '\'' + ", traceId=" + traceId + ", issuedAt=" + issuedAt + '}';
+        return "AuthResponse{accessToken='[PROTECTED]', userId=" + this.userId + ", username='" + this.username + "', email='" + this.email + "', roles=" + String.valueOf(this.roles) + ", expiresAt=" + String.valueOf(this.expiresAt) + ", tenantId='" + this.tenantId + "', traceId=" + String.valueOf(this.traceId) + ", issuedAt=" + String.valueOf(this.issuedAt) + "}";
     }
 }
+

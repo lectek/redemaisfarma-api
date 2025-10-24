@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.storage.model;
 
 import java.io.InputStream;
@@ -6,7 +9,7 @@ public class StoredObject {
     private String key;
     private String contentType;
     private long contentLength;
-    private InputStream stream; // lembre-se de fechar após uso
+    private InputStream stream;
 
     public StoredObject(String key, String contentType, long contentLength, InputStream stream) {
         this.key = key;
@@ -16,18 +19,19 @@ public class StoredObject {
     }
 
     public String getKey() {
-        return key;
+        return this.key;
     }
 
     public String getContentType() {
-        return contentType;
+        return this.contentType;
     }
 
     public long getContentLength() {
-        return contentLength;
+        return this.contentLength;
     }
 
     public InputStream getStream() {
-        return stream;
+        return this.stream;
     }
 }
+

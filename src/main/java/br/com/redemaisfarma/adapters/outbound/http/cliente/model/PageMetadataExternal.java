@@ -1,31 +1,29 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package br.com.redemaisfarma.adapters.outbound.http.cliente.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 
-/**
- * Metadados de paginação comuns em APIs (page/size/total). Mantém a camada outbound desacoplada do Spring Page.
- */
-public class PageMetadataExternal implements Serializable {
-
-    @JsonProperty("page")
+public class PageMetadataExternal
+implements Serializable {
+    @JsonProperty(value="page")
     private Integer page;
-
-    @JsonProperty("size")
+    @JsonProperty(value="size")
     private Integer size;
-
-    @JsonProperty("totalElements")
+    @JsonProperty(value="totalElements")
     private Long totalElements;
-
-    @JsonProperty("totalPages")
+    @JsonProperty(value="totalPages")
     private Integer totalPages;
-
-    @JsonProperty("sorted")
+    @JsonProperty(value="sorted")
     private Boolean sorted;
 
     public Integer getPage() {
-        return page;
+        return this.page;
     }
 
     public void setPage(Integer page) {
@@ -33,7 +31,7 @@ public class PageMetadataExternal implements Serializable {
     }
 
     public Integer getSize() {
-        return size;
+        return this.size;
     }
 
     public void setSize(Integer size) {
@@ -41,7 +39,7 @@ public class PageMetadataExternal implements Serializable {
     }
 
     public Long getTotalElements() {
-        return totalElements;
+        return this.totalElements;
     }
 
     public void setTotalElements(Long totalElements) {
@@ -49,7 +47,7 @@ public class PageMetadataExternal implements Serializable {
     }
 
     public Integer getTotalPages() {
-        return totalPages;
+        return this.totalPages;
     }
 
     public void setTotalPages(Integer totalPages) {
@@ -57,10 +55,11 @@ public class PageMetadataExternal implements Serializable {
     }
 
     public Boolean getSorted() {
-        return sorted;
+        return this.sorted;
     }
 
     public void setSorted(Boolean sorted) {
         this.sorted = sorted;
     }
 }
+

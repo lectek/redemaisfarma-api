@@ -1,41 +1,44 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ */
 package br.com.redemaisfarma.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "ItemPedidoResponseDTO", description = "Item que compõe o pedido")
-public class ItemPedidoResponseDTO implements Serializable {
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@Schema(name="ItemPedidoResponseDTO", description="Item que comp\u00f5e o pedido")
+public class ItemPedidoResponseDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Schema(description = "ID do produto", example = "1001")
-    @JsonProperty("produtoId")
+    @Schema(description="ID do produto", example="1001")
+    @JsonProperty(value="produtoId")
     private Long produtoId;
-
-    @Schema(description = "Nome do produto", example = "Dipirona 500mg")
-    @JsonProperty("nomeProduto")
+    @Schema(description="Nome do produto", example="Dipirona 500mg")
+    @JsonProperty(value="nomeProduto")
     private String nomeProduto;
-
-    @Schema(description = "Quantidade solicitada", example = "2")
-    @JsonProperty("quantidade")
+    @Schema(description="Quantidade solicitada", example="2")
+    @JsonProperty(value="quantidade")
     private Integer quantidade;
-
-    @Schema(description = "Preço unitário", example = "12.50")
-    @JsonProperty("precoUnitario")
+    @Schema(description="Pre\u00e7o unit\u00e1rio", example="12.50")
+    @JsonProperty(value="precoUnitario")
     private BigDecimal precoUnitario;
-
-    @Schema(description = "Subtotal do item (quantidade x preço)", example = "25.00")
-    @JsonProperty("subtotal")
+    @Schema(description="Subtotal do item (quantidade x pre\u00e7o)", example="25.00")
+    @JsonProperty(value="subtotal")
     private BigDecimal subtotal;
 
-    // Getters/Setters
     public Long getProdutoId() {
-        return produtoId;
+        return this.produtoId;
     }
 
     public void setProdutoId(Long produtoId) {
@@ -43,7 +46,7 @@ public class ItemPedidoResponseDTO implements Serializable {
     }
 
     public String getNomeProduto() {
-        return nomeProduto;
+        return this.nomeProduto;
     }
 
     public void setNomeProduto(String nomeProduto) {
@@ -51,7 +54,7 @@ public class ItemPedidoResponseDTO implements Serializable {
     }
 
     public Integer getQuantidade() {
-        return quantidade;
+        return this.quantidade;
     }
 
     public void setQuantidade(Integer quantidade) {
@@ -59,7 +62,7 @@ public class ItemPedidoResponseDTO implements Serializable {
     }
 
     public BigDecimal getPrecoUnitario() {
-        return precoUnitario;
+        return this.precoUnitario;
     }
 
     public void setPrecoUnitario(BigDecimal precoUnitario) {
@@ -67,26 +70,26 @@ public class ItemPedidoResponseDTO implements Serializable {
     }
 
     public BigDecimal getSubtotal() {
-        return subtotal;
+        return this.subtotal;
     }
 
     public void setSubtotal(BigDecimal subtotal) {
         this.subtotal = subtotal;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof ItemPedidoResponseDTO))
+        }
+        if (!(o instanceof ItemPedidoResponseDTO)) {
             return false;
-        ItemPedidoResponseDTO that = (ItemPedidoResponseDTO) o;
-        return Objects.equals(produtoId, that.produtoId) && Objects.equals(nomeProduto, that.nomeProduto)
-                && Objects.equals(quantidade, that.quantidade);
+        }
+        ItemPedidoResponseDTO that = (ItemPedidoResponseDTO)o;
+        return Objects.equals(this.produtoId, that.produtoId) && Objects.equals(this.nomeProduto, that.nomeProduto) && Objects.equals(this.quantidade, that.quantidade);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(produtoId, nomeProduto, quantidade);
+        return Objects.hash(this.produtoId, this.nomeProduto, this.quantidade);
     }
 }
+

@@ -1,13 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.model;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Payload “de domínio” que vira o subject/claims do Access Token. Evite colocar dados sensíveis aqui.
- */
-public class TokenSubject implements Serializable {
+public class TokenSubject
+implements Serializable {
     private Long userId;
     private String username;
     private String tenantId;
@@ -24,7 +25,7 @@ public class TokenSubject implements Serializable {
     }
 
     public Long getUserId() {
-        return userId;
+        return this.userId;
     }
 
     public void setUserId(Long userId) {
@@ -32,7 +33,7 @@ public class TokenSubject implements Serializable {
     }
 
     public String getUsername() {
-        return username;
+        return this.username;
     }
 
     public void setUsername(String username) {
@@ -40,7 +41,7 @@ public class TokenSubject implements Serializable {
     }
 
     public String getTenantId() {
-        return tenantId;
+        return this.tenantId;
     }
 
     public void setTenantId(String tenantId) {
@@ -48,26 +49,26 @@ public class TokenSubject implements Serializable {
     }
 
     public List<String> getRoles() {
-        return roles;
+        return this.roles;
     }
 
     public void setRoles(List<String> roles) {
         this.roles = roles;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof TokenSubject))
+        }
+        if (!(o instanceof TokenSubject)) {
             return false;
-        TokenSubject that = (TokenSubject) o;
-        return Objects.equals(userId, that.userId) && Objects.equals(username, that.username)
-                && Objects.equals(tenantId, that.tenantId) && Objects.equals(roles, that.roles);
+        }
+        TokenSubject that = (TokenSubject)o;
+        return Objects.equals(this.userId, that.userId) && Objects.equals(this.username, that.username) && Objects.equals(this.tenantId, that.tenantId) && Objects.equals(this.roles, that.roles);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(userId, username, tenantId, roles);
+        return Objects.hash(this.userId, this.username, this.tenantId, this.roles);
     }
 }
+

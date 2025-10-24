@@ -1,33 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package br.com.redemaisfarma.adapters.outbound.http.cliente.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
-/**
- * Modelo para mapear erros padronizados que a API externa possa retornar. Útil para enriquecer logs e traduzir para
- * exceções da sua camada application.
- */
-public class ApiErrorExternal implements Serializable {
-
-    @JsonProperty("timestamp")
+public class ApiErrorExternal
+implements Serializable {
+    @JsonProperty(value="timestamp")
     private OffsetDateTime timestamp;
-
-    @JsonProperty("status")
+    @JsonProperty(value="status")
     private Integer status;
-
-    @JsonProperty("error")
+    @JsonProperty(value="error")
     private String error;
-
-    @JsonProperty("message")
+    @JsonProperty(value="message")
     private String message;
-
-    @JsonProperty("path")
+    @JsonProperty(value="path")
     private String path;
 
     public OffsetDateTime getTimestamp() {
-        return timestamp;
+        return this.timestamp;
     }
 
     public void setTimestamp(OffsetDateTime timestamp) {
@@ -35,7 +32,7 @@ public class ApiErrorExternal implements Serializable {
     }
 
     public Integer getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(Integer status) {
@@ -43,7 +40,7 @@ public class ApiErrorExternal implements Serializable {
     }
 
     public String getError() {
-        return error;
+        return this.error;
     }
 
     public void setError(String error) {
@@ -51,7 +48,7 @@ public class ApiErrorExternal implements Serializable {
     }
 
     public String getMessage() {
-        return message;
+        return this.message;
     }
 
     public void setMessage(String message) {
@@ -59,10 +56,11 @@ public class ApiErrorExternal implements Serializable {
     }
 
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     public void setPath(String path) {
         this.path = path;
     }
 }
+

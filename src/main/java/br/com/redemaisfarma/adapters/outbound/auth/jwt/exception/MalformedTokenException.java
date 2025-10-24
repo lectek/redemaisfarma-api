@@ -1,7 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.exception;
 
-/** Token com formato malformado (compact serialization inválida). */
-public class MalformedTokenException extends RuntimeException {
+public class MalformedTokenException
+extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public MalformedTokenException(String message) {
@@ -12,3 +15,4 @@ public class MalformedTokenException extends RuntimeException {
         super(message, cause);
     }
 }
+

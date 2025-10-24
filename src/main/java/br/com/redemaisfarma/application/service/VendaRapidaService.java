@@ -1,6 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.application.service;
 
 public interface VendaRapidaService {
-    /** Cria um pedido rápido: valida cliente, produto, estoque; baixa estoque; retorna ID do pedido. */
-    Long criar(String refCliente, String refProduto, int qtd);
+    public Long criar(String var1, String var2, int var3);
 }
+

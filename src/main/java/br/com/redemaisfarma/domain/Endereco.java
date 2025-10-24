@@ -1,10 +1,12 @@
-// src/main/java/br/com/redemaisfarma/domain/Endereco.java
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.domain;
 
 import java.util.Objects;
 
 public class Endereco {
-    private Long id; // se o ID externo for UUID, mantenha este como Long e não mapeie o externo aqui
+    private Long id;
     private String logradouro;
     private String numero;
     private String complemento;
@@ -14,11 +16,8 @@ public class Endereco {
     private String cep;
     private boolean principal;
 
-    public Endereco() {
-    }
-
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -26,7 +25,7 @@ public class Endereco {
     }
 
     public String getLogradouro() {
-        return logradouro;
+        return this.logradouro;
     }
 
     public void setLogradouro(String logradouro) {
@@ -34,7 +33,7 @@ public class Endereco {
     }
 
     public String getNumero() {
-        return numero;
+        return this.numero;
     }
 
     public void setNumero(String numero) {
@@ -42,7 +41,7 @@ public class Endereco {
     }
 
     public String getComplemento() {
-        return complemento;
+        return this.complemento;
     }
 
     public void setComplemento(String complemento) {
@@ -50,7 +49,7 @@ public class Endereco {
     }
 
     public String getBairro() {
-        return bairro;
+        return this.bairro;
     }
 
     public void setBairro(String bairro) {
@@ -58,7 +57,7 @@ public class Endereco {
     }
 
     public String getCidade() {
-        return cidade;
+        return this.cidade;
     }
 
     public void setCidade(String cidade) {
@@ -66,7 +65,7 @@ public class Endereco {
     }
 
     public String getUf() {
-        return uf;
+        return this.uf;
     }
 
     public void setUf(String uf) {
@@ -74,7 +73,7 @@ public class Endereco {
     }
 
     public String getCep() {
-        return cep;
+        return this.cep;
     }
 
     public void setCep(String cep) {
@@ -82,25 +81,26 @@ public class Endereco {
     }
 
     public boolean isPrincipal() {
-        return principal;
+        return this.principal;
     }
 
     public void setPrincipal(boolean principal) {
         this.principal = principal;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof Endereco))
+        }
+        if (!(o instanceof Endereco)) {
             return false;
-        Endereco that = (Endereco) o;
-        return Objects.equals(id, that.id);
+        }
+        Endereco that = (Endereco)o;
+        return Objects.equals(this.id, that.id);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(this.id);
     }
 }
+

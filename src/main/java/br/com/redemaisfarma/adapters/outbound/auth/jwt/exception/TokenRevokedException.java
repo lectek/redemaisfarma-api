@@ -1,7 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.exception;
 
-/** Lançada quando o token foi revogado no store. */
-public class TokenRevokedException extends RuntimeException {
+public class TokenRevokedException
+extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public TokenRevokedException(String message) {
@@ -12,3 +15,4 @@ public class TokenRevokedException extends RuntimeException {
         super(message, cause);
     }
 }
+

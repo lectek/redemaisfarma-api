@@ -1,47 +1,79 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.application.dto.response;
 
+import br.com.redemaisfarma.domain.enums.StatusPedido;
 import java.time.LocalDateTime;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Modelo utilizado para exibir dados resumidos no painel administrativo da loja. ContÃ©m mÃ©tricas de desempenho,
- * indicadores de pedidos, produtos e clientes.
- */
 public class PainelAdminResponseDTO {
-
     private String adminNome;
-    private int totalPedidos;
+    private long totalPedidos;
+    private long clientesAtivos;
+    private long qtdProdutos;
+    private long qtdPedidosPendentes;
+    private long qtdPedidosEntregues;
     private double totalLucro;
     private double ticketMedio;
-    private int clientesAtivos;
-    private int qtdProdutos;
-    private int qtdPedidosPendentes;
-    private int qtdPedidosEntregues;
     private double satisfacaoCliente;
     private LocalDateTime dataUltimoPedido;
     private List<String> categoriasMaisVendidas;
     private List<String> alertas;
-
-    // Getters e Setters
+    private Map<StatusPedido, Long> pedidosPorStatus = new EnumMap<StatusPedido, Long>(StatusPedido.class);
 
     public String getAdminNome() {
-        return adminNome;
+        return this.adminNome;
     }
 
     public void setAdminNome(String adminNome) {
         this.adminNome = adminNome;
     }
 
-    public int getTotalPedidos() {
-        return totalPedidos;
+    public long getTotalPedidos() {
+        return this.totalPedidos;
     }
 
-    public void setTotalPedidos(int totalPedidos) {
+    public void setTotalPedidos(long totalPedidos) {
         this.totalPedidos = totalPedidos;
     }
 
+    public long getClientesAtivos() {
+        return this.clientesAtivos;
+    }
+
+    public void setClientesAtivos(long clientesAtivos) {
+        this.clientesAtivos = clientesAtivos;
+    }
+
+    public long getQtdProdutos() {
+        return this.qtdProdutos;
+    }
+
+    public void setQtdProdutos(long qtdProdutos) {
+        this.qtdProdutos = qtdProdutos;
+    }
+
+    public long getQtdPedidosPendentes() {
+        return this.qtdPedidosPendentes;
+    }
+
+    public void setQtdPedidosPendentes(long qtdPedidosPendentes) {
+        this.qtdPedidosPendentes = qtdPedidosPendentes;
+    }
+
+    public long getQtdPedidosEntregues() {
+        return this.qtdPedidosEntregues;
+    }
+
+    public void setQtdPedidosEntregues(long qtdPedidosEntregues) {
+        this.qtdPedidosEntregues = qtdPedidosEntregues;
+    }
+
     public double getTotalLucro() {
-        return totalLucro;
+        return this.totalLucro;
     }
 
     public void setTotalLucro(double totalLucro) {
@@ -49,47 +81,15 @@ public class PainelAdminResponseDTO {
     }
 
     public double getTicketMedio() {
-        return ticketMedio;
+        return this.ticketMedio;
     }
 
     public void setTicketMedio(double ticketMedio) {
         this.ticketMedio = ticketMedio;
     }
 
-    public int getClientesAtivos() {
-        return clientesAtivos;
-    }
-
-    public void setClientesAtivos(int clientesAtivos) {
-        this.clientesAtivos = clientesAtivos;
-    }
-
-    public int getQtdProdutos() {
-        return qtdProdutos;
-    }
-
-    public void setQtdProdutos(int qtdProdutos) {
-        this.qtdProdutos = qtdProdutos;
-    }
-
-    public int getQtdPedidosPendentes() {
-        return qtdPedidosPendentes;
-    }
-
-    public void setQtdPedidosPendentes(int qtdPedidosPendentes) {
-        this.qtdPedidosPendentes = qtdPedidosPendentes;
-    }
-
-    public int getQtdPedidosEntregues() {
-        return qtdPedidosEntregues;
-    }
-
-    public void setQtdPedidosEntregues(int qtdPedidosEntregues) {
-        this.qtdPedidosEntregues = qtdPedidosEntregues;
-    }
-
     public double getSatisfacaoCliente() {
-        return satisfacaoCliente;
+        return this.satisfacaoCliente;
     }
 
     public void setSatisfacaoCliente(double satisfacaoCliente) {
@@ -97,7 +97,7 @@ public class PainelAdminResponseDTO {
     }
 
     public LocalDateTime getDataUltimoPedido() {
-        return dataUltimoPedido;
+        return this.dataUltimoPedido;
     }
 
     public void setDataUltimoPedido(LocalDateTime dataUltimoPedido) {
@@ -105,7 +105,7 @@ public class PainelAdminResponseDTO {
     }
 
     public List<String> getCategoriasMaisVendidas() {
-        return categoriasMaisVendidas;
+        return this.categoriasMaisVendidas;
     }
 
     public void setCategoriasMaisVendidas(List<String> categoriasMaisVendidas) {
@@ -113,11 +113,19 @@ public class PainelAdminResponseDTO {
     }
 
     public List<String> getAlertas() {
-        return alertas;
+        return this.alertas;
     }
 
     public void setAlertas(List<String> alertas) {
         this.alertas = alertas;
+    }
+
+    public Map<StatusPedido, Long> getPedidosPorStatus() {
+        return this.pedidosPorStatus;
+    }
+
+    public void setPedidosPorStatus(Map<StatusPedido, Long> pedidosPorStatus) {
+        this.pedidosPorStatus = pedidosPorStatus;
     }
 }
 

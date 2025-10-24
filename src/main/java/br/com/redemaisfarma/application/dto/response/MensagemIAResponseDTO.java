@@ -1,137 +1,113 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonFormat
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ *  jakarta.validation.Valid
+ *  jakarta.validation.constraints.NotBlank
+ *  jakarta.validation.constraints.NotNull
+ *  jakarta.validation.constraints.PastOrPresent
+ *  jakarta.validation.constraints.Positive
+ *  jakarta.validation.constraints.PositiveOrZero
+ *  jakarta.validation.constraints.Size
+ */
 package br.com.redemaisfarma.application.dto.response;
-
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
-/**
- * DTO de resposta para interações com Assistente Virtual (IA) na API RedeMaisFarma.
- *
- * Contém informações da pergunta do usuário, resposta da IA, metadados de consumo, rastreamento e histórico de
- * conversas.
- */
-@Schema(name = "MensagemIAResponseDTO", description = "Dados retornados de interação com IA RedeMaisFarma")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class MensagemIAResponseDTO implements Serializable {
+@Schema(name="MensagemIAResponseDTO", description="Dados retornados de intera\u00e7\u00e3o com IA RedeMaisFarma")
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+public class MensagemIAResponseDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    // ----------------------------------------------------------------------
-    // Identificadores e auditoria
-    // ----------------------------------------------------------------------
-
-    @Schema(description = "ID da interação com IA", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6", required = true)
-    @NotNull(message = "{mensagemIAResponse.interacaoId.notNull}")
-    @JsonProperty("interacaoId")
-    private UUID interacaoId;
-
-    @Schema(description = "ID do cliente", example = "12345", required = true)
-    @NotNull(message = "{mensagemIAResponse.clienteId.notNull}")
-    @JsonProperty("clienteId")
-    private Long clienteId;
-
-    @Schema(description = "Token de correlação (UUID)", example = "4fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty("traceId")
+    @Schema(description="ID da intera\u00e7\u00e3o com IA", example="3fa85f64-5717-4562-b3fc-2c963f66afa6", required=true)
+    @NotNull(message="{mensagemIAResponse.interacaoId.notNull}")
+    @JsonProperty(value="interacaoId")
+    private @NotNull(message="{mensagemIAResponse.interacaoId.notNull}") UUID interacaoId;
+    @Schema(description="ID do cliente", example="12345", required=true)
+    @NotNull(message="{mensagemIAResponse.clienteId.notNull}")
+    @JsonProperty(value="clienteId")
+    private @NotNull(message="{mensagemIAResponse.clienteId.notNull}") Long clienteId;
+    @Schema(description="Token de correla\u00e7\u00e3o (UUID)", example="4fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value="traceId")
     private UUID traceId;
-
-    @Schema(description = "ID do tenant (multi-inquilino)", example = "redemaisfarma-001", required = true)
-    @NotBlank(message = "{mensagemIAResponse.tenantId.notBlank}")
-    @JsonProperty("tenantId")
-    private String tenantId;
-
-    @Schema(description = "Data/hora da interação", type = "string", format = "date-time", example = "2025-07-04T15:00:00", required = true)
-    @NotNull(message = "{mensagemIAResponse.dataHoraInteracao.notNull}")
-    @PastOrPresent(message = "{mensagemIAResponse.dataHoraInteracao.pastOrPresent}")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("dataHoraInteracao")
-    private LocalDateTime dataHoraInteracao;
-
-    @Schema(description = "Data/hora da última atualização", type = "string", format = "date-time", example = "2025-07-04T15:05:00")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("atualizadoEm")
+    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", required=true)
+    @NotBlank(message="{mensagemIAResponse.tenantId.notBlank}")
+    @JsonProperty(value="tenantId")
+    private @NotBlank(message="{mensagemIAResponse.tenantId.notBlank}") String tenantId;
+    @Schema(description="Data/hora da intera\u00e7\u00e3o", type="string", format="date-time", example="2025-07-04T15:00:00", required=true)
+    @NotNull(message="{mensagemIAResponse.dataHoraInteracao.notNull}")
+    @PastOrPresent(message="{mensagemIAResponse.dataHoraInteracao.pastOrPresent}")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="dataHoraInteracao")
+    private @NotNull(message="{mensagemIAResponse.dataHoraInteracao.notNull}") @PastOrPresent(message="{mensagemIAResponse.dataHoraInteracao.pastOrPresent}") LocalDateTime dataHoraInteracao;
+    @Schema(description="Data/hora da \u00faltima atualiza\u00e7\u00e3o", type="string", format="date-time", example="2025-07-04T15:05:00")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="atualizadoEm")
     private LocalDateTime atualizadoEm;
-
-    // ----------------------------------------------------------------------
-    // Conteúdo da interação
-    // ----------------------------------------------------------------------
-
-    @Schema(description = "Pergunta enviada pelo usuário", example = "Qual a dosagem recomendada para dor de cabeça?", required = true)
-    @NotBlank(message = "{mensagemIAResponse.perguntaUsuario.notBlank}")
-    @Size(max = 2000, message = "{mensagemIAResponse.perguntaUsuario.size}")
-    @JsonProperty("perguntaUsuario")
-    private String perguntaUsuario;
-
-    @Schema(description = "Resposta fornecida pela IA", example = "Recomenda-se 500mg a cada 6 horas.", required = true)
-    @NotBlank(message = "{mensagemIAResponse.respostaIA.notBlank}")
-    @Size(max = 4000, message = "{mensagemIAResponse.respostaIA.size}")
-    @JsonProperty("respostaIA")
-    private String respostaIA;
-
-    @Schema(description = "Tipo de resposta da IA", example = "EXPLICATIVA", required = true, allowableValues = {
-            "EXPLICATIVA", "CONCISA", "PASSO_A_PASSO" })
-    @NotNull(message = "{mensagemIAResponse.tipoResposta.notNull}")
-    @JsonProperty("tipoResposta")
-    private TipoResposta tipoResposta;
-
-    @Schema(description = "Explicação ou esclarecimento adicional", example = "Evite uso excessivo...")
-    @Size(max = 2000, message = "{mensagemIAResponse.explicacaoSugerida.size}")
-    @JsonProperty("explicacaoSugerida")
-    private String explicacaoSugerida;
-
-    @Schema(description = "Plano/modelo de IA usado", example = "GPT-4", required = true)
-    @NotBlank(message = "{mensagemIAResponse.planoIA.notBlank}")
-    @Size(max = 50, message = "{mensagemIAResponse.planoIA.size}")
-    @JsonProperty("planoIA")
-    private String planoIA;
-
-    // ----------------------------------------------------------------------
-    // Consumo de tokens e limites
-    // ----------------------------------------------------------------------
-
-    @Schema(description = "Quantidade de tokens consumidos na resposta IA", example = "150")
-    @PositiveOrZero(message = "{mensagemIAResponse.consumoAtual.positiveOrZero}")
-    @JsonProperty("consumoAtual")
-    private Integer consumoAtual;
-
-    @Schema(description = "Limite mensal de tokens do plano IA", example = "1000000")
-    @Positive(message = "{mensagemIAResponse.limiteMensal.positive}")
-    @JsonProperty("limiteMensal")
-    private Integer limiteMensal;
-
-    @Schema(description = "Canal de origem da interação IA", example = "APP", required = true, allowableValues = {
-            "WEB", "APP", "ADMIN" })
-    @NotNull(message = "{mensagemIAResponse.canalOrigem.notNull}")
-    @JsonProperty("canalOrigem")
-    private CanalOrigem canalOrigem;
-
-    // ----------------------------------------------------------------------
-    // Histórico de interações
-    // ----------------------------------------------------------------------
-
-    @Schema(description = "Contexto de interações anteriores")
+    @Schema(description="Pergunta enviada pelo usu\u00e1rio", example="Qual a dosagem recomendada para dor de cabe\u00e7a?", required=true)
+    @NotBlank(message="{mensagemIAResponse.perguntaUsuario.notBlank}")
+    @Size(max=2000, message="{mensagemIAResponse.perguntaUsuario.size}")
+    @JsonProperty(value="perguntaUsuario")
+    private @NotBlank(message="{mensagemIAResponse.perguntaUsuario.notBlank}") @Size(max=2000, message="{mensagemIAResponse.perguntaUsuario.size}") String perguntaUsuario;
+    @Schema(description="Resposta fornecida pela IA", example="Recomenda-se 500mg a cada 6 horas.", required=true)
+    @NotBlank(message="{mensagemIAResponse.respostaIA.notBlank}")
+    @Size(max=4000, message="{mensagemIAResponse.respostaIA.size}")
+    @JsonProperty(value="respostaIA")
+    private @NotBlank(message="{mensagemIAResponse.respostaIA.notBlank}") @Size(max=4000, message="{mensagemIAResponse.respostaIA.size}") String respostaIA;
+    @Schema(description="Tipo de resposta da IA", example="EXPLICATIVA", required=true, allowableValues={"EXPLICATIVA", "CONCISA", "PASSO_A_PASSO"})
+    @NotNull(message="{mensagemIAResponse.tipoResposta.notNull}")
+    @JsonProperty(value="tipoResposta")
+    private @NotNull(message="{mensagemIAResponse.tipoResposta.notNull}") TipoResposta tipoResposta;
+    @Schema(description="Explica\u00e7\u00e3o ou esclarecimento adicional", example="Evite uso excessivo...")
+    @Size(max=2000, message="{mensagemIAResponse.explicacaoSugerida.size}")
+    @JsonProperty(value="explicacaoSugerida")
+    private @Size(max=2000, message="{mensagemIAResponse.explicacaoSugerida.size}") String explicacaoSugerida;
+    @Schema(description="Plano/modelo de IA usado", example="GPT-4", required=true)
+    @NotBlank(message="{mensagemIAResponse.planoIA.notBlank}")
+    @Size(max=50, message="{mensagemIAResponse.planoIA.size}")
+    @JsonProperty(value="planoIA")
+    private @NotBlank(message="{mensagemIAResponse.planoIA.notBlank}") @Size(max=50, message="{mensagemIAResponse.planoIA.size}") String planoIA;
+    @Schema(description="Quantidade de tokens consumidos na resposta IA", example="150")
+    @PositiveOrZero(message="{mensagemIAResponse.consumoAtual.positiveOrZero}")
+    @JsonProperty(value="consumoAtual")
+    private @PositiveOrZero(message="{mensagemIAResponse.consumoAtual.positiveOrZero}") Integer consumoAtual;
+    @Schema(description="Limite mensal de tokens do plano IA", example="1000000")
+    @Positive(message="{mensagemIAResponse.limiteMensal.positive}")
+    @JsonProperty(value="limiteMensal")
+    private @Positive(message="{mensagemIAResponse.limiteMensal.positive}") Integer limiteMensal;
+    @Schema(description="Canal de origem da intera\u00e7\u00e3o IA", example="APP", required=true, allowableValues={"WEB", "APP", "ADMIN"})
+    @NotNull(message="{mensagemIAResponse.canalOrigem.notNull}")
+    @JsonProperty(value="canalOrigem")
+    private @NotNull(message="{mensagemIAResponse.canalOrigem.notNull}") CanalOrigem canalOrigem;
+    @Schema(description="Contexto de intera\u00e7\u00f5es anteriores")
     @Valid
-    @JsonProperty("historicoInteracoes")
+    @JsonProperty(value="historicoInteracoes")
     private List<HistoricoInteracaoDTO> historicoInteracoes;
-
-    // ----------------------------------------------------------------------
-    // Construtores
-    // ----------------------------------------------------------------------
 
     public MensagemIAResponseDTO() {
     }
 
-    public MensagemIAResponseDTO(UUID interacaoId, Long clienteId, UUID traceId, String tenantId,
-            LocalDateTime dataHoraInteracao, LocalDateTime atualizadoEm, String perguntaUsuario, String respostaIA,
-            TipoResposta tipoResposta, String explicacaoSugerida, String planoIA, Integer consumoAtual,
-            Integer limiteMensal, CanalOrigem canalOrigem, List<HistoricoInteracaoDTO> historicoInteracoes) {
+    public MensagemIAResponseDTO(UUID interacaoId, Long clienteId, UUID traceId, String tenantId, LocalDateTime dataHoraInteracao, LocalDateTime atualizadoEm, String perguntaUsuario, String respostaIA, TipoResposta tipoResposta, String explicacaoSugerida, String planoIA, Integer consumoAtual, Integer limiteMensal, CanalOrigem canalOrigem, List<HistoricoInteracaoDTO> historicoInteracoes) {
         this.interacaoId = interacaoId;
         this.clienteId = clienteId;
         this.traceId = traceId;
@@ -149,12 +125,8 @@ public class MensagemIAResponseDTO implements Serializable {
         this.historicoInteracoes = historicoInteracoes;
     }
 
-    // ----------------------------------------------------------------------
-    // Getters e Setters
-    // ----------------------------------------------------------------------
-
     public UUID getInteracaoId() {
-        return interacaoId;
+        return this.interacaoId;
     }
 
     public void setInteracaoId(UUID interacaoId) {
@@ -162,7 +134,7 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public Long getClienteId() {
-        return clienteId;
+        return this.clienteId;
     }
 
     public void setClienteId(Long clienteId) {
@@ -170,7 +142,7 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public UUID getTraceId() {
-        return traceId;
+        return this.traceId;
     }
 
     public void setTraceId(UUID traceId) {
@@ -178,7 +150,7 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public String getTenantId() {
-        return tenantId;
+        return this.tenantId;
     }
 
     public void setTenantId(String tenantId) {
@@ -186,7 +158,7 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public LocalDateTime getDataHoraInteracao() {
-        return dataHoraInteracao;
+        return this.dataHoraInteracao;
     }
 
     public void setDataHoraInteracao(LocalDateTime dataHoraInteracao) {
@@ -194,7 +166,7 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public LocalDateTime getAtualizadoEm() {
-        return atualizadoEm;
+        return this.atualizadoEm;
     }
 
     public void setAtualizadoEm(LocalDateTime atualizadoEm) {
@@ -202,7 +174,7 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public String getPerguntaUsuario() {
-        return perguntaUsuario;
+        return this.perguntaUsuario;
     }
 
     public void setPerguntaUsuario(String perguntaUsuario) {
@@ -210,11 +182,11 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public String getRespostasIA() {
-        return respostaIA;
-    } // compat: nome alternativo se necessário
+        return this.respostaIA;
+    }
 
     public String getRespostaIA() {
-        return respostaIA;
+        return this.respostaIA;
     }
 
     public void setRespostaIA(String respostaIA) {
@@ -222,7 +194,7 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public TipoResposta getTipoResposta() {
-        return tipoResposta;
+        return this.tipoResposta;
     }
 
     public void setTipoResposta(TipoResposta tipoResposta) {
@@ -230,7 +202,7 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public String getExplicacaoSugerida() {
-        return explicacaoSugerida;
+        return this.explicacaoSugerida;
     }
 
     public void setExplicacaoSugerida(String explicacaoSugerida) {
@@ -238,7 +210,7 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public String getPlanoIA() {
-        return planoIA;
+        return this.planoIA;
     }
 
     public void setPlanoIA(String planoIA) {
@@ -246,7 +218,7 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public Integer getConsumoAtual() {
-        return consumoAtual;
+        return this.consumoAtual;
     }
 
     public void setConsumoAtual(Integer consumoAtual) {
@@ -254,7 +226,7 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public Integer getLimiteMensal() {
-        return limiteMensal;
+        return this.limiteMensal;
     }
 
     public void setLimiteMensal(Integer limiteMensal) {
@@ -262,7 +234,7 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public CanalOrigem getCanalOrigem() {
-        return canalOrigem;
+        return this.canalOrigem;
     }
 
     public void setCanalOrigem(CanalOrigem canalOrigem) {
@@ -270,97 +242,72 @@ public class MensagemIAResponseDTO implements Serializable {
     }
 
     public List<HistoricoInteracaoDTO> getHistoricoInteracoes() {
-        return historicoInteracoes;
+        return this.historicoInteracoes;
     }
 
     public void setHistoricoInteracoes(List<HistoricoInteracaoDTO> historicoInteracoes) {
         this.historicoInteracoes = historicoInteracoes;
     }
 
-    // ----------------------------------------------------------------------
-    // Métodos utilitários
-    // ----------------------------------------------------------------------
-
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof MensagemIAResponseDTO))
+        }
+        if (!(o instanceof MensagemIAResponseDTO)) {
             return false;
-        MensagemIAResponseDTO that = (MensagemIAResponseDTO) o;
-        return Objects.equals(interacaoId, that.interacaoId) && Objects.equals(clienteId, that.clienteId)
-                && Objects.equals(traceId, that.traceId) && Objects.equals(tenantId, that.tenantId)
-                && Objects.equals(dataHoraInteracao, that.dataHoraInteracao)
-                && Objects.equals(atualizadoEm, that.atualizadoEm)
-                && Objects.equals(perguntaUsuario, that.perguntaUsuario) && Objects.equals(respostaIA, that.respostaIA)
-                && tipoResposta == that.tipoResposta && Objects.equals(explicacaoSugerida, that.explicacaoSugerida)
-                && Objects.equals(planoIA, that.planoIA) && Objects.equals(consumoAtual, that.consumoAtual)
-                && Objects.equals(limiteMensal, that.limiteMensal) && canalOrigem == that.canalOrigem
-                && Objects.equals(historicoInteracoes, that.historicoInteracoes);
+        }
+        MensagemIAResponseDTO that = (MensagemIAResponseDTO)o;
+        return Objects.equals(this.interacaoId, that.interacaoId) && Objects.equals(this.clienteId, that.clienteId) && Objects.equals(this.traceId, that.traceId) && Objects.equals(this.tenantId, that.tenantId) && Objects.equals(this.dataHoraInteracao, that.dataHoraInteracao) && Objects.equals(this.atualizadoEm, that.atualizadoEm) && Objects.equals(this.perguntaUsuario, that.perguntaUsuario) && Objects.equals(this.respostaIA, that.respostaIA) && this.tipoResposta == that.tipoResposta && Objects.equals(this.explicacaoSugerida, that.explicacaoSugerida) && Objects.equals(this.planoIA, that.planoIA) && Objects.equals(this.consumoAtual, that.consumoAtual) && Objects.equals(this.limiteMensal, that.limiteMensal) && this.canalOrigem == that.canalOrigem && Objects.equals(this.historicoInteracoes, that.historicoInteracoes);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(interacaoId, clienteId, traceId, tenantId, dataHoraInteracao, atualizadoEm, perguntaUsuario,
-                respostaIA, tipoResposta, explicacaoSugerida, planoIA, consumoAtual, limiteMensal, canalOrigem,
-                historicoInteracoes);
+        return Objects.hash(new Object[]{this.interacaoId, this.clienteId, this.traceId, this.tenantId, this.dataHoraInteracao, this.atualizadoEm, this.perguntaUsuario, this.respostaIA, this.tipoResposta, this.explicacaoSugerida, this.planoIA, this.consumoAtual, this.limiteMensal, this.canalOrigem, this.historicoInteracoes});
     }
 
-    @Override
     public String toString() {
-        return "MensagemIAResponseDTO{" + "interacaoId=" + interacaoId + ", clienteId=" + clienteId + ", traceId="
-                + traceId + ", tenantId='" + tenantId + '\'' + ", dataHoraInteracao=" + dataHoraInteracao
-                + ", atualizadoEm=" + atualizadoEm + ", perguntaUsuario='" + perguntaUsuario + '\'' + ", respostaIA='"
-                + respostaIA + '\'' + ", tipoResposta=" + tipoResposta + ", explicacaoSugerida='" + explicacaoSugerida
-                + '\'' + ", planoIA='" + planoIA + '\'' + ", consumoAtual=" + consumoAtual + ", limiteMensal="
-                + limiteMensal + ", canalOrigem=" + canalOrigem + ", historicoInteracoes=" + historicoInteracoes + '}';
+        return "MensagemIAResponseDTO{interacaoId=" + String.valueOf(this.interacaoId) + ", clienteId=" + this.clienteId + ", traceId=" + String.valueOf(this.traceId) + ", tenantId='" + this.tenantId + "', dataHoraInteracao=" + String.valueOf(this.dataHoraInteracao) + ", atualizadoEm=" + String.valueOf(this.atualizadoEm) + ", perguntaUsuario='" + this.perguntaUsuario + "', respostaIA='" + this.respostaIA + "', tipoResposta=" + String.valueOf((Object)this.tipoResposta) + ", explicacaoSugerida='" + this.explicacaoSugerida + "', planoIA='" + this.planoIA + "', consumoAtual=" + this.consumoAtual + ", limiteMensal=" + this.limiteMensal + ", canalOrigem=" + String.valueOf((Object)this.canalOrigem) + ", historicoInteracoes=" + String.valueOf(this.historicoInteracoes) + "}";
     }
 
-    // ----------------------------------------------------------------------
-    // Enums
-    // ----------------------------------------------------------------------
+    @Schema(enumAsRef=true, description="Tipo de resposta gerada pela IA")
+    public static enum TipoResposta {
+        EXPLICATIVA,
+        CONCISA,
+        PASSO_A_PASSO;
 
-    @Schema(enumAsRef = true, description = "Tipo de resposta gerada pela IA")
-    public enum TipoResposta {
-        EXPLICATIVA, CONCISA, PASSO_A_PASSO
     }
 
-    @Schema(enumAsRef = true, description = "Canal de origem da interação")
-    public enum CanalOrigem {
-        WEB, APP, ADMIN
+    @Schema(enumAsRef=true, description="Canal de origem da intera\u00e7\u00e3o")
+    public static enum CanalOrigem {
+        WEB,
+        APP,
+        ADMIN;
+
     }
 
-    // ----------------------------------------------------------------------
-    // DTO interno
-    // ----------------------------------------------------------------------
-
-    @Schema(name = "HistoricoInteracaoDTO", description = "Registro de interações anteriores")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class HistoricoInteracaoDTO implements Serializable {
+    @Schema(name="HistoricoInteracaoDTO", description="Registro de intera\u00e7\u00f5es anteriores")
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    public static class HistoricoInteracaoDTO
+    implements Serializable {
         private static final long serialVersionUID = 1L;
-
-        @Schema(description = "ID único do registro", example = "7fa85f64-5717-4562-b3fc-2c963f66afa6", required = true)
-        @NotNull(message = "{historicoInteracao.registroId.notNull}")
-        @JsonProperty("registroId")
-        private UUID registroId;
-
-        @Schema(description = "Pergunta do usuário", example = "Qual horário de funcionamento?", required = true)
-        @NotBlank(message = "{historicoInteracao.pergunta.notBlank}")
-        @Size(max = 2000, message = "{historicoInteracao.pergunta.size}")
-        @JsonProperty("pergunta")
-        private String pergunta;
-
-        @Schema(description = "Resposta da IA", example = "Funcionamos 24h.", required = true)
-        @NotBlank(message = "{historicoInteracao.resposta.notBlank}")
-        @Size(max = 4000, message = "{historicoInteracao.resposta.size}")
-        @JsonProperty("resposta")
-        private String resposta;
-
-        @Schema(description = "Timestamp do registro", type = "string", format = "date-time", example = "2025-07-04T14:59:00", required = true)
-        @NotNull(message = "{historicoInteracao.dataHora.notNull}")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        @JsonProperty("dataHora")
-        private LocalDateTime dataHora;
+        @Schema(description="ID \u00fanico do registro", example="7fa85f64-5717-4562-b3fc-2c963f66afa6", required=true)
+        @NotNull(message="{historicoInteracao.registroId.notNull}")
+        @JsonProperty(value="registroId")
+        private @NotNull(message="{historicoInteracao.registroId.notNull}") UUID registroId;
+        @Schema(description="Pergunta do usu\u00e1rio", example="Qual hor\u00e1rio de funcionamento?", required=true)
+        @NotBlank(message="{historicoInteracao.pergunta.notBlank}")
+        @Size(max=2000, message="{historicoInteracao.pergunta.size}")
+        @JsonProperty(value="pergunta")
+        private @NotBlank(message="{historicoInteracao.pergunta.notBlank}") @Size(max=2000, message="{historicoInteracao.pergunta.size}") String pergunta;
+        @Schema(description="Resposta da IA", example="Funcionamos 24h.", required=true)
+        @NotBlank(message="{historicoInteracao.resposta.notBlank}")
+        @Size(max=4000, message="{historicoInteracao.resposta.size}")
+        @JsonProperty(value="resposta")
+        private @NotBlank(message="{historicoInteracao.resposta.notBlank}") @Size(max=4000, message="{historicoInteracao.resposta.size}") String resposta;
+        @Schema(description="Timestamp do registro", type="string", format="date-time", example="2025-07-04T14:59:00", required=true)
+        @NotNull(message="{historicoInteracao.dataHora.notNull}")
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+        @JsonProperty(value="dataHora")
+        private @NotNull(message="{historicoInteracao.dataHora.notNull}") LocalDateTime dataHora;
 
         public HistoricoInteracaoDTO() {
         }
@@ -373,7 +320,7 @@ public class MensagemIAResponseDTO implements Serializable {
         }
 
         public UUID getRegistroId() {
-            return registroId;
+            return this.registroId;
         }
 
         public void setRegistroId(UUID registroId) {
@@ -381,7 +328,7 @@ public class MensagemIAResponseDTO implements Serializable {
         }
 
         public String getPergunta() {
-            return pergunta;
+            return this.pergunta;
         }
 
         public void setPergunta(String pergunta) {
@@ -389,7 +336,7 @@ public class MensagemIAResponseDTO implements Serializable {
         }
 
         public String getResposta() {
-            return resposta;
+            return this.resposta;
         }
 
         public void setResposta(String resposta) {
@@ -397,33 +344,31 @@ public class MensagemIAResponseDTO implements Serializable {
         }
 
         public LocalDateTime getDataHora() {
-            return dataHora;
+            return this.dataHora;
         }
 
         public void setDataHora(LocalDateTime dataHora) {
             this.dataHora = dataHora;
         }
 
-        @Override
         public boolean equals(Object o) {
-            if (this == o)
+            if (this == o) {
                 return true;
-            if (!(o instanceof HistoricoInteracaoDTO))
+            }
+            if (!(o instanceof HistoricoInteracaoDTO)) {
                 return false;
-            HistoricoInteracaoDTO that = (HistoricoInteracaoDTO) o;
-            return Objects.equals(registroId, that.registroId) && Objects.equals(pergunta, that.pergunta)
-                    && Objects.equals(resposta, that.resposta) && Objects.equals(dataHora, that.dataHora);
+            }
+            HistoricoInteracaoDTO that = (HistoricoInteracaoDTO)o;
+            return Objects.equals(this.registroId, that.registroId) && Objects.equals(this.pergunta, that.pergunta) && Objects.equals(this.resposta, that.resposta) && Objects.equals(this.dataHora, that.dataHora);
         }
 
-        @Override
         public int hashCode() {
-            return Objects.hash(registroId, pergunta, resposta, dataHora);
+            return Objects.hash(this.registroId, this.pergunta, this.resposta, this.dataHora);
         }
 
-        @Override
         public String toString() {
-            return "HistoricoInteracaoDTO{" + "registroId=" + registroId + ", pergunta='" + pergunta + '\''
-                    + ", resposta='" + resposta + '\'' + ", dataHora=" + dataHora + '}';
+            return "HistoricoInteracaoDTO{registroId=" + String.valueOf(this.registroId) + ", pergunta='" + this.pergunta + "', resposta='" + this.resposta + "', dataHora=" + String.valueOf(this.dataHora) + "}";
         }
     }
 }
+

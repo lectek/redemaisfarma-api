@@ -1,11 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.model;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
-/** Value object para o access token gerado. */
-public class AccessToken implements Serializable {
+public class AccessToken
+implements Serializable {
     private String token;
     private Instant expiresAt;
 
@@ -18,7 +21,7 @@ public class AccessToken implements Serializable {
     }
 
     public String getToken() {
-        return token;
+        return this.token;
     }
 
     public void setToken(String token) {
@@ -26,25 +29,26 @@ public class AccessToken implements Serializable {
     }
 
     public Instant getExpiresAt() {
-        return expiresAt;
+        return this.expiresAt;
     }
 
     public void setExpiresAt(Instant expiresAt) {
         this.expiresAt = expiresAt;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof AccessToken))
+        }
+        if (!(o instanceof AccessToken)) {
             return false;
-        AccessToken that = (AccessToken) o;
-        return Objects.equals(token, that.token) && Objects.equals(expiresAt, that.expiresAt);
+        }
+        AccessToken that = (AccessToken)o;
+        return Objects.equals(this.token, that.token) && Objects.equals(this.expiresAt, that.expiresAt);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(token, expiresAt);
+        return Objects.hash(this.token, this.expiresAt);
     }
 }
+

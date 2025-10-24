@@ -1,21 +1,34 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  br.com.redemaisfarma.application.dto.request.LoginRequest
+ *  br.com.redemaisfarma.application.dto.response.AuthResponse
+ *  br.com.redemaisfarma.application.dto.response.LoginResponseDTO
+ *  br.com.redemaisfarma.domain.user.Usuario
+ */
 package br.com.redemaisfarma.application.service;
 
+import br.com.redemaisfarma.application.dto.request.LoginRequest;
 import br.com.redemaisfarma.application.dto.response.AuthResponse;
-import br.com.redemaisfarma.domain.Usuario;
+import br.com.redemaisfarma.application.dto.response.LoginResponseDTO;
+import br.com.redemaisfarma.domain.user.Usuario;
 
 public interface AuthService {
+    public boolean isBlocked(String var1);
 
-    boolean isBlocked(String identifier);
+    public void registerFailedAttempt(String var1);
 
-    void registerFailedAttempt(String identifier);
+    public AuthResponse authenticate(String var1, String var2);
 
-    AuthResponse authenticate(String identifier, String password);
+    public boolean isClienteVip(String var1);
 
-    boolean isClienteVip(String identifier);
+    public String getIdentificador(Usuario var1);
 
-    String getIdentificador(Usuario usuario);
+    public String getPassword(Usuario var1);
 
-    String getPassword(Usuario usuario);
+    public String getEmail(Usuario var1);
 
-    String getEmail(Usuario usuario);
+    public LoginResponseDTO login(LoginRequest var1);
 }
+

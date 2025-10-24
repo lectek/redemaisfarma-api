@@ -1,26 +1,28 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.validation.constraints.NotBlank
+ *  org.springframework.boot.context.properties.ConfigurationProperties
+ *  org.springframework.validation.annotation.Validated
+ */
 package br.com.redemaisfarma.adapters.outbound.http.cliente.config;
 
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.constraints.NotBlank;
-
 @Validated
-@ConfigurationProperties(prefix = "integrations.cliente")
+@ConfigurationProperties(prefix="integrations.cliente")
 public class ClienteClientProperties {
-
     @NotBlank
     private String baseUrl;
-
-    // limite de buffer (bytes) para respostas grandes – default 10 MB
-    private int maxInMemorySize = 10 * 1024 * 1024;
-
-    // timeouts específicos (opcional, caso queira usar filtros no client)
+    private int maxInMemorySize = 0xA00000;
     private int readTimeoutMs = 10000;
     private int writeTimeoutMs = 10000;
 
     public String getBaseUrl() {
-        return baseUrl;
+        return this.baseUrl;
     }
 
     public void setBaseUrl(String baseUrl) {
@@ -28,7 +30,7 @@ public class ClienteClientProperties {
     }
 
     public int getMaxInMemorySize() {
-        return maxInMemorySize;
+        return this.maxInMemorySize;
     }
 
     public void setMaxInMemorySize(int maxInMemorySize) {
@@ -36,7 +38,7 @@ public class ClienteClientProperties {
     }
 
     public int getReadTimeoutMs() {
-        return readTimeoutMs;
+        return this.readTimeoutMs;
     }
 
     public void setReadTimeoutMs(int readTimeoutMs) {
@@ -44,10 +46,11 @@ public class ClienteClientProperties {
     }
 
     public int getWriteTimeoutMs() {
-        return writeTimeoutMs;
+        return this.writeTimeoutMs;
     }
 
     public void setWriteTimeoutMs(int writeTimeoutMs) {
         this.writeTimeoutMs = writeTimeoutMs;
     }
 }
+

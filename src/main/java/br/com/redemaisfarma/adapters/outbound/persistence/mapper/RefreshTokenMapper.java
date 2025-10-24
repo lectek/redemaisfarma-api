@@ -1,18 +1,19 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.persistence.mapper;
 
 import br.com.redemaisfarma.adapters.outbound.auth.jwt.model.RefreshToken;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.RefreshTokenEntity;
 
-import java.util.Objects;
-
 public final class RefreshTokenMapper {
-
     private RefreshTokenMapper() {
     }
 
     public static RefreshToken toModel(RefreshTokenEntity e) {
-        if (e == null)
+        if (e == null) {
             return null;
+        }
         RefreshToken m = new RefreshToken();
         m.setId(e.getId());
         m.setUserId(e.getUserId());
@@ -27,10 +28,13 @@ public final class RefreshTokenMapper {
     }
 
     public static RefreshTokenEntity toEntity(RefreshToken m) {
-        if (m == null)
+        if (m == null) {
             return null;
+        }
         RefreshTokenEntity e = new RefreshTokenEntity();
-        e.setId(Objects.requireNonNullElseGet(m.getId(), java.util.UUID::randomUUID));
+        if (m.getId() != null) {
+            e.setId(m.getId());
+        }
         e.setUserId(m.getUserId());
         e.setTenantId(m.getTenantId());
         e.setToken(m.getToken());
@@ -42,3 +46,4 @@ public final class RefreshTokenMapper {
         return e;
     }
 }
+

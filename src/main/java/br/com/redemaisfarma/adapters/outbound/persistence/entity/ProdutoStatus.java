@@ -1,9 +1,12 @@
-// src/main/java/br/com/redemaisfarma/adapters/outbound/persistence/entity/ProdutoStatus.java
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.persistence.entity;
 
-/** Status do ciclo de vida do produto. */
 public enum ProdutoStatus {
-    IMPORTADO,   // recém-chegado do export, aguardando revisão
-    VALIDADO,    // revisado pelo admin, mas ainda não publicado
-    PUBLICADO    // já liberado para aparecer na loja
+    IMPORTADO,
+    VALIDADO,
+    PUBLICADO;
+
 }
+

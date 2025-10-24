@@ -1,55 +1,34 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.validation.constraints.NotBlank
+ *  org.springframework.boot.context.properties.ConfigurationProperties
+ *  org.springframework.context.annotation.Configuration
+ *  org.springframework.validation.annotation.Validated
+ */
 package br.com.redemaisfarma.application.config;
 
+import jakarta.validation.constraints.NotBlank;
+import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.constraints.NotBlank;
-import java.util.Map;
-
-/**
- * Propriedades de configuração da aplicação RedeMaisFarma.
- *
- * <p>
- * Carrega dados do application.yml com o prefixo 'app.config'
- * </p>
- */
 @Configuration
-@ConfigurationProperties(prefix = "app.config")
+@ConfigurationProperties(prefix="app.config")
 @Validated
 public class AppConfigProperties {
-
-    /**
-     * Nome do ambiente atual (ex: produção, homologação, dev).
-     */
     @NotBlank
     private String envProfileLabel;
-
-    /**
-     * Rótulo da porta de rede para exibição em tela.
-     */
     @NotBlank
     private String networkPortLabel;
-
-    /**
-     * Nome público do sistema (ex: para exibir em header).
-     */
     private String systemName;
-
-    /**
-     * Versão atual da aplicação.
-     */
     private String version;
-
-    /**
-     * Mapa de traduções ou textos de sistema que podem ser dinâmicos.
-     */
     private Map<String, String> dynamicLabels;
 
-    // Getters e Setters
-
     public String getEnvProfileLabel() {
-        return envProfileLabel;
+        return this.envProfileLabel;
     }
 
     public void setEnvProfileLabel(String envProfileLabel) {
@@ -57,7 +36,7 @@ public class AppConfigProperties {
     }
 
     public String getNetworkPortLabel() {
-        return networkPortLabel;
+        return this.networkPortLabel;
     }
 
     public void setNetworkPortLabel(String networkPortLabel) {
@@ -65,7 +44,7 @@ public class AppConfigProperties {
     }
 
     public String getSystemName() {
-        return systemName;
+        return this.systemName;
     }
 
     public void setSystemName(String systemName) {
@@ -73,7 +52,7 @@ public class AppConfigProperties {
     }
 
     public String getVersion() {
-        return version;
+        return this.version;
     }
 
     public void setVersion(String version) {
@@ -81,10 +60,11 @@ public class AppConfigProperties {
     }
 
     public Map<String, String> getDynamicLabels() {
-        return dynamicLabels;
+        return this.dynamicLabels;
     }
 
     public void setDynamicLabels(Map<String, String> dynamicLabels) {
         this.dynamicLabels = dynamicLabels;
     }
 }
+

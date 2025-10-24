@@ -1,9 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.email.exception;
 
-/**
- * Exceção específica para falhas no envio de e-mails.
- */
-public class MailSendException extends RuntimeException {
+public class MailSendException
+extends RuntimeException {
     public MailSendException(String message) {
         super(message);
     }
@@ -12,3 +13,4 @@ public class MailSendException extends RuntimeException {
         super(message, cause);
     }
 }
+

@@ -1,32 +1,30 @@
-// src/main/java/br/com/redemaisfarma/domain/catalogo/ProdutoQueryService.java
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.data.domain.PageRequest
+ *  org.springframework.data.domain.Pageable
+ */
 package br.com.redemaisfarma.domain.catalogo;
 
 import br.com.redemaisfarma.application.view.ProductCardVM;
+import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
-/** Facade de consultas para montar cards/carrossel da Home. */
 public interface ProdutoQueryService {
+    public List<ProductCardVM> topSellers(Pageable var1, boolean var2);
 
-    /** “Mais vendidos” (proxy/fallback). */
-    List<ProductCardVM> topSellers(Pageable page, boolean incluirIndisponiveis);
+    public List<ProductCardVM> newArrivals(Pageable var1, boolean var2);
 
-    /** “Novidades”. */
-    List<ProductCardVM> newArrivals(Pageable page, boolean incluirIndisponiveis);
+    public List<ProductCardVM> featured(Pageable var1, boolean var2);
 
-    /** “Destaques” (carrossel). */
-    List<ProductCardVM> featured(Pageable page, boolean incluirIndisponiveis);
+    public List<ProductCardVM> recommended(Pageable var1, boolean var2);
 
-    /** “Para você” (recomendados). */
-    List<ProductCardVM> recommended(Pageable page, boolean incluirIndisponiveis);
-
-    /** Atalho usado pelo controller público (/destaques?limit=10). */
-    default List<ProductCardVM> featured(int limit) {
-        int size = Math.max(1, Math.min(limit, 50)); // limite de segurança
-        Pageable page = PageRequest.of(0, size);
-        // por padrão NÃO inclui indisponíveis
-        return featured(page, false);
+    default public List<ProductCardVM> featured(int limit) {
+        int size = Math.max(1, Math.min(limit, 50));
+        PageRequest page = PageRequest.of((int)0, (int)size);
+        return this.featured((Pageable)page, false);
     }
 }
+

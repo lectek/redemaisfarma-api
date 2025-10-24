@@ -1,9 +1,19 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  Pedido
+ *  PedidoJPARepository
+ *  PedidoService
+ *  org.junit.jupiter.api.BeforeEach
+ *  org.junit.jupiter.api.Test
+ *  org.junit.jupiter.api.extension.ExtendWith
+ *  org.mockito.InjectMocks
+ *  org.mockito.Mock
+ *  org.mockito.junit.jupiter.MockitoExtension
+ */
 package unit;
 
-import br.com.redemaisfarma.adapters.outbound.persistence.jpa.PedidoJPARepository;
-import br.com.redemaisfarma.application.service.PedidoService;
-import br.com.redemaisfarma.domain.Pedido;
-import br.com.redemaisfarma.domain.enums.StatusPedido;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,38 +21,26 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(value={MockitoExtension.class})
 class PedidoServiceTest {
-
     @Mock
     private PedidoJPARepository pedidoRepository;
-
     @InjectMocks
     private PedidoService pedidoService;
-
     private Pedido pedido;
+
+    PedidoServiceTest() {
+        throw new Error("Unresolved compilation problems: \n\tThe import br.com.redemaisfarma.adapters.outbound.persistence cannot be resolved\n\tThe import br.com.redemaisfarma.application.service cannot be resolved\n\tThe import br.com.redemaisfarma.domain cannot be resolved\n\tThe import br.com.redemaisfarma.domain cannot be resolved\n\tPedidoJPARepository cannot be resolved to a type\n\tPedidoService cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tStatusPedido cannot be resolved to a variable\n\tPedidoJPARepository cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedidoJPARepository cannot be resolved to a type\n\tStatusPedido cannot be resolved to a variable\n\tPedidoJPARepository cannot be resolved to a type\n");
+    }
 
     @BeforeEach
     void setup() {
-        pedido = new Pedido();
-        pedido.setId(1L);
-        pedido.setStatus(StatusPedido.ABERTO); // 👈 agora compila
+        throw new Error("Unresolved compilation problems: \n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tStatusPedido cannot be resolved to a variable\n");
     }
 
     @Test
     void deveRetornarPedidoPorId() {
-        when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
-
-        Optional<Pedido> resultado = pedidoRepository.findById(1L);
-
-        assertTrue(resultado.isPresent());
-        assertEquals(StatusPedido.ABERTO, resultado.get().getStatus());
-
-        verify(pedidoRepository, times(1)).findById(1L);
+        throw new Error("Unresolved compilation problems: \n\tPedidoJPARepository cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedidoJPARepository cannot be resolved to a type\n\tStatusPedido cannot be resolved to a variable\n\tPedidoJPARepository cannot be resolved to a type\n");
     }
 }
+

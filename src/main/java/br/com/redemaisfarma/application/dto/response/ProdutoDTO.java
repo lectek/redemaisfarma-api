@@ -1,40 +1,38 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ */
 package br.com.redemaisfarma.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-/**
- * DTO para exibição resumida das informações de um produto.
- */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "ProdutoDTO", description = "Informações resumidas do produto")
-public class ProdutoDTO implements Serializable {
-
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@Schema(name="ProdutoDTO", description="Informa\u00e7\u00f5es resumidas do produto")
+public class ProdutoDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Schema(description = "ID do produto", example = "1")
-    @JsonProperty("produtoId")
+    @Schema(description="ID do produto", example="1")
+    @JsonProperty(value="produtoId")
     private Long id;
-
-    @Schema(description = "Nome do produto", example = "Dipirona 500mg")
-    @JsonProperty("nome")
+    @Schema(description="Nome do produto", example="Dipirona 500mg")
+    @JsonProperty(value="nome")
     private String nome;
-
-    @Schema(description = "Preço do produto", example = "12.99")
-    @JsonProperty("preco")
+    @Schema(description="Pre\u00e7o do produto", example="12.99")
+    @JsonProperty(value="preco")
     private BigDecimal preco;
 
-    // ===========================
-    // Getters e Setters
-    // ===========================
-
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -42,7 +40,7 @@ public class ProdutoDTO implements Serializable {
     }
 
     public String getNome() {
-        return nome;
+        return this.nome;
     }
 
     public void setNome(String nome) {
@@ -50,38 +48,30 @@ public class ProdutoDTO implements Serializable {
     }
 
     public BigDecimal getPreco() {
-        return preco;
+        return this.preco;
     }
 
     public void setPreco(BigDecimal preco) {
         this.preco = preco;
     }
 
-    // ===========================
-    // equals e hashCode
-    // ===========================
-
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof ProdutoDTO))
+        }
+        if (!(o instanceof ProdutoDTO)) {
             return false;
-        ProdutoDTO that = (ProdutoDTO) o;
-        return Objects.equals(id, that.id) && Objects.equals(nome, that.nome) && Objects.equals(preco, that.preco);
+        }
+        ProdutoDTO that = (ProdutoDTO)o;
+        return Objects.equals(this.id, that.id) && Objects.equals(this.nome, that.nome) && Objects.equals(this.preco, that.preco);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(id, nome, preco);
+        return Objects.hash(this.id, this.nome, this.preco);
     }
 
-    // ===========================
-    // toString
-    // ===========================
-
-    @Override
     public String toString() {
-        return "ProdutoDTO{" + "id=" + id + ", nome='" + nome + '\'' + ", preco=" + preco + '}';
+        return "ProdutoDTO{id=" + this.id + ", nome='" + this.nome + "', preco=" + String.valueOf(this.preco) + "}";
     }
 }
+

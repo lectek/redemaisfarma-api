@@ -1,15 +1,18 @@
-// src/main/java/br/com/redemaisfarma/domain/sync/CheckpointService.java
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.stereotype.Service
+ */
 package br.com.redemaisfarma.domain.sync;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.SyncCheckpoint;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.SyncCheckpointRepository;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
+import org.springframework.stereotype.Service;
 
 @Service
 public class CheckpointService {
-
     private final SyncCheckpointRepository repo;
 
     public CheckpointService(SyncCheckpointRepository repo) {
@@ -17,28 +20,26 @@ public class CheckpointService {
     }
 
     public LocalDateTime readSince(String source, LocalDateTime defaultSince) {
-        return repo.findBySource(source)
-                .map(SyncCheckpoint::getLastSince)
-                .orElse(defaultSince);
+        return this.repo.findBySource(source).map(SyncCheckpoint::getLastSince).orElse(defaultSince);
     }
 
     public void writeSince(String source, LocalDateTime since) {
-        SyncCheckpoint cp = repo.findBySource(source).orElseGet(() -> {
+        SyncCheckpoint cp = this.repo.findBySource(source).orElseGet(() -> {
             SyncCheckpoint c = new SyncCheckpoint();
-            c.setId(source);          // 👈 PK obrigatória
-            c.setSource(source);      // 👈 UK
+            c.setId(source);
+            c.setSource(source);
             return c;
         });
         cp.setLastSince(since);
-        repo.save(cp);
+        this.repo.save(cp);
     }
 
-    /** Sugiro usar 1900 para garantir “full crawl” inicial. */
     public LocalDateTime findSinceOrEpoch(String source) {
-        return readSince(source, LocalDateTime.of(1900,1,1,0,0));
+        return this.readSince(source, LocalDateTime.of(1900, 1, 1, 0, 0));
     }
 
     public void touch(String source, LocalDateTime now) {
-        writeSince(source, now);
+        this.writeSince(source, now);
     }
 }
+

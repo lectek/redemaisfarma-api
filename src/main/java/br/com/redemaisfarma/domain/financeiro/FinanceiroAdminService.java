@@ -1,11 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.domain.financeiro;
 
+import br.com.redemaisfarma.application.view.AssinaturaView;
 import java.util.List;
 import java.util.Optional;
 
-import br.com.redemaisfarma.application.view.AssinaturaView;
-
 public interface FinanceiroAdminService {
-    List<AssinaturaView> listarAssinaturas();
-    Optional<AssinaturaView> buscarAssinatura(Long id);
+    public List<AssinaturaView> listarAssinaturas();
+
+    public Optional<AssinaturaView> buscarAssinatura(Long var1);
 }
+

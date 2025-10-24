@@ -1,49 +1,40 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ */
 package br.com.redemaisfarma.adapters.outbound.http.cliente.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.io.Serializable;
 import java.util.Objects;
 
-/**
- * Endereço retornado pelo serviço externo de clientes. Campos e nomes pensados para casar com JSON comum de APIs
- * brasileiras.
- */
-public class EnderecoExternal implements Serializable {
-
-    @JsonProperty("cep")
+public class EnderecoExternal
+implements Serializable {
+    @JsonProperty(value="cep")
     private String cep;
-
-    @JsonProperty("logradouro")
+    @JsonProperty(value="logradouro")
     private String logradouro;
-
-    @JsonProperty("numero")
+    @JsonProperty(value="numero")
     private String numero;
-
-    @JsonProperty("complemento")
+    @JsonProperty(value="complemento")
     private String complemento;
-
-    @JsonProperty("bairro")
+    @JsonProperty(value="bairro")
     private String bairro;
-
-    @JsonProperty("cidade")
+    @JsonProperty(value="cidade")
     private String cidade;
-
-    @JsonProperty("estado")
-    private String estado; // UF
-
-    @JsonProperty("ibge")
+    @JsonProperty(value="estado")
+    private String estado;
+    @JsonProperty(value="ibge")
     private String ibge;
-
-    @JsonProperty("tipo")
-    private String tipo; // RESIDENCIAL | COMERCIAL | OUTRO (livre)
-
-    @JsonProperty("principal")
+    @JsonProperty(value="tipo")
+    private String tipo;
+    @JsonProperty(value="principal")
     private Boolean principal;
 
-    // Getters/Setters
     public String getCep() {
-        return cep;
+        return this.cep;
     }
 
     public void setCep(String cep) {
@@ -51,7 +42,7 @@ public class EnderecoExternal implements Serializable {
     }
 
     public String getLogradouro() {
-        return logradouro;
+        return this.logradouro;
     }
 
     public void setLogradouro(String logradouro) {
@@ -59,7 +50,7 @@ public class EnderecoExternal implements Serializable {
     }
 
     public String getNumero() {
-        return numero;
+        return this.numero;
     }
 
     public void setNumero(String numero) {
@@ -67,7 +58,7 @@ public class EnderecoExternal implements Serializable {
     }
 
     public String getComplemento() {
-        return complemento;
+        return this.complemento;
     }
 
     public void setComplemento(String complemento) {
@@ -75,7 +66,7 @@ public class EnderecoExternal implements Serializable {
     }
 
     public String getBairro() {
-        return bairro;
+        return this.bairro;
     }
 
     public void setBairro(String bairro) {
@@ -83,7 +74,7 @@ public class EnderecoExternal implements Serializable {
     }
 
     public String getCidade() {
-        return cidade;
+        return this.cidade;
     }
 
     public void setCidade(String cidade) {
@@ -91,7 +82,7 @@ public class EnderecoExternal implements Serializable {
     }
 
     public String getEstado() {
-        return estado;
+        return this.estado;
     }
 
     public void setEstado(String estado) {
@@ -99,7 +90,7 @@ public class EnderecoExternal implements Serializable {
     }
 
     public String getIbge() {
-        return ibge;
+        return this.ibge;
     }
 
     public void setIbge(String ibge) {
@@ -107,7 +98,7 @@ public class EnderecoExternal implements Serializable {
     }
 
     public String getTipo() {
-        return tipo;
+        return this.tipo;
     }
 
     public void setTipo(String tipo) {
@@ -115,27 +106,26 @@ public class EnderecoExternal implements Serializable {
     }
 
     public Boolean getPrincipal() {
-        return principal;
+        return this.principal;
     }
 
     public void setPrincipal(Boolean principal) {
         this.principal = principal;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof EnderecoExternal))
+        }
+        if (!(o instanceof EnderecoExternal)) {
             return false;
-        EnderecoExternal that = (EnderecoExternal) o;
-        return Objects.equals(cep, that.cep) && Objects.equals(logradouro, that.logradouro)
-                && Objects.equals(numero, that.numero) && Objects.equals(cidade, that.cidade)
-                && Objects.equals(estado, that.estado);
+        }
+        EnderecoExternal that = (EnderecoExternal)o;
+        return Objects.equals(this.cep, that.cep) && Objects.equals(this.logradouro, that.logradouro) && Objects.equals(this.numero, that.numero) && Objects.equals(this.cidade, that.cidade) && Objects.equals(this.estado, that.estado);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(cep, logradouro, numero, cidade, estado);
+        return Objects.hash(this.cep, this.logradouro, this.numero, this.cidade, this.estado);
     }
 }
+

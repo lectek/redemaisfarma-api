@@ -1,29 +1,32 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ */
 package br.com.redemaisfarma.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.Serializable;
 import java.util.Objects;
 
-/**
- * Informações básicas do atendente (response).
- */
-@Schema(name = "AtendenteDTO", description = "Informações básicas do atendente")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class AtendenteDTO implements Serializable {
+@Schema(name="AtendenteDTO", description="Informa\u00e7\u00f5es b\u00e1sicas do atendente")
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+public class AtendenteDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Schema(description = "ID do atendente", example = "10")
-    @JsonProperty("id")
+    @Schema(description="ID do atendente", example="10")
+    @JsonProperty(value="id")
     private Long id;
-
-    @Schema(description = "Nome do atendente", example = "Carlos Souza")
-    @JsonProperty("nome")
+    @Schema(description="Nome do atendente", example="Carlos Souza")
+    @JsonProperty(value="nome")
     private String nome;
 
-    // Construtores
     public AtendenteDTO() {
     }
 
@@ -32,9 +35,8 @@ public class AtendenteDTO implements Serializable {
         this.nome = nome;
     }
 
-    // Getters/Setters
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -42,31 +44,30 @@ public class AtendenteDTO implements Serializable {
     }
 
     public String getNome() {
-        return nome;
+        return this.nome;
     }
 
     public void setNome(String nome) {
         this.nome = nome;
     }
 
-    // equals/hashCode/toString
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof AtendenteDTO))
+        }
+        if (!(o instanceof AtendenteDTO)) {
             return false;
-        AtendenteDTO that = (AtendenteDTO) o;
-        return Objects.equals(id, that.id) && Objects.equals(nome, that.nome);
+        }
+        AtendenteDTO that = (AtendenteDTO)o;
+        return Objects.equals(this.id, that.id) && Objects.equals(this.nome, that.nome);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(id, nome);
+        return Objects.hash(this.id, this.nome);
     }
 
-    @Override
     public String toString() {
-        return "AtendenteDTO{" + "id=" + id + ", nome='" + nome + '\'' + '}';
+        return "AtendenteDTO{id=" + this.id + ", nome='" + this.nome + "'}";
     }
 }
+

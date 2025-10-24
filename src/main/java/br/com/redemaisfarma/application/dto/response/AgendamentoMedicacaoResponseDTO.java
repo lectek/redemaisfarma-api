@@ -1,10 +1,19 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonFormat
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ */
 package br.com.redemaisfarma.application.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,70 +21,53 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * DTO de resposta para retornos de agendamentos de medicação na API RedeMaisFarma. Somente dados de saída (sem Bean
- * Validation). Campos nulos são omitidos no JSON.
- */
-@Schema(name = "AgendamentoMedicacaoResponseDTO", description = "Dados de agendamento de medicação do cliente")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class AgendamentoMedicacaoResponseDTO implements Serializable {
+@Schema(name="AgendamentoMedicacaoResponseDTO", description="Dados de agendamento de medica\u00e7\u00e3o do cliente")
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+public class AgendamentoMedicacaoResponseDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Schema(description = "ID único do agendamento", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty("agendamentoId")
+    @Schema(description="ID \u00fanico do agendamento", example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value="agendamentoId")
     private UUID agendamentoId;
-
-    @Schema(description = "ID do cliente", example = "12345")
-    @JsonProperty("clienteId")
+    @Schema(description="ID do cliente", example="12345")
+    @JsonProperty(value="clienteId")
     private Long clienteId;
-
-    @Schema(description = "Data de início do agendamento", type = "string", format = "date", example = "2025-07-04")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @JsonProperty("dataInicio")
+    @Schema(description="Data de in\u00edcio do agendamento", type="string", format="date", example="2025-07-04")
+    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonProperty(value="dataInicio")
     private LocalDate dataInicio;
-
-    @Schema(description = "Data de término do agendamento", type = "string", format = "date", example = "2025-07-10")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @JsonProperty("dataFim")
+    @Schema(description="Data de t\u00e9rmino do agendamento", type="string", format="date", example="2025-07-10")
+    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonProperty(value="dataFim")
     private LocalDate dataFim;
-
-    @Schema(description = "Lista de horários de administração no formato HH:mm:ss", example = "[\"08:00:00\", \"20:00:00\"]")
-    @JsonProperty("horarios")
+    @Schema(description="Lista de hor\u00e1rios de administra\u00e7\u00e3o no formato HH:mm:ss", example="[\"08:00:00\", \"20:00:00\"]")
+    @JsonProperty(value="horarios")
     private List<String> horarios;
-
-    @Schema(description = "Dosagem prevista para cada administração", example = "500mg")
-    @JsonProperty("dosagem")
+    @Schema(description="Dosagem prevista para cada administra\u00e7\u00e3o", example="500mg")
+    @JsonProperty(value="dosagem")
     private String dosagem;
-
-    @Schema(description = "Frequência em dias entre administrações", example = "1")
-    @JsonProperty("frequenciaDias")
+    @Schema(description="Frequ\u00eancia em dias entre administra\u00e7\u00f5es", example="1")
+    @JsonProperty(value="frequenciaDias")
     private Integer frequenciaDias;
-
-    @Schema(description = "Status do agendamento", example = "ATIVO")
-    @JsonProperty("status")
+    @Schema(description="Status do agendamento", example="ATIVO")
+    @JsonProperty(value="status")
     private StatusAgendamento status;
-
-    @Schema(description = "Lista de registros de confirmação de dose e ações")
-    @JsonProperty("historico")
+    @Schema(description="Lista de registros de confirma\u00e7\u00e3o de dose e a\u00e7\u00f5es")
+    @JsonProperty(value="historico")
     private List<HistoricoDoseDTO> historico;
-
-    @Schema(description = "Data/hora de criação do agendamento", type = "string", format = "date-time", example = "2025-07-04T09:00:00")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("criadoEm")
+    @Schema(description="Data/hora de cria\u00e7\u00e3o do agendamento", type="string", format="date-time", example="2025-07-04T09:00:00")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="criadoEm")
     private LocalDateTime criadoEm;
-
-    @Schema(description = "Data/hora da última atualização", type = "string", format = "date-time", example = "2025-07-05T10:15:00")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("atualizadoEm")
+    @Schema(description="Data/hora da \u00faltima atualiza\u00e7\u00e3o", type="string", format="date-time", example="2025-07-05T10:15:00")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="atualizadoEm")
     private LocalDateTime atualizadoEm;
 
-    // Construtores
     public AgendamentoMedicacaoResponseDTO() {
     }
 
-    public AgendamentoMedicacaoResponseDTO(UUID agendamentoId, Long clienteId, LocalDate dataInicio, LocalDate dataFim,
-            List<String> horarios, String dosagem, Integer frequenciaDias, StatusAgendamento status,
-            List<HistoricoDoseDTO> historico, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
+    public AgendamentoMedicacaoResponseDTO(UUID agendamentoId, Long clienteId, LocalDate dataInicio, LocalDate dataFim, List<String> horarios, String dosagem, Integer frequenciaDias, StatusAgendamento status, List<HistoricoDoseDTO> historico, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
         this.agendamentoId = agendamentoId;
         this.clienteId = clienteId;
         this.dataInicio = dataInicio;
@@ -89,9 +81,8 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
         this.atualizadoEm = atualizadoEm;
     }
 
-    // Getters e Setters
     public UUID getAgendamentoId() {
-        return agendamentoId;
+        return this.agendamentoId;
     }
 
     public void setAgendamentoId(UUID agendamentoId) {
@@ -99,7 +90,7 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
     }
 
     public Long getClienteId() {
-        return clienteId;
+        return this.clienteId;
     }
 
     public void setClienteId(Long clienteId) {
@@ -107,7 +98,7 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
     }
 
     public LocalDate getDataInicio() {
-        return dataInicio;
+        return this.dataInicio;
     }
 
     public void setDataInicio(LocalDate dataInicio) {
@@ -115,7 +106,7 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
     }
 
     public LocalDate getDataFim() {
-        return dataFim;
+        return this.dataFim;
     }
 
     public void setDataFim(LocalDate dataFim) {
@@ -123,7 +114,7 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
     }
 
     public List<String> getHorarios() {
-        return horarios;
+        return this.horarios;
     }
 
     public void setHorarios(List<String> horarios) {
@@ -131,7 +122,7 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
     }
 
     public String getDosagem() {
-        return dosagem;
+        return this.dosagem;
     }
 
     public void setDosagem(String dosagem) {
@@ -139,7 +130,7 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
     }
 
     public Integer getFrequenciaDias() {
-        return frequenciaDias;
+        return this.frequenciaDias;
     }
 
     public void setFrequenciaDias(Integer frequenciaDias) {
@@ -147,7 +138,7 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
     }
 
     public StatusAgendamento getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(StatusAgendamento status) {
@@ -155,7 +146,7 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
     }
 
     public List<HistoricoDoseDTO> getHistorico() {
-        return historico;
+        return this.historico;
     }
 
     public void setHistorico(List<HistoricoDoseDTO> historico) {
@@ -163,7 +154,7 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
     }
 
     public LocalDateTime getCriadoEm() {
-        return criadoEm;
+        return this.criadoEm;
     }
 
     public void setCriadoEm(LocalDateTime criadoEm) {
@@ -171,69 +162,57 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
     }
 
     public LocalDateTime getAtualizadoEm() {
-        return atualizadoEm;
+        return this.atualizadoEm;
     }
 
     public void setAtualizadoEm(LocalDateTime atualizadoEm) {
         this.atualizadoEm = atualizadoEm;
     }
 
-    // equals/hashCode/toString
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof AgendamentoMedicacaoResponseDTO))
+        }
+        if (!(o instanceof AgendamentoMedicacaoResponseDTO)) {
             return false;
-        AgendamentoMedicacaoResponseDTO that = (AgendamentoMedicacaoResponseDTO) o;
-        return Objects.equals(agendamentoId, that.agendamentoId) && Objects.equals(clienteId, that.clienteId)
-                && Objects.equals(dataInicio, that.dataInicio) && Objects.equals(dataFim, that.dataFim)
-                && Objects.equals(horarios, that.horarios) && Objects.equals(dosagem, that.dosagem)
-                && Objects.equals(frequenciaDias, that.frequenciaDias) && status == that.status
-                && Objects.equals(historico, that.historico) && Objects.equals(criadoEm, that.criadoEm)
-                && Objects.equals(atualizadoEm, that.atualizadoEm);
+        }
+        AgendamentoMedicacaoResponseDTO that = (AgendamentoMedicacaoResponseDTO)o;
+        return Objects.equals(this.agendamentoId, that.agendamentoId) && Objects.equals(this.clienteId, that.clienteId) && Objects.equals(this.dataInicio, that.dataInicio) && Objects.equals(this.dataFim, that.dataFim) && Objects.equals(this.horarios, that.horarios) && Objects.equals(this.dosagem, that.dosagem) && Objects.equals(this.frequenciaDias, that.frequenciaDias) && this.status == that.status && Objects.equals(this.historico, that.historico) && Objects.equals(this.criadoEm, that.criadoEm) && Objects.equals(this.atualizadoEm, that.atualizadoEm);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(agendamentoId, clienteId, dataInicio, dataFim, horarios, dosagem, frequenciaDias, status,
-                historico, criadoEm, atualizadoEm);
+        return Objects.hash(new Object[]{this.agendamentoId, this.clienteId, this.dataInicio, this.dataFim, this.horarios, this.dosagem, this.frequenciaDias, this.status, this.historico, this.criadoEm, this.atualizadoEm});
     }
 
-    @Override
     public String toString() {
-        return "AgendamentoMedicacaoResponseDTO{" + "agendamentoId=" + agendamentoId + ", clienteId=" + clienteId
-                + ", dataInicio=" + dataInicio + ", dataFim=" + dataFim + ", horarios=" + horarios + ", dosagem='"
-                + dosagem + '\'' + ", frequenciaDias=" + frequenciaDias + ", status=" + status + ", historico="
-                + historico + ", criadoEm=" + criadoEm + ", atualizadoEm=" + atualizadoEm + '}';
+        return "AgendamentoMedicacaoResponseDTO{agendamentoId=" + String.valueOf(this.agendamentoId) + ", clienteId=" + this.clienteId + ", dataInicio=" + String.valueOf(this.dataInicio) + ", dataFim=" + String.valueOf(this.dataFim) + ", horarios=" + String.valueOf(this.horarios) + ", dosagem='" + this.dosagem + "', frequenciaDias=" + this.frequenciaDias + ", status=" + String.valueOf((Object)this.status) + ", historico=" + String.valueOf(this.historico) + ", criadoEm=" + String.valueOf(this.criadoEm) + ", atualizadoEm=" + String.valueOf(this.atualizadoEm) + "}";
     }
 
-    // Enum
-    public enum StatusAgendamento {
-        ATIVO, PAUSADO, CONCLUIDO, CANCELADO
+    public static enum StatusAgendamento {
+        ATIVO,
+        PAUSADO,
+        CONCLUIDO,
+        CANCELADO;
+
     }
 
-    // DTO interno
-    @Schema(name = "HistoricoDoseDTO", description = "Registro de confirmação de dose administrada")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class HistoricoDoseDTO implements Serializable {
+    @Schema(name="HistoricoDoseDTO", description="Registro de confirma\u00e7\u00e3o de dose administrada")
+    @JsonInclude(value=JsonInclude.Include.NON_NULL)
+    public static class HistoricoDoseDTO
+    implements Serializable {
         private static final long serialVersionUID = 1L;
-
-        @Schema(description = "ID único do registro de dose", example = "4fa85f64-5717-4562-b3fc-2c963f66afa6")
-        @JsonProperty("registroId")
+        @Schema(description="ID \u00fanico do registro de dose", example="4fa85f64-5717-4562-b3fc-2c963f66afa6")
+        @JsonProperty(value="registroId")
         private UUID registroId;
-
-        @Schema(description = "Data e hora da administração", type = "string", format = "date-time", example = "2025-07-04T08:00:00")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        @JsonProperty("registroEm")
+        @Schema(description="Data e hora da administra\u00e7\u00e3o", type="string", format="date-time", example="2025-07-04T08:00:00")
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+        @JsonProperty(value="registroEm")
         private LocalDateTime registroEm;
-
-        @Schema(description = "Indicador se a dose foi confirmada pelo usuário", example = "true")
-        @JsonProperty("confirmado")
+        @Schema(description="Indicador se a dose foi confirmada pelo usu\u00e1rio", example="true")
+        @JsonProperty(value="confirmado")
         private Boolean confirmado;
-
-        @Schema(description = "Observações do registro", example = "Paciente relatou leve tontura após dose")
-        @JsonProperty("observacoes")
+        @Schema(description="Observa\u00e7\u00f5es do registro", example="Paciente relatou leve tontura ap\u00f3s dose")
+        @JsonProperty(value="observacoes")
         private String observacoes;
 
         public HistoricoDoseDTO() {
@@ -247,7 +226,7 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
         }
 
         public UUID getRegistroId() {
-            return registroId;
+            return this.registroId;
         }
 
         public void setRegistroId(UUID registroId) {
@@ -255,7 +234,7 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
         }
 
         public LocalDateTime getRegistroEm() {
-            return registroEm;
+            return this.registroEm;
         }
 
         public void setRegistroEm(LocalDateTime registroEm) {
@@ -263,7 +242,7 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
         }
 
         public Boolean getConfirmado() {
-            return confirmado;
+            return this.confirmado;
         }
 
         public void setConfirmado(Boolean confirmado) {
@@ -271,33 +250,31 @@ public class AgendamentoMedicacaoResponseDTO implements Serializable {
         }
 
         public String getObservacoes() {
-            return observacoes;
+            return this.observacoes;
         }
 
         public void setObservacoes(String observacoes) {
             this.observacoes = observacoes;
         }
 
-        @Override
         public boolean equals(Object o) {
-            if (this == o)
+            if (this == o) {
                 return true;
-            if (!(o instanceof HistoricoDoseDTO))
+            }
+            if (!(o instanceof HistoricoDoseDTO)) {
                 return false;
-            HistoricoDoseDTO that = (HistoricoDoseDTO) o;
-            return Objects.equals(registroId, that.registroId) && Objects.equals(registroEm, that.registroEm)
-                    && Objects.equals(confirmado, that.confirmado) && Objects.equals(observacoes, that.observacoes);
+            }
+            HistoricoDoseDTO that = (HistoricoDoseDTO)o;
+            return Objects.equals(this.registroId, that.registroId) && Objects.equals(this.registroEm, that.registroEm) && Objects.equals(this.confirmado, that.confirmado) && Objects.equals(this.observacoes, that.observacoes);
         }
 
-        @Override
         public int hashCode() {
-            return Objects.hash(registroId, registroEm, confirmado, observacoes);
+            return Objects.hash(this.registroId, this.registroEm, this.confirmado, this.observacoes);
         }
 
-        @Override
         public String toString() {
-            return "HistoricoDoseDTO{" + "registroId=" + registroId + ", registroEm=" + registroEm + ", confirmado="
-                    + confirmado + ", observacoes='" + observacoes + '\'' + '}';
+            return "HistoricoDoseDTO{registroId=" + String.valueOf(this.registroId) + ", registroEm=" + String.valueOf(this.registroEm) + ", confirmado=" + this.confirmado + ", observacoes='" + this.observacoes + "'}";
         }
     }
 }
+

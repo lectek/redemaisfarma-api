@@ -1,26 +1,30 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.validation.Constraint
+ *  jakarta.validation.Payload
+ */
 package br.com.redemaisfarma.application.validation.annotation;
 
+import br.com.redemaisfarma.application.validation.EmailUnicoValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.lang.annotation.*;
-
-import br.com.redemaisfarma.application.validation.EmailUnicoValidator;
-
-/**
- * ValidaÃƒÂ§ÃƒÂ£o personalizada para verificar se um e-mail jÃƒÂ¡ estÃƒÂ¡ em uso. Deve ser usada em campos do tipo String,
- * como @EmailUnico.
- */
 @Documented
-@Constraint(validatedBy = EmailUnicoValidator.class)
-@Target({ ElementType.FIELD })
-@Retention(RetentionPolicy.RUNTIME)
+@Constraint(validatedBy={EmailUnicoValidator.class})
+@Target(value={ElementType.FIELD, ElementType.PARAMETER})
+@Retention(value=RetentionPolicy.RUNTIME)
 public @interface EmailUnico {
+    public String message() default "E-mail j\u00e1 cadastrado.";
 
-    String message() default "Este e-mail jÃƒÂ¡ estÃƒÂ¡ cadastrado.";
+    public Class<?>[] groups() default {};
 
-    Class<?>[] groups() default {};
-
-    Class<? extends Payload>[] payload() default {};
+    public Class<? extends Payload>[] payload() default {};
 }
 

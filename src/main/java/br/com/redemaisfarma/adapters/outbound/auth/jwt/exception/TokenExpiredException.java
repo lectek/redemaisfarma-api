@@ -1,7 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.exception;
 
-/** Lançada quando o JWT já expirou. */
-public class TokenExpiredException extends RuntimeException {
+public class TokenExpiredException
+extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public TokenExpiredException(String message) {
@@ -12,3 +15,4 @@ public class TokenExpiredException extends RuntimeException {
         super(message, cause);
     }
 }
+

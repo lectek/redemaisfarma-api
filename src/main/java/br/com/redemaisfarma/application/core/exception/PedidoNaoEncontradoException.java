@@ -1,14 +1,12 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.application.core.exception;
 
-/**
- * Exceção lançada quando um pedido não é localizado no banco de dados. Ideal para sinalizar erro 404 em APIs REST ou
- * validar regras de domínio.
- */
-public class PedidoNaoEncontradoException extends RuntimeException {
-
-    private static final String DEFAULT_MESSAGE = "O pedido solicitado não foi encontrado.";
+public class PedidoNaoEncontradoException
+extends RuntimeException {
+    private static final String DEFAULT_MESSAGE = "O pedido solicitado n\u00e3o foi encontrado.";
     private static final String DEFAULT_CODE = "PEDIDO_NAO_ENCONTRADO";
-
     private final String codigoErro;
 
     public PedidoNaoEncontradoException() {
@@ -31,8 +29,8 @@ public class PedidoNaoEncontradoException extends RuntimeException {
         this.codigoErro = DEFAULT_CODE;
     }
 
-    // ✅ Getter adicionado
     public String getCodigoErro() {
-        return codigoErro;
+        return this.codigoErro;
     }
 }
+

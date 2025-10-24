@@ -1,103 +1,58 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.validation.constraints.Min
+ *  jakarta.validation.constraints.Min$List
+ *  jakarta.validation.constraints.NotBlank
+ *  jakarta.validation.constraints.NotNull
+ *  jakarta.validation.constraints.NotNull$List
+ *  org.springframework.boot.context.properties.ConfigurationProperties
+ *  org.springframework.validation.annotation.Validated
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
-/**
- * Propriedades de JWT/Autenticação.
- *
- * Bind automático a partir de application.yml (prefixo "jwt"). Esta classe é usada pelos adapters de geração/validação
- * de tokens, armazenamento de refresh tokens e por filtros de autenticação.
- */
 @Validated
-@ConfigurationProperties(prefix = "jwt")
+@ConfigurationProperties(prefix="jwt")
 public class JwtProperties {
-
-    /**
-     * Segredo usado para assinar/verificar os tokens (HMAC). Em produção, injete via variável de ambiente/secret
-     * manager.
-     */
     @NotBlank
     private String secret;
-
-    /**
-     * Emissor (iss) incluído no token.
-     */
     @NotBlank
     private String issuer;
-
-    /**
-     * Audiência (aud) opcional para reforçar validação entre serviços.
-     */
     private String audience;
-
-    /**
-     * Tempo de expiração do access token, em minutos.
-     */
-    @NotNull
-    @Min(1)
-    private Integer accessTokenExpirationMinutes;
-
-    /**
-     * Tempo de expiração do refresh token, em minutos.
-     */
-    @NotNull
-    @Min(10)
-    private Integer refreshTokenExpirationMinutes;
-
-    /**
-     * Tolerância de clock (em segundos) para validação de "nbf" e "exp".
-     */
-    @NotNull
-    @Min(0)
-    private Integer clockSkewSeconds = 60;
-
-    /**
-     * Cabeçalho HTTP onde o token é esperado (ex.: Authorization).
-     */
+    @NotNull, @NotNull
+    @Min(value=1L)
+@Min(value=1L)
+    private @NotNull, @NotNull @Min(value=1L)
+@Min(value=1L) Integer accessTokenExpirationMinutes;
+    @NotNull, @NotNull
+    @Min(value=10L)
+@Min(value=10L)
+    private @NotNull, @NotNull @Min(value=10L)
+@Min(value=10L) Integer refreshTokenExpirationMinutes;
+    @NotNull, @NotNull
+    @Min(value=0L)
+@Min(value=0L)
+    private @NotNull, @NotNull @Min(value=0L)
+@Min(value=0L) Integer clockSkewSeconds = 60;
     @NotBlank
     private String header = "Authorization";
-
-    /**
-     * Prefixo do header (ex.: Bearer).
-     */
     @NotBlank
     private String prefix = "Bearer";
-
-    /**
-     * Nome do cookie usado para refresh token (quando aplicável).
-     */
     private String refreshCookieName = "REFRESH_TOKEN";
-
-    /**
-     * Sinalizador de segurança do cookie de refresh.
-     */
     private boolean refreshCookieSecure = true;
-
-    /**
-     * Sinalizador HttpOnly do cookie de refresh.
-     */
     private boolean refreshCookieHttpOnly = true;
-
-    /**
-     * Domain opcional para o cookie de refresh.
-     */
     private String refreshCookieDomain;
-
-    /**
-     * Path do cookie de refresh.
-     */
     private String refreshCookiePath = "/";
 
-    // =========================
-    // Getters e Setters
-    // =========================
-
     public String getSecret() {
-        return secret;
+        return this.secret;
     }
 
     public void setSecret(String secret) {
@@ -105,7 +60,7 @@ public class JwtProperties {
     }
 
     public String getIssuer() {
-        return issuer;
+        return this.issuer;
     }
 
     public void setIssuer(String issuer) {
@@ -113,7 +68,7 @@ public class JwtProperties {
     }
 
     public String getAudience() {
-        return audience;
+        return this.audience;
     }
 
     public void setAudience(String audience) {
@@ -121,7 +76,7 @@ public class JwtProperties {
     }
 
     public Integer getAccessTokenExpirationMinutes() {
-        return accessTokenExpirationMinutes;
+        return this.accessTokenExpirationMinutes;
     }
 
     public void setAccessTokenExpirationMinutes(Integer accessTokenExpirationMinutes) {
@@ -129,7 +84,7 @@ public class JwtProperties {
     }
 
     public Integer getRefreshTokenExpirationMinutes() {
-        return refreshTokenExpirationMinutes;
+        return this.refreshTokenExpirationMinutes;
     }
 
     public void setRefreshTokenExpirationMinutes(Integer refreshTokenExpirationMinutes) {
@@ -137,7 +92,7 @@ public class JwtProperties {
     }
 
     public Integer getClockSkewSeconds() {
-        return clockSkewSeconds;
+        return this.clockSkewSeconds;
     }
 
     public void setClockSkewSeconds(Integer clockSkewSeconds) {
@@ -145,7 +100,7 @@ public class JwtProperties {
     }
 
     public String getHeader() {
-        return header;
+        return this.header;
     }
 
     public void setHeader(String header) {
@@ -153,7 +108,7 @@ public class JwtProperties {
     }
 
     public String getPrefix() {
-        return prefix;
+        return this.prefix;
     }
 
     public void setPrefix(String prefix) {
@@ -161,7 +116,7 @@ public class JwtProperties {
     }
 
     public String getRefreshCookieName() {
-        return refreshCookieName;
+        return this.refreshCookieName;
     }
 
     public void setRefreshCookieName(String refreshCookieName) {
@@ -169,7 +124,7 @@ public class JwtProperties {
     }
 
     public boolean isRefreshCookieSecure() {
-        return refreshCookieSecure;
+        return this.refreshCookieSecure;
     }
 
     public void setRefreshCookieSecure(boolean refreshCookieSecure) {
@@ -177,7 +132,7 @@ public class JwtProperties {
     }
 
     public boolean isRefreshCookieHttpOnly() {
-        return refreshCookieHttpOnly;
+        return this.refreshCookieHttpOnly;
     }
 
     public void setRefreshCookieHttpOnly(boolean refreshCookieHttpOnly) {
@@ -185,7 +140,7 @@ public class JwtProperties {
     }
 
     public String getRefreshCookieDomain() {
-        return refreshCookieDomain;
+        return this.refreshCookieDomain;
     }
 
     public void setRefreshCookieDomain(String refreshCookieDomain) {
@@ -193,10 +148,11 @@ public class JwtProperties {
     }
 
     public String getRefreshCookiePath() {
-        return refreshCookiePath;
+        return this.refreshCookiePath;
     }
 
     public void setRefreshCookiePath(String refreshCookiePath) {
         this.refreshCookiePath = refreshCookiePath;
     }
 }
+

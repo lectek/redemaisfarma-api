@@ -1,70 +1,70 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  br.com.redemaisfarma.domain.user.Role
+ *  br.com.redemaisfarma.domain.user.Usuario
+ *  org.springframework.stereotype.Component
+ */
 package br.com.redemaisfarma.adapters.outbound.persistence.mapper;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
-import br.com.redemaisfarma.domain.Usuario;
+import br.com.redemaisfarma.domain.user.Role;
+import br.com.redemaisfarma.domain.user.Usuario;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-/**
- * Mapper responsável por converter entre UsuarioEntity (persistência) e Usuario (domínio de negócio).
- */
 @Component
 public class UsuarioMapper {
+    private static final ZoneId ZONE = ZoneId.systemDefault();
 
-    /**
-     * Converte uma entidade JPA para o modelo de domínio.
-     *
-     * @param entity
-     *            objeto persistido
-     *
-     * @return objeto de domínio
-     */
-    public Usuario toDomain(UsuarioEntity entity) {
-        if (entity == null)
+    public Usuario toDomain(UsuarioEntity e) {
+        if (e == null) {
             return null;
-
-        return new Usuario(entity.getId(), entity.getNome(), entity.getEmail(), entity.getCpf(), entity.getSenha(),
-                entity.getRoles() != null ? List.copyOf(entity.getRoles()) : List.of());
+        }
+        Usuario u = new Usuario(e.getNome(), e.getEmail(), e.getCpf(), e.getSenha());
+        u.setId(e.getId());
+        u.setRoles(this.toRoleNames(e.getRoles()));
+        u.setClienteVip(Boolean.TRUE.equals(e.getClienteVip()));
+        u.setTentativasFalhas(e.getTentativasFalhas() == null ? 0 : e.getTentativasFalhas());
+        u.setUltimoAcesso(e.getUltimoAcesso() != null ? e.getUltimoAcesso().atZone(ZONE).toInstant() : null);
+        return u;
     }
 
-    /**
-     * Converte um objeto de domínio para uma entidade JPA.
-     *
-     * @param usuario
-     *            modelo de domínio
-     *
-     * @return entidade JPA
-     */
-    public UsuarioEntity toEntity(Usuario usuario) {
-        if (usuario == null)
+    public UsuarioEntity toEntity(Usuario u) {
+        if (u == null) {
             return null;
-
-        UsuarioEntity entity = new UsuarioEntity();
-        entity.setId(usuario.getId());
-        entity.setNome(usuario.getNome());
-        entity.setEmail(usuario.getEmail());
-        entity.setCpf(usuario.getCpf());
-        entity.setSenha(usuario.getSenha());
-        entity.setRoles(usuario.getRoles());
-        return entity;
+        }
+        UsuarioEntity e = new UsuarioEntity();
+        e.setId(u.getId());
+        e.setNome(u.getNome());
+        e.setEmail(u.getEmail());
+        e.setCpf(u.getCpf());
+        e.setSenha(u.getSenha());
+        e.setRoles(this.toRoleEntities(u.getRoles()));
+        e.setClienteVip(u.isClienteVip());
+        e.setTentativasFalhas(u.getTentativasFalhas());
+        e.setUltimoAcesso(u.getUltimoAcesso() != null ? LocalDateTime.ofInstant(u.getUltimoAcesso(), ZONE) : null);
+        return e;
     }
 
-    /**
-     * Converte uma lista de entidades para domínio.
-     */
-    public List<Usuario> toDomainList(List<UsuarioEntity> entities) {
-        return entities == null ? List.of()
-                : entities.stream().filter(Objects::nonNull).map(this::toDomain).collect(Collectors.toList());
+    private Set<String> toRoleNames(Set<Role> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return Set.of();
+        }
+        return roles.stream().filter(Objects::nonNull).map(Role::getNome).filter(Objects::nonNull).map(String::trim).filter(s -> !s.isEmpty()).map(String::toUpperCase).collect(Collectors.toCollection(HashSet::new));
     }
 
-    /**
-     * Converte uma lista de domínios para entidades.
-     */
-    public List<UsuarioEntity> toEntityList(List<Usuario> dominios) {
-        return dominios == null ? List.of()
-                : dominios.stream().filter(Objects::nonNull).map(this::toEntity).collect(Collectors.toList());
+    private Set<Role> toRoleEntities(Set<String> roleNames) {
+        if (roleNames == null || roleNames.isEmpty()) {
+            return new HashSet<Role>();
+        }
+        return roleNames.stream().filter(Objects::nonNull).map(String::trim).filter(s -> !s.isEmpty()).map(String::toUpperCase).map(Role::of).collect(Collectors.toCollection(HashSet::new));
     }
 }
+

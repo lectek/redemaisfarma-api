@@ -1,25 +1,24 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.http.exception;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * Exceção base para falhas em chamadas HTTP a serviços externos. Carrega metadados úteis para logs/observabilidade.
- */
-public class ExternalClientException extends RuntimeException {
+public class ExternalClientException
+extends RuntimeException {
     private static final long serialVersionUID = 1L;
+    private final String service;
+    private final String method;
+    private final String url;
+    private final Integer status;
+    private final String responseBody;
+    private final Map<String, List<String>> headers;
+    private final String traceId;
 
-    private final String service; // identificação do serviço externo (ex.: "cliente")
-    private final String method; // GET/POST/PUT/DELETE…
-    private final String url; // URL final (com pathvars e query)
-    private final Integer status; // HTTP status (se houver)
-    private final String responseBody; // corpo retornado (se houver)
-    private final Map<String, List<String>> headers; // headers de resposta (se houver)
-    private final String traceId; // trace/correlation id opcional
-
-    public ExternalClientException(String message, String service, String method, String url, Integer status,
-            String responseBody, Map<String, List<String>> headers, String traceId, Throwable cause) {
+    public ExternalClientException(String message, String service, String method, String url, Integer status, String responseBody, Map<String, List<String>> headers, String traceId, Throwable cause) {
         super(message, cause);
         this.service = service;
         this.method = method;
@@ -31,53 +30,51 @@ public class ExternalClientException extends RuntimeException {
     }
 
     public String getService() {
-        return service;
+        return this.service;
     }
 
     public String getMethod() {
-        return method;
+        return this.method;
     }
 
     public String getUrl() {
-        return url;
+        return this.url;
     }
 
     public Integer getStatus() {
-        return status;
+        return this.status;
     }
 
     public String getResponseBody() {
-        return responseBody;
+        return this.responseBody;
     }
 
     public Map<String, List<String>> getHeaders() {
-        return headers;
+        return this.headers;
     }
 
     public String getTraceId() {
-        return traceId;
+        return this.traceId;
     }
 
     @Override
     public String toString() {
-        return "ExternalClientException{" + "service='" + service + '\'' + ", method='" + method + '\'' + ", url='"
-                + url + '\'' + ", status=" + status + ", traceId='" + traceId + '\'' + '}';
+        return "ExternalClientException{service='" + this.service + "', method='" + this.method + "', url='" + this.url + "', status=" + String.valueOf(this.status) + ", traceId='" + this.traceId + "'}";
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof ExternalClientException))
+        }
+        if (!(o instanceof ExternalClientException)) {
             return false;
-        ExternalClientException that = (ExternalClientException) o;
-        return Objects.equals(service, that.service) && Objects.equals(method, that.method)
-                && Objects.equals(url, that.url) && Objects.equals(status, that.status)
-                && Objects.equals(traceId, that.traceId);
+        }
+        ExternalClientException that = (ExternalClientException)o;
+        return Objects.equals(this.service, that.service) && Objects.equals(this.method, that.method) && Objects.equals(this.url, that.url) && Objects.equals(this.status, that.status) && Objects.equals(this.traceId, that.traceId);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(service, method, url, status, traceId);
+        return Objects.hash(this.service, this.method, this.url, this.status, this.traceId);
     }
 }
+

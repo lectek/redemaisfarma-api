@@ -1,69 +1,67 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonFormat
+ *  com.fasterxml.jackson.annotation.JsonFormat$Shape
+ *  com.fasterxml.jackson.annotation.JsonInclude
+ *  com.fasterxml.jackson.annotation.JsonInclude$Include
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ *  io.swagger.v3.oas.annotations.media.Schema$RequiredMode
+ */
 package br.com.redemaisfarma.application.dto.response;
 
+import br.com.redemaisfarma.application.dto.response.AtendenteDTO;
+import br.com.redemaisfarma.application.dto.response.ClienteDTO;
+import br.com.redemaisfarma.application.dto.response.ItemPedidoResponseDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * DTO de resposta com todos os dados detalhados de um pedido.
- */
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(name = "PedidoResponseDTO", description = "Dados completos de um pedido realizado")
-public class PedidoResponseDTO implements Serializable {
-
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@Schema(name="PedidoResponseDTO", description="Dados completos de um pedido realizado")
+public class PedidoResponseDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Schema(description = "ID do pedido", example = "123")
-    @JsonProperty("id")
+    @Schema(description="ID do pedido", example="123", requiredMode=Schema.RequiredMode.REQUIRED)
+    @JsonProperty(value="id")
     private Long id;
-
-    @Schema(description = "Data e hora da criação do pedido", example = "2025-07-05T10:15:30")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("dataCriacao")
+    @Schema(description="Data e hora da cria\u00e7\u00e3o do pedido", example="2025-07-05T10:15:30", type="string", format="date-time")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="dataCriacao")
     private LocalDateTime dataCriacao;
-
-    @Schema(description = "Data e hora da entrega (se aplicável)", example = "2025-07-06T15:00:00")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("dataEntrega")
+    @Schema(description="Data e hora da entrega (se aplic\u00e1vel)", example="2025-07-06T15:00:00", type="string", format="date-time")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="dataEntrega")
     private LocalDateTime dataEntrega;
-
-    @Schema(description = "Status atual do pedido", example = "EM_PREPARO")
-    @JsonProperty("status")
+    @Schema(description="Status atual do pedido", example="EM_PREPARO")
+    @JsonProperty(value="status")
     private String status;
-
-    @Schema(description = "Valor total do pedido", example = "249.90")
-    @JsonProperty("total")
+    @Schema(description="Valor total do pedido", example="249.90")
+    @JsonProperty(value="total")
     private BigDecimal total;
-
-    @Schema(description = "Observações adicionais do pedido", example = "Cliente pediu sem sacola.")
-    @JsonProperty("observacao")
+    @Schema(description="Observa\u00e7\u00f5es adicionais do pedido", example="Cliente pediu sem sacola.")
+    @JsonProperty(value="observacao")
     private String observacao;
-
-    @Schema(description = "Cliente que realizou o pedido")
-    @JsonProperty("cliente")
+    @Schema(description="Cliente que realizou o pedido")
+    @JsonProperty(value="cliente")
     private ClienteDTO cliente;
-
-    @Schema(description = "Atendente responsável pelo pedido")
-    @JsonProperty("atendente")
+    @Schema(description="Atendente respons\u00e1vel pelo pedido")
+    @JsonProperty(value="atendente")
     private AtendenteDTO atendente;
-
-    @Schema(description = "Lista de itens do pedido")
-    @JsonProperty("itens")
+    @Schema(description="Lista de itens do pedido")
+    @JsonProperty(value="itens")
     private List<ItemPedidoResponseDTO> itens;
 
-    // ===========================
-    // Getters e Setters
-    // ===========================
-
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(Long id) {
@@ -71,7 +69,7 @@ public class PedidoResponseDTO implements Serializable {
     }
 
     public LocalDateTime getDataCriacao() {
-        return dataCriacao;
+        return this.dataCriacao;
     }
 
     public void setDataCriacao(LocalDateTime dataCriacao) {
@@ -79,7 +77,7 @@ public class PedidoResponseDTO implements Serializable {
     }
 
     public LocalDateTime getDataEntrega() {
-        return dataEntrega;
+        return this.dataEntrega;
     }
 
     public void setDataEntrega(LocalDateTime dataEntrega) {
@@ -87,7 +85,7 @@ public class PedidoResponseDTO implements Serializable {
     }
 
     public String getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(String status) {
@@ -95,7 +93,7 @@ public class PedidoResponseDTO implements Serializable {
     }
 
     public BigDecimal getTotal() {
-        return total;
+        return this.total;
     }
 
     public void setTotal(BigDecimal total) {
@@ -103,7 +101,7 @@ public class PedidoResponseDTO implements Serializable {
     }
 
     public String getObservacao() {
-        return observacao;
+        return this.observacao;
     }
 
     public void setObservacao(String observacao) {
@@ -111,7 +109,7 @@ public class PedidoResponseDTO implements Serializable {
     }
 
     public ClienteDTO getCliente() {
-        return cliente;
+        return this.cliente;
     }
 
     public void setCliente(ClienteDTO cliente) {
@@ -119,7 +117,7 @@ public class PedidoResponseDTO implements Serializable {
     }
 
     public AtendenteDTO getAtendente() {
-        return atendente;
+        return this.atendente;
     }
 
     public void setAtendente(AtendenteDTO atendente) {
@@ -127,40 +125,30 @@ public class PedidoResponseDTO implements Serializable {
     }
 
     public List<ItemPedidoResponseDTO> getItens() {
-        return itens;
+        return this.itens;
     }
 
     public void setItens(List<ItemPedidoResponseDTO> itens) {
         this.itens = itens;
     }
 
-    // ===========================
-    // equals e hashCode
-    // ===========================
-
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof PedidoResponseDTO))
+        }
+        if (!(o instanceof PedidoResponseDTO)) {
             return false;
-        PedidoResponseDTO that = (PedidoResponseDTO) o;
-        return Objects.equals(id, that.id) && Objects.equals(dataCriacao, that.dataCriacao)
-                && Objects.equals(dataEntrega, that.dataEntrega) && Objects.equals(status, that.status)
-                && Objects.equals(total, that.total) && Objects.equals(observacao, that.observacao)
-                && Objects.equals(cliente, that.cliente) && Objects.equals(atendente, that.atendente)
-                && Objects.equals(itens, that.itens);
+        }
+        PedidoResponseDTO that = (PedidoResponseDTO)o;
+        return Objects.equals(this.id, that.id) && Objects.equals(this.dataCriacao, that.dataCriacao) && Objects.equals(this.dataEntrega, that.dataEntrega) && Objects.equals(this.status, that.status) && Objects.equals(this.total, that.total) && Objects.equals(this.observacao, that.observacao) && Objects.equals(this.cliente, that.cliente) && Objects.equals(this.atendente, that.atendente) && Objects.equals(this.itens, that.itens);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(id, dataCriacao, dataEntrega, status, total, observacao, cliente, atendente, itens);
+        return Objects.hash(this.id, this.dataCriacao, this.dataEntrega, this.status, this.total, this.observacao, this.cliente, this.atendente, this.itens);
     }
 
-    @Override
     public String toString() {
-        return "PedidoResponseDTO{" + "id=" + id + ", dataCriacao=" + dataCriacao + ", dataEntrega=" + dataEntrega
-                + ", status='" + status + '\'' + ", total=" + total + ", observacao='" + observacao + '\''
-                + ", cliente=" + cliente + ", atendente=" + atendente + ", itens=" + itens + '}';
+        return "PedidoResponseDTO{id=" + this.id + ", dataCriacao=" + String.valueOf(this.dataCriacao) + ", dataEntrega=" + String.valueOf(this.dataEntrega) + ", status='" + this.status + "', total=" + String.valueOf(this.total) + ", observacao='" + this.observacao + "', cliente=" + String.valueOf(this.cliente) + ", atendente=" + String.valueOf(this.atendente) + ", itens=" + String.valueOf(this.itens) + "}";
     }
 }
+

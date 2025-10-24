@@ -1,48 +1,70 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.http.HttpStatus
+ *  org.springframework.http.HttpStatusCode
+ *  org.springframework.http.ResponseEntity
+ *  org.springframework.web.bind.annotation.DeleteMapping
+ *  org.springframework.web.bind.annotation.GetMapping
+ *  org.springframework.web.bind.annotation.PathVariable
+ *  org.springframework.web.bind.annotation.PostMapping
+ *  org.springframework.web.bind.annotation.PutMapping
+ *  org.springframework.web.bind.annotation.RequestBody
+ *  org.springframework.web.bind.annotation.RequestMapping
+ *  org.springframework.web.bind.annotation.RestController
+ */
 package br.com.redemaisfarma.application.controller;
 
 import br.com.redemaisfarma.application.service.ProdutoService;
 import br.com.redemaisfarma.domain.Produto;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("/api/produtos")
+@RestController(value="produtoAppController")
+@RequestMapping(value={"/api/app/produtos"})
 public class ProdutoController {
-
     private final ProdutoService produtoService;
 
     public ProdutoController(ProdutoService produtoService) {
         this.produtoService = produtoService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<Produto>> listarTodos() {
-        return ResponseEntity.ok(produtoService.listarTodos());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Produto> buscarPorId(@PathVariable Long id) {
-        return produtoService.buscarPorId(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
-    }
-
     @PostMapping
-    public ResponseEntity<Produto> cadastrar(@RequestBody Produto produto) {
-        Produto salvo = produtoService.salvar(produto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
+    public ResponseEntity<Produto> create(@RequestBody Produto produto) {
+        Produto salvo = this.produtoService.create(produto);
+        return ResponseEntity.status((HttpStatusCode)HttpStatus.CREATED).body((Object)salvo);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Produto> atualizar(@PathVariable Long id, @RequestBody Produto produto) {
-        Produto atualizado = produtoService.atualizar(id, produto);
-        return ResponseEntity.ok(atualizado);
+    @GetMapping
+    public ResponseEntity<List<Produto>> list() {
+        return ResponseEntity.ok(this.produtoService.list());
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        produtoService.deletar(id);
+    @GetMapping(value={"/{id}"})
+    public ResponseEntity<Produto> findById(@PathVariable Long id) {
+        return ResponseEntity.ok((Object)this.produtoService.findById(id));
+    }
+
+    @PutMapping(value={"/{id}"})
+    public ResponseEntity<Produto> update(@PathVariable Long id, @RequestBody Produto produto) {
+        return ResponseEntity.ok((Object)this.produtoService.update(id, produto));
+    }
+
+    @DeleteMapping(value={"/{id}"})
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        this.produtoService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
+

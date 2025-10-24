@@ -1,22 +1,23 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.store;
 
 import br.com.redemaisfarma.adapters.outbound.auth.jwt.model.RefreshToken;
-
 import java.time.Instant;
 import java.util.Optional;
 
 public interface RefreshTokenStore {
+    public RefreshToken save(RefreshToken var1);
 
-    RefreshToken save(RefreshToken rt);
+    public Optional<RefreshToken> findValidByToken(String var1);
 
-    Optional<RefreshToken> findValidByToken(String token);
+    public void revokeByToken(String var1, Instant var2);
 
-    void revokeByToken(String token, Instant revokedAt);
+    public void revokeAllForUser(Long var1, String var2, Instant var3);
 
-    void revokeAllForUser(Long userId, String tenantId, Instant revokedAt);
+    public RefreshToken rotate(String var1, RefreshToken var2, Instant var3);
 
-    RefreshToken rotate(String oldToken, RefreshToken newToken, Instant revokedAt);
-
-    /** Remove tokens expirados e retorna quantos foram apagados. */
-    long deleteExpired(Instant now);
+    public long deleteExpired(Instant var1);
 }
+

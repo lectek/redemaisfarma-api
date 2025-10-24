@@ -1,10 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.domain.enums;
 
 public enum StatusPedido {
-    ABERTO,                // 👈 adicionado
+    ABERTO,
     AGUARDANDO_PAGAMENTO,
     PAGO,
     ENVIADO,
     ENTREGUE,
-    CANCELADO
+    CANCELADO;
+
 }
+

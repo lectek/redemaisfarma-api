@@ -1,21 +1,20 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.application.port;
 
 import br.com.redemaisfarma.domain.Cliente;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Porta de aplicação para consulta/persistência de clientes via serviço externo. Implementada por ClienteHttpAdapter.
- */
 public interface ClientePort {
+    public Optional<Cliente> buscarPorId(UUID var1);
 
-    Optional<Cliente> buscarPorId(UUID id);
+    public Optional<Cliente> buscarPorCpf(String var1);
 
-    Optional<Cliente> buscarPorCpf(String cpf);
+    public List<Cliente> buscarPorNome(String var1, int var2, int var3);
 
-    List<Cliente> buscarPorNome(String nome, int page, int size);
-
-    Cliente salvarOuAtualizar(Cliente cliente);
+    public Cliente salvarOuAtualizar(Cliente var1);
 }
+

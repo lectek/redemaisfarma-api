@@ -1,10 +1,29 @@
-// src/main/java/br/com/redemaisfarma/application/controller/PasswordResetController.java
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.validation.Valid
+ *  org.slf4j.Logger
+ *  org.slf4j.LoggerFactory
+ *  org.springframework.beans.propertyeditors.StringTrimmerEditor
+ *  org.springframework.stereotype.Controller
+ *  org.springframework.ui.Model
+ *  org.springframework.validation.BindingResult
+ *  org.springframework.web.bind.WebDataBinder
+ *  org.springframework.web.bind.annotation.GetMapping
+ *  org.springframework.web.bind.annotation.InitBinder
+ *  org.springframework.web.bind.annotation.ModelAttribute
+ *  org.springframework.web.bind.annotation.PostMapping
+ *  org.springframework.web.bind.annotation.RequestMapping
+ *  org.springframework.web.bind.annotation.RequestParam
+ */
 package br.com.redemaisfarma.application.controller;
 
 import br.com.redemaisfarma.application.dto.request.ForgotPasswordRequest;
 import br.com.redemaisfarma.application.dto.request.ResetPasswordRequest;
 import br.com.redemaisfarma.application.service.PasswordResetService;
 import jakarta.validation.Valid;
+import java.beans.PropertyEditor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
@@ -12,103 +31,88 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * Controller MVC para o fluxo clássico (link por e-mail) em páginas.
- * O fluxo via OTP/JS ficará exposto por endpoints REST dedicados (em outro controller),
- * assim evitamos conflitos de path com "/cliente/auth/**".
- */
 @Controller
-@RequestMapping("/cliente/auth")
+@RequestMapping(value={"/cliente/auth"})
 public class PasswordResetController {
-
     private static final Logger log = LoggerFactory.getLogger(PasswordResetController.class);
-
     private final PasswordResetService service;
 
     public PasswordResetController(PasswordResetService service) {
         this.service = service;
     }
 
-    /** Trima strings e converte "" em null para os formulários desta página. */
     @InitBinder
     public void initBinder(WebDataBinder binder) {
-        binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+        binder.registerCustomEditor(String.class, (PropertyEditor)new StringTrimmerEditor(true));
     }
 
-    // ---- Esqueci minha senha (view cliente) ----
-    @GetMapping("/esqueci-senha")
+    @GetMapping(value={"/esqueci-senha"})
     public String forgotForm(Model model) {
         if (!model.containsAttribute("form")) {
-            model.addAttribute("form", new ForgotPasswordRequest());
+            model.addAttribute("form", (Object)new ForgotPasswordRequest());
         }
         return "pages/cliente/esqueci-senha";
     }
 
-    @PostMapping("/esqueci-senha")
-    public String forgotSubmit(@Valid @ModelAttribute("form") ForgotPasswordRequest form,
-                               BindingResult br,
-                               Model model) {
+    @PostMapping(value={"/esqueci-senha"})
+    public String forgotSubmit(@Valid @ModelAttribute(value="form") ForgotPasswordRequest form, BindingResult br, Model model) {
         if (br.hasErrors()) {
             return "pages/cliente/esqueci-senha";
         }
-
         try {
-            service.solicitarResetPorEmailOuCpf(form.getEmailOuCpf());
-            log.info("Solicitação de reset recebida para identificador='{}' (se existir).", form.getEmailOuCpf());
-        } catch (Exception ex) {
-            // Não vaza detalhe para o usuário (evita enumeração de contas)
-            log.warn("Falha ao solicitar reset para '{}': {}", form.getEmailOuCpf(), ex.getMessage());
+            this.service.solicitarResetPorEmailOuCpf(form.getEmailOuCpf());
+            log.info("Solicita\u00e7\u00e3o de reset recebida para identificador='{}' (se existir).", (Object)form.getEmailOuCpf());
         }
-
-        model.addAttribute("infoMessage",
-            "Se encontrarmos sua conta, enviaremos um link de redefinição para o e-mail cadastrado.");
-        model.addAttribute("form", new ForgotPasswordRequest()); // limpa o form
+        catch (Exception ex) {
+            log.warn("Falha ao solicitar reset para '{}': {}", (Object)form.getEmailOuCpf(), (Object)ex.getMessage());
+        }
+        model.addAttribute("infoMessage", (Object)"Se encontrarmos sua conta, enviaremos um link de redefini\u00e7\u00e3o para o e-mail cadastrado.");
+        model.addAttribute("form", (Object)new ForgotPasswordRequest());
         return "pages/cliente/esqueci-senha";
     }
 
-    // ---- Resetar com token (view cliente) ----
-    @GetMapping("/resetar-senha")
-    public String resetForm(@RequestParam("token") String token, Model model) {
-        var valido = service.validarToken(token).isPresent();
+    @GetMapping(value={"/resetar-senha"})
+    public String resetForm(@RequestParam(value="token") String token, Model model) {
+        boolean valido = this.service.validarToken(token).isPresent();
         if (!valido) {
-            model.addAttribute("errorMessage", "Link inválido ou expirado. Solicite novamente.");
+            model.addAttribute("errorMessage", (Object)"Link inv\u00e1lido ou expirado. Solicite novamente.");
             return "pages/cliente/resetar-senha";
         }
         ResetPasswordRequest form = new ResetPasswordRequest();
         form.setToken(token);
-        model.addAttribute("form", form);
+        model.addAttribute("form", (Object)form);
         return "pages/cliente/resetar-senha";
     }
 
-    @PostMapping("/resetar-senha")
-    public String resetSubmit(@Valid @ModelAttribute("form") ResetPasswordRequest form,
-                              BindingResult br,
-                              Model model) {
-        if (form.getNovaSenha() != null && form.getConfirmarSenha() != null
-                && !form.getNovaSenha().equals(form.getConfirmarSenha())) {
-            br.rejectValue("confirmarSenha", "mismatch", "As senhas não conferem.");
+    @PostMapping(value={"/resetar-senha"})
+    public String resetSubmit(@Valid @ModelAttribute(value="form") ResetPasswordRequest form, BindingResult br, Model model) {
+        boolean ok;
+        if (form.getNovaSenha() != null && form.getConfirmarSenha() != null && !form.getNovaSenha().equals(form.getConfirmarSenha())) {
+            br.rejectValue("confirmarSenha", "mismatch", "As senhas n\u00e3o conferem.");
         }
         if (br.hasErrors()) {
             return "pages/cliente/resetar-senha";
         }
-
-        boolean ok;
         try {
-            ok = service.aplicarNovaSenha(form.getToken(), form.getNovaSenha());
-        } catch (Exception ex) {
-            log.error("Erro ao aplicar nova senha via token: {}", ex.getMessage(), ex);
+            ok = this.service.aplicarNovaSenha(form.getToken(), form.getNovaSenha());
+        }
+        catch (Exception ex) {
+            log.error("Erro ao aplicar nova senha via token: {}", (Object)ex.getMessage(), (Object)ex);
             ok = false;
         }
-
         if (!ok) {
-            model.addAttribute("errorMessage", "Link inválido ou expirado. Solicite novamente.");
+            model.addAttribute("errorMessage", (Object)"Link inv\u00e1lido ou expirado. Solicite novamente.");
             return "pages/cliente/resetar-senha";
         }
-
-        model.addAttribute("successMessage", "Senha redefinida com sucesso! Você já pode entrar.");
-        // Mantém a mesma página com mensagem de sucesso — UX simples
+        model.addAttribute("successMessage", (Object)"Senha redefinida com sucesso! Voc\u00ea j\u00e1 pode entrar.");
         return "pages/cliente/resetar-senha";
     }
 }
+

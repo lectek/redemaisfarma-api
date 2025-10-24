@@ -1,4 +1,12 @@
-// src/main/java/br/com/redemaisfarma/config/KafkaConfig.java
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.context.annotation.Bean
+ *  org.springframework.context.annotation.Configuration
+ *  org.springframework.kafka.annotation.EnableKafka
+ *  org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
+ */
 package br.com.redemaisfarma.config;
 
 import org.springframework.context.annotation.Bean;
@@ -9,14 +17,9 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 @EnableKafka
 @Configuration
 public class KafkaConfig {
-
-  // Alias para o factory padrão criado pelo Spring Boot
-  @Bean(name = "pedidoKafkaListenerContainerFactory")
-  public ConcurrentKafkaListenerContainerFactory<?, ?> pedidoKafkaListenerContainerFactory(
-      ConcurrentKafkaListenerContainerFactory<?, ?> kafkaListenerContainerFactory
-  ) {
-    // Se quiser rodar sem Kafka no dev:
-    // kafkaListenerContainerFactory.setAutoStartup(false);
-    return kafkaListenerContainerFactory;
-  }
+    @Bean(name={"pedidoKafkaListenerContainerFactory"})
+    public ConcurrentKafkaListenerContainerFactory<?, ?> pedidoKafkaListenerContainerFactory(ConcurrentKafkaListenerContainerFactory<?, ?> kafkaListenerContainerFactory) {
+        return kafkaListenerContainerFactory;
+    }
 }
+

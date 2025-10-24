@@ -1,14 +1,14 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.model;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
-/**
- * Par de tokens de autenticação (access + refresh) e metadados. Use este VO no outbound. O mapeamento para DTOs da
- * camada application (ex.: AuthResponse) fica no application/service/controller.
- */
-public class TokenPair implements Serializable {
+public class TokenPair
+implements Serializable {
     private final String accessToken;
     private final String refreshToken;
     private final Instant issuedAt;
@@ -22,40 +22,38 @@ public class TokenPair implements Serializable {
     }
 
     public String getAccessToken() {
-        return accessToken;
+        return this.accessToken;
     }
 
     public String getRefreshToken() {
-        return refreshToken;
+        return this.refreshToken;
     }
 
     public Instant getIssuedAt() {
-        return issuedAt;
+        return this.issuedAt;
     }
 
     public Instant getExpiresAt() {
-        return expiresAt;
+        return this.expiresAt;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof TokenPair))
+        }
+        if (!(o instanceof TokenPair)) {
             return false;
-        TokenPair that = (TokenPair) o;
-        return Objects.equals(accessToken, that.accessToken) && Objects.equals(refreshToken, that.refreshToken)
-                && Objects.equals(issuedAt, that.issuedAt) && Objects.equals(expiresAt, that.expiresAt);
+        }
+        TokenPair that = (TokenPair)o;
+        return Objects.equals(this.accessToken, that.accessToken) && Objects.equals(this.refreshToken, that.refreshToken) && Objects.equals(this.issuedAt, that.issuedAt) && Objects.equals(this.expiresAt, that.expiresAt);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(accessToken, refreshToken, issuedAt, expiresAt);
+        return Objects.hash(this.accessToken, this.refreshToken, this.issuedAt, this.expiresAt);
     }
 
-    @Override
     public String toString() {
-        return "TokenPair{accessToken='[PROTECTED]', refreshToken='[PROTECTED]', issuedAt=" + issuedAt + ", expiresAt="
-                + expiresAt + '}';
+        return "TokenPair{accessToken='[PROTECTED]', refreshToken='[PROTECTED]', issuedAt=" + String.valueOf(this.issuedAt) + ", expiresAt=" + String.valueOf(this.expiresAt) + "}";
     }
 }
+

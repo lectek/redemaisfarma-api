@@ -1,31 +1,34 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.validation.ConstraintValidator
+ *  jakarta.validation.ConstraintValidatorContext
+ *  org.springframework.stereotype.Component
+ */
 package br.com.redemaisfarma.application.validation;
 
+import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteRepository;
+import br.com.redemaisfarma.application.validation.annotation.EmailUnico;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.stereotype.Component;
 
-import br.com.redemaisfarma.application.validation.annotation.EmailUnico;
-
-import java.util.Arrays;
-import java.util.List;
-
-/**
- * ImplementaÃƒÂ§ÃƒÂ£o da lÃƒÂ³gica de verificaÃƒÂ§ÃƒÂ£o de e-mail ÃƒÂºnico. Por enquanto, faz uma simulaÃƒÂ§ÃƒÂ£o local. Futuramente integrarÃƒÂ¡
- * com o banco.
- */
 @Component
-public class EmailUnicoValidator implements ConstraintValidator<EmailUnico, String> {
+public class EmailUnicoValidator
+implements ConstraintValidator<EmailUnico, String> {
+    private final ClienteRepository clienteRepository;
 
-    // SimulaÃƒÂ§ÃƒÂ£o de e-mails jÃƒÂ¡ cadastrados (em produÃƒÂ§ÃƒÂ£o virÃƒÂ¡ do banco de dados)
-    private static final List<String> EMAILS_CADASTRADOS = Arrays.asList("teste@exemplo.com", "admin@embalando.com",
-            "cliente@loja.com");
+    public EmailUnicoValidator(ClienteRepository clienteRepository) {
+        this.clienteRepository = clienteRepository;
+    }
 
-    @Override
-    public boolean isValid(String email, ConstraintValidatorContext context) {
-        if (email == null)
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (value == null || value.isBlank()) {
             return true;
-
-        return !EMAILS_CADASTRADOS.contains(email.trim().toLowerCase());
+        }
+        String email = value.trim();
+        return !this.clienteRepository.existsByEmailIgnoreCase(email);
     }
 }
 

@@ -1,16 +1,15 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.http.model;
 
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Referência genérica a um recurso externo retornado por integrações HTTP. Útil para payloads leves: mantém
- * identificação e rótulo.
- */
-public class ExternalResourceRef implements Serializable {
+public class ExternalResourceRef
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private UUID id;
     private String name;
 
@@ -23,7 +22,7 @@ public class ExternalResourceRef implements Serializable {
     }
 
     public UUID getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(UUID id) {
@@ -31,30 +30,30 @@ public class ExternalResourceRef implements Serializable {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof ExternalResourceRef))
+        }
+        if (!(o instanceof ExternalResourceRef)) {
             return false;
-        ExternalResourceRef that = (ExternalResourceRef) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name);
+        }
+        ExternalResourceRef that = (ExternalResourceRef)o;
+        return Objects.equals(this.id, that.id) && Objects.equals(this.name, that.name);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(this.id, this.name);
     }
 
-    @Override
     public String toString() {
-        return "ExternalResourceRef{id=" + id + ", name='" + name + "'}";
+        return "ExternalResourceRef{id=" + String.valueOf(this.id) + ", name='" + this.name + "'}";
     }
 }
+

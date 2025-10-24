@@ -1,58 +1,72 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.validation.constraints.AssertTrue
+ *  jakarta.validation.constraints.AssertTrue$List
+ *  jakarta.validation.constraints.Min
+ *  jakarta.validation.constraints.Min$List
+ *  jakarta.validation.constraints.NotNull
+ *  jakarta.validation.constraints.NotNull$List
+ *  org.springframework.boot.context.properties.ConfigurationProperties
+ *  org.springframework.validation.annotation.Validated
+ */
 package br.com.redemaisfarma.adapters.outbound.messaging.kafka.config;
 
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import java.util.Map;
-
 @Validated
-@ConfigurationProperties(prefix = "kafka")
+@ConfigurationProperties(prefix="kafka")
 public class KafkaProperties {
-
-    /** Lista de brokers (ex.: "localhost:9092,localhost:9093"). */
-    @NotBlank
+    private boolean enabled = true;
     private String bootstrapServers;
-
-    /** Cliente id base para produtores (um sufixo randômico será adicionado). */
-    @NotBlank
     private String clientId = "redemaisfarma-api";
-
-    /** Número de tentativas do produtor. */
-    @NotNull
-    @Min(0)
-    private Integer retries = 5;
-
-    /** Tamanho do batch (bytes). */
-    @NotNull
-    @Min(16384)
-    private Integer batchSize = 32_768;
-
-    /** Linger (ms) para agrupar mensagens. */
-    @NotNull
-    @Min(0)
-    private Integer lingerMs = 5;
-
-    /** Buffer total do produtor (bytes). */
-    @NotNull
-    @Min(33_554_432)
-    private Integer bufferMemory = 67_108_864;
-
-    /** Habilita idempotência do produtor. */
+    @NotNull, @NotNull
+    @Min(value=0L)
+@Min(value=0L)
+    private @NotNull, @NotNull @Min(value=0L)
+@Min(value=0L) Integer retries = 5;
+    @NotNull, @NotNull
+    @Min(value=16384L)
+@Min(value=16384L)
+    private @NotNull, @NotNull @Min(value=16384L)
+@Min(value=16384L) Integer batchSize = 32768;
+    @NotNull, @NotNull
+    @Min(value=0L)
+@Min(value=0L)
+    private @NotNull, @NotNull @Min(value=0L)
+@Min(value=0L) Integer lingerMs = 5;
+    @NotNull, @NotNull
+    @Min(value=0x2000000L)
+@Min(value=0x2000000L)
+    private @NotNull, @NotNull @Min(value=0x2000000L)
+@Min(value=0x2000000L) Integer bufferMemory = 0x4000000;
     private boolean idempotence = true;
-
-    /** Acks (all, 1, 0). Recomenda-se "all" com idempotência. */
-    @NotBlank
     private String acks = "all";
+    private Map<String, Object> extra;
 
-    /** Propriedades extras opcionais que serão “pass-through” para o Kafka. */
-    private Map<String, String> extra;
+    @AssertTrue(message="kafka.bootstrapServers deve ser informado quando kafka.enabled=true")
+@AssertTrue(message="kafka.bootstrapServers deve ser informado quando kafka.enabled=true")
+    public @AssertTrue(message="kafka.bootstrapServers deve ser informado quando kafka.enabled=true")
+@AssertTrue(message="kafka.bootstrapServers deve ser informado quando kafka.enabled=true") boolean isBootstrapServersValid() {
+        return !this.enabled || this.bootstrapServers != null && !this.bootstrapServers.isBlank();
+    }
 
-    // getters/setters
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public String getBootstrapServers() {
-        return bootstrapServers;
+        return this.bootstrapServers;
     }
 
     public void setBootstrapServers(String bootstrapServers) {
@@ -60,7 +74,7 @@ public class KafkaProperties {
     }
 
     public String getClientId() {
-        return clientId;
+        return this.clientId;
     }
 
     public void setClientId(String clientId) {
@@ -68,7 +82,7 @@ public class KafkaProperties {
     }
 
     public Integer getRetries() {
-        return retries;
+        return this.retries;
     }
 
     public void setRetries(Integer retries) {
@@ -76,7 +90,7 @@ public class KafkaProperties {
     }
 
     public Integer getBatchSize() {
-        return batchSize;
+        return this.batchSize;
     }
 
     public void setBatchSize(Integer batchSize) {
@@ -84,7 +98,7 @@ public class KafkaProperties {
     }
 
     public Integer getLingerMs() {
-        return lingerMs;
+        return this.lingerMs;
     }
 
     public void setLingerMs(Integer lingerMs) {
@@ -92,7 +106,7 @@ public class KafkaProperties {
     }
 
     public Integer getBufferMemory() {
-        return bufferMemory;
+        return this.bufferMemory;
     }
 
     public void setBufferMemory(Integer bufferMemory) {
@@ -100,7 +114,7 @@ public class KafkaProperties {
     }
 
     public boolean isIdempotence() {
-        return idempotence;
+        return this.idempotence;
     }
 
     public void setIdempotence(boolean idempotence) {
@@ -108,18 +122,19 @@ public class KafkaProperties {
     }
 
     public String getAcks() {
-        return acks;
+        return this.acks;
     }
 
     public void setAcks(String acks) {
         this.acks = acks;
     }
 
-    public Map<String, String> getExtra() {
-        return extra;
+    public Map<String, Object> getExtra() {
+        return this.extra;
     }
 
-    public void setExtra(Map<String, String> extra) {
+    public void setExtra(Map<String, Object> extra) {
         this.extra = extra;
     }
 }
+

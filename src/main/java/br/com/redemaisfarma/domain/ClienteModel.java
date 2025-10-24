@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.domain;
 
 import java.io.Serializable;
@@ -5,14 +8,9 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Modelo de domínio para Cliente (sem anotações JPA).
- * Use ClienteEntity (em adapters/outbound/persistence/entity) para persistência.
- */
-public class ClienteModel implements Serializable {
-
+public class ClienteModel
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
     private UUID id;
     private String nome;
     private String cpf;
@@ -24,8 +22,7 @@ public class ClienteModel implements Serializable {
     public ClienteModel() {
     }
 
-    public ClienteModel(UUID id, String nome, String cpf, String email,
-                        String telefone, LocalDate dataNascimento, String endereco) {
+    public ClienteModel(UUID id, String nome, String cpf, String email, String telefone, LocalDate dataNascimento, String endereco) {
         this.id = id;
         this.nome = nome;
         this.cpf = cpf;
@@ -35,49 +32,79 @@ public class ClienteModel implements Serializable {
         this.endereco = endereco;
     }
 
-    // Getters & Setters
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
-
-    public String getCpf() { return cpf; }
-    public void setCpf(String cpf) { this.cpf = cpf; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getTelefone() { return telefone; }
-    public void setTelefone(String telefone) { this.telefone = telefone; }
-
-    public LocalDate getDataNascimento() { return dataNascimento; }
-    public void setDataNascimento(LocalDate dataNascimento) { this.dataNascimento = dataNascimento; }
-
-    public String getEndereco() { return endereco; }
-    public void setEndereco(String endereco) { this.endereco = endereco; }
-
-    // equals/hashCode por ID
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ClienteModel that)) return false;
-        return Objects.equals(id, that.id);
+    public UUID getId() {
+        return this.id;
     }
 
-    @Override
-    public int hashCode() { return Objects.hash(id); }
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
-    @Override
+    public String getNome() {
+        return this.nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getCpf() {
+        return this.cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getTelefone() {
+        return this.telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+
+    public LocalDate getDataNascimento() {
+        return this.dataNascimento;
+    }
+
+    public void setDataNascimento(LocalDate dataNascimento) {
+        this.dataNascimento = dataNascimento;
+    }
+
+    public String getEndereco() {
+        return this.endereco;
+    }
+
+    public void setEndereco(String endereco) {
+        this.endereco = endereco;
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ClienteModel)) {
+            return false;
+        }
+        ClienteModel that = (ClienteModel)o;
+        return Objects.equals(this.id, that.id);
+    }
+
+    public int hashCode() {
+        return Objects.hash(this.id);
+    }
+
     public String toString() {
-        return "ClienteModel{" +
-                "id=" + id +
-                ", nome='" + nome + '\'' +
-                ", cpf='" + cpf + '\'' +
-                ", email='" + email + '\'' +
-                ", telefone='" + telefone + '\'' +
-                ", dataNascimento=" + dataNascimento +
-                ", endereco='" + endereco + '\'' +
-                '}';
+        return "ClienteModel{id=" + String.valueOf(this.id) + ", nome='" + this.nome + "', cpf='" + this.cpf + "', email='" + this.email + "', telefone='" + this.telefone + "', dataNascimento=" + String.valueOf(this.dataNascimento) + ", endereco='" + this.endereco + "'}";
     }
 }
+

@@ -1,24 +1,35 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.data.domain.PageRequest
+ *  org.springframework.data.domain.Pageable
+ *  org.springframework.stereotype.Service
+ *  org.springframework.transaction.annotation.Transactional
+ */
 package br.com.redemaisfarma.application.core.produto;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
+import java.util.List;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 public class ProdutoVitrineService {
-
     private final ProdutoRepository repo;
 
-    public ProdutoVitrineService(ProdutoRepository repo) { this.repo = repo; }
+    public ProdutoVitrineService(ProdutoRepository repo) {
+        this.repo = repo;
+    }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly=true)
     public List<ProdutoEntity> listarDestaques(int limit) {
-        var page = PageRequest.of(0, Math.max(1, Math.min(limit, 20)));
-        var destaques = repo.findCarrossel(page);
-        return destaques.isEmpty() ? repo.findVitrineFallback(page) : destaques;
+        PageRequest page = PageRequest.of((int)0, (int)Math.max(1, Math.min(limit, 20)));
+        List<ProdutoEntity> destaques = this.repo.findCarrossel((Pageable)page);
+        return destaques.isEmpty() ? this.repo.findVitrineFallback((Pageable)page) : destaques;
     }
 }
+

@@ -1,20 +1,40 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+ *  org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer
+ *  org.springframework.boot.context.properties.EnableConfigurationProperties
+ *  org.springframework.context.annotation.Bean
+ *  org.springframework.context.annotation.Configuration
+ *  org.springframework.data.redis.connection.RedisConnectionFactory
+ *  org.springframework.data.redis.connection.RedisPassword
+ *  org.springframework.data.redis.connection.RedisStandaloneConfiguration
+ *  org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration
+ *  org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration$LettuceClientConfigurationBuilder
+ *  org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
+ *  org.springframework.data.redis.core.StringRedisTemplate
+ */
 package br.com.redemaisfarma.adapters.outbound.cache.config;
 
+import br.com.redemaisfarma.adapters.outbound.cache.config.RedisProperties;
+import java.time.Duration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.*;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisPassword;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.time.Duration;
-
 @Configuration
-@EnableConfigurationProperties(RedisProperties.class)
+@EnableConfigurationProperties(value={RedisProperties.class})
+@ConditionalOnProperty(prefix="redis", name={"enabled"}, havingValue="true")
 public class RedisConfig {
-
     @Bean
     public RedisStandaloneConfiguration redisStandaloneConfiguration(RedisProperties props) {
         RedisStandaloneConfiguration cfg = new RedisStandaloneConfiguration();
@@ -22,15 +42,14 @@ public class RedisConfig {
         cfg.setPort(props.getPort());
         cfg.setDatabase(props.getDatabase());
         if (props.getPassword() != null && !props.getPassword().isBlank()) {
-            cfg.setPassword(RedisPassword.of(props.getPassword()));
+            cfg.setPassword(RedisPassword.of((String)props.getPassword()));
         }
         return cfg;
     }
 
     @Bean
     public LettuceClientConfiguration lettuceClientConfiguration(RedisProperties props) {
-        LettuceClientConfiguration.LettuceClientConfigurationBuilder b = LettuceClientConfiguration.builder()
-                .commandTimeout(Duration.ofMillis(props.getTimeoutMs()));
+        LettuceClientConfiguration.LettuceClientConfigurationBuilder b = LettuceClientConfiguration.builder().commandTimeout(Duration.ofMillis(props.getTimeoutMs()));
         if (props.isSsl()) {
             b.useSsl();
         }
@@ -38,8 +57,7 @@ public class RedisConfig {
     }
 
     @Bean
-    public RedisConnectionFactory redisConnectionFactory(RedisStandaloneConfiguration standalone,
-            LettuceClientConfiguration lettuce) {
+    public RedisConnectionFactory redisConnectionFactory(RedisStandaloneConfiguration standalone, LettuceClientConfiguration lettuce) {
         return new LettuceConnectionFactory(standalone, lettuce);
     }
 
@@ -48,13 +66,9 @@ public class RedisConfig {
         return new StringRedisTemplate(cf);
     }
 
-    /**
-     * Customizer opcional para tunning adicional do Lettuce via Spring Boot. Mantido aqui como extensão futura; sem
-     * side effects no momento.
-     */
     @Bean
     public LettuceClientConfigurationBuilderCustomizer noopCustomizer() {
-        return builder -> {
-            /* noop */ };
+        return builder -> {};
     }
 }
+

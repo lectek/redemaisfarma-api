@@ -1,28 +1,17 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.provider;
 
 import br.com.redemaisfarma.adapters.outbound.auth.jwt.model.JwtPrincipal;
-
 import java.time.Instant;
 import java.util.Map;
 
-/**
- * Abstração de baixo nível para assinar e validar JWT. O JwtService orquestrador usa esta interface.
- */
 public interface TokenProvider {
+    public String generateAccessToken(String var1, Map<String, Object> var2, Instant var3);
 
-    /**
-     * Gera um Access Token com subject, claims adicionais e expiração.
-     */
-    String generateAccessToken(String subject, Map<String, Object> claims, Instant expiresAt);
+    public String generateRefreshToken(String var1, String var2, Map<String, Object> var3, Instant var4);
 
-    /**
-     * Gera um Refresh Token com subject, JTI, claims e expiração.
-     */
-    String generateRefreshToken(String subject, String jti, Map<String, Object> claims, Instant expiresAt);
-
-    /**
-     * Valida o token (assinatura/claims) e retorna um principal normalizado. Deve lançar runtime exceptions específicas
-     * em caso de erro.
-     */
-    JwtPrincipal validate(String token);
+    public JwtPrincipal validate(String var1);
 }
+

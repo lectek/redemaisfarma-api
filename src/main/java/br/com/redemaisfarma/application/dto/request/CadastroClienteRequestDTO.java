@@ -1,53 +1,41 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  jakarta.validation.constraints.Email
+ *  jakarta.validation.constraints.NotBlank
+ *  jakarta.validation.constraints.Pattern
+ *  jakarta.validation.constraints.Size
+ */
 package br.com.redemaisfarma.application.dto.request;
 
+import br.com.redemaisfarma.adapters.inbound.web.validator.annotation.SenhaForte;
 import br.com.redemaisfarma.application.validation.annotation.EmailUnico;
-import br.com.redemaisfarma.application.validation.annotation.SenhaForte;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-/**
- * Representa o formulÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rio de cadastro de cliente. Usado com th:object no HTML para capturar e validar dados vindos da
- * camada web.
- */
 public class CadastroClienteRequestDTO {
-
-    @NotBlank(message = "O nome ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â© obrigatÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³rio.")
-    @Size(min = 2, max = 60, message = "O nome deve ter entre 2 e 60 caracteres.")
-    private String nome;
-
-    @NotBlank(message = "O e-mail ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â© obrigatÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³rio.")
-    @Email(message = "Informe um e-mail vÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lido.")
-    @EmailUnico(message = "Este e-mail jÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡ estÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡ em uso.")
-    private String email;
-
+    @NotBlank(message="O nome \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3rio.")
+    @Size(min=2, max=60, message="O nome deve ter entre 2 e 60 caracteres.")
+    private @NotBlank(message="O nome \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3rio.") @Size(min=2, max=60, message="O nome deve ter entre 2 e 60 caracteres.") String nome;
+    @NotBlank(message="O e-mail \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3rio.")
+    @Email(message="Informe um e-mail v\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a1lido.")
+    @EmailUnico(message="Este e-mail j\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a1 est\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a1 em uso.")
+    private @NotBlank(message="O e-mail \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3rio.") @Email(message="Informe um e-mail v\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a1lido.") String email;
     @SenhaForte
     private String senha;
-
-    @NotBlank(message = "A confirmaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o de senha ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â© obrigatÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³ria.")
-    private String confirmarSenha;
-
-    @NotBlank(message = "O telefone ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â© obrigatÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³rio.")
-    @Pattern(regexp = "\\(\\d{2}\\)\\s\\d{4,5}-\\d{4}", message = "Telefone invÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lido. Ex: (83) 91234-5678")
-    private String telefone;
-
-    // Campo opcional - usado futuramente para segmentar perfis ou personalizar a loja
+    @NotBlank(message="A confirma\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a7\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a3o de senha \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3ria.")
+    private @NotBlank(message="A confirma\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a7\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a3o de senha \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3ria.") String confirmarSenha;
+    @NotBlank(message="O telefone \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3rio.")
+    @Pattern(regexp="\\(\\d{2}\\)\\s\\d{4,5}-\\d{4}", message="Telefone inv\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a1lido. Ex: (83) 91234-5678")
+    private @NotBlank(message="O telefone \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3rio.") @Pattern(regexp="\\(\\d{2}\\)\\s\\d{4,5}-\\d{4}", message="Telefone inv\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a1lido. Ex: (83) 91234-5678") String telefone;
     private String genero;
-
-    // Campo opcional - usado futuramente para campanhas ou recomendaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âµes
     private String dataNascimento;
 
-    /**
-     * Construtor padrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o.
-     */
-    public CadastroClienteRequestDTO() {
-    }
-
-    // Getters e Setters com validaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o e comentÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡rios
-
     public String getNome() {
-        return nome;
+        return this.nome;
     }
 
     public void setNome(String nome) {
@@ -55,7 +43,7 @@ public class CadastroClienteRequestDTO {
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public void setEmail(String email) {
@@ -63,7 +51,7 @@ public class CadastroClienteRequestDTO {
     }
 
     public String getSenha() {
-        return senha;
+        return this.senha;
     }
 
     public void setSenha(String senha) {
@@ -71,7 +59,7 @@ public class CadastroClienteRequestDTO {
     }
 
     public String getConfirmarSenha() {
-        return confirmarSenha;
+        return this.confirmarSenha;
     }
 
     public void setConfirmarSenha(String confirmarSenha) {
@@ -79,7 +67,7 @@ public class CadastroClienteRequestDTO {
     }
 
     public String getTelefone() {
-        return telefone;
+        return this.telefone;
     }
 
     public void setTelefone(String telefone) {
@@ -87,7 +75,7 @@ public class CadastroClienteRequestDTO {
     }
 
     public String getGenero() {
-        return genero;
+        return this.genero;
     }
 
     public void setGenero(String genero) {
@@ -95,24 +83,19 @@ public class CadastroClienteRequestDTO {
     }
 
     public String getDataNascimento() {
-        return dataNascimento;
+        return this.dataNascimento;
     }
 
     public void setDataNascimento(String dataNascimento) {
         this.dataNascimento = dataNascimento;
     }
 
-    /**
-     * Verifica se a senha e a confirmaÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â§ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o sÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â£o iguais. Pode ser usado no controller ou em um validador customizado.
-     */
     public boolean isSenhaConfirmada() {
-        return senha != null && senha.equals(confirmarSenha);
+        return this.senha != null && this.senha.equals(this.confirmarSenha);
     }
 
-    @Override
     public String toString() {
-        return "CadastroClienteRequestDTO{" + "nome='" + nome + '\'' + ", email='" + email + '\'' + ", telefone='" + telefone
-                + '\'' + ", genero='" + genero + '\'' + ", dataNascimento='" + dataNascimento + '\'' + '}';
+        return "CadastroClienteRequestDTO{nome='" + this.nome + "', email='" + this.email + "', telefone='" + this.telefone + "', genero='" + this.genero + "', dataNascimento='" + this.dataNascimento + "'}";
     }
 }
 

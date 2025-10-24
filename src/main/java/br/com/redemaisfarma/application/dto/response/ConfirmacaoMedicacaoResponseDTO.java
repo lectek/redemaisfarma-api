@@ -1,5 +1,31 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  com.fasterxml.jackson.annotation.JsonFormat
+ *  com.fasterxml.jackson.annotation.JsonProperty
+ *  io.swagger.v3.oas.annotations.media.Schema
+ *  io.swagger.v3.oas.annotations.media.Schema$RequiredMode
+ *  jakarta.validation.Valid
+ *  jakarta.validation.constraints.DecimalMax
+ *  jakarta.validation.constraints.DecimalMin
+ *  jakarta.validation.constraints.NotBlank
+ *  jakarta.validation.constraints.NotNull
+ *  jakarta.validation.constraints.PastOrPresent
+ *  jakarta.validation.constraints.Size
+ */
 package br.com.redemaisfarma.application.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -8,125 +34,86 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Size;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-
-/**
- * DTO de resposta para confirmação de medicação de um cliente na API RedeMaisFarma.
- */
-@Schema(name = "ConfirmacaoMedicacaoResponseDTO", description = "Detalhes da confirmação de medicação")
-public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
+@Schema(name="ConfirmacaoMedicacaoResponseDTO", description="Detalhes da confirma\u00e7\u00e3o de medica\u00e7\u00e3o")
+public class ConfirmacaoMedicacaoResponseDTO
+implements Serializable {
     private static final long serialVersionUID = 1L;
-
-    @Schema(description = "ID único da confirmação", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty("confirmacaoId")
+    @Schema(description="ID \u00fanico da confirma\u00e7\u00e3o", example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value="confirmacaoId")
     private UUID confirmacaoId;
-
-    @Schema(description = "ID do cliente", example = "12345", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "{confirmacaoMedicacao.clienteId.notNull}")
-    @JsonProperty("clienteId")
-    private Long clienteId;
-
-    @Schema(description = "Nome do medicamento", example = "Dipirona 500mg", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "{confirmacaoMedicacao.medicamento.notBlank}")
-    @Size(max = 100, message = "{confirmacaoMedicacao.medicamento.size}")
-    @JsonProperty("medicamento")
-    private String medicamento;
-
-    @Schema(description = "Data de início do tratamento", type = "string", format = "date", example = "2025-07-01")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @JsonProperty("dataInicioTratamento")
+    @Schema(description="ID do cliente", example="12345", requiredMode=Schema.RequiredMode.REQUIRED)
+    @NotNull(message="{confirmacaoMedicacao.clienteId.notNull}")
+    @JsonProperty(value="clienteId")
+    private @NotNull(message="{confirmacaoMedicacao.clienteId.notNull}") Long clienteId;
+    @Schema(description="Nome do medicamento", example="Dipirona 500mg", requiredMode=Schema.RequiredMode.REQUIRED)
+    @NotBlank(message="{confirmacaoMedicacao.medicamento.notBlank}")
+    @Size(max=100, message="{confirmacaoMedicacao.medicamento.size}")
+    @JsonProperty(value="medicamento")
+    private @NotBlank(message="{confirmacaoMedicacao.medicamento.notBlank}") @Size(max=100, message="{confirmacaoMedicacao.medicamento.size}") String medicamento;
+    @Schema(description="Data de in\u00edcio do tratamento", type="string", format="date", example="2025-07-01")
+    @JsonFormat(pattern="yyyy-MM-dd")
+    @JsonProperty(value="dataInicioTratamento")
     private LocalDate dataInicioTratamento;
-
-    @Schema(description = "Horário agendado", type = "string", format = "date-time", example = "2025-07-04T08:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "{confirmacaoMedicacao.horarioAgendado.notNull}")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("horarioAgendado")
-    private LocalDateTime horarioAgendado;
-
-    @Schema(description = "Horário de confirmação", type = "string", format = "date-time", example = "2025-07-04T08:05:00", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "{confirmacaoMedicacao.horarioConfirmado.notNull}")
-    @PastOrPresent(message = "{confirmacaoMedicacao.horarioConfirmado.pastOrPresent}")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("horarioConfirmado")
-    private LocalDateTime horarioConfirmado;
-
-    @Schema(description = "Indicador de tomada do medicamento", example = "true", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "{confirmacaoMedicacao.confirmado.notNull}")
-    @JsonProperty("confirmado")
-    private Boolean confirmado;
-
-    @Schema(description = "Método de confirmação", example = "MANUAL", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "{confirmacaoMedicacao.metodoConfirmacao.notNull}")
-    @JsonProperty("metodoConfirmacao")
-    private MetodoConfirmacao metodoConfirmacao;
-
-    @Schema(description = "ID do lembrete associado (UUID)", example = "4fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty("lembreteId")
+    @Schema(description="Hor\u00e1rio agendado", type="string", format="date-time", example="2025-07-04T08:00:00", requiredMode=Schema.RequiredMode.REQUIRED)
+    @NotNull(message="{confirmacaoMedicacao.horarioAgendado.notNull}")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="horarioAgendado")
+    private @NotNull(message="{confirmacaoMedicacao.horarioAgendado.notNull}") LocalDateTime horarioAgendado;
+    @Schema(description="Hor\u00e1rio de confirma\u00e7\u00e3o", type="string", format="date-time", example="2025-07-04T08:05:00", requiredMode=Schema.RequiredMode.REQUIRED)
+    @NotNull(message="{confirmacaoMedicacao.horarioConfirmado.notNull}")
+    @PastOrPresent(message="{confirmacaoMedicacao.horarioConfirmado.pastOrPresent}")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="horarioConfirmado")
+    private @NotNull(message="{confirmacaoMedicacao.horarioConfirmado.notNull}") @PastOrPresent(message="{confirmacaoMedicacao.horarioConfirmado.pastOrPresent}") LocalDateTime horarioConfirmado;
+    @Schema(description="Indicador de tomada do medicamento", example="true", requiredMode=Schema.RequiredMode.REQUIRED)
+    @NotNull(message="{confirmacaoMedicacao.confirmado.notNull}")
+    @JsonProperty(value="confirmado")
+    private @NotNull(message="{confirmacaoMedicacao.confirmado.notNull}") Boolean confirmado;
+    @Schema(description="M\u00e9todo de confirma\u00e7\u00e3o", example="MANUAL", requiredMode=Schema.RequiredMode.REQUIRED)
+    @NotNull(message="{confirmacaoMedicacao.metodoConfirmacao.notNull}")
+    @JsonProperty(value="metodoConfirmacao")
+    private @NotNull(message="{confirmacaoMedicacao.metodoConfirmacao.notNull}") MetodoConfirmacao metodoConfirmacao;
+    @Schema(description="ID do lembrete associado (UUID)", example="4fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value="lembreteId")
     private UUID lembreteId;
-
-    @Schema(description = "Desconto automático aplicado (%)", example = "5.0")
-    @DecimalMin(value = "0.0", inclusive = true, message = "{confirmacaoMedicacao.descontoAplicado.min}")
-    @DecimalMax(value = "100.0", inclusive = true, message = "{confirmacaoMedicacao.descontoAplicado.max}")
-    @JsonProperty("descontoAplicado")
-    private BigDecimal descontoAplicado = BigDecimal.ZERO;
-
-    @Schema(description = "Observações adicionais", example = "Paciente relatou leve tontura.")
-    @Size(max = 500, message = "{confirmacaoMedicacao.observacoes.size}")
-    @JsonProperty("observacoes")
-    private String observacoes;
-
-    @Schema(description = "Status de adesão ao tratamento", example = "EM_ANDAMENTO", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "{confirmacaoMedicacao.statusAdesao.notNull}")
-    @JsonProperty("statusAdesao")
-    private StatusAdesao statusAdesao;
-
-    @Schema(description = "Timestamp de criação do registro", type = "string", format = "date-time", example = "2025-07-04T08:05:00", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "{confirmacaoMedicacao.criadoEm.notNull}")
-    @PastOrPresent(message = "{confirmacaoMedicacao.criadoEm.pastOrPresent}")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("criadoEm")
-    private LocalDateTime criadoEm;
-
-    @Schema(description = "Timestamp da última atualização", type = "string", format = "date-time", example = "2025-07-04T08:10:00")
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty("atualizadoEm")
+    @Schema(description="Desconto autom\u00e1tico aplicado (%)", example="5.0")
+    @DecimalMin(value="0.0", inclusive=true, message="{confirmacaoMedicacao.descontoAplicado.min}")
+    @DecimalMax(value="100.0", inclusive=true, message="{confirmacaoMedicacao.descontoAplicado.max}")
+    @JsonProperty(value="descontoAplicado")
+    private @DecimalMin(value="0.0", inclusive=true, message="{confirmacaoMedicacao.descontoAplicado.min}") @DecimalMax(value="100.0", inclusive=true, message="{confirmacaoMedicacao.descontoAplicado.max}") BigDecimal descontoAplicado = BigDecimal.ZERO;
+    @Schema(description="Observa\u00e7\u00f5es adicionais", example="Paciente relatou leve tontura.")
+    @Size(max=500, message="{confirmacaoMedicacao.observacoes.size}")
+    @JsonProperty(value="observacoes")
+    private @Size(max=500, message="{confirmacaoMedicacao.observacoes.size}") String observacoes;
+    @Schema(description="Status de ades\u00e3o ao tratamento", example="EM_ANDAMENTO", requiredMode=Schema.RequiredMode.REQUIRED)
+    @NotNull(message="{confirmacaoMedicacao.statusAdesao.notNull}")
+    @JsonProperty(value="statusAdesao")
+    private @NotNull(message="{confirmacaoMedicacao.statusAdesao.notNull}") StatusAdesao statusAdesao;
+    @Schema(description="Timestamp de cria\u00e7\u00e3o do registro", type="string", format="date-time", example="2025-07-04T08:05:00", requiredMode=Schema.RequiredMode.REQUIRED)
+    @NotNull(message="{confirmacaoMedicacao.criadoEm.notNull}")
+    @PastOrPresent(message="{confirmacaoMedicacao.criadoEm.pastOrPresent}")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="criadoEm")
+    private @NotNull(message="{confirmacaoMedicacao.criadoEm.notNull}") @PastOrPresent(message="{confirmacaoMedicacao.criadoEm.pastOrPresent}") LocalDateTime criadoEm;
+    @Schema(description="Timestamp da \u00faltima atualiza\u00e7\u00e3o", type="string", format="date-time", example="2025-07-04T08:10:00")
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value="atualizadoEm")
     private LocalDateTime atualizadoEm;
-
-    @Schema(description = "ID do tenant (multi-inquilino)", example = "redemaisfarma-001", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "{confirmacaoMedicacao.tenantId.notBlank}")
-    @JsonProperty("tenantId")
-    private String tenantId;
-
-    @Schema(description = "Token de rastreamento (UUID)", example = "5fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty("traceId")
+    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", requiredMode=Schema.RequiredMode.REQUIRED)
+    @NotBlank(message="{confirmacaoMedicacao.tenantId.notBlank}")
+    @JsonProperty(value="tenantId")
+    private @NotBlank(message="{confirmacaoMedicacao.tenantId.notBlank}") String tenantId;
+    @Schema(description="Token de rastreamento (UUID)", example="5fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value="traceId")
     private UUID traceId;
-
-    @Schema(description = "Histórico de confirmações")
-    @JsonProperty("historico")
+    @Schema(description="Hist\u00f3rico de confirma\u00e7\u00f5es")
+    @JsonProperty(value="historico")
     private List<@Valid HistoricoConfirmacaoDTO> historico;
-
-    // Construtores
 
     public ConfirmacaoMedicacaoResponseDTO() {
     }
 
-    public ConfirmacaoMedicacaoResponseDTO(UUID confirmacaoId, Long clienteId, String medicamento,
-            LocalDate dataInicioTratamento, LocalDateTime horarioAgendado, LocalDateTime horarioConfirmado,
-            Boolean confirmado, MetodoConfirmacao metodoConfirmacao, UUID lembreteId, BigDecimal descontoAplicado,
-            String observacoes, StatusAdesao statusAdesao, LocalDateTime criadoEm, LocalDateTime atualizadoEm,
-            String tenantId, UUID traceId, List<HistoricoConfirmacaoDTO> historico) {
-
+    public ConfirmacaoMedicacaoResponseDTO(UUID confirmacaoId, Long clienteId, String medicamento, LocalDate dataInicioTratamento, LocalDateTime horarioAgendado, LocalDateTime horarioConfirmado, Boolean confirmado, MetodoConfirmacao metodoConfirmacao, UUID lembreteId, BigDecimal descontoAplicado, String observacoes, StatusAdesao statusAdesao, LocalDateTime criadoEm, LocalDateTime atualizadoEm, String tenantId, UUID traceId, List<HistoricoConfirmacaoDTO> historico) {
         this.confirmacaoId = confirmacaoId;
         this.clienteId = clienteId;
         this.medicamento = medicamento;
@@ -146,10 +133,8 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
         this.historico = historico;
     }
 
-    // Getters/Setters
-
     public UUID getConfirmacaoId() {
-        return confirmacaoId;
+        return this.confirmacaoId;
     }
 
     public void setConfirmacaoId(UUID confirmacaoId) {
@@ -157,7 +142,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public Long getClienteId() {
-        return clienteId;
+        return this.clienteId;
     }
 
     public void setClienteId(Long clienteId) {
@@ -165,7 +150,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public String getMedicamento() {
-        return medicamento;
+        return this.medicamento;
     }
 
     public void setMedicamento(String medicamento) {
@@ -173,7 +158,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public LocalDate getDataInicioTratamento() {
-        return dataInicioTratamento;
+        return this.dataInicioTratamento;
     }
 
     public void setDataInicioTratamento(LocalDate dataInicioTratamento) {
@@ -181,7 +166,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public LocalDateTime getHorarioAgendado() {
-        return horarioAgendado;
+        return this.horarioAgendado;
     }
 
     public void setHorarioAgendado(LocalDateTime horarioAgendado) {
@@ -189,7 +174,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public LocalDateTime getHorarioConfirmado() {
-        return horarioConfirmado;
+        return this.horarioConfirmado;
     }
 
     public void setHorarioConfirmado(LocalDateTime horarioConfirmado) {
@@ -197,7 +182,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public Boolean getConfirmado() {
-        return confirmado;
+        return this.confirmado;
     }
 
     public void setConfirmado(Boolean confirmado) {
@@ -205,7 +190,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public MetodoConfirmacao getMetodoConfirmacao() {
-        return metodoConfirmacao;
+        return this.metodoConfirmacao;
     }
 
     public void setMetodoConfirmacao(MetodoConfirmacao metodoConfirmacao) {
@@ -213,7 +198,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public UUID getLembreteId() {
-        return lembreteId;
+        return this.lembreteId;
     }
 
     public void setLembreteId(UUID lembreteId) {
@@ -221,7 +206,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public BigDecimal getDescontoAplicado() {
-        return descontoAplicado;
+        return this.descontoAplicado;
     }
 
     public void setDescontoAplicado(BigDecimal descontoAplicado) {
@@ -229,7 +214,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public String getObservacoes() {
-        return observacoes;
+        return this.observacoes;
     }
 
     public void setObservacoes(String observacoes) {
@@ -237,7 +222,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public StatusAdesao getStatusAdesao() {
-        return statusAdesao;
+        return this.statusAdesao;
     }
 
     public void setStatusAdesao(StatusAdesao statusAdesao) {
@@ -245,7 +230,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public LocalDateTime getCriadoEm() {
-        return criadoEm;
+        return this.criadoEm;
     }
 
     public void setCriadoEm(LocalDateTime criadoEm) {
@@ -253,7 +238,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public LocalDateTime getAtualizadoEm() {
-        return atualizadoEm;
+        return this.atualizadoEm;
     }
 
     public void setAtualizadoEm(LocalDateTime atualizadoEm) {
@@ -261,7 +246,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public String getTenantId() {
-        return tenantId;
+        return this.tenantId;
     }
 
     public void setTenantId(String tenantId) {
@@ -269,7 +254,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public UUID getTraceId() {
-        return traceId;
+        return this.traceId;
     }
 
     public void setTraceId(UUID traceId) {
@@ -277,82 +262,62 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
     }
 
     public List<HistoricoConfirmacaoDTO> getHistorico() {
-        return historico;
+        return this.historico;
     }
 
     public void setHistorico(List<HistoricoConfirmacaoDTO> historico) {
         this.historico = historico;
     }
 
-    // utilitários
-
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof ConfirmacaoMedicacaoResponseDTO))
+        }
+        if (!(o instanceof ConfirmacaoMedicacaoResponseDTO)) {
             return false;
-        ConfirmacaoMedicacaoResponseDTO that = (ConfirmacaoMedicacaoResponseDTO) o;
-        return Objects.equals(confirmacaoId, that.confirmacaoId) && Objects.equals(clienteId, that.clienteId)
-                && Objects.equals(medicamento, that.medicamento)
-                && Objects.equals(dataInicioTratamento, that.dataInicioTratamento)
-                && Objects.equals(horarioAgendado, that.horarioAgendado)
-                && Objects.equals(horarioConfirmado, that.horarioConfirmado)
-                && Objects.equals(confirmado, that.confirmado) && metodoConfirmacao == that.metodoConfirmacao
-                && Objects.equals(lembreteId, that.lembreteId)
-                && Objects.equals(descontoAplicado, that.descontoAplicado)
-                && Objects.equals(observacoes, that.observacoes) && statusAdesao == that.statusAdesao
-                && Objects.equals(criadoEm, that.criadoEm) && Objects.equals(atualizadoEm, that.atualizadoEm)
-                && Objects.equals(tenantId, that.tenantId) && Objects.equals(traceId, that.traceId)
-                && Objects.equals(historico, that.historico);
+        }
+        ConfirmacaoMedicacaoResponseDTO that = (ConfirmacaoMedicacaoResponseDTO)o;
+        return Objects.equals(this.confirmacaoId, that.confirmacaoId) && Objects.equals(this.clienteId, that.clienteId) && Objects.equals(this.medicamento, that.medicamento) && Objects.equals(this.dataInicioTratamento, that.dataInicioTratamento) && Objects.equals(this.horarioAgendado, that.horarioAgendado) && Objects.equals(this.horarioConfirmado, that.horarioConfirmado) && Objects.equals(this.confirmado, that.confirmado) && this.metodoConfirmacao == that.metodoConfirmacao && Objects.equals(this.lembreteId, that.lembreteId) && Objects.equals(this.descontoAplicado, that.descontoAplicado) && Objects.equals(this.observacoes, that.observacoes) && this.statusAdesao == that.statusAdesao && Objects.equals(this.criadoEm, that.criadoEm) && Objects.equals(this.atualizadoEm, that.atualizadoEm) && Objects.equals(this.tenantId, that.tenantId) && Objects.equals(this.traceId, that.traceId) && Objects.equals(this.historico, that.historico);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(confirmacaoId, clienteId, medicamento, dataInicioTratamento, horarioAgendado,
-                horarioConfirmado, confirmado, metodoConfirmacao, lembreteId, descontoAplicado, observacoes,
-                statusAdesao, criadoEm, atualizadoEm, tenantId, traceId, historico);
+        return Objects.hash(new Object[]{this.confirmacaoId, this.clienteId, this.medicamento, this.dataInicioTratamento, this.horarioAgendado, this.horarioConfirmado, this.confirmado, this.metodoConfirmacao, this.lembreteId, this.descontoAplicado, this.observacoes, this.statusAdesao, this.criadoEm, this.atualizadoEm, this.tenantId, this.traceId, this.historico});
     }
 
-    @Override
     public String toString() {
-        return "ConfirmacaoMedicacaoResponseDTO{" + "confirmacaoId=" + confirmacaoId + ", clienteId=" + clienteId
-                + ", medicamento='" + medicamento + '\'' + ", dataInicioTratamento=" + dataInicioTratamento
-                + ", horarioAgendado=" + horarioAgendado + ", horarioConfirmado=" + horarioConfirmado + ", confirmado="
-                + confirmado + ", metodoConfirmacao=" + metodoConfirmacao + ", lembreteId=" + lembreteId
-                + ", descontoAplicado=" + descontoAplicado + ", observacoes='" + observacoes + '\'' + ", statusAdesao="
-                + statusAdesao + ", criadoEm=" + criadoEm + ", atualizadoEm=" + atualizadoEm + ", tenantId='" + tenantId
-                + '\'' + ", traceId=" + traceId + ", historico=" + historico + '}';
+        return "ConfirmacaoMedicacaoResponseDTO{confirmacaoId=" + String.valueOf(this.confirmacaoId) + ", clienteId=" + this.clienteId + ", medicamento='" + this.medicamento + "', dataInicioTratamento=" + String.valueOf(this.dataInicioTratamento) + ", horarioAgendado=" + String.valueOf(this.horarioAgendado) + ", horarioConfirmado=" + String.valueOf(this.horarioConfirmado) + ", confirmado=" + this.confirmado + ", metodoConfirmacao=" + String.valueOf((Object)this.metodoConfirmacao) + ", lembreteId=" + String.valueOf(this.lembreteId) + ", descontoAplicado=" + String.valueOf(this.descontoAplicado) + ", observacoes='" + this.observacoes + "', statusAdesao=" + String.valueOf((Object)this.statusAdesao) + ", criadoEm=" + String.valueOf(this.criadoEm) + ", atualizadoEm=" + String.valueOf(this.atualizadoEm) + ", tenantId='" + this.tenantId + "', traceId=" + String.valueOf(this.traceId) + ", historico=" + String.valueOf(this.historico) + "}";
     }
 
-    // Enums
-    public enum MetodoConfirmacao {
-        MANUAL, AUTOMATICO
+    public static enum MetodoConfirmacao {
+        MANUAL,
+        AUTOMATICO;
+
     }
 
-    public enum StatusAdesao {
-        EM_ANDAMENTO, CONCLUIDA, ATRASADA, CANCELADA
+    public static enum StatusAdesao {
+        EM_ANDAMENTO,
+        CONCLUIDA,
+        ATRASADA,
+        CANCELADA;
+
     }
 
-    // DTO interno: Histórico
-    @Schema(name = "HistoricoConfirmacaoDTO", description = "Registro de cada confirmação de dose")
-    public static class HistoricoConfirmacaoDTO implements Serializable {
+    @Schema(name="HistoricoConfirmacaoDTO", description="Registro de cada confirma\u00e7\u00e3o de dose")
+    public static class HistoricoConfirmacaoDTO
+    implements Serializable {
         private static final long serialVersionUID = 1L;
-
-        @Schema(description = "ID único do registro", example = "6fa85f64-5717-4562-b3fc-2c963f66afa6")
-        @JsonProperty("registroId")
+        @Schema(description="ID \u00fanico do registro", example="6fa85f64-5717-4562-b3fc-2c963f66afa6")
+        @JsonProperty(value="registroId")
         private UUID registroId;
-
-        @Schema(description = "Horário do registro", type = "string", format = "date-time", example = "2025-07-04T08:05:00", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotNull(message = "{historicoConfirmacao.registroEm.notNull}")
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        @JsonProperty("registroEm")
-        private LocalDateTime registroEm;
-
-        @Schema(description = "Detalhes adicionais do registro", example = "Confirmação via app móvel")
-        @Size(max = 200, message = "{historicoConfirmacao.detalhes.size}")
-        @JsonProperty("detalhes")
-        private String detalhes;
+        @Schema(description="Hor\u00e1rio do registro", type="string", format="date-time", example="2025-07-04T08:05:00", requiredMode=Schema.RequiredMode.REQUIRED)
+        @NotNull(message="{historicoConfirmacao.registroEm.notNull}")
+        @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
+        @JsonProperty(value="registroEm")
+        private @NotNull(message="{historicoConfirmacao.registroEm.notNull}") LocalDateTime registroEm;
+        @Schema(description="Detalhes adicionais do registro", example="Confirma\u00e7\u00e3o via app m\u00f3vel")
+        @Size(max=200, message="{historicoConfirmacao.detalhes.size}")
+        @JsonProperty(value="detalhes")
+        private @Size(max=200, message="{historicoConfirmacao.detalhes.size}") String detalhes;
 
         public HistoricoConfirmacaoDTO() {
         }
@@ -364,7 +329,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
         }
 
         public UUID getRegistroId() {
-            return registroId;
+            return this.registroId;
         }
 
         public void setRegistroId(UUID registroId) {
@@ -372,7 +337,7 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
         }
 
         public LocalDateTime getRegistroEm() {
-            return registroEm;
+            return this.registroEm;
         }
 
         public void setRegistroEm(LocalDateTime registroEm) {
@@ -380,33 +345,31 @@ public class ConfirmacaoMedicacaoResponseDTO implements Serializable {
         }
 
         public String getDetalhes() {
-            return detalhes;
+            return this.detalhes;
         }
 
         public void setDetalhes(String detalhes) {
             this.detalhes = detalhes;
         }
 
-        @Override
         public boolean equals(Object o) {
-            if (this == o)
+            if (this == o) {
                 return true;
-            if (!(o instanceof HistoricoConfirmacaoDTO))
+            }
+            if (!(o instanceof HistoricoConfirmacaoDTO)) {
                 return false;
-            HistoricoConfirmacaoDTO that = (HistoricoConfirmacaoDTO) o;
-            return Objects.equals(registroId, that.registroId) && Objects.equals(registroEm, that.registroEm)
-                    && Objects.equals(detalhes, that.detalhes);
+            }
+            HistoricoConfirmacaoDTO that = (HistoricoConfirmacaoDTO)o;
+            return Objects.equals(this.registroId, that.registroId) && Objects.equals(this.registroEm, that.registroEm) && Objects.equals(this.detalhes, that.detalhes);
         }
 
-        @Override
         public int hashCode() {
-            return Objects.hash(registroId, registroEm, detalhes);
+            return Objects.hash(this.registroId, this.registroEm, this.detalhes);
         }
 
-        @Override
         public String toString() {
-            return "HistoricoConfirmacaoDTO{" + "registroId=" + registroId + ", registroEm=" + registroEm
-                    + ", detalhes='" + detalhes + '\'' + '}';
+            return "HistoricoConfirmacaoDTO{registroId=" + String.valueOf(this.registroId) + ", registroEm=" + String.valueOf(this.registroEm) + ", detalhes='" + this.detalhes + "'}";
         }
     }
 }
+

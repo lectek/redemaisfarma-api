@@ -1,7 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.exception;
 
-/** Lançada quando o refresh token não é encontrado no store/persistência. */
-public class RefreshTokenNotFoundException extends RuntimeException {
+public class RefreshTokenNotFoundException
+extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public RefreshTokenNotFoundException(String message) {
@@ -12,3 +15,4 @@ public class RefreshTokenNotFoundException extends RuntimeException {
         super(message, cause);
     }
 }
+

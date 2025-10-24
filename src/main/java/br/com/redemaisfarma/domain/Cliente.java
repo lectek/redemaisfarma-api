@@ -1,35 +1,25 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.domain;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-@Entity
 public class Cliente {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String nome;
     private String email;
     private String telefone;
     private String cpf;
     private String senha;
-
-    // Novos campos
     private LocalDate dataDeNascimento;
     private boolean ativo = true;
 
     public Cliente() {
     }
 
-    public Cliente(Long id, String nome, String email, String telefone, String cpf, String senha,
-            LocalDate dataDeNascimento, boolean ativo) {
+    public Cliente(Long id, String nome, String email, String telefone, String cpf, String senha, LocalDate dataDeNascimento, boolean ativo) {
         this.id = id;
         this.nome = nome;
         this.email = email;
@@ -40,37 +30,36 @@ public class Cliente {
         this.ativo = ativo;
     }
 
-    // Getters & Setters
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public String getNome() {
-        return nome;
+        return this.nome;
     }
 
     public String getEmail() {
-        return email;
+        return this.email;
     }
 
     public String getTelefone() {
-        return telefone;
+        return this.telefone;
     }
 
     public String getCpf() {
-        return cpf;
+        return this.cpf;
     }
 
     public String getSenha() {
-        return senha;
+        return this.senha;
     }
 
     public LocalDate getDataDeNascimento() {
-        return dataDeNascimento;
+        return this.dataDeNascimento;
     }
 
     public boolean isAtivo() {
-        return ativo;
+        return this.ativo;
     }
 
     public void setId(Long id) {
@@ -107,23 +96,24 @@ public class Cliente {
 
     public void atualizarTelefone(String novoTelefone) {
         if (novoTelefone == null || novoTelefone.length() < 8) {
-            throw new IllegalArgumentException("Telefone inválido.");
+            throw new IllegalArgumentException("Telefone inv\u00e1lido.");
         }
         this.telefone = novoTelefone;
     }
 
-    @Override
     public boolean equals(Object o) {
-        if (this == o)
+        if (this == o) {
             return true;
-        if (!(o instanceof Cliente))
+        }
+        if (!(o instanceof Cliente)) {
             return false;
-        Cliente c = (Cliente) o;
-        return Objects.equals(id, c.id);
+        }
+        Cliente c = (Cliente)o;
+        return Objects.equals(this.id, c.id);
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(this.id);
     }
 }
+

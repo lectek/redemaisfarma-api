@@ -1,11 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package br.com.redemaisfarma.application.dto.response;
 
-/**
- * Modelo de dados usado para exibir informaÃƒÂ§ÃƒÂµes no painel do cliente apÃƒÂ³s o login. Este objeto nÃƒÂ£o estÃƒÂ¡ ligado
- * diretamente ao banco de dados e ÃƒÂ© usado apenas para visualizaÃƒÂ§ÃƒÂ£o.
- */
 public class PainelClienteResponseDTO {
-
     private String nomeCliente;
     private int pedidosRecentes;
     private double totalGasto;
@@ -13,11 +11,7 @@ public class PainelClienteResponseDTO {
     private String categoriaMaisComprada;
     private boolean statusVip;
 
-    /**
-     * Construtor completo.
-     */
-    public PainelClienteResponseDTO(String nomeCliente, int pedidosRecentes, double totalGasto, String mensagemBoasVindas,
-            String categoriaMaisComprada, boolean statusVip) {
+    public PainelClienteResponseDTO(String nomeCliente, int pedidosRecentes, double totalGasto, String mensagemBoasVindas, String categoriaMaisComprada, boolean statusVip) {
         this.nomeCliente = nomeCliente;
         this.pedidosRecentes = pedidosRecentes;
         this.totalGasto = totalGasto;
@@ -26,10 +20,8 @@ public class PainelClienteResponseDTO {
         this.statusVip = statusVip;
     }
 
-    // Getters e Setters
-
     public String getNomeCliente() {
-        return nomeCliente;
+        return this.nomeCliente;
     }
 
     public void setNomeCliente(String nomeCliente) {
@@ -37,7 +29,7 @@ public class PainelClienteResponseDTO {
     }
 
     public int getPedidosRecentes() {
-        return pedidosRecentes;
+        return this.pedidosRecentes;
     }
 
     public void setPedidosRecentes(int pedidosRecentes) {
@@ -45,7 +37,7 @@ public class PainelClienteResponseDTO {
     }
 
     public double getTotalGasto() {
-        return totalGasto;
+        return this.totalGasto;
     }
 
     public void setTotalGasto(double totalGasto) {
@@ -53,7 +45,7 @@ public class PainelClienteResponseDTO {
     }
 
     public String getMensagemBoasVindas() {
-        return mensagemBoasVindas;
+        return this.mensagemBoasVindas;
     }
 
     public void setMensagemBoasVindas(String mensagemBoasVindas) {
@@ -61,7 +53,7 @@ public class PainelClienteResponseDTO {
     }
 
     public String getCategoriaMaisComprada() {
-        return categoriaMaisComprada;
+        return this.categoriaMaisComprada;
     }
 
     public void setCategoriaMaisComprada(String categoriaMaisComprada) {
@@ -69,18 +61,15 @@ public class PainelClienteResponseDTO {
     }
 
     public boolean isStatusVip() {
-        return statusVip;
+        return this.statusVip;
     }
 
     public void setStatusVip(boolean statusVip) {
         this.statusVip = statusVip;
     }
 
-    @Override
     public String toString() {
-        return "PainelClienteResponseDTO{" + "nomeCliente='" + nomeCliente + '\'' + ", pedidosRecentes=" + pedidosRecentes
-                + ", totalGasto=" + totalGasto + ", mensagemBoasVindas='" + mensagemBoasVindas + '\''
-                + ", categoriaMaisComprada='" + categoriaMaisComprada + '\'' + ", statusVip=" + statusVip + '}';
+        return "PainelClienteResponseDTO{nomeCliente='" + this.nomeCliente + "', pedidosRecentes=" + this.pedidosRecentes + ", totalGasto=" + this.totalGasto + ", mensagemBoasVindas='" + this.mensagemBoasVindas + "', categoriaMaisComprada='" + this.categoriaMaisComprada + "', statusVip=" + this.statusVip + "}";
     }
 }
 
