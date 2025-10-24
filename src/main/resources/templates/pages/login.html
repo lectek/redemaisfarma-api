@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title th:text="#{auth.login.title} ?: 'Entrar • RedeMaisFarma'">Entrar • RedeMaisFarma</title>
+
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+  <link rel="stylesheet" th:href="@{/css/login.css}"/>
+  <meta name="color-scheme" content="light dark"/>
+
+  <!-- metas p/ CSRF (Spring) usados no JS -->
+  <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}"/>
+  <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body class="body-flex">
+  <header th:replace="~{fragments/header :: header}"></header>
+
+  <main class="form-container" id="main-content" tabindex="-1">
+    <section class="form-card" aria-labelledby="titulo-login">
+      <h1 id="titulo-login" class="form-title" th:text="#{auth.login.heading} ?: 'Entrar'">Entrar</h1>
+
+      <!-- Mensagens do servidor -->
+      <div th:if="${loginError}" class="alert error" role="alert" aria-live="assertive" th:text="${loginError}"></div>
+      <div th:if="${infoMessage}"  class="alert info"  role="status"  aria-live="polite"    th:text="${infoMessage}"></div>
+
+      <!-- Mensagens por query (?error / ?logout) -->
+      <div th:if="${param.error}"  class="alert error" aria-live="assertive">Não foi possível autenticar. Verifique suas credenciais.</div>
+      <div th:if="${param.logout}" class="alert info"  aria-live="polite">Você saiu da sua conta com sucesso.</div>
+
+      <!-- Área de mensagem do cliente (JS) -->
+      <div id="alert" class="alert" role="status" aria-live="polite"></div>
+
+      <!-- Formulário de login (fluxo WEB / Spring Security) -->
+      <form id="loginForm" th:action="@{/login}" th:object="${loginForm}" method="post"
+            class="form-grid" autocomplete="on" novalidate>
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <!-- Usuário -->
+        <div class="form-group">
+          <label for="usuario" th:text="#{auth.login.usuario.label} ?: 'E-mail / CPF / Usuário'">E-mail / CPF / Usuário</label>
+          <input id="usuario" type="text" th:field="*{usuario}" class="input" autocomplete="username"
+                 placeholder="ex.: joao@dominio.com ou 123.456.789-00" required autofocus/>
+          <p th:if="${#fields.hasErrors('usuario')}" th:errors="*{usuario}" class="error-message"></p>
+        </div>
+
+        <!-- Senha -->
+        <div class="form-group">
+          <label for="senha" th:text="#{auth.login.senha.label} ?: 'Senha'">Senha</label>
+          <div class="input-with-action">
+            <input id="senha" type="password" th:field="*{senha}" class="input"
+                   autocomplete="current-password" required aria-describedby="password-help"
+                   minlength="8" maxlength="128"
+                   pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,128}$"
+                   data-pattern-msg="Sua senha precisa ter: 8+ caracteres, letra maiúscula, minúscula, número e símbolo (@ $ ! % * ? &)."/>
+            <button type="button" class="btn btn--ghost btn--icon" id="toggleSenha"
+                    aria-pressed="false" aria-label="Mostrar senha">👁</button>
+          </div>
+          <small id="password-help" class="help" th:text="#{auth.login.senha.dica} ?: 'Use 8+ caracteres, com maiúscula, minúscula, número e símbolo.'">
+            Use 8+ caracteres, com maiúscula, minúscula, número e símbolo.
+          </small>
+          <p th:if="${#fields.hasErrors('senha')}" th:errors="*{senha}" class="error-message"></p>
+        </div>
+
+        <!-- Lembrar-me (nome compatível com Spring Security) -->
+        <label class="remember">
+          <input id="lembrarMe" type="checkbox" name="remember-me"/>
+          <span th:text="#{auth.login.lembrar} ?: 'Lembrar de mim (sessão maior)'">Lembrar de mim (sessão maior)</span>
+        </label>
+
+        <!-- Ações -->
+        <div class="form-actions" style="display:flex; gap:.5rem; flex-wrap:wrap; align-items:center">
+          <button id="entrarBtn" type="submit" class="btn btn--primary" th:text="#{auth.login.entrar} ?: 'Entrar'">Entrar</button>
+
+          <!-- Link “Esqueci minha senha” (JS acrescenta o e-mail) -->
+          <a id="forgotBtn" href="#" class="btn btn--ghost" role="button"
+             th:text="#{auth.login.esqueci} ?: 'Esqueci minha senha'">Esqueci minha senha</a>
+        </div>
+
+        <!-- Links extras -->
+        <nav class="links mt-12" aria-label="Acesso rápido">
+          <a th:href="@{/auth/esqueci-senha}" th:text="#{auth.login.esqueci} ?: 'Esqueci a senha'">Esqueci a senha</a>
+          &nbsp;•&nbsp;
+          <a th:href="@{/auth/mudar-senha}" th:text="#{auth.login.mudar} ?: 'Mudar minha senha'">Mudar minha senha</a>
+          &nbsp;•&nbsp;
+          <a th:href="@{/clientes/cadastro}" th:text="#{auth.login.cadastrar} ?: 'Precisa de cadastro? Clique aqui'">Precisa de cadastro? Clique aqui</a>
+        </nav>
+      </form>
+
+      <noscript>
+        <p class="hint">Para melhor experiência, ative o JavaScript. Você ainda pode usar os links acima para recuperar/mudar a senha.</p>
+      </noscript>
+    </section>
+  </main>
+
+  <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+  <!-- scripts -->
+  <script th:src="@{/js/layout.js}"></script>
+  <!-- ✅ usa o login.js plano; remove o módulo antigo -->
+  <script th:src="@{/js/login.js}"></script>
+  <!-- (Removido) <script type="module" th:src="@{/js/pages/login.js}"></script> -->
+</body>
+</html>
