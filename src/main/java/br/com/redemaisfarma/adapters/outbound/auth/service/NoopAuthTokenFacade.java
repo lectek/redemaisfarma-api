@@ -9,7 +9,6 @@
 package br.com.redemaisfarma.adapters.outbound.auth.service;
 
 import br.com.redemaisfarma.adapters.outbound.auth.jwt.model.TokenPair;
-import br.com.redemaisfarma.adapters.outbound.auth.service.AuthTokenOperations;
 import java.util.List;
 import java.util.Map;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

@@ -1,42 +1,115 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.context.annotation.Bean
- *  org.springframework.context.annotation.Configuration
- *  org.springframework.security.config.Customizer
- *  org.springframework.security.config.annotation.web.builders.HttpSecurity
- *  org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer$AuthorizedUrl
- *  org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer
- *  org.springframework.security.web.SecurityFilterChain
- *  org.springframework.security.web.authentication.AuthenticationSuccessHandler
- *  org.springframework.security.web.util.matcher.AntPathRequestMatcher
- *  org.springframework.security.web.util.matcher.RequestMatcher
- */
+// src/main/java/br/com/redemaisfarma/config/SecurityConfig.java
 package br.com.redemaisfarma.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
-import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 
 @Configuration
 public class SecurityConfig {
+
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.ignoringRequestMatchers(new RequestMatcher[]{new AntPathRequestMatcher("/api/public/**"), new AntPathRequestMatcher("/actuator/**")})).authorizeHttpRequests(auth -> ((AuthorizeHttpRequestsConfigurer.AuthorizedUrl)((AuthorizeHttpRequestsConfigurer.AuthorizedUrl)auth.requestMatchers(new String[]{"/", "/home", "/sobre", "/contato", "/produtos/**", "/ofertas/**", "/login", "/logout", "/pos-login", "/entrar-com", "/limpar-escolha", "/css/**", "/js/**", "/images/**", "/img/**", "/webjars/**", "/swagger-ui/**", "/v3/api-docs/**", "/api/public/**", "/actuator/health", "/actuator/info", "/actuator/mappings", "/actuator/loggers"})).permitAll().anyRequest()).authenticated()).formLogin(form -> ((FormLoginConfigurer)form.loginPage("/login").successHandler(this.posLoginSuccessHandler())).permitAll()).logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/home")).httpBasic(Customizer.withDefaults());
-        return (SecurityFilterChain)http.build();
-    }
 
-    @Bean
-    AuthenticationSuccessHandler posLoginSuccessHandler() {
-        return (request, response, authentication) -> response.sendRedirect(request.getContextPath() + "/pos-login");
+        // 🔑 Depois de logar:
+        // - Se o usuário tentou acessar algo protegido (ex.: /checkout),
+        //   ele volta para essa URL.
+        // - Se não tiver URL anterior, cai na home "/".
+        var successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
+        successHandler.setDefaultTargetUrl("/");
+
+        http
+            // CSRF desabilitado para algumas rotas técnicas / públicas de API
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers(
+                    "/actuator/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/api/public/**"
+                )
+            )
+
+            .authorizeHttpRequests(auth -> auth
+
+                // 🔹 Recursos estáticos SEMPRE liberados
+                .requestMatchers(
+                    "/assets/**",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/img/**",
+                    "/webjars/**",
+                    "/favicon.ico"
+                ).permitAll()
+
+                // 🔹 PÁGINAS PÚBLICAS (área cliente / vitrine)
+                // Qualquer pessoa pode navegar na loja:
+                // - Home / (raiz)
+                // - /cliente      (alias da home cliente)
+                // - /cliente/index
+                // - /sobre        (página institucional)
+                // - /produtos/**  (listar/detalhar produtos)
+                // - /buscar       (busca de produtos)
+                .requestMatchers(
+                    "/",
+                    "/cliente",
+                    "/cliente/index",
+                    "/sobre",
+                    "/produtos/**",
+                    "/buscar"
+                ).permitAll()
+
+                // 🔹 Telas de login/cadastro (GET e POST)
+                // Liberadas para o usuário poder entrar ou criar conta
+                .requestMatchers(HttpMethod.GET,
+                    "/auth/login",
+                    "/auth/cadastro-cliente"
+                ).permitAll()
+                .requestMatchers(HttpMethod.POST,
+                    "/auth/login",
+                    "/auth/cadastro-cliente"
+                ).permitAll()
+
+                // 🔹 APIs públicas e health (para monitoramento, docs, etc.)
+                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+
+                // 🔸 ROTAS DE COMPRA — exigem cadastro/login
+                // Tudo que mexe com pedido, checkout e carrinho é protegido.
+                .requestMatchers(
+                    "/carrinho/**",
+                    "/checkout/**",
+                    "/pedido/**"
+                ).authenticated()
+
+                // 🔸 ÁREA ADMIN — só para usuários com ROLE_ADMIN
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                // 🔒 Qualquer outra rota que sobrar exige login
+                .anyRequest().authenticated()
+            )
+
+            // 🔐 Configuração do login via formulário
+            .formLogin(f -> f
+                .loginPage("/auth/login")          // GET: tela de login
+                .loginProcessingUrl("/auth/login") // POST: envio do formulário
+                .successHandler(successHandler)    // redireciona para URL original ou "/"
+                .failureUrl("/auth/login?error")
+                .permitAll()
+            )
+
+            // 🔓 Logout padrão
+            .logout(l -> l
+                .logoutUrl("/auth/logout")
+                .logoutSuccessUrl("/auth/login?logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .permitAll()
+            );
+
+        return http.build();
     }
 }
-

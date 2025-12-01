@@ -1,30 +1,9 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonFormat
- *  com.fasterxml.jackson.annotation.JsonInclude
- *  com.fasterxml.jackson.annotation.JsonInclude$Include
- *  com.fasterxml.jackson.annotation.JsonProperty
- *  com.fasterxml.jackson.annotation.JsonProperty$Access
- *  io.swagger.v3.oas.annotations.media.Schema
- *  jakarta.validation.Valid
- *  jakarta.validation.constraints.AssertTrue
- *  jakarta.validation.constraints.DecimalMin
- *  jakarta.validation.constraints.Digits
- *  jakarta.validation.constraints.Min
- *  jakarta.validation.constraints.NotBlank
- *  jakarta.validation.constraints.NotEmpty
- *  jakarta.validation.constraints.NotNull
- *  jakarta.validation.constraints.PastOrPresent
- *  jakarta.validation.constraints.Size
- */
 package br.com.redemaisfarma.application.dto.request;
 
-import br.com.redemaisfarma.application.dto.request.FormaPagamentoRequestDTO;
-import br.com.redemaisfarma.application.dto.request.ItemPedidoRequestDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -36,76 +15,103 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Size;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@JsonInclude(value=JsonInclude.Include.NON_NULL)
-@Schema(name="CriarPedidoRequest", description="Dados para cria\u00e7\u00e3o de um pedido na RedeMaisFarma")
-public class CriarPedidoRequest
-implements Serializable {
+/**
+ * DTO para criação de pedidos (API pública).
+ */
+@JsonInclude(Include.NON_NULL)
+@Schema(name = "CriarPedidoRequest", description = "Dados para criação de um pedido na RedeMaisFarma")
+public class CriarPedidoRequest implements Serializable {
     private static final long serialVersionUID = 1L;
-    @Schema(description="ID \u00fanico do pedido (idempot\u00eancia)", example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty(value="pedidoId", access=JsonProperty.Access.READ_ONLY)
+
+    @Schema(description = "ID único do pedido (idempotência)", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value = "pedidoId", access = JsonProperty.Access.WRITE_ONLY)
     private UUID pedidoId;
-    @Schema(description="ID do cliente que realizou o pedido", example="123", required=true)
-    @NotNull(message="{pedido.clienteId.notNull}")
-    @Min(value=1L, message="{pedido.clienteId.min}")
-    @JsonProperty(value="clienteId")
-    private @NotNull(message="{pedido.clienteId.notNull}") @Min(value=1L, message="{pedido.clienteId.min}") Long clienteId;
-    @Schema(description="Itens do pedido", required=true)
-    @NotEmpty(message="{pedido.itens.notEmpty}")
-    @Size(max=200, message="{pedido.itens.size}")
+
+    @Schema(description = "ID do cliente que realizou o pedido", example = "123", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "{pedido.clienteId.notNull}")
+    @Min(value = 1, message = "{pedido.clienteId.min}")
+    @JsonProperty("clienteId")
+    private Long clienteId;
+
+    @Schema(description = "Itens do pedido", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotEmpty(message = "{pedido.itens.notEmpty}")
     @Valid
-    @JsonProperty(value="itens")
-    private @NotEmpty(message="{pedido.itens.notEmpty}") @Size(max=200, message="{pedido.itens.size}") @Valid List<@NotNull @Valid ItemPedidoRequestDTO> itens;
-    @Schema(description="Endere\u00e7o de entrega completo", example="Rua das Ac\u00e1cias, 45, Centro, Jo\u00e3o Pessoa - PB", required=true)
-    @NotBlank(message="{pedido.enderecoEntrega.notBlank}")
-    @Size(min=5, max=200, message="{pedido.enderecoEntrega.size}")
-    @JsonProperty(value="enderecoEntrega")
-    private @NotBlank(message="{pedido.enderecoEntrega.notBlank}") @Size(min=5, max=200, message="{pedido.enderecoEntrega.size}") String enderecoEntrega;
-    @Schema(description="Valor total do pedido", example="150.75", required=true)
-    @NotNull(message="{pedido.valorTotal.notNull}")
-    @DecimalMin(value="0.01", inclusive=true, message="{pedido.valorTotal.min}")
-    @Digits(integer=12, fraction=2, message="{pedido.valorTotal.digits}")
-    @JsonProperty(value="valorTotal")
-    private @NotNull(message="{pedido.valorTotal.notNull}") @DecimalMin(value="0.01", inclusive=true, message="{pedido.valorTotal.min}") @Digits(integer=12, fraction=2, message="{pedido.valorTotal.digits}") BigDecimal valorTotal;
-    @Schema(description="Forma de pagamento", required=true)
-    @NotNull(message="{pedido.formaPagamento.notNull}")
+    @JsonProperty("itens")
+    private List<@NotNull @Valid ItemPedidoRequestDTO> itens;
+
+    @Schema(description = "Endereço de entrega completo", example = "Rua das Acácias, 45, Centro, João Pessoa - PB", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "{pedido.enderecoEntrega.notBlank}")
+    @jakarta.validation.constraints.Size(min = 5, max = 200, message = "{pedido.enderecoEntrega.size}")
+    @JsonProperty("enderecoEntrega")
+    private String enderecoEntrega;
+
+    @Schema(description = "Valor total do pedido", example = "150.75", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "{pedido.valorTotal.notNull}")
+    @DecimalMin(value = "0.01", inclusive = true, message = "{pedido.valorTotal.min}")
+    @Digits(integer = 12, fraction = 2, message = "{pedido.valorTotal.digits}")
+    @JsonProperty("valorTotal")
+    private BigDecimal valorTotal;
+
+    @Schema(description = "Forma de pagamento", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "{pedido.formaPagamento.notNull}")
     @Valid
-    @JsonProperty(value="formaPagamento")
-    private @NotNull(message="{pedido.formaPagamento.notNull}") @Valid FormaPagamentoRequestDTO formaPagamento;
-    @Schema(description="ID do tenant", example="redemaisfarma-001", required=true)
-    @NotBlank(message="{pedido.tenantId.notBlank}")
-    @Size(max=100, message="{pedido.tenantId.size}")
-    @JsonProperty(value="tenantId")
-    private @NotBlank(message="{pedido.tenantId.notBlank}") @Size(max=100, message="{pedido.tenantId.size}") String tenantId;
-    @Schema(description="Token de rastreamento do pedido", example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JsonProperty(value="traceId", access=JsonProperty.Access.READ_ONLY)
+    @JsonProperty("formaPagamento")
+    private FormaPagamentoRequestDTO formaPagamento;
+
+    @Schema(description = "ID do tenant", example = "redemaisfarma-001", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotBlank(message = "{pedido.tenantId.notBlank}")
+    @jakarta.validation.constraints.Size(max = 100, message = "{pedido.tenantId.size}")
+    @JsonProperty("tenantId")
+    private String tenantId;
+
+    @Schema(description = "Token de rastreamento do pedido", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @JsonProperty(value = "traceId", access = JsonProperty.Access.READ_ONLY)
     private UUID traceId;
-    @Schema(description="Timestamp de cria\u00e7\u00e3o do pedido", type="string", format="date-time", example="2025-07-04T10:15:30", required=true)
-    @NotNull(message="{pedido.dataCriacao.notNull}")
-    @PastOrPresent(message="{pedido.dataCriacao.pastOrPresent}")
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty(value="dataCriacao")
-    private @NotNull(message="{pedido.dataCriacao.notNull}") @PastOrPresent(message="{pedido.dataCriacao.pastOrPresent}") LocalDateTime dataCriacao;
-    @Schema(description="Observa\u00e7\u00f5es adicionais", example="Entregar com cuidado, atr\u00e1s do port\u00e3o branco")
-    @Size(max=500, message="{pedido.observacao.size}")
-    @JsonProperty(value="observacao")
-    private @Size(max=500, message="{pedido.observacao.size}") String observacao;
-    @Schema(description="Timestamp da \u00faltima atualiza\u00e7\u00e3o do pedido", type="string", format="date-time", example="2025-07-04T11:00:00")
-    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
-    @JsonProperty(value="dataAtualizacao", access=JsonProperty.Access.READ_ONLY)
+
+    @Schema(description = "Timestamp de criação do pedido", type = "string", format = "date-time",
+            example = "2025-07-04T10:15:30", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "{pedido.dataCriacao.notNull}")
+    @PastOrPresent(message = "{pedido.dataCriacao.pastOrPresent}")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty("dataCriacao")
+    private LocalDateTime dataCriacao;
+
+    @Schema(description = "Observações adicionais", example = "Entregar com cuidado, atrás do portão branco")
+    @jakarta.validation.constraints.Size(max = 500, message = "{pedido.observacao.size}")
+    @JsonProperty("observacao")
+    private String observacao;
+
+    @Schema(description = "Timestamp da última atualização do pedido", type = "string", format = "date-time",
+            example = "2025-07-04T11:00:00")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonProperty(value = "dataAtualizacao", access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime dataAtualizacao;
 
     public CriarPedidoRequest() {
     }
 
-    public CriarPedidoRequest(UUID pedidoId, Long clienteId, List<ItemPedidoRequestDTO> itens, String enderecoEntrega, BigDecimal valorTotal, FormaPagamentoRequestDTO formaPagamento, String tenantId, UUID traceId, LocalDateTime dataCriacao, String observacao, LocalDateTime dataAtualizacao) {
+    public CriarPedidoRequest(
+            UUID pedidoId,
+            Long clienteId,
+            List<ItemPedidoRequestDTO> itens,
+            String enderecoEntrega,
+            BigDecimal valorTotal,
+            FormaPagamentoRequestDTO formaPagamento,
+            String tenantId,
+            UUID traceId,
+            LocalDateTime dataCriacao,
+            String observacao,
+            LocalDateTime dataAtualizacao
+    ) {
         this.pedidoId = pedidoId;
         this.clienteId = clienteId;
         this.itens = itens;
@@ -119,39 +125,41 @@ implements Serializable {
         this.dataAtualizacao = dataAtualizacao;
     }
 
-    @AssertTrue(message="{pedido.totais.coerencia}")
-    @JsonProperty(access=JsonProperty.Access.READ_ONLY)
-    public @AssertTrue(message="{pedido.totais.coerencia}") boolean isTotaisCoerentes() {
-        if (this.itens == null || this.itens.isEmpty() || this.valorTotal == null) {
-            return false;
-        }
-        BigDecimal soma = this.itens.stream().map(i -> i.getPrecoUnitario().multiply(BigDecimal.valueOf(i.getQuantidade().intValue()))).reduce(BigDecimal.ZERO, BigDecimal::add);
-        return soma.compareTo(this.valorTotal) == 0;
+    // ======= Validações de consistência (não expostas no JSON) =======
+
+    @AssertTrue(message = "{pedido.totais.coerencia}")
+    @JsonIgnore
+    public boolean isTotaisCoerentes() {
+        if (itens == null || itens.isEmpty() || valorTotal == null) return false;
+
+        BigDecimal soma = itens.stream()
+                .map(i -> i.getPrecoUnitario()
+                        .multiply(BigDecimal.valueOf(i.getQuantidade().longValue()))
+                        .setScale(2, RoundingMode.HALF_UP))
+                .reduce(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP), BigDecimal::add);
+
+        return soma.compareTo(valorTotal) == 0;
     }
 
-    @AssertTrue(message="{pedido.formaPagamento.igualTotal}")
-    @JsonProperty(access=JsonProperty.Access.READ_ONLY)
-    public @AssertTrue(message="{pedido.formaPagamento.igualTotal}") boolean isFormaPagamentoIgualTotal() {
-        if (this.formaPagamento == null || this.valorTotal == null || this.formaPagamento.getValor() == null) {
-            return false;
-        }
-        return this.valorTotal.compareTo(this.formaPagamento.getValor()) == 0;
+    @AssertTrue(message = "{pedido.formaPagamento.igualTotal}")
+    @JsonIgnore
+    public boolean isFormaPagamentoIgualTotal() {
+        if (formaPagamento == null || valorTotal == null || formaPagamento.getValor() == null) return false;
+        return valorTotal.compareTo(formaPagamento.getValor()) == 0;
     }
 
-    @AssertTrue(message="{pedido.datas.ordemValida}")
-    @JsonProperty(access=JsonProperty.Access.READ_ONLY)
-    public @AssertTrue(message="{pedido.datas.ordemValida}") boolean isOrdemTemporalValida() {
-        if (this.dataCriacao == null) {
-            return false;
-        }
-        if (this.dataAtualizacao == null) {
-            return true;
-        }
-        return !this.dataAtualizacao.isBefore(this.dataCriacao);
+    @AssertTrue(message = "{pedido.datas.ordemValida}")
+    @JsonIgnore
+    public boolean isOrdemTemporalValida() {
+        if (dataCriacao == null) return false;
+        if (dataAtualizacao == null) return true;
+        return !dataAtualizacao.isBefore(dataCriacao);
     }
+
+    // ======= Getters/Setters =======
 
     public UUID getPedidoId() {
-        return this.pedidoId;
+        return pedidoId;
     }
 
     public void setPedidoId(UUID pedidoId) {
@@ -159,7 +167,7 @@ implements Serializable {
     }
 
     public Long getClienteId() {
-        return this.clienteId;
+        return clienteId;
     }
 
     public void setClienteId(Long clienteId) {
@@ -167,7 +175,7 @@ implements Serializable {
     }
 
     public List<ItemPedidoRequestDTO> getItens() {
-        return this.itens;
+        return itens;
     }
 
     public void setItens(List<ItemPedidoRequestDTO> itens) {
@@ -175,15 +183,15 @@ implements Serializable {
     }
 
     public String getEnderecoEntrega() {
-        return this.enderecoEntrega;
+        return enderecoEntrega;
     }
 
     public void setEnderecoEntrega(String enderecoEntrega) {
-        this.enderecoEntrega = enderecoEntrega;
+        this.enderecoEntrega = enderecoEntrega == null ? null : enderecoEntrega.trim();
     }
 
     public BigDecimal getValorTotal() {
-        return this.valorTotal;
+        return valorTotal;
     }
 
     public void setValorTotal(BigDecimal valorTotal) {
@@ -191,7 +199,7 @@ implements Serializable {
     }
 
     public FormaPagamentoRequestDTO getFormaPagamento() {
-        return this.formaPagamento;
+        return formaPagamento;
     }
 
     public void setFormaPagamento(FormaPagamentoRequestDTO formaPagamento) {
@@ -199,15 +207,15 @@ implements Serializable {
     }
 
     public String getTenantId() {
-        return this.tenantId;
+        return tenantId;
     }
 
     public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+        this.tenantId = tenantId == null ? null : tenantId.trim();
     }
 
     public UUID getTraceId() {
-        return this.traceId;
+        return traceId;
     }
 
     public void setTraceId(UUID traceId) {
@@ -215,7 +223,7 @@ implements Serializable {
     }
 
     public LocalDateTime getDataCriacao() {
-        return this.dataCriacao;
+        return dataCriacao;
     }
 
     public void setDataCriacao(LocalDateTime dataCriacao) {
@@ -223,38 +231,63 @@ implements Serializable {
     }
 
     public String getObservacao() {
-        return this.observacao;
+        return observacao;
     }
 
     public void setObservacao(String observacao) {
-        this.observacao = observacao;
+        this.observacao = observacao == null ? null : observacao.trim();
     }
 
     public LocalDateTime getDataAtualizacao() {
-        return this.dataAtualizacao;
+        return dataAtualizacao;
     }
 
     public void setDataAtualizacao(LocalDateTime dataAtualizacao) {
         this.dataAtualizacao = dataAtualizacao;
     }
 
+    // ======= equals/hashCode/toString =======
+
+    @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof CriarPedidoRequest)) {
-            return false;
-        }
-        CriarPedidoRequest that = (CriarPedidoRequest)o;
-        return Objects.equals(this.pedidoId, that.pedidoId) && Objects.equals(this.clienteId, that.clienteId) && Objects.equals(this.itens, that.itens) && Objects.equals(this.enderecoEntrega, that.enderecoEntrega) && Objects.equals(this.valorTotal, that.valorTotal) && Objects.equals(this.formaPagamento, that.formaPagamento) && Objects.equals(this.tenantId, that.tenantId) && Objects.equals(this.traceId, that.traceId) && Objects.equals(this.dataCriacao, that.dataCriacao) && Objects.equals(this.observacao, that.observacao) && Objects.equals(this.dataAtualizacao, that.dataAtualizacao);
+        if (this == o) return true;
+        if (!(o instanceof CriarPedidoRequest)) return false;
+        CriarPedidoRequest that = (CriarPedidoRequest) o;
+        return Objects.equals(pedidoId, that.pedidoId)
+                && Objects.equals(clienteId, that.clienteId)
+                && Objects.equals(itens, that.itens)
+                && Objects.equals(enderecoEntrega, that.enderecoEntrega)
+                && Objects.equals(valorTotal, that.valorTotal)
+                && Objects.equals(formaPagamento, that.formaPagamento)
+                && Objects.equals(tenantId, that.tenantId)
+                && Objects.equals(traceId, that.traceId)
+                && Objects.equals(dataCriacao, that.dataCriacao)
+                && Objects.equals(observacao, that.observacao)
+                && Objects.equals(dataAtualizacao, that.dataAtualizacao);
     }
 
+    @Override
     public int hashCode() {
-        return Objects.hash(this.pedidoId, this.clienteId, this.itens, this.enderecoEntrega, this.valorTotal, this.formaPagamento, this.tenantId, this.traceId, this.dataCriacao, this.observacao, this.dataAtualizacao);
+        return Objects.hash(
+                pedidoId, clienteId, itens, enderecoEntrega, valorTotal,
+                formaPagamento, tenantId, traceId, dataCriacao, observacao, dataAtualizacao
+        );
     }
 
+    @Override
     public String toString() {
-        return "CriarPedidoRequest{pedidoId=" + String.valueOf(this.pedidoId) + ", clienteId=" + this.clienteId + ", itens=" + String.valueOf(this.itens) + ", enderecoEntrega='" + this.enderecoEntrega + "', valorTotal=" + String.valueOf(this.valorTotal) + ", formaPagamento=" + String.valueOf(this.formaPagamento) + ", tenantId='" + this.tenantId + "', traceId=" + String.valueOf(this.traceId) + ", dataCriacao=" + String.valueOf(this.dataCriacao) + ", observacao='" + this.observacao + "', dataAtualizacao=" + String.valueOf(this.dataAtualizacao) + "}";
+        return "CriarPedidoRequest{" +
+                "pedidoId=" + pedidoId +
+                ", clienteId=" + clienteId +
+                ", itens=" + itens +
+                ", enderecoEntrega='" + enderecoEntrega + '\'' +
+                ", valorTotal=" + valorTotal +
+                ", formaPagamento=" + formaPagamento +
+                ", tenantId='" + tenantId + '\'' +
+                ", traceId=" + traceId +
+                ", dataCriacao=" + dataCriacao +
+                ", observacao='" + observacao + '\'' +
+                ", dataAtualizacao=" + dataAtualizacao +
+                '}';
     }
 }
-

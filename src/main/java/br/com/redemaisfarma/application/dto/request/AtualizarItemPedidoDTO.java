@@ -17,8 +17,6 @@
  *  jakarta.validation.constraints.Size
  */
 package br.com.redemaisfarma.application.dto.request;
-
-import br.com.redemaisfarma.application.dto.request.ItemPedidoRequestDTO;
 import br.com.redemaisfarma.domain.enums.StatusPedido;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;

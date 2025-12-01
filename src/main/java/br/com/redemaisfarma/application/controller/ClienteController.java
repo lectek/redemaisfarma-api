@@ -1,83 +1,102 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.validation.Valid
- *  org.springframework.http.HttpStatus
- *  org.springframework.http.ResponseEntity
- *  org.springframework.validation.annotation.Validated
- *  org.springframework.web.bind.annotation.DeleteMapping
- *  org.springframework.web.bind.annotation.GetMapping
- *  org.springframework.web.bind.annotation.PathVariable
- *  org.springframework.web.bind.annotation.PostMapping
- *  org.springframework.web.bind.annotation.PutMapping
- *  org.springframework.web.bind.annotation.RequestBody
- *  org.springframework.web.bind.annotation.RequestMapping
- *  org.springframework.web.bind.annotation.ResponseStatus
- *  org.springframework.web.bind.annotation.RestController
- *  org.springframework.web.servlet.support.ServletUriComponentsBuilder
- */
 package br.com.redemaisfarma.application.controller;
 
 import br.com.redemaisfarma.application.service.ClienteService;
 import br.com.redemaisfarma.domain.Cliente;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.net.URI;
-import java.util.List;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
+import java.util.Optional;
+
+@Slf4j
 @Validated
-@RestController(value="clienteAppController")
-@RequestMapping(value={"/api/app/clientes"}, produces={"application/json"})
+@RestController
+@RequiredArgsConstructor
+@RequestMapping(path = "/api/app/clientes", produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = "App - Clientes", description = "CRUD e busca de clientes (camada de aplicação)")
 public class ClienteController {
+
     private final ClienteService clienteService;
 
-    public ClienteController(ClienteService clienteService) {
-        this.clienteService = clienteService;
-    }
-
-    @PostMapping(consumes={"application/json"})
+    @Operation(summary = "Criar cliente")
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    // @PreAuthorize("hasAuthority('APP:CLIENTE:CRIAR') or hasRole('ADMIN')")
     public ResponseEntity<Cliente> create(@Valid @RequestBody Cliente cliente) {
-        Cliente salvo = this.clienteService.create(cliente);
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(new Object[]{salvo.getId()}).toUri();
-        return ResponseEntity.created((URI)location).body((Object)salvo);
+        log.debug("Criando cliente...");
+        Cliente salvo = clienteService.create(cliente);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(salvo.getId())
+                .toUri();
+
+        log.info("Cliente id={} criado.", salvo.getId());
+        return ResponseEntity.created(location).body(salvo);
     }
 
+    @Operation(summary = "Listar/buscar clientes (paginado). Filtros: q, cpf, telefone")
     @GetMapping
-    public ResponseEntity<List<Cliente>> list() {
-        List<Cliente> clientes = this.clienteService.list();
-        return ResponseEntity.ok(clientes);
+    // @PreAuthorize("hasAuthority('APP:CLIENTE:LER') or hasRole('ADMIN')")
+    public ResponseEntity<Page<Cliente>> list(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String cpf,
+            @RequestParam(required = false) String telefone,
+            @ParameterObject @PageableDefault(size = 20, sort = "id") Pageable pageable
+    ) {
+        Page<Cliente> page = clienteService.search(q, cpf, telefone, pageable);
+        return ResponseEntity.ok(page);
     }
 
-    @GetMapping(value={"/{id}"})
+    @Operation(summary = "Buscar cliente por ID")
+    @GetMapping("/{id}")
+    // @PreAuthorize("hasAuthority('APP:CLIENTE:LER') or hasRole('ADMIN')")
     public ResponseEntity<Cliente> findById(@PathVariable Long id) {
-        Cliente cliente = this.clienteService.findById(id);
-        return ResponseEntity.ok((Object)cliente);
+        Cliente cliente = clienteService.findById(id);
+        return ResponseEntity.ok(cliente);
     }
 
-    @PutMapping(value={"/{id}"}, consumes={"application/json"})
+    @Operation(summary = "Buscar cliente por CPF (atalho)")
+    @GetMapping("/cpf/{cpf}")
+    public ResponseEntity<Cliente> findByCpf(@PathVariable String cpf) {
+        Optional<Cliente> opt = clienteService.findByCpf(cpf);
+        return opt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Buscar cliente por telefone (atalho)")
+    @GetMapping("/telefone/{telefone}")
+    public ResponseEntity<Cliente> findByTelefone(@PathVariable String telefone) {
+        Optional<Cliente> opt = clienteService.findByTelefone(telefone);
+        return opt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Atualizar cliente")
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    // @PreAuthorize("hasAuthority('APP:CLIENTE:ATUALIZAR') or hasRole('ADMIN')")
     public ResponseEntity<Cliente> update(@PathVariable Long id, @Valid @RequestBody Cliente cliente) {
-        cliente.setId(id);
-        Cliente atualizado = this.clienteService.update(id, cliente);
-        return ResponseEntity.ok((Object)atualizado);
+        cliente.setId(id); // path param é a fonte de verdade
+        Cliente atualizado = clienteService.update(id, cliente);
+        log.info("Cliente id={} atualizado.", id);
+        return ResponseEntity.ok(atualizado);
     }
 
-    @DeleteMapping(value={"/{id}"})
-    @ResponseStatus(value=HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        this.clienteService.delete(id);
+    @Operation(summary = "Excluir cliente")
+    @DeleteMapping("/{id}")
+    // @PreAuthorize("hasAuthority('APP:CLIENTE:EXCLUIR') or hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        clienteService.delete(id);
+        log.info("Cliente id={} removido.", id);
+        return ResponseEntity.noContent().build();
     }
 }
-

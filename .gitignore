@@ -1,8 +1,13 @@
-# ===== Maven / Java =====
+# ========================
+# Maven / Java
+# ========================
 target/
 **/target/
+# Wrapper do Maven deve ser versionado:
+# (mantenha .mvn/ e os scripts mvnw/mvnw.cmd no repo)
+# .mvn/  <-- NÃO ignore
 !.mvn/wrapper/maven-wrapper.jar
-.mvn/
+
 .settings/
 .classpath
 .project
@@ -11,17 +16,18 @@ bin/
 # Não versionar testes compilados
 src/test/**/target/
 
-# ===== IDEs =====
+# ========================
+# IDEs
+# ========================
 *.iml
 .idea/
 *.ipr
 *.iws
 .vscode/
-*.sw?
-*.bak
-*.tmp
 
-# ===== Sistema operacional =====
+# ========================
+# SO / Arquivos temporários
+# ========================
 .DS_Store
 Thumbs.db
 desktop.ini
@@ -30,37 +36,49 @@ ehthumbs.db
 *.out
 *.pid
 *.gz
+*.tmp
+*.bak
 
-# ===== Artefatos de build locais =====
+# ========================
+# Artefatos de build locais
+# ========================
 app.jar
 *.jar.original
 jacoco.exec
 /*.exec
+hs_err_pid*.log
+replay_pid*.log
+*.hprof
 
-# ===== Arquivos locais/sensíveis =====
+# ========================
+# Arquivos sensíveis/locais
+# ========================
 .env
 *.env
 *.properties.local
 *.yml.local
 *.local
+.env.local
 
-# ===== Dados e volumes locais (não versionar) =====
+# ========================
+# Dados e volumes locais (não versionar)
+# ========================
 app-logs/
+logs/
 storage/
 mysql_data/
 kafka_data/
 infra/firebird/data/
 
-# ===== Mocks / WireMock / dados de teste grandes =====
+# ========================
+# Mocks / WireMock / dados pesados
+# ========================
 infra/wiremock/__files/
 infra/wiremock/mappings/
 mocks/
 
-# ===== Scripts e arquivos transitórios =====
-*.tmp
-*.bak
-# Logs
-*.log
-*.tmp
-logs/
-app-logs/
+# ========================
+# Docker / Gerados locais
+# ========================
+docker-compose.generated.yml
+compose.raw.yml

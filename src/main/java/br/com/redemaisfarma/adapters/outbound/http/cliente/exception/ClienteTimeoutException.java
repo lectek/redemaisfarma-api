@@ -3,7 +3,6 @@
  */
 package br.com.redemaisfarma.adapters.outbound.http.cliente.exception;
 
-import br.com.redemaisfarma.adapters.outbound.http.cliente.exception.ClienteClientException;
 
 public class ClienteTimeoutException
 extends ClienteClientException {

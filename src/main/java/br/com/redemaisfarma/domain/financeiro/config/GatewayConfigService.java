@@ -2,8 +2,6 @@
  * Decompiled with CFR 0.152.
  */
 package br.com.redemaisfarma.domain.financeiro.config;
-
-import br.com.redemaisfarma.domain.financeiro.config.GatewayConfig;
 import java.util.List;
 import java.util.Optional;
 

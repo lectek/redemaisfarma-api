@@ -1,0 +1,52 @@
+<!-- src/main/resources/templates/pages/auth/admin-login.html -->
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin • Entrar</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+  <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}"/>
+  <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body class="body-flex">
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="form-container" id="main-content" tabindex="-1">
+  <section class="form-card" aria-labelledby="titulo-admin-login">
+    <h1 id="titulo-admin-login" class="form-title">Entrar (Admin)</h1>
+
+    <div th:if="${param.error}" class="alert error">Credenciais inválidas.</div>
+    <div th:if="${param.logout}" class="alert info">Sessão encerrada.</div>
+
+    <!-- Posta no mesmo /login, mas fixa perfil e redirect para ADMIN -->
+    <form th:action="@{/login}" method="post" class="form-grid" novalidate>
+      <input type="hidden" name="perfil" value="admin"/>
+      <input type="hidden" name="redirect" value="/admin/conta"/>
+      <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+      <label class="stack">
+        <span>Usuário / E-mail</span>
+        <input class="input" type="text" name="username" autocomplete="username" required autofocus/>
+      </label>
+
+      <label class="stack">
+        <span>Senha</span>
+        <input class="input" type="password" name="password" autocomplete="current-password" required/>
+      </label>
+
+      <label class="remember">
+        <input type="checkbox" name="remember-me"/> <span>Lembrar-me</span>
+      </label>
+
+      <div class="form-actions">
+        <button class="btn btn--primary" type="submit">Entrar</button>
+        <a class="btn btn--ghost" th:href="@{/home}">Voltar</a>
+      </div>
+    </form>
+  </section>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

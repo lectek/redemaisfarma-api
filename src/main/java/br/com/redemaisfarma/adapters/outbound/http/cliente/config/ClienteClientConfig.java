@@ -16,7 +16,6 @@ package br.com.redemaisfarma.adapters.outbound.http.cliente.config;
 
 import br.com.redemaisfarma.adapters.outbound.http.cliente.client.ClienteClient;
 import br.com.redemaisfarma.adapters.outbound.http.cliente.client.ClienteHttpClient;
-import br.com.redemaisfarma.adapters.outbound.http.cliente.config.ClienteClientProperties;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

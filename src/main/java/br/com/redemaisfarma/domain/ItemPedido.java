@@ -3,7 +3,6 @@
  */
 package br.com.redemaisfarma.domain;
 
-import br.com.redemaisfarma.domain.Pedido;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;

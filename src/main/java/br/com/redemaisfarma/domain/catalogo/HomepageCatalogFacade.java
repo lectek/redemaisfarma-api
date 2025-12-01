@@ -11,7 +11,6 @@ package br.com.redemaisfarma.domain.catalogo;
 import br.com.redemaisfarma.application.core.settings.AppSettingService;
 import br.com.redemaisfarma.application.view.HomePageVM;
 import br.com.redemaisfarma.application.view.ProductCardVM;
-import br.com.redemaisfarma.domain.catalogo.ProdutoQueryService;
 import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

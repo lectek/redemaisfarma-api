@@ -1,6 +1,13 @@
-<!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Produto • Form</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Produto • Form</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
 <div class="layout">
@@ -25,4 +32,5 @@
   </form>
 </main></div>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-</body></html>
+</body>
+</html>

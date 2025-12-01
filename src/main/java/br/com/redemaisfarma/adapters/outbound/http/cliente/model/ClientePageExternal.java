@@ -5,9 +5,6 @@
  *  com.fasterxml.jackson.annotation.JsonProperty
  */
 package br.com.redemaisfarma.adapters.outbound.http.cliente.model;
-
-import br.com.redemaisfarma.adapters.outbound.http.cliente.model.ClienteExternal;
-import br.com.redemaisfarma.adapters.outbound.http.cliente.model.PageMetadataExternal;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.List;

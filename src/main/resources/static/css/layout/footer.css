@@ -5,8 +5,18 @@
    - evita herdar min-height 44px dos links/botões
    ========================================================= */
 
+/* Garante que o footer minimal sempre apareça */
+.site-footer.site-footer--minimal{
+  display: block !important;
+  width: 100%;
+  background: var(--color-footer-bg, #031016);
+  margin-top: auto;
+}
+
 /* Esconde grid tradicional quando usar o minimal */
-.site-footer--minimal .footer-grid { display: none !important; }
+.site-footer--minimal .footer-grid { 
+  display: none !important; 
+}
 
 /* Barra minimal: linha com 3 itens */
 .site-footer--minimal .minimal{
@@ -56,7 +66,8 @@
   flex: 0 0 18px !important;
   vertical-align: middle;
 }
-.site-footer--minimal svg, .site-footer--minimal svg *{
+.site-footer--minimal svg, 
+.site-footer--minimal svg *{
   fill: currentColor !important;
   stroke: none !important;
 }
@@ -119,12 +130,23 @@
 
 /* Botão “voltar ao topo” (se estiver presente) */
 .btn-to-top{
-  position: fixed; right: 16px; bottom: 16px; z-index: 900;
-  width: 44px; height: 44px; border-radius: 999px; border: 0; cursor: pointer;
-  background: var(--color-footer-accent); color: #06281d; font-weight: var(--font-weight-bold);
+  position: fixed; 
+  right: 16px; 
+  bottom: 16px; 
+  z-index: 900;
+  width: 44px; 
+  height: 44px; 
+  border-radius: 999px; 
+  border: 0; 
+  cursor: pointer;
+  background: var(--color-footer-accent); 
+  color: #06281d; 
+  font-weight: var(--font-weight-bold);
   box-shadow: 0 8px 22px rgba(0,0,0,.25);
 }
-.btn-to-top:hover{ filter: brightness(1.05); }
+.btn-to-top:hover{ 
+  filter: brightness(1.05); 
+}
 
 /* Responsividade suave */
 @media (max-width: 480px){

@@ -3,8 +3,6 @@
  */
 package br.com.redemaisfarma.adapters.outbound.http.exception;
 
-import br.com.redemaisfarma.adapters.outbound.http.exception.ExternalClientException;
-
 public class ClientTimeoutException
 extends ExternalClientException {
     private static final long serialVersionUID = 1L;

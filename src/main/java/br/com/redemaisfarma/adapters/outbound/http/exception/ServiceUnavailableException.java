@@ -2,8 +2,6 @@
  * Decompiled with CFR 0.152.
  */
 package br.com.redemaisfarma.adapters.outbound.http.exception;
-
-import br.com.redemaisfarma.adapters.outbound.http.exception.ExternalClientException;
 import java.util.List;
 import java.util.Map;
 

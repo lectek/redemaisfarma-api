@@ -1,70 +1,79 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.http.HttpStatus
- *  org.springframework.http.HttpStatusCode
- *  org.springframework.http.ResponseEntity
- *  org.springframework.web.bind.annotation.DeleteMapping
- *  org.springframework.web.bind.annotation.GetMapping
- *  org.springframework.web.bind.annotation.PathVariable
- *  org.springframework.web.bind.annotation.PostMapping
- *  org.springframework.web.bind.annotation.PutMapping
- *  org.springframework.web.bind.annotation.RequestBody
- *  org.springframework.web.bind.annotation.RequestMapping
- *  org.springframework.web.bind.annotation.RestController
- */
 package br.com.redemaisfarma.application.controller;
 
 import br.com.redemaisfarma.application.service.ProdutoService;
 import br.com.redemaisfarma.domain.Produto;
-import java.util.List;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-@RestController(value="produtoAppController")
-@RequestMapping(value={"/api/app/produtos"})
+import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.List;
+
+@Slf4j
+@Validated
+@RestController
+@RequiredArgsConstructor
+@RequestMapping(path = "/api/app/produtos", produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = "App - Produtos", description = "CRUD de produtos (camada de aplicação)")
 public class ProdutoController {
+
     private final ProdutoService produtoService;
 
-    public ProdutoController(ProdutoService produtoService) {
-        this.produtoService = produtoService;
+    @Operation(summary = "Criar produto")
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    // @PreAuthorize("hasAuthority('APP:PRODUTO:CRIAR') or hasRole('ADMIN')")
+    public ResponseEntity<Produto> create(@Valid @RequestBody Produto produto) {
+        Produto salvo = produtoService.create(produto);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(salvo.getId())
+                .toUri();
+
+        log.info("Produto id={} criado.", salvo.getId());
+        return ResponseEntity.created(location).body(salvo);
     }
 
-    @PostMapping
-    public ResponseEntity<Produto> create(@RequestBody Produto produto) {
-        Produto salvo = this.produtoService.create(produto);
-        return ResponseEntity.status((HttpStatusCode)HttpStatus.CREATED).body((Object)salvo);
-    }
-
+    @Operation(summary = "Listar produtos")
     @GetMapping
+    // @PreAuthorize("hasAuthority('APP:PRODUTO:LER') or hasRole('ADMIN')")
     public ResponseEntity<List<Produto>> list() {
-        return ResponseEntity.ok(this.produtoService.list());
+        List<Produto> produtos = produtoService.list();
+        return ResponseEntity.ok(produtos);
     }
 
-    @GetMapping(value={"/{id}"})
+    @Operation(summary = "Buscar produto por ID")
+    @GetMapping("/{id}")
+    // @PreAuthorize("hasAuthority('APP:PRODUTO:LER') or hasRole('ADMIN')")
     public ResponseEntity<Produto> findById(@PathVariable Long id) {
-        return ResponseEntity.ok((Object)this.produtoService.findById(id));
+        Produto produto = produtoService.findById(id);
+        return ResponseEntity.ok(produto);
     }
 
-    @PutMapping(value={"/{id}"})
-    public ResponseEntity<Produto> update(@PathVariable Long id, @RequestBody Produto produto) {
-        return ResponseEntity.ok((Object)this.produtoService.update(id, produto));
+    @Operation(summary = "Atualizar produto")
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    // @PreAuthorize("hasAuthority('APP:PRODUTO:ATUALIZAR') or hasRole('ADMIN')")
+    public ResponseEntity<Produto> update(@PathVariable Long id, @Valid @RequestBody Produto produto) {
+        // path param é a fonte de verdade
+        produto.setId(id);
+        Produto atualizado = produtoService.update(id, produto);
+        log.info("Produto id={} atualizado.", id);
+        return ResponseEntity.ok(atualizado);
     }
 
-    @DeleteMapping(value={"/{id}"})
+    @Operation(summary = "Excluir produto")
+    @DeleteMapping("/{id}")
+    // @PreAuthorize("hasAuthority('APP:PRODUTO:EXCLUIR') or hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        this.produtoService.delete(id);
+        produtoService.delete(id);
+        log.info("Produto id={} removido.", id);
         return ResponseEntity.noContent().build();
     }
 }
-

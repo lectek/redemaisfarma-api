@@ -7,9 +7,14 @@
   <meta name="theme-color" content="#0ea5e9" />
 
   <!-- SEO -->
-  <title th:text="${title} ?: 'RedeMaisFarma • Sua farmácia de confiança'">RedeMaisFarma</title>
-  <meta name="description" content="RedeMaisFarma: medicamentos, perfumaria e cuidados pessoais com entrega rápida e segura." />
-  <link rel="canonical" th:href="${#httpServletRequest.requestURL}" />
+  <title th:text="${title} ?: 'RedeMaisFarma • Sua farmácia de confiança'">
+    RedeMaisFarma
+  </title>
+  <meta name="description"
+        content="RedeMaisFarma: medicamentos, perfumaria e cuidados pessoais com entrega rápida e segura." />
+
+  <!-- Canonical: usando link expression, sem #request -->
+  <link rel="canonical" th:href="@{/}" />
 
   <!-- Favicons -->
   <link rel="icon" type="image/png" th:href="@{/images/favicon.png}" />
@@ -20,9 +25,11 @@
   <meta property="og:locale" content="pt_BR" />
   <meta property="og:site_name" content="RedeMaisFarma" />
   <meta property="og:title" content="RedeMaisFarma • Sua farmácia de confiança" />
-  <meta property="og:description" content="Compre com segurança e receba em casa. Atendimento rápido, preços justos e ofertas!" />
+  <meta property="og:description"
+        content="Compre com segurança e receba em casa. Atendimento rápido, preços justos e ofertas!" />
   <meta property="og:image" th:content="@{/images/og-cover.png}" />
-  <meta property="og:url" th:content="${#httpServletRequest.requestURL}" />
+  <!-- og:url também sem #request -->
+  <meta property="og:url" th:content="@{/}" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -30,8 +37,9 @@
   <meta name="twitter:description" content="Medicamentos e perfumaria com entrega rápida." />
   <meta name="twitter:image" th:content="@{/images/og-cover.png}" />
 
-  <!-- CSS (cache-busting) -->
-  <link rel="stylesheet" th:href="@{/css/main.css(v=${#dates.createNow().time})}" />
+  <!-- CSS (cache-busting simples) -->
+  <link rel="stylesheet"
+        th:href="@{/css/main.css(v=${#dates.createNow().time})}" />
 </head>
 
 <body class="body-flex" data-page="layout">
@@ -40,11 +48,15 @@
   <!-- Header -->
   <header th:replace="~{fragments/header :: header}" role="banner"></header>
 
-  <!-- Espaço para sticky header (se usar .main-offset) -->
+  <!-- Espaço para sticky header -->
   <div class="main-offset" aria-hidden="true"></div>
 
   <!-- Conteúdo -->
-  <main id="main-content" role="main" tabindex="-1" th:fragment="conteudo" aria-label="Conteúdo principal da página">
+  <main id="main-content"
+        role="main"
+        tabindex="-1"
+        th:fragment="conteudo"
+        aria-label="Conteúdo principal da página">
     <!-- As páginas inserem seu conteúdo aqui via th:insert/replace -->
   </main>
 
@@ -84,10 +96,16 @@
 
       <div class="footer-column">
         <h4>Receba novidades</h4>
-        <!-- IDs adicionados para compatibilidade total com o JS -->
-        <form id="newsletter-form" th:action="@{/newsletter}" method="post" class="newsletter-form">
+        <form id="newsletter-form"
+              th:action="@{/newsletter}"
+              method="post"
+              class="newsletter-form">
           <label class="sr-only" for="newsletter-email">Seu e-mail</label>
-          <input id="newsletter-email" name="email" type="email" placeholder="Seu e-mail" required />
+          <input id="newsletter-email"
+                 name="email"
+                 type="email"
+                 placeholder="Seu e-mail"
+                 required />
           <button type="submit" class="btn">Assinar</button>
           <div class="error-message" role="alert" aria-live="assertive"></div>
         </form>
@@ -95,7 +113,12 @@
       </div>
 
       <div class="footer-column credits">
-        <small>© <span th:text="${#temporals.format(#temporals.createNow(),'yyyy')}">2025</span> RedeMaisFarma. Todos os direitos reservados.</small>
+        <small>©
+          <span th:text="${#temporals.format(#temporals.createNow(),'yyyy')}">
+            2025
+          </span>
+          RedeMaisFarma. Todos os direitos reservados.
+        </small>
         <small>Desenvolvido por LekTec</small>
       </div>
     </div>

@@ -6,8 +6,6 @@
  *  com.fasterxml.jackson.annotation.JsonProperty
  */
 package br.com.redemaisfarma.adapters.outbound.http.cliente.model;
-
-import br.com.redemaisfarma.adapters.outbound.http.cliente.model.EnderecoExternal;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;

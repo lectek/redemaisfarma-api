@@ -16,7 +16,6 @@ package br.com.redemaisfarma.adapters.outbound.storage.config;
 
 import br.com.redemaisfarma.adapters.outbound.storage.adapter.LocalStorageAdapter;
 import br.com.redemaisfarma.adapters.outbound.storage.adapter.S3StorageAdapter;
-import br.com.redemaisfarma.adapters.outbound.storage.config.StorageProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

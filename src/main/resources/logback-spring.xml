@@ -9,7 +9,7 @@
   <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] cid=%X{cid} %logger{36} - %msg%n"/>
   <property name="ACCESS_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level cid=%X{cid} - %msg%n"/>
 
-  <!-- ===== Appenders comuns ===== -->
+  <!-- ===== Appenders comuns (console + arquivos) ===== -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
       <pattern>${LOG_PATTERN}</pattern>
@@ -22,9 +22,11 @@
     </encoder>
   </appender>
 
+  <!-- Arquivo principal do app -->
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>${LOG_PATH}/${LOG_FILE}</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <!-- Mantido prefixo 'app.' para padronizar arquivo de rotação -->
       <fileNamePattern>${LOG_PATH}/app.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
       <maxHistory>${MAX_HISTORY}</maxHistory>
       <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
@@ -35,6 +37,7 @@
     </encoder>
   </appender>
 
+  <!-- Arquivo de access/auditoria -->
   <appender name="ACCESS_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>${LOG_PATH}/${ACCESS_FILE}</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
@@ -48,22 +51,11 @@
     </encoder>
   </appender>
 
-  <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
-    <queueSize>8192</queueSize>
-    <discardingThreshold>0</discardingThreshold>
-    <neverBlock>true</neverBlock>
-    <appender-ref ref="FILE"/>
-  </appender>
-
-  <appender name="ASYNC_ACCESS_FILE" class="ch.qos.logback.classic.AsyncAppender">
-    <queueSize>4096</queueSize>
-    <discardingThreshold>0</discardingThreshold>
-    <neverBlock>true</neverBlock>
-    <appender-ref ref="ACCESS_FILE"/>
-  </appender>
-
-  <!-- ===== DEV ===== -->
+  <!-- =================================================================== -->
+  <!-- =============================== DEV =============================== -->
+  <!-- =================================================================== -->
   <springProfile name="dev">
+    <!-- Níveis -->
     <logger name="org.springframework" level="INFO"/>
     <logger name="org.springframework.web" level="DEBUG"/>
     <logger name="org.springframework.security" level="INFO"/>
@@ -73,12 +65,13 @@
     <logger name="org.springframework.kafka" level="INFO"/>
     <logger name="br.com.redemaisfarma" level="DEBUG"/>
 
+    <!-- ROOT no dev: console colorido + arquivo síncrono -->
     <root level="DEBUG">
       <appender-ref ref="STDOUT_COLORED"/>
       <appender-ref ref="FILE"/>
     </root>
 
-    <!-- Access/Auditoria -->
+    <!-- Access/Auditoria no dev: console + arquivo síncrono -->
     <logger name="br.com.redemaisfarma.adapters.inbound.web.filter.RequestLoggingFilter" level="INFO" additivity="false">
       <appender-ref ref="STDOUT_COLORED"/>
       <appender-ref ref="ACCESS_FILE"/>
@@ -93,8 +86,11 @@
     </logger>
   </springProfile>
 
-  <!-- ===== DOCKER ===== -->
+  <!-- =================================================================== -->
+  <!-- ============================== DOCKER ============================= -->
+  <!-- =================================================================== -->
   <springProfile name="docker">
+    <!-- Níveis -->
     <logger name="org.springframework" level="${LOG_LEVEL_SPRING:-INFO}"/>
     <logger name="org.springframework.web" level="INFO"/>
     <logger name="org.springframework.security" level="INFO"/>
@@ -103,6 +99,25 @@
     <logger name="com.zaxxer.hikari" level="INFO"/>
     <logger name="org.springframework.kafka" level="INFO"/>
     <logger name="br.com.redemaisfarma" level="${LOG_LEVEL_APP:-INFO}"/>
+
+    <!-- Async wrappers (definidos SOMENTE neste perfil) -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+      <queueSize>16384</queueSize>
+      <discardingThreshold>0</discardingThreshold>
+      <neverBlock>false</neverBlock>          <!-- lossless -->
+      <includeCallerData>false</includeCallerData>
+      <maxFlushTime>2000</maxFlushTime>
+      <appender-ref ref="FILE"/>
+    </appender>
+
+    <appender name="ASYNC_ACCESS_FILE" class="ch.qos.logback.classic.AsyncAppender">
+      <queueSize>8192</queueSize>
+      <discardingThreshold>0</discardingThreshold>
+      <neverBlock>false</neverBlock>          <!-- lossless -->
+      <includeCallerData>false</includeCallerData>
+      <maxFlushTime>2000</maxFlushTime>
+      <appender-ref ref="ACCESS_FILE"/>
+    </appender>
 
     <!-- Root no Docker: console colorido + arquivo assíncrono -->
     <root level="${LOG_LEVEL_ROOT:-INFO}">
@@ -125,8 +140,11 @@
     </logger>
   </springProfile>
 
-  <!-- ===== PROD ===== -->
+  <!-- =================================================================== -->
+  <!-- =============================== PROD ============================== -->
+  <!-- =================================================================== -->
   <springProfile name="prod">
+    <!-- Níveis -->
     <logger name="org.springframework" level="WARN"/>
     <logger name="org.springframework.web" level="INFO"/>
     <logger name="org.springframework.security" level="INFO"/>
@@ -136,11 +154,32 @@
     <logger name="org.springframework.kafka" level="INFO"/>
     <logger name="br.com.redemaisfarma" level="INFO"/>
 
+    <!-- Async wrappers (definidos SOMENTE neste perfil) -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+      <queueSize>16384</queueSize>
+      <discardingThreshold>0</discardingThreshold>
+      <neverBlock>false</neverBlock>          <!-- lossless -->
+      <includeCallerData>false</includeCallerData>
+      <maxFlushTime>2000</maxFlushTime>
+      <appender-ref ref="FILE"/>
+    </appender>
+
+    <appender name="ASYNC_ACCESS_FILE" class="ch.qos.logback.classic.AsyncAppender">
+      <queueSize>8192</queueSize>
+      <discardingThreshold>0</discardingThreshold>
+      <neverBlock>false</neverBlock>          <!-- lossless -->
+      <includeCallerData>false</includeCallerData>
+      <maxFlushTime>2000</maxFlushTime>
+      <appender-ref ref="ACCESS_FILE"/>
+    </appender>
+
+    <!-- Root em produção: console simples (sem cor) + arquivo assíncrono -->
     <root level="${LOG_LEVEL_ROOT:-INFO}">
       <appender-ref ref="STDOUT"/>
       <appender-ref ref="ASYNC_FILE"/>
     </root>
 
+    <!-- Access/Auditoria (assíncrono) -->
     <logger name="br.com.redemaisfarma.adapters.inbound.web.filter.RequestLoggingFilter" level="INFO" additivity="false">
       <appender-ref ref="STDOUT"/>
       <appender-ref ref="ASYNC_ACCESS_FILE"/>
@@ -155,7 +194,9 @@
     </logger>
   </springProfile>
 
-  <!-- ===== TEST ===== -->
+  <!-- =================================================================== -->
+  <!-- =============================== TEST ============================== -->
+  <!-- =================================================================== -->
   <springProfile name="test">
     <logger name="org.springframework" level="WARN"/>
     <logger name="org.springframework.web" level="INFO"/>
@@ -173,7 +214,9 @@
     </root>
   </springProfile>
 
-  <!-- ===== LEGACY (apenas níveis) ===== -->
+  <!-- =================================================================== -->
+  <!-- ============================== LEGACY ============================= -->
+  <!-- =================================================================== -->
   <springProfile name="legacy">
     <logger name="br.com.redemaisfarma.legacy" level="INFO"/>
   </springProfile>

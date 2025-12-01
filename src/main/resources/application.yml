@@ -32,6 +32,7 @@ spring:
           quitwait: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_QUITWAIT:false}
 
   kafka:
+    # Para desenvolvimento fora de Docker, localhost:9092
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: ${app.kafka.groups.pedidos:pedidos-consumer}
@@ -55,7 +56,7 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     enabled: true
-    path: /docs                 # UI ficará em /docs (pode trocar para /swagger-ui se preferir)
+    path: /docs
     filter: true
     try-it-out-enabled: true
     display-request-duration: true
@@ -94,14 +95,17 @@ server:
 
 management:
   server:
+    # Mantém o Actuator na MESMA porta do app (8080) para casar com o healthcheck do container
     port: ${MANAGEMENT_SERVER_PORT:8080}
   endpoints:
     web:
       base-path: /actuator
+      # Exponha health e info (suficiente para liveness/readiness)
       exposure:
-        include: health,info,mappings,loggers,env
+        include: health,info
   endpoint:
     health:
+      # Mostra detalhes só localmente; mude para "never" se não quiser vazar detalhes
       show-details: always
       probes:
         enabled: true
@@ -146,3 +150,37 @@ app:
 api:
   base-path: /api
   version: v2
+
+---
+# Overrides para rodar DENTRO do Docker (profile: docker)
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  kafka:
+    # Usa o broker do Compose (porta 9094 exposta pelo Bitnami com KRaft)
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:redemaisfarma-kafka-dev:9094}
+    listener:
+      # Se quiser garantir startup mesmo sem Kafka, deixe true; ajuste depois conforme necessidade
+      missing-topics-fatal: false
+      # Opcional: desligar listeners na subida do container até estabilizar o ambiente
+      # auto-startup: false
+
+  mail:
+    host: ${SPRING_MAIL_HOST:redemaisfarma-mailpit-dev}
+    port: ${SPRING_MAIL_PORT:8025}
+
+management:
+  server:
+    # Mantém 8080 para alinhar com o healthcheck (http://127.0.0.1:8080/actuator/health/liveness)
+    port: ${MANAGEMENT_SERVER_PORT:8080}
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true

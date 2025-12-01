@@ -1,33 +1,22 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
- *  org.springframework.stereotype.Component
- */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.store;
 
 import br.com.redemaisfarma.adapters.outbound.auth.jwt.model.RefreshToken;
-import br.com.redemaisfarma.adapters.outbound.auth.jwt.store.RefreshTokenStore;
-import java.time.Clock;
-import java.time.Instant;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+
 @Component
-@ConditionalOnProperty(prefix="jwt.refresh-store", name={"type"}, havingValue="memory")
-public class InMemoryRefreshTokenStore
-implements RefreshTokenStore {
+@ConditionalOnProperty(prefix = "jwt.refresh-store", name = {"type"}, havingValue = "memory")
+public class InMemoryRefreshTokenStore implements RefreshTokenStore {
+
     private final Clock clock;
-    private final Map<String, Entry> byToken = new ConcurrentHashMap<String, Entry>();
-    private final Map<Long, CopyOnWriteArraySet<String>> tokensByUser = new ConcurrentHashMap<Long, CopyOnWriteArraySet<String>>();
+    private final Map<String, Entry> byToken = new ConcurrentHashMap<>();
+    private final Map<Long, CopyOnWriteArraySet<String>> tokensByUser = new ConcurrentHashMap<>();
 
     public InMemoryRefreshTokenStore(Clock clock) {
         this.clock = Objects.requireNonNull(clock, "clock");
@@ -35,85 +24,85 @@ implements RefreshTokenStore {
 
     @Override
     public Optional<RefreshToken> findValidByToken(String token) {
-        if (token == null) {
-            return Optional.empty();
-        }
-        Entry e = this.byToken.get(token);
-        if (e == null) {
-            return Optional.empty();
-        }
-        Instant now = this.clock.instant();
+        if (token == null) return Optional.empty();
+        Entry e = byToken.get(token);
+        if (e == null) return Optional.empty();
+
+        Instant now = clock.instant();
         boolean expired = e.expiresAt != null && e.expiresAt.isBefore(now);
         boolean revoked = e.revokedAt != null;
-        boolean bl = revoked;
-        if (expired || revoked) {
-            return Optional.empty();
-        }
+        if (expired || revoked) return Optional.empty();
+
         return Optional.of(e.toModel());
     }
 
     @Override
     public RefreshToken rotate(String currentToken, RefreshToken newToken, Instant revokedAt) {
         if (currentToken != null) {
-            this.internalRevoke(currentToken, revokedAt != null ? revokedAt : this.clock.instant());
+            internalRevoke(currentToken, revokedAt != null ? revokedAt : clock.instant());
         }
-        return this.save(newToken);
+        return save(newToken);
     }
 
     @Override
     public RefreshToken save(RefreshToken token) {
         Objects.requireNonNull(token, "token");
         Entry e = Entry.fromModel(token);
-        this.byToken.put(e.token, e);
-        this.tokensByUser.computeIfAbsent(e.userId, k -> new CopyOnWriteArraySet()).add(e.token);
+        byToken.put(e.token, e);
+        tokensByUser.computeIfAbsent(e.userId, k -> new CopyOnWriteArraySet<>()).add(e.token);
         return e.toModel();
     }
 
     @Override
-    public void revokeAllForUser(Long l, String string, Instant instant) {
-        throw new Error("Unresolved compilation problem: \n\tType mismatch: cannot convert from element type Object to String\n");
+    public void revokeAllForUser(Long userId, String tenantId, Instant when) {
+        if (userId == null) return;
+        CopyOnWriteArraySet<String> set = tokensByUser.get(userId);
+        if (set == null || set.isEmpty()) return;
+
+        Instant ts = (when != null) ? when : clock.instant();
+        for (String t : set) {
+            internalRevoke(t, ts);
+        }
     }
 
     @Override
     public void revokeByToken(String token, Instant revokedAt) {
-        if (token == null) {
-            return;
-        }
-        this.internalRevoke(token, revokedAt != null ? revokedAt : this.clock.instant());
+        if (token == null) return;
+        internalRevoke(token, revokedAt != null ? revokedAt : clock.instant());
     }
 
     @Override
     public long deleteExpired(Instant now) {
-        Instant ref = now != null ? now : this.clock.instant();
+        Instant ref = now != null ? now : clock.instant();
         long count = 0L;
-        Iterator<Map.Entry<String, Entry>> it = this.byToken.entrySet().iterator();
+
+        Iterator<Map.Entry<String, Entry>> it = byToken.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Entry> me = it.next();
             Entry e = me.getValue();
-            if (e.expiresAt == null || !e.expiresAt.isBefore(ref)) continue;
-            it.remove();
-            this.removeFromUserIndex(e.userId, e.token);
-            ++count;
+            if (e.expiresAt != null && e.expiresAt.isBefore(ref)) {
+                it.remove();
+                removeFromUserIndex(e.userId, e.token);
+                count++;
+            }
         }
         return count;
     }
 
     private void internalRevoke(String token, Instant when) {
-        Entry e = this.byToken.get(token);
+        Entry e = byToken.get(token);
         if (e != null) {
             e.revokedAt = when;
         }
     }
 
     private void removeFromUserIndex(Long userId, String token) {
-        if (userId == null) {
-            return;
-        }
-        Set set = this.tokensByUser.get(userId);
+        if (userId == null) return;
+        CopyOnWriteArraySet<String> set = tokensByUser.get(userId);
         if (set != null) {
             set.remove(token);
             if (set.isEmpty()) {
-                this.tokensByUser.remove(userId, (CopyOnWriteArraySet)set);
+                tokensByUser.remove(userId, set);
             }
         }
     }
@@ -127,9 +116,6 @@ implements RefreshTokenStore {
         Instant revokedAt;
         String userAgent;
         String ipAddress;
-
-        private Entry() {
-        }
 
         static Entry fromModel(RefreshToken rt) {
             Entry e = new Entry();
@@ -146,16 +132,15 @@ implements RefreshTokenStore {
 
         RefreshToken toModel() {
             RefreshToken rt = new RefreshToken();
-            rt.setToken(this.token);
-            rt.setUserId(this.userId);
-            rt.setTenantId(this.tenantId);
-            rt.setIssuedAt(this.issuedAt);
-            rt.setExpiresAt(this.expiresAt);
-            rt.setRevokedAt(this.revokedAt);
-            rt.setUserAgent(this.userAgent);
-            rt.setIpAddress(this.ipAddress);
+            rt.setToken(token);
+            rt.setUserId(userId);
+            rt.setTenantId(tenantId);
+            rt.setIssuedAt(issuedAt);
+            rt.setExpiresAt(expiresAt);
+            rt.setRevokedAt(revokedAt);
+            rt.setUserAgent(userAgent);
+            rt.setIpAddress(ipAddress);
             return rt;
         }
     }
 }
-

@@ -11,10 +11,6 @@
  *  io.swagger.v3.oas.annotations.media.Schema$RequiredMode
  */
 package br.com.redemaisfarma.application.dto.response;
-
-import br.com.redemaisfarma.application.dto.response.AtendenteDTO;
-import br.com.redemaisfarma.application.dto.response.ClienteDTO;
-import br.com.redemaisfarma.application.dto.response.ItemPedidoResponseDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

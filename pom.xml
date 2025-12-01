@@ -17,7 +17,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <!-- VersÃµes principais -->
+    <!-- Versões principais -->
     <spring-boot.version>3.3.4</spring-boot.version>
     <mapstruct.version>1.6.2</mapstruct.version>
     <lombok.version>1.18.34</lombok.version>
@@ -147,6 +147,12 @@
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
     </dependency>
 
+    <!-- >>> ADIÇÃO: Thymeleaf + Spring Security 6 dialect <<< -->
+    <dependency>
+      <groupId>org.thymeleaf.extras</groupId>
+      <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+    </dependency>
+
     <!-- Kafka -->
     <dependency>
       <groupId>org.springframework.kafka</groupId>
@@ -167,7 +173,7 @@
       <version>5.0.3.java11</version>
     </dependency>
 
-    <!-- Hibernate 6: dialetos comunitÃ¡rios (inclui FirebirdDialect) -->
+    <!-- Hibernate 6: dialetos comunitários (inclui FirebirdDialect) -->
     <dependency>
       <groupId>org.hibernate.orm</groupId>
       <artifactId>hibernate-community-dialects</artifactId>
@@ -305,7 +311,7 @@
       </exclusions>
     </dependency>
 
-    <!-- JUnit 5 + Mockito (Jupiter) explÃ­citos -->
+    <!-- JUnit 5 + Mockito (Jupiter) explícitos -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
@@ -368,7 +374,7 @@
                   <excludes>
                     <exclude>commons-logging:commons-logging</exclude>
                   </excludes>
-                  <message>'commons-logging' Ã© proibido. Use SLF4J (Spring Boot). AWS SDK deve usar 'url-connection-client'.</message>
+                  <message>'commons-logging' é proibido. Use SLF4J (Spring Boot). AWS SDK deve usar 'url-connection-client'.</message>
                 </bannedDependencies>
                 <requireUpperBoundDeps/>
               </rules>
@@ -534,7 +540,7 @@
         <version>${maven-resources-plugin.version}</version>
       </plugin>
 
-      <!-- Analyze dependÃªncias -->
+      <!-- Analyze dependências -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -566,7 +572,6 @@
               </sources>
             </configuration>
           </execution>
-          
         </executions>
       </plugin>
 
@@ -635,4 +640,3 @@
     </pluginRepository>
   </pluginRepositories>
 </project>
-

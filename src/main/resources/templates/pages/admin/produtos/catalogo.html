@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Catálogo • Produtos</title>
   <link rel="stylesheet" th:href="@{/css/main.css}"/>
+
+  <!-- CSRF (para chamadas JS autenticadas, se necessário) -->
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+  <style>
+    #toast{position:fixed;right:16px;bottom:16px;display:grid;gap:8px;z-index:9999}
+    .toast{background:#0f1320;color:#e9eef6;border:1px solid rgba(255,255,255,.07);
+           border-radius:12px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .toast.ok{border-color:rgba(46,204,113,.5)}
+    .toast.err{border-color:rgba(231,76,60,.5)}
+    .card-prod{display:flex;flex-direction:column;gap:.5rem}
+    .card-prod .thumb{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;background:#111}
+    .price{font-weight:600}
+    .muted{opacity:.7}
+  </style>
 </head>
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
@@ -41,73 +57,7 @@
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 
-<!-- Modal de edição (reaproveita teu components/modal.css) -->
-<div class="modal" id="modal-editar" aria-hidden="true">
-  <div class="modal-content card max-w-2xl">
-    <button class="modal-close" aria-label="Fechar">&times;</button>
-    <h2 class="h3 mb-3">Editar produto</h2>
-
-    <form id="form-editar" class="stack gap-3">
-      <input type="hidden" id="edit-id"/>
-
-      <label class="stack">
-        <span>Nome</span>
-        <input class="input" id="edit-nome" required maxlength="150"/>
-      </label>
-
-      <label class="stack">
-        <span>Descrição</span>
-        <textarea class="input" id="edit-desc" rows="3" maxlength="255"></textarea>
-      </label>
-
-      <div class="form-row gap-3">
-        <label class="stack">
-          <span>Preço de venda (R$)</span>
-          <input class="input" id="edit-preco" type="number" min="0.01" step="0.01" required/>
-        </label>
-        <label class="stack">
-          <span>Estoque</span>
-          <input class="input" id="edit-estoque" type="number" min="0" step="1"/>
-        </label>
-      </div>
-
-      <div class="form-row gap-3">
-        <label class="stack">
-          <span>Disponível</span>
-          <select class="input" id="edit-disponivel">
-            <option value="true">Sim</option>
-            <option value="false">Não</option>
-          </select>
-        </label>
-        <label class="stack flex-1">
-          <span>Categoria</span>
-          <input class="input" id="edit-categoria" maxlength="100"/>
-        </label>
-      </div>
-
-      <label class="stack">
-        <span>Imagem (URL)</span>
-        <input class="input" id="edit-imagem-url" maxlength="255" placeholder="https://…"/>
-      </label>
-
-      <div class="form-row gap-3">
-        <label class="stack">
-          <span>Trocar imagem (arquivo)</span>
-          <input class="input" id="edit-imagem-file" type="file" accept="image/*"/>
-        </label>
-        <div class="stack">
-          <span class="text-muted">Código de barras (EAN)</span>
-          <span id="edit-ean" class="code bg-muted px-2 py-1 radius-sm"></span>
-        </div>
-      </div>
-
-      <div class="right mt-2">
-        <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
-        <button type="submit" class="btn">Salvar</button>
-      </div>
-    </form>
-  </div>
-</div>
+<div id="toast"></div>
 
 <!-- Thymeleaf injeta o contexto para o JS -->
 <script th:inline="javascript">
@@ -116,6 +66,7 @@
   };
 </script>
 
+<script th:src="@{/js/lib/ui.js}"></script>
 <script th:src="@{/js/pages/catalogo.js}"></script>
 </body>
 </html>

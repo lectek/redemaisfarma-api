@@ -16,8 +16,6 @@
  *  jakarta.persistence.Version
  */
 package br.com.redemaisfarma.adapters.outbound.persistence.entity;
-
-import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

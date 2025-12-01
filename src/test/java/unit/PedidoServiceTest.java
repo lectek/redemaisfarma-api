@@ -1,46 +1,111 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  Pedido
- *  PedidoJPARepository
- *  PedidoService
- *  org.junit.jupiter.api.BeforeEach
- *  org.junit.jupiter.api.Test
- *  org.junit.jupiter.api.extension.ExtendWith
- *  org.mockito.InjectMocks
- *  org.mockito.Mock
- *  org.mockito.junit.jupiter.MockitoExtension
- */
 package unit;
 
-import org.junit.jupiter.api.BeforeEach;
+import br.com.redemaisfarma.application.service.PedidoService;
+import br.com.redemaisfarma.domain.Pedido;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(value={MockitoExtension.class})
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class PedidoServiceTest {
-    @Mock
-    private PedidoJPARepository pedidoRepository;
-    @InjectMocks
+
+    // Usa CALLS_REAL_METHODS para executar os métodos default da interface;
+    // os métodos abstratos (findById, list, etc.) serão stubados.
+    @Mock(answer = Answers.CALLS_REAL_METHODS)
     private PedidoService pedidoService;
+
+    @Mock
     private Pedido pedido;
 
-    PedidoServiceTest() {
-        throw new Error("Unresolved compilation problems: \n\tThe import br.com.redemaisfarma.adapters.outbound.persistence cannot be resolved\n\tThe import br.com.redemaisfarma.application.service cannot be resolved\n\tThe import br.com.redemaisfarma.domain cannot be resolved\n\tThe import br.com.redemaisfarma.domain cannot be resolved\n\tPedidoJPARepository cannot be resolved to a type\n\tPedidoService cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tStatusPedido cannot be resolved to a variable\n\tPedidoJPARepository cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedidoJPARepository cannot be resolved to a type\n\tStatusPedido cannot be resolved to a variable\n\tPedidoJPARepository cannot be resolved to a type\n");
-    }
+    private final Long ID = 1L;
 
-    @BeforeEach
-    void setup() {
-        throw new Error("Unresolved compilation problems: \n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tStatusPedido cannot be resolved to a variable\n");
+    @Test
+    void findByIdOptional_quandoEncontrar() {
+        // arrange
+        when(pedidoService.findById(ID)).thenReturn(pedido);
+
+        // act
+        Optional<Pedido> result = pedidoService.findByIdOptional(ID);
+
+        // assert
+        assertTrue(result.isPresent());
+        assertSame(pedido, result.get());
+        verify(pedidoService).findById(ID); // default delega para findById
     }
 
     @Test
-    void deveRetornarPedidoPorId() {
-        throw new Error("Unresolved compilation problems: \n\tPedidoJPARepository cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedido cannot be resolved to a type\n\tPedidoJPARepository cannot be resolved to a type\n\tStatusPedido cannot be resolved to a variable\n\tPedidoJPARepository cannot be resolved to a type\n");
+    void findByIdOptional_quandoFindByIdLancaIllegalArgument() {
+        // arrange
+        when(pedidoService.findById(ID)).thenThrow(new IllegalArgumentException("não encontrado"));
+
+        // act
+        Optional<Pedido> result = pedidoService.findByIdOptional(ID);
+
+        // assert
+        assertTrue(result.isEmpty());
+        verify(pedidoService).findById(ID);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    void buscarPorId_deveDelegarParaFindById() {
+        when(pedidoService.findById(ID)).thenReturn(pedido);
+
+        Pedido r = pedidoService.buscarPorId(ID); // método default (deprecated) da interface
+
+        assertSame(pedido, r);
+        verify(pedidoService).findById(ID);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    void listarTodos_deveDelegarParaList() {
+        List<Pedido> lista = List.of(pedido);
+        when(pedidoService.list()).thenReturn(lista);
+
+        List<Pedido> r = pedidoService.listarTodos(); // default (deprecated)
+
+        assertEquals(lista, r);
+        verify(pedidoService).list();
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    void salvar_deveDelegarParaCreate() {
+        when(pedidoService.create(pedido)).thenReturn(pedido);
+
+        Pedido r = pedidoService.salvar(pedido); // default (deprecated)
+
+        assertSame(pedido, r);
+        verify(pedidoService).create(pedido);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    void atualizar_deveDelegarParaUpdate() {
+        when(pedidoService.update(ID, pedido)).thenReturn(pedido);
+
+        Pedido r = pedidoService.atualizar(ID, pedido); // default (deprecated)
+
+        assertSame(pedido, r);
+        verify(pedidoService).update(ID, pedido);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    void deletar_deveDelegarParaDelete() {
+        // act
+        pedidoService.deletar(ID); // default (deprecated)
+
+        // assert
+        verify(pedidoService).delete(ID);
     }
 }
-

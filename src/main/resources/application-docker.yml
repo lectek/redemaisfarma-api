@@ -68,7 +68,7 @@ spring:
       max-request-size: 20MB
 
   kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:${KAFKA_BOOTSTRAP_SERVERS:redemaisfarma-k:9092}}
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}}
     listener:
       ack-mode: RECORD
       missing-topics-fatal: false
@@ -96,7 +96,7 @@ spring:
 # ===== PROPRIEDADES CUSTOM =====
 kafka:
   enabled: true
-  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:redemaisfarma-k:9092}
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
   acks: 1
   retries: 3
   batch-size: 16384
@@ -106,7 +106,7 @@ kafka:
 
 legacy:
   datasource:
-    url: jdbc:firebirdsql://${FIREBIRD_HOST:firebird}:${FIREBIRD_PORT:3050}/${FIREBIRD_DATABASE:digifarma6.FDB}?encoding=WIN1252&sql_dialect=3
+    url: jdbc:firebirdsql://${FIREBIRD_HOST:firebird}:${FIREBIRD_PORT:3050}//firebird/data/${FIREBIRD_DATABASE:digifarma6.fdb}?encoding=WIN1252&sql_dialect=3
     username: ${FIREBIRD_USER:SYSDBA}
     password: ${ISC_PASSWORD:masterkey}
     driver-class-name: org.firebirdsql.jdbc.FBDriver
@@ -138,7 +138,7 @@ jwt:
   access-token-expiration-minutes: ${JWT_ACCESS_TOKEN_TTL_MINUTES:60}
   refresh-token-expiration-minutes: ${JWT_REFRESH_TOKEN_TTL_MINUTES:43200}
   blacklist:
-    strategy: ${JWT_BLACKLIST_STRATEGY:noop}  # noop | memory | redis
+    strategy: ${JWT_BLACKLIST_STRATEGY:noop}
 
 security:
   jwt:

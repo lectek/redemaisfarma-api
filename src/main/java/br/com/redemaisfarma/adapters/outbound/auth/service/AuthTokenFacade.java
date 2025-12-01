@@ -15,7 +15,6 @@ import br.com.redemaisfarma.adapters.outbound.auth.jwt.model.TokenSubject;
 import br.com.redemaisfarma.adapters.outbound.auth.jwt.service.JwtTokenService;
 import br.com.redemaisfarma.adapters.outbound.auth.jwt.store.RefreshTokenStore;
 import br.com.redemaisfarma.adapters.outbound.auth.jwt.store.TokenBlacklist;
-import br.com.redemaisfarma.adapters.outbound.auth.service.AuthTokenOperations;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Instant;

@@ -2,9 +2,6 @@
  * Decompiled with CFR 0.152.
  */
 package br.com.redemaisfarma.domain;
-
-import br.com.redemaisfarma.domain.Cliente;
-import br.com.redemaisfarma.domain.ItemPedido;
 import br.com.redemaisfarma.domain.enums.StatusPedido;
 import br.com.redemaisfarma.domain.enums.TipoPagamento;
 import java.math.BigDecimal;

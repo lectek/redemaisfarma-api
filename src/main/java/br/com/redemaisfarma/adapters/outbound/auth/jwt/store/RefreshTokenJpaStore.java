@@ -9,7 +9,6 @@
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.store;
 
 import br.com.redemaisfarma.adapters.outbound.auth.jwt.model.RefreshToken;
-import br.com.redemaisfarma.adapters.outbound.auth.jwt.store.RefreshTokenStore;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.RefreshTokenEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.RefreshTokenJpaRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.mapper.RefreshTokenMapper;

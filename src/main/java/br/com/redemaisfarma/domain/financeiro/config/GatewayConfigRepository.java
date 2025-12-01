@@ -5,8 +5,6 @@
  *  org.springframework.data.jpa.repository.JpaRepository
  */
 package br.com.redemaisfarma.domain.financeiro.config;
-
-import br.com.redemaisfarma.domain.financeiro.config.GatewayConfig;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,28 +1,27 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.data.domain.Page
- *  org.springframework.data.domain.Pageable
- *  org.springframework.data.jpa.repository.JpaRepository
- *  org.springframework.data.jpa.repository.Query
- */
 package br.com.redemaisfarma.adapters.outbound.persistence.repository;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.AppSettingEntity;
-import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-public interface AppSettingRepository
-extends JpaRepository<AppSettingEntity, Long> {
-    public Optional<AppSettingEntity> findBySettingKey(String var1);
+import java.util.Optional;
 
-    public boolean existsBySettingKey(String var1);
+public interface AppSettingRepository extends JpaRepository<AppSettingEntity, Long> {
 
-    @Query(value="select s\nfrom AppSettingEntity s\nwhere (:q is null or :q = ''\n       or lower(s.settingKey) like lower(concat('%', :q, '%'))\n       or lower(s.description) like lower(concat('%', :q, '%')))\norder by s.settingKey asc\n")
-    public Page<AppSettingEntity> search(String var1, Pageable var2);
+    Optional<AppSettingEntity> findBySettingKey(String settingKey);
+
+    boolean existsBySettingKey(String settingKey);
+
+    @Query("""
+        select s
+        from AppSettingEntity s
+        where (:q is null or :q = ''
+               or lower(s.settingKey) like lower(concat('%', :q, '%'))
+               or lower(s.description) like lower(concat('%', :q, '%')))
+        order by s.settingKey asc
+        """)
+    Page<AppSettingEntity> search(@Param("q") String q, Pageable pageable);
 }
-

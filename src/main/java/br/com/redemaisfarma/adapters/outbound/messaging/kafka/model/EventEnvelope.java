@@ -1,105 +1,96 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  com.fasterxml.jackson.annotation.JsonFormat
- *  com.fasterxml.jackson.annotation.JsonFormat$Shape
- */
 package br.com.redemaisfarma.adapters.outbound.messaging.kafka.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-public class EventEnvelope<T>
-implements Serializable {
+/**
+ * Envelope genérico para eventos publicados/consumidos no Kafka.
+ * @param <T> tipo do payload do evento
+ */
+public class EventEnvelope<T> implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String eventId;
     private String eventType;
     private String source;
-    @JsonFormat(shape=JsonFormat.Shape.STRING)
+
+    // Serializa como string ISO-8601 (requer JavaTimeModule no ObjectMapper)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant occurredAt;
+
     private String tenantId;
     private T data;
 
     public EventEnvelope() {
+        // Jackson
     }
 
     public EventEnvelope(String eventType, String source, String tenantId, T data) {
         this.eventId = UUID.randomUUID().toString();
         this.eventType = eventType;
         this.source = source;
-        this.occuredNow();
+        this.occurredNow();
         this.tenantId = tenantId;
         this.data = data;
     }
 
-    public void occuredNow() {
+    /** Fábrica conveniente. */
+    public static <T> EventEnvelope<T> of(String eventType, String source, String tenantId, T data) {
+        return new EventEnvelope<>(eventType, source, tenantId, data);
+    }
+
+    /** Define occurredAt = agora (forma correta). */
+    public void occurredNow() {
         this.occurredAt = Instant.now();
     }
 
-    public String getEventId() {
-        return this.eventId;
+    /** Alias legado para compatibilidade com código já decompilado. */
+    @Deprecated
+    public void occuredNow() {
+        this.occurredNow();
     }
 
-    public void setEventId(String eventId) {
-        this.eventId = eventId;
-    }
+    public String getEventId() { return eventId; }
+    public void setEventId(String eventId) { this.eventId = eventId; }
 
-    public String getEventType() {
-        return this.eventType;
-    }
+    public String getEventType() { return eventType; }
+    public void setEventType(String eventType) { this.eventType = eventType; }
 
-    public void setEventType(String eventType) {
-        this.eventType = eventType;
-    }
+    public String getSource() { return source; }
+    public void setSource(String source) { this.source = source; }
 
-    public String getSource() {
-        return this.source;
-    }
+    public Instant getOccurredAt() { return occurredAt; }
+    public void setOccurredAt(Instant occurredAt) { this.occurredAt = occurredAt; }
 
-    public void setSource(String source) {
-        this.source = source;
-    }
+    public String getTenantId() { return tenantId; }
+    public void setTenantId(String tenantId) { this.tenantId = tenantId; }
 
-    public Instant getOccurredAt() {
-        return this.occurredAt;
-    }
+    public T getData() { return data; }
+    public void setData(T data) { this.data = data; }
 
-    public void setOccurredAt(Instant occurredAt) {
-        this.occurredAt = occurredAt;
-    }
-
-    public String getTenantId() {
-        return this.tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public T getData() {
-        return this.data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
+    @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof EventEnvelope)) {
-            return false;
-        }
-        EventEnvelope that = (EventEnvelope)o;
-        return Objects.equals(this.eventId, that.eventId);
+        if (this == o) return true;
+        if (!(o instanceof EventEnvelope<?> that)) return false;
+        return Objects.equals(eventId, that.eventId);
     }
 
+    @Override
     public int hashCode() {
-        return Objects.hash(this.eventId);
+        return Objects.hash(eventId);
+    }
+
+    @Override
+    public String toString() {
+        return "EventEnvelope{" +
+                "eventType='" + eventType + '\'' +
+                ", source='" + source + '\'' +
+                ", occurredAt=" + occurredAt +
+                ", tenantId='" + tenantId + '\'' +
+                '}';
     }
 }
-

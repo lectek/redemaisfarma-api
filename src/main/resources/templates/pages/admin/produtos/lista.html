@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Produtos • Admin</title>
   <link rel="stylesheet" th:href="@{/css/main.css}" />
+
+  <!-- CSRF (Spring Security + Thymeleaf) -->
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+  <style>
+    /* extras leves para os botões/badges (mantém seu visual) */
+    .actions{display:flex;gap:.5rem;flex-wrap:wrap}
+    .badge{font-size:.75rem;padding:.15rem .5rem;border-radius:999px;white-space:nowrap}
+    .badge-ok{background:rgba(46,204,113,.15);color:#2ecc71}
+    .badge-warn{background:rgba(241,196,15,.15);color:#f1c40f}
+    #toast{position:fixed;right:16px;bottom:16px;display:grid;gap:8px;z-index:9999}
+    .toast{background:#0f1320;color:#e9eef6;border:1px solid rgba(255,255,255,.07);
+           border-radius:12px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .toast.ok{border-color:rgba(46,204,113,.5)}
+    .toast.err{border-color:rgba(231,76,60,.5)}
+  </style>
 </head>
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
@@ -31,23 +48,57 @@
       <table class="table">
         <thead>
           <tr>
-            <th>Imagem</th><th>Nome</th><th>Preço</th><th>Estoque</th><th>Categoria</th><th>Ações</th>
+            <th>Imagem</th>
+            <th>Nome</th>
+            <th>Preço</th>
+            <th>Estoque</th>
+            <th>Categoria</th>
+            <th>Imagem IA</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
           <tr th:each="p : ${produtos}">
-            <td><img th:src="${p.imagemUrl} ?: @{/img/placeholder.png}" alt="" width="48" height="48" loading="lazy"/></td>
+            <td>
+              <img th:src="${p.imagemUrl} ?: @{/img/placeholder.png}" alt="" width="48" height="48" loading="lazy"/>
+            </td>
             <td th:text="${p.nome}">Dipirona 500mg</td>
             <td th:text="${#numbers.formatCurrency(p.preco)}">R$ 0,00</td>
             <td th:text="${p.estoque}">0</td>
             <td th:text="${p.categoria}">Genérico</td>
+
+            <!-- status imagem IA -->
+            <td>
+              <span th:if="${p.imagemUrl == null or #strings.isEmpty(p.imagemUrl)}"
+                    class="badge badge-warn">Sem imagem</span>
+              <a th:if="${p.imagemUrl != null and !#strings.isEmpty(p.imagemUrl)}"
+                 th:href="${p.imagemUrl}" target="_blank" class="badge badge-ok">Ver</a>
+            </td>
+
             <td class="actions">
               <a class="btn btn-ghost" th:href="@{|/admin/produtos/${p.id}/editar|}">Editar</a>
               <button class="btn btn-ghost" type="button" th:attr="data-id=${p.id}" data-open="#modal-excluir">Excluir</button>
+
+              <!-- NOVOS: gerar/regenerar via fila -->
+              <button class="btn btn-primary"
+                      type="button"
+                      data-action="queue"
+                      th:attr="data-id=${p.id}">
+                Gerar
+              </button>
+
+              <button class="btn btn-ghost"
+                      type="button"
+                      data-action="regen"
+                      th:attr="data-id=${p.id}"
+                      th:disabled="${p.imagemUrl != null and !#strings.isEmpty(p.imagemUrl)}">
+                Regenerar
+              </button>
             </td>
           </tr>
+
           <tr th:if="${#lists.isEmpty(produtos)}">
-            <td colspan="6" class="text-center text-muted">Nenhum produto cadastrado.</td>
+            <td colspan="7" class="text-center text-muted">Nenhum produto cadastrado.</td>
           </tr>
         </tbody>
       </table>
@@ -58,7 +109,11 @@
 </div>
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<div id="toast"></div>
+
 <script defer>
+  // Modal excluir (já existia)
   document.addEventListener('click',(e)=>{
     if(e.target.matches('[data-open]')){
       const sel=e.target.getAttribute('data-open');
@@ -71,6 +126,55 @@
       },{once:true});
     }
   });
+
+  // ---- Integração Imagem IA (queue/regenerate) ----
+  (()=>{
+    const toastBox = document.getElementById('toast');
+    const toast = (m,t='ok')=>{
+      const el=document.createElement('div');
+      el.className=`toast ${t}`; el.textContent=m;
+      toastBox.appendChild(el); setTimeout(()=>el.remove(),3500);
+    };
+
+    const CSRF_TOKEN = document.querySelector('meta[name="_csrf"]')?.content;
+    const CSRF_HEADER = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+    const withCsrf = (init={})=>{
+      init.headers = Object.assign({}, init.headers||{}, { [CSRF_HEADER]: CSRF_TOKEN });
+      return init;
+    };
+
+    document.addEventListener('click', async (ev)=>{
+      const btn = ev.target.closest('button[data-action][data-id]');
+      if(!btn) return;
+
+      const id = btn.getAttribute('data-id');
+      const action = btn.getAttribute('data-action');
+      const endpoint = action === 'regen'
+        ? `/api/admin/imagens/${id}/regenerate`
+        : `/api/admin/imagens/${id}/queue`;
+
+      btn.disabled = true;
+      try{
+        const res = await fetch(endpoint, withCsrf({ method:'POST', credentials:'same-origin' }));
+        if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        toast(action==='regen' ? 'Regeneração solicitada' : 'Enfileirado com sucesso','ok');
+
+        // Atualiza badge da linha (opcional)
+        const row = btn.closest('tr');
+        if(row){
+          const badgeCell = row.querySelector('td:nth-child(6)'); // coluna "Imagem IA"
+          if(badgeCell){
+            badgeCell.innerHTML = '<span class="badge badge-warn">Em processamento…</span>';
+          }
+        }
+      }catch(err){
+        console.error(err);
+        toast('Falha ao enviar ação','err');
+      }finally{
+        btn.disabled = false;
+      }
+    });
+  })();
 </script>
 </body>
 </html>

@@ -6,8 +6,6 @@
  *  org.springframework.stereotype.Component
  */
 package br.com.redemaisfarma.adapters.outbound.auth.jwt.store;
-
-import br.com.redemaisfarma.adapters.outbound.auth.jwt.store.TokenBlacklist;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

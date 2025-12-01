@@ -1,91 +1,85 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  lombok.Generated
- *  org.springframework.data.domain.Page
- *  org.springframework.data.domain.Pageable
- *  org.springframework.stereotype.Service
- */
 package br.com.redemaisfarma.application.service;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 import lombok.Generated;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 @Service
 public class ProdutoAdminService {
+
     private final ProdutoRepository repository;
 
     public Page<ProdutoEntity> buscarPagina(String q, String categoria, Pageable pageable) {
-        String qNorm = ProdutoAdminService.normalize(q);
-        String catNorm = ProdutoAdminService.normalize(categoria);
-        return this.repository.searchPageByCategoria(qNorm, catNorm, pageable);
+        String qNorm = normalize(q);
+        String catNorm = normalize(categoria);
+        return repository.searchPageByCategoria(qNorm, catNorm, pageable);
     }
 
     public List<ProdutoEntity> buscarParaExport(String q, String categoria, int limit) {
-        String qNorm = ProdutoAdminService.normalize(q);
-        String catNorm = ProdutoAdminService.normalize(categoria);
-        int safeLimit = Math.max(1, Math.min(limit, 50000));
+        String qNorm = normalize(q);
+        String catNorm = normalize(categoria);
+        int safeLimit = Math.max(1, Math.min(limit, 50_000));
+
         if (qNorm == null && catNorm == null) {
-            List<ProdutoEntity> all = this.repository.findTop2000ByOrderByIdAsc();
+            List<ProdutoEntity> all = repository.findTop2000ByOrderByIdAsc();
             return safeLimit < 2000 ? all.stream().limit(safeLimit).toList() : all;
         }
-        return this.repository.searchForExportLimited(qNorm, catNorm, Math.min(safeLimit, 2000));
+        // mesmo com limite alto, o export controlado vai até 2000
+        return repository.searchForExportLimited(qNorm, catNorm, Math.min(safeLimit, 2000));
     }
 
+    /** Escreve CSV em UTF-8 (com BOM) e separador ';' */
     public void writeCsv(OutputStream os, String q, String categoria, int limit) throws IOException {
-        List<ProdutoEntity> produtos = this.buscarParaExport(q, categoria, limit);
-        Throwable throwable = null;
-        Object var7_8 = null;
-        try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8));){
-            w.write(65279);
-            w.write("id;descricao;codigo_barras;preco_venda\n");
+        List<ProdutoEntity> produtos = buscarParaExport(q, categoria, limit);
+
+        try (BufferedWriter w = new BufferedWriter(new OutputStreamWriter(os, StandardCharsets.UTF_8))) {
+            // BOM UTF-8
+            w.write('\uFEFF');
+
+            // cabeçalho
+            w.append("id;descricao;codigo_barras;preco_venda\n");
+
+            // linhas
             for (ProdutoEntity p : produtos) {
-                w.write(ProdutoAdminService.csv(p.getId()));
-                w.write(59);
-                w.write(ProdutoAdminService.csv(p.getDescricao()));
-                w.write(59);
-                w.write(ProdutoAdminService.csv(p.getCodigoBarras()));
-                w.write(59);
-                w.write(ProdutoAdminService.csv(p.getPrecoVenda()));
-                w.write(10);
+                w.append(csv(p.getId())).append(';')
+                 .append(csv(p.getDescricao())).append(';')
+                 .append(csv(p.getCodigoBarras())).append(';')
+                 .append(csv(formatPreco(p.getPrecoVenda()))).append('\n');
             }
+            // try-with-resources já garante flush/close; flush aqui é opcional
             w.flush();
         }
-        catch (Throwable throwable2) {
-            if (throwable == null) {
-                throwable = throwable2;
-            } else if (throwable != throwable2) {
-                throwable.addSuppressed(throwable2);
-            }
-            throw throwable;
-        }
     }
 
+    // -------- helpers --------
+
     private static String csv(Object o) {
-        if (o == null) {
-            return "";
-        }
+        if (o == null) return "";
         String s = String.valueOf(o);
         boolean wrap = s.contains(";") || s.contains("\"") || s.contains("\n") || s.contains("\r");
-        s = s.replace("\"", "\"\"");
+        s = s.replace("\"", "\"\""); // escapa aspas
         return wrap ? "\"" + s + "\"" : s;
     }
 
+    private static String formatPreco(BigDecimal v) {
+        if (v == null) return "";
+        // evita notação científica e vírgula de locale
+        return v.stripTrailingZeros().toPlainString();
+    }
+
     private static String normalize(String s) {
-        if (s == null) {
-            return null;
-        }
+        if (s == null) return null;
         String t = s.trim();
         return t.isEmpty() ? null : t;
     }
@@ -95,4 +89,3 @@ public class ProdutoAdminService {
         this.repository = repository;
     }
 }
-

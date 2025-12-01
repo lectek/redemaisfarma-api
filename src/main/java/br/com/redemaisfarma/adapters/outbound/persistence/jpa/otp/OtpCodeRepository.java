@@ -5,8 +5,6 @@
  *  org.springframework.data.jpa.repository.JpaRepository
  */
 package br.com.redemaisfarma.adapters.outbound.persistence.jpa.otp;
-
-import br.com.redemaisfarma.adapters.outbound.persistence.jpa.otp.OtpCodeEntity;
 import java.time.Instant;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

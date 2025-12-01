@@ -17,7 +17,6 @@
  */
 package br.com.redemaisfarma.adapters.outbound.cache.config;
 
-import br.com.redemaisfarma.adapters.outbound.cache.config.RedisProperties;
 import java.time.Duration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;

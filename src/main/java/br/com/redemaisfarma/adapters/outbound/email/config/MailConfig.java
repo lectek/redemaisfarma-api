@@ -7,7 +7,6 @@
  */
 package br.com.redemaisfarma.adapters.outbound.email.config;
 
-import br.com.redemaisfarma.adapters.outbound.email.config.AppMailProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 

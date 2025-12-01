@@ -7,7 +7,6 @@
  */
 package br.com.redemaisfarma.user.audit;
 
-import br.com.redemaisfarma.user.audit.RoleAudit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

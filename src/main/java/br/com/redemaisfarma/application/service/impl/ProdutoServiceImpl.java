@@ -1,16 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  br.com.redemaisfarma.application.dto.request.CadastroProdutoRequestDTO
- *  br.com.redemaisfarma.application.mapper.ProdutoMapper
- *  br.com.redemaisfarma.domain.Produto
- *  lombok.Generated
- *  org.springframework.context.annotation.Primary
- *  org.springframework.data.domain.Pageable
- *  org.springframework.stereotype.Service
- *  org.springframework.transaction.annotation.Transactional
- */
 package br.com.redemaisfarma.application.service.impl;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
@@ -20,60 +7,67 @@ import br.com.redemaisfarma.application.dto.request.CadastroProdutoRequestDTO;
 import br.com.redemaisfarma.application.mapper.ProdutoMapper;
 import br.com.redemaisfarma.application.service.ProdutoService;
 import br.com.redemaisfarma.domain.Produto;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.Generated;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 @Primary
-public class ProdutoServiceImpl
-implements ProdutoService {
+public class ProdutoServiceImpl implements ProdutoService {
+
     private final ProdutoJpaRepository repo;
 
     @Override
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public Produto findById(Long id) {
-        ProdutoEntity e = (ProdutoEntity)this.repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Produto n\u00e3o encontrado: " + String.valueOf(id)));
-        return ProdutoMapper.toDomain((ProdutoEntity)e);
+        ProdutoEntity e = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + id));
+        return ProdutoMapper.toDomain(e);
     }
 
     @Override
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<Produto> list() {
-        return this.repo.findAll().stream().map(ProdutoMapper::toDomain).toList();
+        return repo.findAll().stream()
+                .map(ProdutoMapper::toDomain)
+                .toList();
     }
 
     @Override
     @Transactional
     public Produto create(Produto produto) {
-        ProdutoEntity e = ProdutoMapper.toEntity((Produto)produto);
+        ProdutoEntity e = ProdutoMapper.toEntity(produto);
         e.setId(null);
-        e.setStatus(ProdutoStatus.IMPORTADO);
-        e.setDataImportacao(LocalDateTime.now());
-        ProdutoEntity salvo = (ProdutoEntity)this.repo.save(e);
-        return ProdutoMapper.toDomain((ProdutoEntity)salvo);
+        if (e.getStatus() == null) e.setStatus(ProdutoStatus.IMPORTADO);
+        if (e.getDataImportacao() == null) e.setDataImportacao(LocalDateTime.now());
+
+        ProdutoEntity salvo = repo.save(e);
+        return ProdutoMapper.toDomain(salvo);
     }
 
     @Override
     @Transactional
     public Produto update(Long id, Produto produto) {
-        ProdutoEntity atual = (ProdutoEntity)this.repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Produto n\u00e3o encontrado: " + String.valueOf(id)));
-        ProdutoMapper.updateEntity((ProdutoEntity)atual, (Produto)produto);
-        ProdutoEntity salvo = (ProdutoEntity)this.repo.save(atual);
-        return ProdutoMapper.toDomain((ProdutoEntity)salvo);
+        ProdutoEntity atual = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + id));
+
+        ProdutoMapper.updateEntity(atual, produto);
+        ProdutoEntity salvo = repo.save(atual);
+        return ProdutoMapper.toDomain(salvo);
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!this.repo.existsById(id)) {
-            throw new IllegalArgumentException("Produto n\u00e3o encontrado: " + String.valueOf(id));
+        if (!repo.existsById(id)) {
+            throw new IllegalArgumentException("Produto não encontrado: " + id);
         }
-        this.repo.deleteById(id);
+        repo.deleteById(id);
     }
 
     @Override
@@ -86,39 +80,49 @@ implements ProdutoService {
         domain.setPrecoVenda(dto.getPrecoVenda());
         domain.setCategoria(dto.getCategoria());
         domain.setDataCadastro(LocalDateTime.now());
-        ProdutoEntity e = ProdutoMapper.toEntity((Produto)domain);
+
+        ProdutoEntity e = ProdutoMapper.toEntity(domain);
         e.setId(null);
-        e.setStatus(ProdutoStatus.IMPORTADO);
+        if (e.getStatus() == null) e.setStatus(ProdutoStatus.IMPORTADO);
         e.setDataImportacao(LocalDateTime.now());
-        ProdutoEntity salvo = (ProdutoEntity)this.repo.save(e);
-        return ProdutoMapper.toDomain((ProdutoEntity)salvo);
+
+        ProdutoEntity salvo = repo.save(e);
+        return ProdutoMapper.toDomain(salvo);
     }
 
     @Override
     @Transactional
     public Produto validar(Long id, String validador) {
-        ProdutoEntity entity = (ProdutoEntity)this.repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Produto n\u00e3o encontrado: " + String.valueOf(id)));
+        ProdutoEntity entity = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + id));
+
         entity.setStatus(ProdutoStatus.VALIDADO);
         entity.setValidador(validador);
-        ProdutoEntity salvo = (ProdutoEntity)this.repo.save(entity);
-        return ProdutoMapper.toDomain((ProdutoEntity)salvo);
+
+        ProdutoEntity salvo = repo.save(entity);
+        return ProdutoMapper.toDomain(salvo);
     }
 
     @Override
     @Transactional
     public Produto publicar(Long id, String validador) {
-        ProdutoEntity entity = (ProdutoEntity)this.repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Produto n\u00e3o encontrado: " + String.valueOf(id)));
+        ProdutoEntity entity = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado: " + id));
+
         entity.setStatus(ProdutoStatus.PUBLICADO);
         entity.setValidador(validador);
         entity.setPublicadoEm(LocalDateTime.now());
-        ProdutoEntity salvo = (ProdutoEntity)this.repo.save(entity);
-        return ProdutoMapper.toDomain((ProdutoEntity)salvo);
+
+        ProdutoEntity salvo = repo.save(entity);
+        return ProdutoMapper.toDomain(salvo);
     }
 
     @Override
-    @Transactional(readOnly=true)
+    @Transactional(readOnly = true)
     public List<Produto> listByStatus(ProdutoStatus status) {
-        return this.repo.findByStatus(status, Pageable.unpaged()).stream().map(ProdutoMapper::toDomain).toList();
+        return repo.findByStatus(status, Pageable.unpaged()).stream()
+                .map(ProdutoMapper::toDomain)
+                .toList();
     }
 
     @Generated
@@ -126,4 +130,3 @@ implements ProdutoService {
         this.repo = repo;
     }
 }
-
