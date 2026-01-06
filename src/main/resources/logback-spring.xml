@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="30 seconds">
   <!-- ===== Variáveis comuns ===== -->
-  <property name="LOG_PATH" value="${LOG_PATH:-/opt/app/logs}"/>
+  <property name="LOG_PATH" value="${LOG_PATH:-/tmp/logs}"/>
   <property name="LOG_FILE" value="${LOG_FILE:-app.log}"/>
   <property name="ACCESS_FILE" value="${ACCESS_FILE:-access.log}"/>
   <property name="MAX_HISTORY" value="${MAX_HISTORY:-7}"/>
