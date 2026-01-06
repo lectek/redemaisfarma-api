@@ -6,7 +6,6 @@
 FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
 WORKDIR /workspace
-ENV SPRING_PROFILES_ACTIVE=docker
 
 # Copy POM and Maven Wrapper (dependency cache)
 COPY pom.xml mvnw* ./
