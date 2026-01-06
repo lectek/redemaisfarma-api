@@ -13,13 +13,13 @@ COPY pom.xml mvnw* ./
 COPY .mvn .mvn
 
 # Dependency cache
-RUN --mount=type=cache,target=/root/.m2,sharing=locked mvn -B -ntp dependency:go-offline
+RUN mvn -B -ntp dependency:go-offline
 
 # Copy source
 COPY src src
 
 # Package jar (skip tests)
-RUN --mount=type=cache,target=/root/.m2,sharing=locked mvn -B -ntp -DskipTests=true -DskipITs=true package
+RUN mvn -B -ntp -DskipTests=true -DskipITs=true package
 
 # Extract layers for faster rebuilds
 RUN java -Djarmode=layertools -jar /workspace/target/*.jar extract --destination /workspace/target/layers
