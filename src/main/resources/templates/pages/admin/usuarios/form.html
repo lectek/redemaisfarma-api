@@ -1,13 +1,13 @@
 <!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Usuário • Form</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
+<title>Usuario - Form</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
 <div class="layout">
-<aside th:replace="~{fragments/sidebar :: sidebar('usuarios')}"></aside>
+<aside th:replace="~{fragments/admin-sidebar :: adminSidebar('Usuarios')}"></aside>
 <main class="container stack mt-4 mb-6">
-  <h1 class="page-title" th:text="${#ids.prev('id') != null} ? 'Editar usuário' : 'Novo usuário'">Usuário</h1>
-  <form class="form-grid" th:action="@{/admin/usuarios}" method="post" th:object="${usuario}">
+  <h1 class="page-title" th:text="${#ids.prev('id') != null} ? 'Editar Usuario' : 'Novo Usuario'">Usuario</h1>
+  <form class="form-grid" th:action="@{/admin/Usuarios}" method="post" th:object="${Usuario}">
     <input type="hidden" th:field="*{id}"/>
     <div class="form-group"><label>Nome</label><input class="input" th:field="*{nome}" required/></div>
     <div class="form-group"><label>E-mail</label><input class="input" type="email" th:field="*{email}" required/></div>
@@ -23,3 +23,9 @@
 </main></div>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body></html>
+
+
+
+
+
+

@@ -1,15 +1,15 @@
 <!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Estoque • Níveis</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
+<title>Estoque a NAveis</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
 <div class="layout">
-<aside th:replace="~{fragments/sidebar :: sidebar('estoque')}"></aside>
+<aside th:replace="~{fragments/admin-sidebar :: adminSidebar('estoque')}"></aside>
 <main class="container stack mt-4 mb-6">
-  <h1 class="page-title">Níveis de estoque</h1>
+  <h1 class="page-title">NAveis de estoque</h1>
   <section class="card table-responsive">
     <table class="table">
-      <thead><tr><th>Produto</th><th>Em estoque</th><th>Mínimo</th><th>Ação</th></tr></thead>
+      <thead><tr><th>Produto</th><th>Em estoque</th><th>minimo</th><th>Acao</th></tr></thead>
       <tbody>
         <tr th:each="e : ${itens}">
           <td th:text="${e.nome}">Produto</td>
@@ -20,7 +20,7 @@
               <button class="btn btn-ghost">Salvar</button>
             </form>
           </td>
-          <td><span class="badge danger" th:if="${e.qtd <= e.minimo}">Crítico</span></td>
+          <td><span class="badge danger" th:if="${e.qtd <= e.minimo}">Critico</span></td>
         </tr>
       </tbody>
     </table>
@@ -28,3 +28,9 @@
 </main></div>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body></html>
+
+
+
+
+
+

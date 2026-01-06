@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Meus dados - RedeMaisFarma</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body class="body-flex">
+  <header th:replace="~{fragments/header :: header}"></header>
+
+  <div class="layout layout--with-sidebar">
+    <aside th:replace="~{fragments/sidebar :: sidebar('dados')}"></aside>
+
+    <main id="main-content" class="container stack mt-4 mb-8" role="main">
+      <h1 class="page-title">Meus dados</h1>
+      <p class="text-muted">Atualize seus dados basicos de acesso.</p>
+
+      <div th:if="${infoMessage}" class="alert alert-info" th:text="${infoMessage}"></div>
+      <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+      <section class="card">
+        <h2 class="title">Foto de perfil</h2>
+        <div class="between">
+          <div class="stack">
+            <img th:if="${avatarUrl != null and !#strings.isEmpty(avatarUrl)}"
+                 th:src="${avatarUrl}"
+                 alt="Foto de perfil"
+                 style="width:96px;height:96px;border-radius:50%;object-fit:cover;"/>
+            <div th:if="${avatarUrl == null or #strings.isEmpty(avatarUrl)}"
+                 style="width:96px;height:96px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;">
+              <strong th:text="${avatarNome != null ? avatarNome.substring(0,1) : 'U'}">U</strong>
+            </div>
+          </div>
+          <form class="stack" th:action="@{/cliente/avatar}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input class="input" type="file" name="file" accept="image/png,image/jpeg,image/webp" required/>
+            <small class="text-muted">Formatos aceitos: PNG, JPG, WEBP. Tamanho maximo: 2MB.</small>
+            <button class="btn btn--primary" type="submit">Enviar foto</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="title">Cadastro</h2>
+
+        <form class="form-grid" th:action="@{/cliente/dados}" method="post" th:object="${form}" novalidate>
+          <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+          <label class="stack">
+            <span>Nome completo</span>
+            <input class="input" type="text" th:field="*{nome}" required maxlength="120"/>
+            <p class="error-message" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></p>
+          </label>
+
+          <label class="stack">
+            <span>E-mail</span>
+            <input class="input" type="email" th:field="*{email}" required maxlength="150" autocomplete="email"/>
+            <p class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+          </label>
+
+          <label class="stack">
+            <span>CPF</span>
+            <input class="input" type="text" th:field="*{cpf}" readonly aria-readonly="true"/>
+          </label>
+
+          <label class="stack">
+            <span>Telefone</span>
+            <input class="input" type="tel" th:field="*{telefone}" maxlength="25" autocomplete="tel"/>
+            <p class="error-message" th:if="${#fields.hasErrors('telefone')}" th:errors="*{telefone}"></p>
+          </label>
+
+          <label class="stack">
+            <span>Endereco</span>
+            <input class="input" type="text" th:field="*{endereco}" maxlength="200" autocomplete="street-address"/>
+            <p class="error-message" th:if="${#fields.hasErrors('endereco')}" th:errors="*{endereco}"></p>
+          </label>
+
+          <div class="form-actions">
+            <button class="btn btn--primary" type="submit">Salvar dados</button>
+            <a class="btn btn--ghost" th:href="@{/cliente/conta}">Voltar</a>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

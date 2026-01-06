@@ -1,0 +1,36 @@
+<!-- templates/fragments/admin-header.html -->
+<header class="site-header" role="banner" th:fragment="adminHeader">
+  <a class="skip-link" href="#main-content">Pular para o conteudo</a>
+
+  <div class="header-inner container-fluid">
+    <a th:href="@{/admin/dashboard}" class="logo" aria-label="Dashboard admin">
+      <img th:src="${#strings.isEmpty(brandingLogoUrl)} ? @{/images/logofarma.jpg} : ${brandingLogoUrl}" alt="RedeMaisFarma" height="40" />
+    </a>
+
+    <button class="nav-toggle"
+            data-role="nav-toggle"
+            aria-label="Abrir menu"
+            aria-controls="primary-nav"
+            aria-expanded="false">
+      <span class="menu-icon" aria-hidden="true"></span>
+    </button>
+
+    <nav id="primary-nav" class="primary-nav" aria-label="Menu admin">
+      <ul class="nav-list">
+        <li><a th:href="@{/admin/dashboard}" class="menu-button">Dashboard</a></li>
+        <li><a th:href="@{/admin/produtos}"  class="menu-button">Produtos</a></li>
+        <li><a th:href="@{/admin/pedidos}"   class="menu-button">Pedidos</a></li>
+        <li><a th:href="@{/admin/clientes}"  class="menu-button">Clientes</a></li>
+        <li><a th:href="@{/admin/relatorios/vendas}" class="menu-button">Relatorios</a></li>
+        <li><a th:href="@{/admin/configuracoes/geral}" class="menu-button">Configuracoes</a></li>
+
+        <li>
+          <form th:action="@{/logout}" method="post" class="inline-form">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="menu-button">Sair</button>
+          </form>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>

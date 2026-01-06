@@ -2,6 +2,7 @@ package br.com.redemaisfarma.adapters.outbound.legacy.adapter;
 
 import br.com.redemaisfarma.adapters.outbound.legacy.dto.LegacyProdutoDTO;
 import br.com.redemaisfarma.adapters.outbound.legacy.port.LegacyProdutoPort;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
+@ConditionalOnProperty(name = "legacy.sync.enabled", havingValue = "true")
 public class LegacyProdutoJdbcAdapter implements LegacyProdutoPort {
     private final JdbcTemplate jdbc;
     private final String configuredLastUpdateColumn;

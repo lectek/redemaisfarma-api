@@ -37,37 +37,37 @@ import java.util.UUID;
 public class LoginResponseDTO
 implements Serializable {
     private static final long serialVersionUID = 1L;
-    @Schema(description="Token de acesso JWT", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", required=true)
+    @Schema(description="Token de acesso JWT", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{loginResponse.accessToken.notBlank}")
     @JsonProperty(value="accessToken")
     private @NotBlank(message="{loginResponse.accessToken.notBlank}") String accessToken;
-    @Schema(description="Token de refresh JWT", example="dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...", required=true)
+    @Schema(description="Token de refresh JWT", example="dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{loginResponse.refreshToken.notBlank}")
     @JsonProperty(value="refreshToken")
     private @NotBlank(message="{loginResponse.refreshToken.notBlank}") String refreshToken;
-    @Schema(description="Tipo de usu\u00e1rio", example="CLIENTE", required=true, allowableValues={"CLIENTE", "ATENDENTE", "ADMIN"})
+    @Schema(description="Tipo de usu\u00e1rio", example="CLIENTE", requiredMode = Schema.RequiredMode.REQUIRED, allowableValues={"CLIENTE", "ATENDENTE", "ADMIN"})
     @NotNull(message="{loginResponse.userType.notNull}")
     @JsonProperty(value="userType")
     private @NotNull(message="{loginResponse.userType.notNull}") UserType userType;
-    @Schema(description="ID do usu\u00e1rio autenticado", example="12345", required=true)
+    @Schema(description="ID do usu\u00e1rio autenticado", example="12345", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{loginResponse.userId.notNull}")
     @JsonProperty(value="userId")
     private @NotNull(message="{loginResponse.userId.notNull}") Long userId;
-    @Schema(description="Nome completo do usu\u00e1rio", example="Jo\u00e3o da Silva", required=true)
+    @Schema(description="Nome completo do usu\u00e1rio", example="Jo\u00e3o da Silva", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{loginResponse.fullName.notBlank}")
     @Size(max=100, message="{loginResponse.fullName.size}")
     @JsonProperty(value="fullName")
     private @NotBlank(message="{loginResponse.fullName.notBlank}") @Size(max=100, message="{loginResponse.fullName.size}") String fullName;
-    @Schema(description="E-mail do usu\u00e1rio", example="joao@redemaisfarma.com", required=true)
+    @Schema(description="E-mail do usu\u00e1rio", example="joao@redemaisfarma.com", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{loginResponse.email.notBlank}")
     @Email(message="{loginResponse.email.valid}")
     @JsonProperty(value="email")
     private @NotBlank(message="{loginResponse.email.notBlank}") @Email(message="{loginResponse.email.valid}") String email;
-    @Schema(description="Lista de permiss\u00f5es do usu\u00e1rio", example="[\"READ_ORDERS\",\"WRITE_ORDERS\"]", required=true)
+    @Schema(description="Lista de permiss\u00f5es do usu\u00e1rio", example="[\"READ_ORDERS\",\"WRITE_ORDERS\"]", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message="{loginResponse.permissions.notEmpty}")
     @JsonProperty(value="permissions")
     private @NotEmpty(message="{loginResponse.permissions.notEmpty}") List<@NotBlank(message="{loginResponse.permission.notBlank}") String> permissions;
-    @Schema(description="Timestamp de expira\u00e7\u00e3o do token de acesso", type="string", format="date-time", example="2025-07-04T15:00:00", required=true)
+    @Schema(description="Timestamp de expira\u00e7\u00e3o do token de acesso", type="string", format="date-time", example="2025-07-04T15:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{loginResponse.expiresAt.notNull}")
     @Future(message="{loginResponse.expiresAt.future}")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
@@ -77,14 +77,14 @@ implements Serializable {
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     @JsonProperty(value="lastLoginAt")
     private LocalDateTime lastLoginAt;
-    @Schema(description="Status da conta do usu\u00e1rio", example="ACTIVE", required=true, allowableValues={"ACTIVE", "SUSPENDED", "INACTIVE"})
+    @Schema(description="Status da conta do usu\u00e1rio", example="ACTIVE", requiredMode = Schema.RequiredMode.REQUIRED, allowableValues={"ACTIVE", "SUSPENDED", "INACTIVE"})
     @NotNull(message="{loginResponse.accountStatus.notNull}")
     @JsonProperty(value="accountStatus")
     private @NotNull(message="{loginResponse.accountStatus.notNull}") AccountStatus accountStatus;
     @Schema(description="Mensagem de boas-vindas", example="Bem-vindo \u00e0 RedeMaisFarma, Jo\u00e3o!")
     @JsonProperty(value="welcomeMessage")
     private String welcomeMessage;
-    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", required=true)
+    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{loginResponse.tenantId.notBlank}")
     @JsonProperty(value="tenantId")
     private @NotBlank(message="{loginResponse.tenantId.notBlank}") String tenantId;
@@ -248,4 +248,5 @@ implements Serializable {
 
     }
 }
+
 

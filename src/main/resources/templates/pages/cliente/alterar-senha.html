@@ -10,14 +10,16 @@
 <body class="body-flex">
   <!-- Header e sidebar do layout do cliente -->
   <header th:replace="~{fragments/header :: header}"></header>
-  <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
 
-  <main class="container">
-    <section class="card">
-      <h1 class="title">Alterar senha</h1>
+  <div class="layout layout--with-sidebar">
+    <aside th:replace="~{fragments/sidebar :: sidebar('conta')}"></aside>
 
-      <div th:if="${errorMessage}" class="alert error" th:text="${errorMessage}"></div>
-      <div th:if="${infoMessage}"  class="alert info"  th:text="${infoMessage}"></div>
+    <main class="container">
+      <section class="card">
+        <h1 class="title">Alterar senha</h1>
+
+      <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+      <div th:if="${infoMessage}"  class="alert alert-info"  th:text="${infoMessage}"></div>
 
       <!-- ✅ envia para o controller /auth/mudar-senha -->
       <form th:action="@{/auth/mudar-senha}" th:object="${form}" method="post" class="form-grid" autocomplete="off">
@@ -48,9 +50,10 @@
 
         <button type="submit" class="btn btn--primary">Salvar</button>
         <a th:href="@{/cliente}" class="btn">Cancelar</a>
-      </form>
-    </section>
-  </main>
+        </form>
+      </section>
+    </main>
+  </div>
 
   <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>

@@ -6,16 +6,31 @@
 <th:block th:fragment="card(p)">
   <article class="card-produto">
     <a class="card-imagem" th:href="@{'/produto/' + ${p.id}}">
-      <img th:src="${p.imagem} ?: @{/img/placeholder-product.png}"
+      <img th:src="${p.imagem} ?: @{/img/produtos/placeholder-generico.png}"
            th:alt="${p.nome}" loading="lazy"
-           onerror="this.src='/img/placeholder-product.png'">
+           onerror="this.src='/img/produtos/placeholder-generico.png'">
     </a>
-    <div class="card-conteudo">
+    <div class="card-conteudo"
+         th:with="outOfStock=${p.estoque != null and p.estoque <= 0}">
       <h3 class="card-titulo" th:text="${p.nome}">Nome do produto</h3>
-      <p class="card-descricao" th:text="${p.descricao}">Descrição</p>
+      <div class="card-badges" th:if="${!p.disponivel or outOfStock}">
+        <span class="badge badge--neutral" th:if="${!p.disponivel}">Indisponivel</span>
+        <span class="badge badge--danger" th:if="${p.disponivel and outOfStock}">Sem estoque</span>
+      </div>
+      <p class="card-descricao" th:text="${p.descricao}">Descricao</p>
       <div class="card-preco-acao">
         <span class="card-preco" th:text="${#numbers.formatCurrency(p.preco, 'pt_BR')}">R$ 0,00</span>
         <a class="btn-detalhes" th:href="@{'/produto/' + ${p.id}}">Ver detalhes</a>
+        <form th:action="@{/carrinho/adicionar}" method="post" class="inline">
+          <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <input type="hidden" name="produtoId" th:value="${p.id}"/>
+          <input type="hidden" name="quantidade" value="1"/>
+          <button type="submit" class="btn btn-ghost"
+                  th:disabled="${!p.disponivel or outOfStock}"
+                  th:attr="aria-disabled=${!p.disponivel or outOfStock}">
+            Adicionar
+          </button>
+        </form>
       </div>
     </div>
   </article>
@@ -36,9 +51,9 @@
     <div id="carousel-viewport" class="carousel__viewport" aria-live="polite">
       <div class="carousel__item" th:each="p : ${lista}">
         <img class="carousel__img"
-             th:src="${p.imagem} ?: @{/img/placeholder-product.png}"
+             th:src="${p.imagem} ?: @{/img/produtos/placeholder-generico.png}"
              th:alt="${p.nome}" loading="lazy"
-             onerror="this.src='/img/placeholder-product.png'"/>
+             onerror="this.src='/img/produtos/placeholder-generico.png'"/>
         <div class="carousel__info">
           <h3 class="carousel__title" th:text="${p.nome}">Nome</h3>
           <div class="price">
@@ -61,3 +76,6 @@
 
 </body>
 </html>
+
+
+

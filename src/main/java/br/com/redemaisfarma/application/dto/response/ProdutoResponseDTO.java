@@ -51,21 +51,21 @@ implements Serializable {
     @Schema(description="ID num\u00e9rico interno da entidade Produto (chave do banco)", example="123")
     @JsonProperty(value="entityId")
     private Long entityId;
-    @Schema(description="ID \u00fanico p\u00fablico (UUID) do produto", example="3fa85f64-5717-4562-b3fc-2c963f66afa6", required=true)
+    @Schema(description="ID \u00fanico p\u00fablico (UUID) do produto", example="3fa85f64-5717-4562-b3fc-2c963f66afa6", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{produto.id.notNull}")
     @JsonProperty(value="id")
     private @NotNull(message="{produto.id.notNull}") UUID id;
-    @Schema(description="Nome do produto", example="Dipirona 500mg", required=true)
+    @Schema(description="Nome do produto", example="Dipirona 500mg", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{produto.nome.notBlank}")
     @Size(max=100, message="{produto.nome.size}")
     @JsonProperty(value="nome")
     private @NotBlank(message="{produto.nome.notBlank}") @Size(max=100, message="{produto.nome.size}") String nome;
-    @Schema(description="Descri\u00e7\u00e3o do produto", example="Analg\u00e9sico e antit\u00e9rmico", required=true)
+    @Schema(description="Descri\u00e7\u00e3o do produto", example="Analg\u00e9sico e antit\u00e9rmico", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{produto.descricao.notBlank}")
     @Size(max=1000, message="{produto.descricao.size}")
     @JsonProperty(value="descricao")
     private @NotBlank(message="{produto.descricao.notBlank}") @Size(max=1000, message="{produto.descricao.size}") String descricao;
-    @Schema(description="Pre\u00e7o unit\u00e1rio", example="12.50", required=true)
+    @Schema(description="Pre\u00e7o unit\u00e1rio", example="12.50", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{produto.preco.notNull}")
     @DecimalMin(value="0.01", inclusive=true, message="{produto.preco.min}")
     @Digits(integer=12, fraction=2, message="{produto.preco.digits}")
@@ -75,22 +75,22 @@ implements Serializable {
     @Size(max=255, message="{produto.imagem.size}")
     @JsonProperty(value="imagem")
     private @Size(max=255, message="{produto.imagem.size}") String imagem;
-    @Schema(description="Categoria do produto", example="ANALGESICOS", required=true)
+    @Schema(description="Categoria do produto", example="ANALGESICOS", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{produto.categoria.notBlank}")
     @JsonProperty(value="categoria")
     private @NotBlank(message="{produto.categoria.notBlank}") String categoria;
-    @Schema(description="Quantidade atual em estoque", example="150", required=true)
+    @Schema(description="Quantidade atual em estoque", example="150", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{produto.estoqueAtual.notNull}")
     @Min(value=0L, message="{produto.estoqueAtual.min}")
     @JsonProperty(value="estoqueAtual")
     private @NotNull(message="{produto.estoqueAtual.notNull}") @Min(value=0L, message="{produto.estoqueAtual.min}") Integer estoqueAtual;
-    @Schema(description="Data de validade do produto", type="string", format="date", example="2026-12-31", required=true)
+    @Schema(description="Data de validade do produto", type="string", format="date", example="2026-12-31", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{produto.validade.notNull}")
     @Future(message="{produto.validade.future}")
     @JsonFormat(pattern="yyyy-MM-dd")
     @JsonProperty(value="validade")
     private @NotNull(message="{produto.validade.notNull}") @Future(message="{produto.validade.future}") LocalDate validade;
-    @Schema(description="C\u00f3digo de barras", example="7896000033445", required=true)
+    @Schema(description="C\u00f3digo de barras", example="7896000033445", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{produto.codigoBarras.notBlank}")
     @Pattern(regexp="^(\\d{8}|\\d{12,14})$", message="{produto.codigoBarras.pattern}")
     @JsonProperty(value="codigoBarras")
@@ -107,7 +107,7 @@ implements Serializable {
     @PositiveOrZero(message="{produto.quantidadeVendida.min}")
     @JsonProperty(value="quantidadeVendida")
     private @PositiveOrZero(message="{produto.quantidadeVendida.min}") Long quantidadeVendida;
-    @Schema(description="Data/hora de cadastro", type="string", format="date-time", example="2025-01-01T08:00:00", required=true)
+    @Schema(description="Data/hora de cadastro", type="string", format="date-time", example="2025-01-01T08:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{produto.dataCadastro.notNull}")
     @PastOrPresent(message="{produto.dataCadastro.pastOrPresent}")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
@@ -135,7 +135,7 @@ implements Serializable {
     @Schema(description="Lista de tags do produto", example="[\"dor-de-cabeca\", \"antitermico\"]")
     @JsonProperty(value="tags")
     private List<@NotBlank @Size(max=50) String> tags;
-    @Schema(description="Situa\u00e7\u00e3o do produto", example="ATIVO", required=true, allowableValues={"ATIVO", "INATIVO", "DESCONTINUADO", "ESGOTADO"})
+    @Schema(description="Situa\u00e7\u00e3o do produto", example="ATIVO", requiredMode = Schema.RequiredMode.REQUIRED, allowableValues={"ATIVO", "INATIVO", "DESCONTINUADO", "ESGOTADO"})
     @NotNull(message="{produto.situacao.notNull}")
     @JsonProperty(value="situacao")
     private @NotNull(message="{produto.situacao.notNull}") SituacaoProduto situacao;
@@ -342,4 +342,5 @@ implements Serializable {
 
     }
 }
+
 

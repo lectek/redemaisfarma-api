@@ -1,9 +1,12 @@
 package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCategoriaRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import br.com.redemaisfarma.application.service.ProdutoAdminService;
 import lombok.Generated;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,20 +18,29 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Profile("!test")
 @Controller
 @RequestMapping("/admin/produtos")
 public class ProdutoAdminPageController {
 
+    private static final Logger log = LoggerFactory.getLogger(ProdutoAdminPageController.class);
+
     private final ProdutoAdminService adminService;
     private final ProdutoRepository produtoRepository;
+    private final ProdutoCategoriaRepository categoriaRepository;
 
     @GetMapping
     public String list(
@@ -42,8 +54,8 @@ public class ProdutoAdminPageController {
         model.addAttribute("produtos", page.getContent());
         model.addAttribute("q", q == null ? "" : q);
         model.addAttribute("categoria", categoria == null ? "" : categoria);
-        model.addAttribute("categorias", produtoRepository.findDistinctCategorias());
-        return "admin/produtos/lista";
+        model.addAttribute("categorias", this.resolveCategorias());
+        return "pages/admin/produtos/lista";
     }
 
     @GetMapping(value = "/export.csv", produces = "text/csv")
@@ -73,9 +85,72 @@ public class ProdutoAdminPageController {
                 .body(body);
     }
 
+    @PostMapping(consumes = "multipart/form-data")
+    public String criarProduto(
+            @ModelAttribute("produto") ProdutoEntity produto,
+            @RequestParam(value = "imagemFile", required = false) MultipartFile imagemFile,
+            RedirectAttributes ra
+    ) {
+        String nome = this.normalize(produto.getNome());
+        if (nome.isBlank()) {
+            return "redirect:/admin/produtos/novo?erro=nome";
+        }
+        produto.setNome(nome);
+
+        String categoria = this.normalize(produto.getCategoria());
+        if (categoria.isBlank()) {
+            categoria = "Sem Categoria";
+        }
+        produto.setCategoria(categoria);
+
+        String codigoBarras = this.normalize(produto.getCodigoBarras());
+        if (codigoBarras.isBlank()) {
+            produto.setCodigoBarras(null);
+        } else {
+            if (produtoRepository.existsByCodigoBarras(codigoBarras)) {
+                return "redirect:/admin/produtos/novo?erro=codigo_barras";
+            }
+            produto.setCodigoBarras(codigoBarras);
+        }
+
+        log.debug("[admin-produto] criar | nome='{}', categoria='{}', codigoBarras='{}'",
+                produto.getNome(), produto.getCategoria(), produto.getCodigoBarras());
+
+        produto.setId(null);
+        if (produto.getDisponivel() == null) {
+            produto.setDisponivel(Boolean.TRUE);
+        }
+        if (produto.getDataCadastro() == null) {
+            produto.setDataCadastro(LocalDate.now());
+        }
+        if (imagemFile != null && !imagemFile.isEmpty()) {
+            String filename = StringUtils.cleanPath(imagemFile.getOriginalFilename());
+            if (!filename.isBlank()) {
+                produto.setImagem("/media/products/" + filename);
+            }
+        }
+        ProdutoEntity salvo;
+        try {
+            salvo = produtoRepository.save(produto);
+        } catch (DataIntegrityViolationException ex) {
+            log.warn("[admin-produto] conflito integridade ao salvar | nome='{}', categoria='{}', codigoBarras='{}'",
+                    produto.getNome(), produto.getCategoria(), produto.getCodigoBarras(), ex);
+            return "redirect:/admin/produtos/novo?erro=integridade";
+        }
+        ra.addFlashAttribute("toast", "Produto criado com sucesso.");
+        return "redirect:/admin/produtos/" + salvo.getId() + "/editar";
+    }
+
     @GetMapping("/novo")
-    public String novoProdutoPage() {
-        return "admin/produtos/novo";
+    public String novoProdutoPage(Model model) {
+        model.addAttribute("produto", new ProdutoEntity());
+        model.addAttribute("categorias", this.resolveCategorias());
+        return "pages/admin/produtos/form";
+    }
+
+    @GetMapping("/form")
+    public String redirectFormToNovo() {
+        return "redirect:/admin/produtos/novo";
     }
 
     @GetMapping("/{id}/editar")
@@ -84,9 +159,27 @@ public class ProdutoAdminPageController {
         return "pages/admin/produtos/editar";
     }
 
+    private List<String> resolveCategorias() {
+        List<String> categorias = this.categoriaRepository.findAllNomes();
+        if (categorias == null || categorias.isEmpty()) {
+            return List.of("Sem Categoria");
+        }
+        return categorias;
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim();
+    }
+
     @Generated
-    public ProdutoAdminPageController(ProdutoAdminService adminService, ProdutoRepository produtoRepository) {
+    public ProdutoAdminPageController(ProdutoAdminService adminService,
+                                      ProdutoRepository produtoRepository,
+                                      ProdutoCategoriaRepository categoriaRepository) {
         this.adminService = adminService;
         this.produtoRepository = produtoRepository;
+        this.categoriaRepository = categoriaRepository;
     }
 }
+
+
+

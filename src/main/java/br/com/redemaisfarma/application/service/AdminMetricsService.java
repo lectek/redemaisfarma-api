@@ -14,9 +14,11 @@ package br.com.redemaisfarma.application.service;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.PedidoRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
+import br.com.redemaisfarma.application.dto.response.AlertItemDTO;
 import br.com.redemaisfarma.application.dto.response.PainelAdminResponseDTO;
 import br.com.redemaisfarma.domain.enums.StatusPedido;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
@@ -40,6 +42,7 @@ public class AdminMetricsService {
     @Transactional(readOnly=true)
     public PainelAdminResponseDTO montarPainel() {
         PainelAdminResponseDTO p = new PainelAdminResponseDTO();
+        List<AlertItemDTO> alertas = new ArrayList<>();
         p.setAdminNome("Alex Morais");
         p.setQtdProdutos(this.produtoRepo.getIfAvailable() != null ? ((ProdutoRepository)this.produtoRepo.getIfAvailable()).count() : 250L);
         p.setTotalPedidos(this.pedidoRepo.getIfAvailable() != null ? ((PedidoRepository)this.pedidoRepo.getIfAvailable()).count() : 350L);
@@ -58,6 +61,10 @@ public class AdminMetricsService {
                 ++n2;
             }
             p.setPedidosPorStatus(porStatus);
+            if (p.getQtdPedidosPendentes() > 0L) {
+                alertas.add(new AlertItemDTO("PEDIDOS",
+                        p.getQtdPedidosPendentes() + " pedidos aguardando pagamento"));
+            }
         } else {
             EnumMap<StatusPedido, Long> porStatus = new EnumMap<StatusPedido, Long>(StatusPedido.class);
             porStatus.put(StatusPedido.ABERTO, 40L);
@@ -69,14 +76,26 @@ public class AdminMetricsService {
             p.setPedidosPorStatus(porStatus);
             p.setQtdPedidosPendentes(((Long)porStatus.get(StatusPedido.AGUARDANDO_PAGAMENTO)).longValue());
             p.setQtdPedidosEntregues(((Long)porStatus.get(StatusPedido.ENTREGUE)).longValue());
+            alertas.add(new AlertItemDTO("PEDIDOS",
+                    p.getQtdPedidosPendentes() + " pedidos aguardando pagamento"));
         }
         p.setTotalLucro(18452.75);
         p.setTicketMedio(124.75);
         p.setSatisfacaoCliente(92.3);
         p.setCategoriasMaisVendidas(List.of("Ra\u00e7\u00f5es", "Coleiras", "Brinquedos"));
         p.setDataUltimoPedido(LocalDateTime.now().minusHours(2L));
-        p.setAlertas(List.of("12 pedidos aguardando envio", "3 produtos com estoque abaixo de 5 unidades", "Novo cliente VIP cadastrado hoje"));
+
+        if (this.produtoRepo.getIfAvailable() != null) {
+            ProdutoRepository pr = (ProdutoRepository)this.produtoRepo.getIfAvailable();
+            int limiteEstoque = 10;
+            int qtdBaixo = pr.findComEstoqueBaixo(limiteEstoque).size();
+            if (qtdBaixo > 0) {
+                alertas.add(new AlertItemDTO("ESTOQUE",
+                        qtdBaixo + " produtos com estoque em 10 unidades ou menos"));
+            }
+        }
+
+        p.setAlertas(alertas);
         return p;
     }
 }
-

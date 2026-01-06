@@ -41,6 +41,13 @@
     <!-- Reproducible builds -->
     <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
     <project.build.outputTimestamp>${maven.build.timestamp}</project.build.outputTimestamp>
+
+    <!-- Local MySQL snapshot used by Flyway & developer tooling -->
+    <mysql.host>localhost</mysql.host>
+    <mysql.port>3310</mysql.port>
+    <mysql.database>redemaisfarma</mysql.database>
+    <mysql.user>app_user</mysql.user>
+    <mysql.password>Rede_Mais_Farma25@</mysql.password>
   </properties>
 
   <dependencyManagement>
@@ -518,9 +525,12 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring-boot.version}</version>
-        <configuration>
-          <mainClass>br.com.redemaisfarma.RedeMaisFarmaApiApplication</mainClass>
-        </configuration>
+          <configuration>
+            <mainClass>br.com.redemaisfarma.RedeMaisFarmaApiApplication</mainClass>
+            <layers>
+              <enabled>true</enabled>
+            </layers>
+          </configuration>
         <executions>
           <execution>
             <goals><goal>repackage</goal></goals>
@@ -575,15 +585,15 @@
         </executions>
       </plugin>
 
-      <!-- Flyway Maven Plugin (MySQL compose: 3307 / app_user) -->
+      <!-- Flyway Maven Plugin (local MySQL; override mysql.port if you map Compose to a different host port) -->
       <plugin>
-        <groupId>org.flywaydb</groupId>
-        <artifactId>flyway-maven-plugin</artifactId>
-        <version>9.22.3</version>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-maven-plugin</artifactId>
+      <version>10.10.0</version>
         <configuration>
-          <url>jdbc:mysql://localhost:3307/redemaisfarma?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC</url>
-          <user>app_user</user>
-          <password>Rede_Mais_Farma25@</password>
+          <url>jdbc:mysql://${mysql.host}:${mysql.port}/${mysql.database}?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC</url>
+          <user>${mysql.user}</user>
+          <password>${mysql.password}</password>
           <locations>
             <location>classpath:db/migration</location>
             <location>classpath:db/migration-mysql</location>

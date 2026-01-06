@@ -10,6 +10,7 @@
  */
 package br.com.redemaisfarma.application.controller.admin;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
+@Profile("legacy")
 @RequestMapping(value={"/admin"})
 public class AdminController {
     private static final String VIEW_PREFIX = "pages/admin/";
@@ -52,15 +54,15 @@ public class AdminController {
         model.addAttribute("active", (Object)active);
     }
 
-    @GetMapping(value={"", "/"})
-    public String root(Model model) {
+    @GetMapping(value={"/dashboard"})
+    public String dashboard(Model model) {
         AdminController.setCommon(model, "Dashboard", "dashboard");
         return this.viewRoot("dashboard");
     }
 
     @GetMapping(value={"/painel"})
     public String redirectPainel() {
-        return "redirect:/admin";
+        return "redirect:/admin/dashboard";
     }
 
     @GetMapping(value={"/{page}"})
@@ -81,4 +83,3 @@ public class AdminController {
         return this.view3(section, sub, page);
     }
 }
-

@@ -1,6 +1,6 @@
 <!-- fragments/sidebar.html -->
 <aside class="sidebar"
-       th:fragment="sidebar"
+       th:fragment="sidebar(active='')"
        role="complementary"
        aria-label="Menu lateral"
        xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -10,54 +10,62 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="sidebar__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8.009 8.009 0 0 1-8 8Z"/>
         </svg>
-        <span>FarmaVida</span>
+        <span>RedeMaisFarma</span>
       </a>
     </div>
+
+    <button class="sidebar__toggle sidebar__toggle--icon sidebar-compact-toggle"
+            type="button"
+            data-sidebar-compact-toggle
+            aria-label="Recolher menu lateral"
+            title="Recolher menu lateral">
+      <span class="sidebar__toggle-label">Recolher menu lateral</span>
+    </button>
 
     <ul class="sidebar__list">
       <li>
         <a th:href="@{/}"
            class="sidebar__link"
            th:classappend="${active}=='home' ? ' is-active' : ''"
-           th:attr="aria-current=${active}=='home' ? 'page' : null">🏠 <span>Início</span></a>
+           th:attr="aria-current=${active}=='home' ? 'page' : null"><span>Home</span></a>
+      </li>
+      <li>
+        <a th:href="@{/cliente/conta}"
+           class="sidebar__link"
+           th:classappend="${active}=='conta' ? ' is-active' : ''"
+           th:attr="aria-current=${active}=='conta' ? 'page' : null"><span>Minha conta</span></a>
+      </li>
+      <li>
+        <a th:href="@{/cliente/dados}"
+           class="sidebar__link"
+           th:classappend="${active}=='dados' ? ' is-active' : ''"
+           th:attr="aria-current=${active}=='dados' ? 'page' : null"><span>Meus dados</span></a>
       </li>
       <li>
         <a th:href="@{/produtos}"
            class="sidebar__link"
            th:classappend="${active}=='produtos' ? ' is-active' : ''"
-           th:attr="aria-current=${active}=='produtos' ? 'page' : null">📦 <span>Catálogo</span></a>
+           th:attr="aria-current=${active}=='produtos' ? 'page' : null"><span>Produtos</span></a>
       </li>
       <li>
         <a th:href="@{/carrinho}"
            class="sidebar__link"
            th:classappend="${active}=='carrinho' ? ' is-active' : ''"
-           th:attr="aria-current=${active}=='carrinho' ? 'page' : null">🛒 <span>Carrinho</span></a>
-      </li>
-      <li>
-        <a th:href="@{/checkout}"
-           class="sidebar__link"
-           th:classappend="${active}=='checkout' ? ' is-active' : ''"
-           th:attr="aria-current=${active}=='checkout' ? 'page' : null">💳 <span>Checkout</span></a>
+           th:attr="aria-current=${active}=='carrinho' ? 'page' : null"><span>Meu carrinho</span></a>
       </li>
       <li>
         <a th:href="@{/sobre}"
            class="sidebar__link"
            th:classappend="${active}=='sobre' ? ' is-active' : ''"
-           th:attr="aria-current=${active}=='sobre' ? 'page' : null">ℹ️ <span>Sobre nós</span></a>
+           th:attr="aria-current=${active}=='sobre' ? 'page' : null"><span>Sobre nós</span></a>
       </li>
 
-      <!-- ====== Admin ====== -->
-      <li sec:authorize="hasRole('ADMIN')">
+      <!-- Admin -->
+      <li class="sidebar__admin-link">
         <a th:href="@{/admin}"
-           class="sidebar__link"
+           class="sidebar__link sidebar__link--muted"
            th:classappend="${active}=='admin' ? ' is-active' : ''"
-           th:attr="aria-current=${active}=='admin' ? 'page' : null">🛠️ <span>Painel Admin</span></a>
-      </li>
-      <li sec:authorize="hasRole('ADMIN')">
-        <a th:href="@{/admin/settings}"
-           class="sidebar__link"
-           th:classappend="${active}=='admin-settings' ? ' is-active' : ''"
-           th:attr="aria-current=${active}=='admin-settings' ? 'page' : null">⚙️ <span>Configurações</span></a>
+           th:attr="aria-current=${active}=='admin' ? 'page' : null"><span>Entrar como admin</span></a>
       </li>
     </ul>
   </nav>

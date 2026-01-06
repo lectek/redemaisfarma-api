@@ -1,31 +1,11 @@
-# Maven: diretório de build
-target/
-
-# Git: não enviar repositório
-.git/
+target
+.git
 .gitignore
-
-# IntelliJ IDEA
-.idea/
+.idea
+.vscode
 *.iml
-
-# VS Code
-.vscode/
-
-# Logs
+node_modules
 *.log
-
-# Arquivos de sistema
-.DS_Store
-Thumbs.db
-*.swp
-
-# Configurações locais e arquivos sensíveis
-.env
-*.local
-
-# Arquivos temporários e não necessários no container
-dep-tree.txt
-validate
-pre-clean
-pre-site
+**/logs
+thread-dump.txt
+mappings_raw.json

@@ -14,11 +14,13 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@ConditionalOnProperty(prefix = "legacy.sync", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class FirebirdProdutoDao {
     private final JdbcTemplate fb;
     private static final RowMapper<FbProduto> MAPPER = (rs, i) -> new FbProduto(rs.getInt("PRODUTO_ID"), rs.getString("PRODUTO"), rs.getString("APRESENTACAO"), rs.getString("COD_BARRAS"), rs.getBigDecimal("PROD_PRVENDA"), rs.getBigDecimal("PROD_PRPROMOCAO"), FirebirdProdutoDao.safeInt(rs, "PROD_SALDO"), FirebirdProdutoDao.safeTs(rs, "LASTUPDATE"));
@@ -45,4 +47,3 @@ public class FirebirdProdutoDao {
     public record FbProduto(Integer produtoId, String produto, String apresentacao, String codBarras, BigDecimal precoVenda, BigDecimal precoPromocao, Integer estoque, LocalDateTime lastUpdate) {
     }
 }
-

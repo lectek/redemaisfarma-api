@@ -39,14 +39,14 @@ public class MensagemIARequestDTO implements Serializable {
     @JsonProperty(value = "requestId", access = JsonProperty.Access.READ_ONLY)
     private UUID requestId;
 
-    @Schema(description = "ID do cliente solicitante", example = "123", required = true)
+    @Schema(description = "ID do cliente solicitante", example = "123", requiredMode = Schema.RequiredMode.REQUIRED)
     @Positive(message = "{mensagemIA.clienteId.positive}")
     @JsonProperty("clienteId")
     private Long clienteId;
 
     @Schema(description = "Conteúdo textual enviado à IA",
             example = "Qual a dosagem recomendada para dor de cabeça?",
-            required = true)
+            requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "{mensagemIA.mensagem.notBlank}")
     @Size(min = 1, max = 2000, message = "{mensagemIA.mensagem.size}")
     @JsonProperty("mensagem")
@@ -66,7 +66,7 @@ public class MensagemIARequestDTO implements Serializable {
     @Schema(description = "Modelo de IA a ser utilizado",
             example = "gpt-4o",
             allowableValues = {"gpt-4", "gpt-4o", "gpt-4-mini", "gpt-3.5-turbo"},
-            required = true)
+            requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "{mensagemIA.modelo.notBlank}")
     @Size(max = 50, message = "{mensagemIA.modelo.size}")
     @JsonProperty("modelo")
@@ -94,7 +94,7 @@ public class MensagemIARequestDTO implements Serializable {
 
     // --- Metadados ---
 
-    @Schema(description = "Identificador do tenant (multi-inquilino)", example = "redemaisfarma-001", required = true)
+    @Schema(description = "Identificador do tenant (multi-inquilino)", example = "redemaisfarma-001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "{mensagemIA.tenantId.notBlank}")
     @Size(max = 100, message = "{mensagemIA.tenantId.size}")
     @Pattern(regexp = "^[a-z0-9-]{3,100}$", message = "{mensagemIA.tenantId.pattern}")
@@ -115,3 +115,4 @@ public class MensagemIARequestDTO implements Serializable {
     @JsonProperty(value = "dataEnvio", access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime dataEnvio;
 }
+

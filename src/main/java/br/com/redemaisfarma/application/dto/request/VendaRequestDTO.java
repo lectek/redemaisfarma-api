@@ -34,18 +34,18 @@ import java.util.UUID;
 public class VendaRequestDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Schema(description = "ID do cliente", example = "123", required = true)
+    @Schema(description = "ID do cliente", example = "123", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "{venda.clienteId.notNull}")
     @JsonProperty("clienteId")
     private Long clienteId;
 
-    @Schema(description = "Itens da venda", required = true)
+    @Schema(description = "Itens da venda", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "{venda.itens.notEmpty}")
     @Valid
     @JsonProperty("itens")
     private List<@Valid ItemVendaDTO> itens;
 
-    @Schema(description = "Valor total bruto (soma dos itens)", example = "200.00", required = true)
+    @Schema(description = "Valor total bruto (soma dos itens)", example = "200.00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "{venda.totalBruto.notNull}")
     @DecimalMin(value = "0.00", inclusive = false, message = "{venda.totalBruto.min}")
     @JsonProperty("totalBruto")
@@ -56,19 +56,19 @@ public class VendaRequestDTO implements Serializable {
     @JsonProperty("totalDescontos")
     private BigDecimal totalDescontos;
 
-    @Schema(description = "Total líquido (bruto - descontos)", example = "180.00", required = true)
+    @Schema(description = "Total líquido (bruto - descontos)", example = "180.00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "{venda.totalLiquido.notNull}")
     @DecimalMin(value = "0.00", inclusive = false, message = "{venda.totalLiquido.min}")
     @JsonProperty("totalLiquido")
     private BigDecimal totalLiquido;
 
-    @Schema(description = "Formas de pagamento da venda", required = true)
+    @Schema(description = "Formas de pagamento da venda", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "{venda.formasPagamento.notEmpty}")
     @Valid
     @JsonProperty("formasPagamento")
     private List<@Valid FormaPagamentoRequestDTO> formasPagamento;
 
-    @Schema(description = "Tipo da venda (PRESENCIAL ou ONLINE)", example = "PRESENCIAL", required = true)
+    @Schema(description = "Tipo da venda (PRESENCIAL ou ONLINE)", example = "PRESENCIAL", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "{venda.tipoVenda.notNull}")
     @JsonProperty("tipoVenda")
     private TipoVenda tipoVenda;
@@ -89,7 +89,7 @@ public class VendaRequestDTO implements Serializable {
     @JsonProperty("observacao")
     private String observacao;
 
-    @Schema(description = "ID do tenant (multi-inquilino)", example = "redemaisfarma-001", required = true)
+    @Schema(description = "ID do tenant (multi-inquilino)", example = "redemaisfarma-001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "{venda.tenantId.notBlank}")
     @JsonProperty("tenantId")
     private String tenantId;
@@ -157,21 +157,21 @@ public class VendaRequestDTO implements Serializable {
     public static class ItemVendaDTO implements Serializable {
         private static final long serialVersionUID = 1L;
 
-        @Schema(description = "ID do produto", example = "987", required = true)
+        @Schema(description = "ID do produto", example = "987", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "{venda.item.produtoId.notNull}")
         private Long produtoId;
 
-        @Schema(description = "Quantidade do item", example = "2", required = true)
+        @Schema(description = "Quantidade do item", example = "2", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "{venda.item.quantidade.notNull}")
         @Min(value = 1, message = "{venda.item.quantidade.min}")
         private Integer quantidade;
 
-        @Schema(description = "Preço unitário", example = "100.00", required = true)
+        @Schema(description = "Preço unitário", example = "100.00", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "{venda.item.precoUnitario.notNull}")
         @DecimalMin(value = "0.00", inclusive = false, message = "{venda.item.precoUnitario.min}")
         private BigDecimal precoUnitario;
 
-        @Schema(description = "Subtotal do item (quantidade * preço unitário)", example = "200.00", required = true)
+        @Schema(description = "Subtotal do item (quantidade * preço unitário)", example = "200.00", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "{venda.item.subtotal.notNull}")
         @DecimalMin(value = "0.00", inclusive = false, message = "{venda.item.subtotal.min}")
         private BigDecimal subtotal;
@@ -185,3 +185,4 @@ public class VendaRequestDTO implements Serializable {
         }
     }
 }
+

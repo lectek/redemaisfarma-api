@@ -35,10 +35,13 @@
 .gap-16  { gap: var(--gap-16); }
 .gap-24  { gap: var(--gap-24); }
 .gap-32  { gap: var(--gap-32); }
+.gap-48  { gap: var(--gap-48); }
 .gap-64  { gap: var(--gap-64); }
 
 .gap-x-8  { column-gap: var(--gap-8); }
+.gap-x-48 { column-gap: var(--gap-48); }
 .gap-y-8  { row-gap: var(--gap-8); }
+.gap-y-48 { row-gap: var(--gap-48); }
 
 /* ========== Justify & Align ========== */
 .justify-start   { justify-items: start; }

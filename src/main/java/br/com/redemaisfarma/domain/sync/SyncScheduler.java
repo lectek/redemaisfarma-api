@@ -19,7 +19,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @Component
-@ConditionalOnProperty(prefix = "sync.firebird", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "legacy.sync", name = "enabled", havingValue = "true")
 public class SyncScheduler {
     private static final Logger log = LoggerFactory.getLogger(SyncScheduler.class);
     private static final String SOURCE = "firebird.produtos";

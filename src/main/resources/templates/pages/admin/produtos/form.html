@@ -3,34 +3,102 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Produto • Form</title>
+  <title>Produto - Novo</title>
   <link rel="stylesheet" th:href="@{/css/main.css}"/>
   <meta name="_csrf" th:content="${_csrf.token}"/>
   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
-<div class="layout">
-<aside th:replace="~{fragments/sidebar :: sidebar('produtos')}"></aside>
+<div class="layout layout--with-sidebar">
+<aside th:replace="~{fragments/admin-sidebar :: adminSidebar('produtos')}"></aside>
 <main class="container stack mt-4 mb-6">
-  <h1 class="page-title" th:text="${produto.id} != null ? 'Editar produto' : 'Novo produto'">Produto</h1>
-  <form class="form-grid" th:action="@{/admin/produtos}" method="post" th:object="${produto}" enctype="multipart/form-data">
-    <input type="hidden" th:field="*{id}"/>
-    <div class="form-group"><label>Nome</label><input class="input" th:field="*{nome}" required/></div>
-    <div class="form-group"><label>Descrição</label><textarea class="input" th:field="*{descricao}" rows="4"></textarea></div>
-    <div class="form-row">
-      <div class="form-group"><label>Preço (R$)</label><input class="input" type="number" step="0.01" th:field="*{preco}" required/></div>
-      <div class="form-group"><label>Estoque</label><input class="input" type="number" min="0" th:field="*{estoque}" required/></div>
-      <div class="form-group"><label>Categoria</label>
-        <select class="select" th:field="*{categoria}">
-          <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}">Categoria</option>
-        </select>
+  <div class="between">
+    <h1 class="page-title" th:text="${produto.id} != null ? 'Editar produto' : 'Novo produto'">Produto</h1>
+    <a class="btn btn-ghost" th:href="@{/admin/produtos}">Voltar</a>
+  </div>
+
+  <p class="text-muted" th:if="${param.erro}">
+    <span th:switch="${param.erro[0]}">
+      <span th:case="'nome'">Informe o nome do produto.</span>
+      <span th:case="'codigo_barras'">Codigo de barras ja cadastrado.</span>
+      <span th:case="'integridade'">Nao foi possivel salvar o produto. Verifique os dados.</span>
+      <span th:case="*">Nao foi possivel salvar o produto.</span>
+    </span>
+  </p>
+
+  <div class="card p-4">
+    <form class="form-grid" th:action="@{/admin/produtos}" method="post" th:object="${produto}" enctype="multipart/form-data">
+      <input type="hidden" th:field="*{id}"/>
+      <div class="form-group">
+        <label>Nome</label>
+        <input class="input" th:field="*{nome}" required/>
       </div>
-    </div>
-    <div class="form-group"><label>Imagem</label><input class="input" type="file" name="imagemFile" accept=".png,.jpg,.jpeg,.webp,.svg"/></div>
-    <div class="form-actions"><button class="btn btn-primary">Salvar</button></div>
-  </form>
+      <div class="form-group">
+        <label>Descricao</label>
+        <textarea class="input" th:field="*{descricao}" rows="4"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Preco (R$)</label>
+          <input class="input" type="number" step="0.01" th:field="*{precoVenda}" required/>
+        </div>
+        <div class="form-group">
+          <label>Preco promocional (R$)</label>
+          <input class="input" type="number" step="0.01" th:field="*{precoPromocional}"/>
+        </div>
+        <div class="form-group">
+          <label>Estoque</label>
+          <input class="input" type="number" min="0" th:field="*{estoque}" required/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Categoria</label>
+          <select class="select" th:field="*{categoria}" required>
+            <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}">Categoria</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Codigo de barras (EAN)</label>
+          <input class="input" th:field="*{codigoBarras}" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-check">
+            <input type="checkbox" th:field="*{disponivel}" checked/>
+            <span>Disponivel</span>
+          </label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Marca/Fabricante</label>
+          <input class="input" th:field="*{fabricante}"/>
+        </div>
+        <div class="form-group">
+          <label>Unidade</label>
+          <input class="input" th:field="*{unidade}"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Imagem</label>
+        <input class="input" type="file" name="imagemFile" accept=".png,.jpg,.jpeg,.webp,.svg"/>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary">Salvar</button>
+      </div>
+    </form>
+  </div>
 </main></div>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>
+
+
+
+
+
+
+
+
+

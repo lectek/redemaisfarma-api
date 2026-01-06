@@ -1,33 +1,37 @@
 /* 🎛 TOKENS — design system (cores, tipografia, spacing, sombras) */
 :root {
   /* Brand & feedback */
-  --color-primary:#22a653;
-  --color-primary-hover:#1a8444;
-  --color-secondary:#2a7de1;
-  --color-success:#2ec27e;
-  --color-error:#e5484d;
-  --color-warning:#f5a524;
+  --color-primary:#1f6feb;
+  --color-primary-hover:#1a5cd6;
+  --color-secondary:#0ea5a4;
+  --color-success:#16a34a;
+  --color-error:#ef4444;
+  --color-warning:#f59e0b;
 
   /* Neutros */
   --color-neutral-1:#ffffff;
-  --color-neutral-2:#f6f7fb;
-  --color-neutral-3:#e6e7eb;
-  --color-neutral-4:#cfd3d8;
-  --color-neutral-5:#707784;
+  --color-neutral-2:#f8fafc;
+  --color-neutral-3:#e2e8f0;
+  --color-neutral-4:#cbd5e1;
+  --color-neutral-5:#475569;
   --color-dark:#0f172a;
   --color-light:#e5e7eb;
 
   /* Tipografia */
-  --font-sans:'Inter', system-ui, Segoe UI, Roboto, Arial, "Noto Sans";
+  --font-sans:'Source Sans 3', system-ui, Segoe UI, Roboto, Arial, "Noto Sans";
+  --font-display:'DM Sans', 'Source Sans 3', system-ui, Segoe UI, Roboto, Arial, "Noto Sans";
   --font-size-xs:.75rem; --font-size-sm:.875rem; --font-size-base:1rem;
   --font-size-lg:1.125rem; --font-size-xl:1.25rem; --font-size-2xl:1.5rem;
 
   /* Espaçamento */
   --gap-4:.25rem; --gap-8:.5rem; --gap-12:.75rem; --gap-16:1rem;
-  --gap-24:1.5rem; --gap-32:2rem; --gap-64:4rem;
+  --gap-24:1.5rem; --gap-32:2rem; --gap-48:3rem; --gap-64:4rem;
 
   /* Radius */
   --radius-sm:8px; --radius-md:12px; --radius-lg:16px; --radius-xl:20px; --radius-full:999px;
+
+  /* Icon sizes */
+  --icon-size-sm:16px; --icon-size-md:20px; --icon-size-lg:24px;
 
   /* Sombras */
   --shadow-0:none;
@@ -37,6 +41,8 @@
   --shadow-inset:inset 0 1px 3px rgba(2,6,23,.05);
 
   /* Layout */
+  --container-max:1200px;
+  --page-pad:clamp(16px, 2.5vw, 28px);
   --layout-bg:var(--color-neutral-2);
   --layout-card:var(--color-neutral-1);
   --layout-dark:var(--color-dark);

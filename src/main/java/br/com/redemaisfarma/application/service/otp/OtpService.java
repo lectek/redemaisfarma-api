@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service("otpService")
-@Profile({"dev", "test"})
+@Profile({"dev", "test", "docker"})
 public class OtpService implements OtpServicePort {
     private static final Logger log = LoggerFactory.getLogger(OtpService.class);
 

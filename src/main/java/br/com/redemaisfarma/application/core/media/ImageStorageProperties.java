@@ -12,6 +12,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ImageStorageProperties {
     private String dir = "media/products";
     private String publicBase = "/media/products";
+    private String userDir = "media/users";
+    private String userPublicBase = "/media/users";
 
     public String getDir() {
         return this.dir;
@@ -28,5 +30,20 @@ public class ImageStorageProperties {
     public void setPublicBase(String publicBase) {
         this.publicBase = publicBase;
     }
-}
 
+    public String getUserDir() {
+        return userDir;
+    }
+
+    public void setUserDir(String userDir) {
+        this.userDir = userDir;
+    }
+
+    public String getUserPublicBase() {
+        return userPublicBase;
+    }
+
+    public void setUserPublicBase(String userPublicBase) {
+        this.userPublicBase = userPublicBase;
+    }
+}

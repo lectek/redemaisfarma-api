@@ -24,7 +24,8 @@ public class WebSecurityBeans {
             // copia mantendo o tipo mais amplo
             Set<GrantedAuthority> out = new HashSet<>(in);
 
-            boolean isDev   = in.stream().anyMatch(a -> "ROLE_DEVELOPER".equals(a.getAuthority()));
+            boolean isDev   = in.stream().anyMatch(a ->
+                    "ROLE_DEVELOPER".equals(a.getAuthority()) || "ROLE_DEV".equals(a.getAuthority()));
             boolean isAdmin = in.stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
 
             if (isDev) {

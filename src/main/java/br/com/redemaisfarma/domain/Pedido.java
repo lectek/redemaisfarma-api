@@ -16,6 +16,7 @@ public class Pedido {
     private List<ItemPedido> itens;
     private StatusPedido status = StatusPedido.AGUARDANDO_PAGAMENTO;
     private TipoPagamento tipoPagamento = TipoPagamento.PIX;
+    private String metodoPagamento;
 
     public Long getId() {
         return this.id;
@@ -72,5 +73,12 @@ public class Pedido {
     public void setTipoPagamento(TipoPagamento tipoPagamento) {
         this.tipoPagamento = tipoPagamento;
     }
-}
 
+    public String getMetodoPagamento() {
+        return this.metodoPagamento;
+    }
+
+    public void setMetodoPagamento(String metodoPagamento) {
+        this.metodoPagamento = metodoPagamento;
+    }
+}

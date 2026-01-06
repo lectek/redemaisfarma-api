@@ -1,25 +1,67 @@
-<!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Configurações • Design</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
-<body class="body-flex">
-<header th:replace="~{fragments/header :: header}"></header>
-<div class="layout">
-<aside th:replace="~{fragments/sidebar :: sidebar('conf-branding')}"></aside>
-<main class="container stack mt-4 mb-6">
-  <h1 class="page-title">Design (tokens/layout)</h1>
-  <form class="card form-grid" th:action="@{/admin/configuracoes/design}" method="post" th:object="${design}">
-    <div class="form-row">
-      <label class="checkbox"><input type="checkbox" th:field="*{darkByDefault}"/> Tema escuro por padrão</label>
-      <label class="checkbox"><input type="checkbox" th:field="*{usarBordasArredondadas}"/> Bordas 12px</label>
-      <label class="checkbox"><input type="checkbox" th:field="*{animacoes}"/> Animações ativas</label>
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Configuracoes de design</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body class="body-flex admin-page">
+<header th:replace="~{fragments/admin-header :: adminHeader}"></header>
+
+<div class="layout layout--with-sidebar">
+  <aside th:replace="~{fragments/admin-sidebar :: adminSidebar('configuracoes')}"></aside>
+
+  <main id="main-content" class="container stack mt-4 mb-6">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Design (tokens e layout)</h1>
+        <p class="page-lead">Ajustes finos de temas, bordas e espacamento.</p>
+      </div>
+      <div class="page-actions">
+        <a class="btn btn-ghost" th:href="@{/admin/configuracoes/branding}">Voltar</a>
+        <button class="btn btn-primary" type="submit" form="design-form">Salvar</button>
+      </div>
     </div>
-    <div class="form-row">
-      <input class="input" th:field="*{fontFamily}" placeholder="Fonte (ex.: 'Inter, Arial')"/>
-      <input class="input" th:field="*{radius}" placeholder="Raio de borda (px)"/>
-      <input class="input" th:field="*{spacing}" placeholder="Base de espaçamento (px)"/>
-    </div>
-    <div class="form-actions"><button class="btn btn-primary">Salvar</button></div>
-  </form>
-</main></div>
+
+    <section th:replace="~{fragments/flash :: flash}"></section>
+
+    <form id="design-form" class="card form-grid" th:action="@{/admin/configuracoes/design}" method="post" th:object="${design}">
+      <fieldset class="fieldset">
+        <legend>Preferencias visuais</legend>
+        <div class="form-row">
+          <label class="checkbox"><input type="checkbox" th:field="*{darkByDefault}"/> Tema escuro por padrao</label>
+          <label class="checkbox"><input type="checkbox" th:field="*{usarBordasArredondadas}"/> Bordas 12px</label>
+          <label class="checkbox"><input type="checkbox" th:field="*{animacoesAtivas}"/> Animacoes ativas</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend>Tokens base</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fontFamily">Fonte</label>
+            <input id="fontFamily" class="input" th:field="*{fontFamily}" placeholder="Inter, Arial, sans-serif"/>
+          </div>
+          <div class="form-group">
+            <label for="radius">Raio de borda (px)</label>
+            <input id="radius" class="input" th:field="*{radius}" placeholder="12"/>
+          </div>
+          <div class="form-group">
+            <label for="spacing">Base de espacamento (px)</label>
+            <input id="spacing" class="input" th:field="*{spacing}" placeholder="8"/>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="form-actions">
+        <button class="btn btn-ghost" type="reset">Cancelar</button>
+        <button class="btn btn-primary" type="submit">Salvar</button>
+      </div>
+    </form>
+  </main>
+</div>
+
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-</body></html>
+</body>
+</html>

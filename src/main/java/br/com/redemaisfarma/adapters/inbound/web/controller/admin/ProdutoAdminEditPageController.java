@@ -15,6 +15,7 @@
 package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCategoriaRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import lombok.Generated;
 import org.springframework.context.annotation.Profile;
@@ -26,19 +27,22 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Profile(value={"!test"})
 @Controller
 @RequestMapping(value={"/admin/produtos"})
 public class ProdutoAdminEditPageController {
     private final ProdutoRepository repo;
+    private final ProdutoCategoriaRepository categoriaRepository;
 
     @GetMapping(value={"/{id}/editar/page"})
     public String editarView(@PathVariable Long id, Model model) {
         ProdutoEntity p = this.repo.findById(id).orElse(null);
         model.addAttribute("produto", (Object)p);
         model.addAttribute("produtoId", (Object)id);
-        model.addAttribute("categorias", this.repo.findDistinctCategorias());
-        return "admin/produtos/editar";
+        model.addAttribute("categorias", this.resolveCategorias());
+        return "pages/admin/produtos/editar";
     }
 
     @PostMapping(value={"/{id}/imagem/regenerate"})
@@ -59,8 +63,16 @@ public class ProdutoAdminEditPageController {
     }
 
     @Generated
-    public ProdutoAdminEditPageController(ProdutoRepository repo) {
+    public ProdutoAdminEditPageController(ProdutoRepository repo, ProdutoCategoriaRepository categoriaRepository) {
         this.repo = repo;
+        this.categoriaRepository = categoriaRepository;
+    }
+
+    private List<String> resolveCategorias() {
+        List<String> categorias = this.categoriaRepository.findAllNomes();
+        if (categorias == null || categorias.isEmpty()) {
+            return List.of("Sem Categoria");
+        }
+        return categorias;
     }
 }
-

@@ -146,6 +146,9 @@ app:
   kafka:
     groups:
       pedidos: ${APP_KAFKA_GROUP_PEDIDOS:pedidos-consumer}
+legacy:
+  sync:
+    enabled: ${LEGACY_SYNC_ENABLED:false}
 
 api:
   base-path: /api

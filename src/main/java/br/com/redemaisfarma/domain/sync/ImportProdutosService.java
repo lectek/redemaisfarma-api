@@ -7,6 +7,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "legacy.sync", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class ImportProdutosService {
 
     private static final String CHECKPOINT_SOURCE = "firebird.produtos";

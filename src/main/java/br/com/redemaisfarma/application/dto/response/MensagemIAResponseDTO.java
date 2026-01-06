@@ -39,22 +39,22 @@ import java.util.UUID;
 public class MensagemIAResponseDTO
 implements Serializable {
     private static final long serialVersionUID = 1L;
-    @Schema(description="ID da intera\u00e7\u00e3o com IA", example="3fa85f64-5717-4562-b3fc-2c963f66afa6", required=true)
+    @Schema(description="ID da intera\u00e7\u00e3o com IA", example="3fa85f64-5717-4562-b3fc-2c963f66afa6", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{mensagemIAResponse.interacaoId.notNull}")
     @JsonProperty(value="interacaoId")
     private @NotNull(message="{mensagemIAResponse.interacaoId.notNull}") UUID interacaoId;
-    @Schema(description="ID do cliente", example="12345", required=true)
+    @Schema(description="ID do cliente", example="12345", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{mensagemIAResponse.clienteId.notNull}")
     @JsonProperty(value="clienteId")
     private @NotNull(message="{mensagemIAResponse.clienteId.notNull}") Long clienteId;
     @Schema(description="Token de correla\u00e7\u00e3o (UUID)", example="4fa85f64-5717-4562-b3fc-2c963f66afa6")
     @JsonProperty(value="traceId")
     private UUID traceId;
-    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", required=true)
+    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{mensagemIAResponse.tenantId.notBlank}")
     @JsonProperty(value="tenantId")
     private @NotBlank(message="{mensagemIAResponse.tenantId.notBlank}") String tenantId;
-    @Schema(description="Data/hora da intera\u00e7\u00e3o", type="string", format="date-time", example="2025-07-04T15:00:00", required=true)
+    @Schema(description="Data/hora da intera\u00e7\u00e3o", type="string", format="date-time", example="2025-07-04T15:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{mensagemIAResponse.dataHoraInteracao.notNull}")
     @PastOrPresent(message="{mensagemIAResponse.dataHoraInteracao.pastOrPresent}")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
@@ -64,17 +64,17 @@ implements Serializable {
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     @JsonProperty(value="atualizadoEm")
     private LocalDateTime atualizadoEm;
-    @Schema(description="Pergunta enviada pelo usu\u00e1rio", example="Qual a dosagem recomendada para dor de cabe\u00e7a?", required=true)
+    @Schema(description="Pergunta enviada pelo usu\u00e1rio", example="Qual a dosagem recomendada para dor de cabe\u00e7a?", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{mensagemIAResponse.perguntaUsuario.notBlank}")
     @Size(max=2000, message="{mensagemIAResponse.perguntaUsuario.size}")
     @JsonProperty(value="perguntaUsuario")
     private @NotBlank(message="{mensagemIAResponse.perguntaUsuario.notBlank}") @Size(max=2000, message="{mensagemIAResponse.perguntaUsuario.size}") String perguntaUsuario;
-    @Schema(description="Resposta fornecida pela IA", example="Recomenda-se 500mg a cada 6 horas.", required=true)
+    @Schema(description="Resposta fornecida pela IA", example="Recomenda-se 500mg a cada 6 horas.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{mensagemIAResponse.respostaIA.notBlank}")
     @Size(max=4000, message="{mensagemIAResponse.respostaIA.size}")
     @JsonProperty(value="respostaIA")
     private @NotBlank(message="{mensagemIAResponse.respostaIA.notBlank}") @Size(max=4000, message="{mensagemIAResponse.respostaIA.size}") String respostaIA;
-    @Schema(description="Tipo de resposta da IA", example="EXPLICATIVA", required=true, allowableValues={"EXPLICATIVA", "CONCISA", "PASSO_A_PASSO"})
+    @Schema(description="Tipo de resposta da IA", example="EXPLICATIVA", requiredMode = Schema.RequiredMode.REQUIRED, allowableValues={"EXPLICATIVA", "CONCISA", "PASSO_A_PASSO"})
     @NotNull(message="{mensagemIAResponse.tipoResposta.notNull}")
     @JsonProperty(value="tipoResposta")
     private @NotNull(message="{mensagemIAResponse.tipoResposta.notNull}") TipoResposta tipoResposta;
@@ -82,7 +82,7 @@ implements Serializable {
     @Size(max=2000, message="{mensagemIAResponse.explicacaoSugerida.size}")
     @JsonProperty(value="explicacaoSugerida")
     private @Size(max=2000, message="{mensagemIAResponse.explicacaoSugerida.size}") String explicacaoSugerida;
-    @Schema(description="Plano/modelo de IA usado", example="GPT-4", required=true)
+    @Schema(description="Plano/modelo de IA usado", example="GPT-4", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{mensagemIAResponse.planoIA.notBlank}")
     @Size(max=50, message="{mensagemIAResponse.planoIA.size}")
     @JsonProperty(value="planoIA")
@@ -95,7 +95,7 @@ implements Serializable {
     @Positive(message="{mensagemIAResponse.limiteMensal.positive}")
     @JsonProperty(value="limiteMensal")
     private @Positive(message="{mensagemIAResponse.limiteMensal.positive}") Integer limiteMensal;
-    @Schema(description="Canal de origem da intera\u00e7\u00e3o IA", example="APP", required=true, allowableValues={"WEB", "APP", "ADMIN"})
+    @Schema(description="Canal de origem da intera\u00e7\u00e3o IA", example="APP", requiredMode = Schema.RequiredMode.REQUIRED, allowableValues={"WEB", "APP", "ADMIN"})
     @NotNull(message="{mensagemIAResponse.canalOrigem.notNull}")
     @JsonProperty(value="canalOrigem")
     private @NotNull(message="{mensagemIAResponse.canalOrigem.notNull}") CanalOrigem canalOrigem;
@@ -289,21 +289,21 @@ implements Serializable {
     public static class HistoricoInteracaoDTO
     implements Serializable {
         private static final long serialVersionUID = 1L;
-        @Schema(description="ID \u00fanico do registro", example="7fa85f64-5717-4562-b3fc-2c963f66afa6", required=true)
+        @Schema(description="ID \u00fanico do registro", example="7fa85f64-5717-4562-b3fc-2c963f66afa6", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message="{historicoInteracao.registroId.notNull}")
         @JsonProperty(value="registroId")
         private @NotNull(message="{historicoInteracao.registroId.notNull}") UUID registroId;
-        @Schema(description="Pergunta do usu\u00e1rio", example="Qual hor\u00e1rio de funcionamento?", required=true)
+        @Schema(description="Pergunta do usu\u00e1rio", example="Qual hor\u00e1rio de funcionamento?", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank(message="{historicoInteracao.pergunta.notBlank}")
         @Size(max=2000, message="{historicoInteracao.pergunta.size}")
         @JsonProperty(value="pergunta")
         private @NotBlank(message="{historicoInteracao.pergunta.notBlank}") @Size(max=2000, message="{historicoInteracao.pergunta.size}") String pergunta;
-        @Schema(description="Resposta da IA", example="Funcionamos 24h.", required=true)
+        @Schema(description="Resposta da IA", example="Funcionamos 24h.", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank(message="{historicoInteracao.resposta.notBlank}")
         @Size(max=4000, message="{historicoInteracao.resposta.size}")
         @JsonProperty(value="resposta")
         private @NotBlank(message="{historicoInteracao.resposta.notBlank}") @Size(max=4000, message="{historicoInteracao.resposta.size}") String resposta;
-        @Schema(description="Timestamp do registro", type="string", format="date-time", example="2025-07-04T14:59:00", required=true)
+        @Schema(description="Timestamp do registro", type="string", format="date-time", example="2025-07-04T14:59:00", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message="{historicoInteracao.dataHora.notNull}")
         @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
         @JsonProperty(value="dataHora")
@@ -371,4 +371,5 @@ implements Serializable {
         }
     }
 }
+
 

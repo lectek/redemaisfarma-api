@@ -99,6 +99,7 @@ services:
       TZ: ${TZ:-America/Sao_Paulo}
 
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SPRING_OPTS: "--spring.output.ansi.enabled=ALWAYS --spring.profiles.active=${SPRING_PROFILES_ACTIVE:-dev}"
 
       SERVER_ADDRESS: 0.0.0.0
       SERVER_PORT: "8080"
@@ -113,14 +114,17 @@ services:
       SPRING_FLYWAY_URL: "jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-redemaisfarma}?sslMode=PREFERRED&allowPublicKeyRetrieval=true&serverTimezone=UTC"
       SPRING_FLYWAY_USER: "${MYSQL_USER:-app_user}"
       SPRING_FLYWAY_PASSWORD: "${MYSQL_PASSWORD:-Rede_Mais_Farma25@}"
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
 
       KAFKA_ENABLED: "false"
       SPRING_KAFKA_LISTENER_AUTO_STARTUP: "false"
+      LEGACY_SYNC_ENABLED: "false"
 
       MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,mappings,loggers"
       MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: "true"
       MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "always"
       MANAGEMENT_ENDPOINT_HEALTH_SHOW_COMPONENTS: "always"
+      MANAGEMENT_HEALTH_REDIS_ENABLED: "false"
 
       APP_MAIL_ENABLED: "true"
       APP_MAIL_FROM: "${APP_MAIL_FROM:-no-reply@local.redemaisfarma}"
@@ -137,6 +141,9 @@ services:
 
       INTEGRATIONS_CLIENTE_BASE_URL: "http://cliente-mock:8080"
       INTEGRATIONS_CLIENTE_BASEURL: "http://cliente-mock:8080"
+
+      LOG_PATH: "/tmp"
+      ACCESS_FILE: "access.log"
 
       JWT_SECRET: "${JWT_SECRET:-dev-docker-please-change-this-very-long-64chars-secret-1234567890-ABCdef}"
       JWT_ISSUER: "${JWT_ISSUER:-redemaisfarma-api}"

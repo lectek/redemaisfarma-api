@@ -1,25 +1,25 @@
 <!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Agendamentos de Medicação</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
+<title>Agendamentos de Medicacao</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
 <div class="layout">
-<aside th:replace="~{fragments/sidebar :: sidebar('agendamentos')}"></aside>
+<aside th:replace="~{fragments/admin-sidebar :: adminSidebar('agendamentos')}"></aside>
 <main class="container stack mt-4 mb-6">
-  <h1 class="page-title">Agendamentos de Medicação</h1>
-  <form class="form-grid card mb-4" th:action="@{/admin/agendamentos/medicacao}" method="post" th:object="${novo}">
+  <h1 class="page-title">Agendamentos de Medicacao</h1>
+  <form class="form-grid card mb-4" th:action="@{/admin/agendamentos/Medicacao}" method="post" th:object="${novo}">
     <div class="form-group"><label>Cliente</label><input class="input" th:field="*{clienteEmail}" placeholder="email@cliente.com" required/></div>
     <div class="form-group"><label>Medicamento</label><input class="input" th:field="*{medicamento}" required/></div>
     <div class="form-row">
-      <div class="form-group"><label>Frequência</label>
+      <div class="form-group"><label>Frequencia</label>
         <select class="select" th:field="*{frequencia}">
-          <option value="DIARIO">Diário</option><option value="SEMANAL">Semanal</option>
+          <option value="Diario">Diario</option><option value="SEMANAL">Semanal</option>
         </select>
       </div>
-      <div class="form-group"><label>Horário</label><input class="input" type="time" th:field="*{horario}" required/></div>
+      <div class="form-group"><label>Horario</label><input class="input" type="time" th:field="*{Horario}" required/></div>
       <div class="form-group"><label>Canal</label>
         <select class="select" th:field="*{canal}">
-          <option>APP</option><option>WHATSAPP</option><option>EMAIL</option>
+          <option>APP</option><option>WhaTSAPP</option><option>EMAIL</option>
         </select>
       </div>
     </div>
@@ -29,13 +29,13 @@
   <section class="card table-responsive">
     <h2 class="card-title">Agendamentos ativos</h2>
     <table class="table">
-      <thead><tr><th>Cliente</th><th>Medicamento</th><th>Freq.</th><th>Horário</th><th>Canal</th><th>Ações</th></tr></thead>
+      <thead><tr><th>Cliente</th><th>Medicamento</th><th>Freq.</th><th>Horario</th><th>Canal</th><th>Acoes</th></tr></thead>
       <tbody>
         <tr th:each="a : ${agendamentos}">
           <td th:text="${a.clienteEmail}">email@c.com</td>
           <td th:text="${a.medicamento}">Dipirona</td>
-          <td th:text="${a.frequencia}">DIARIO</td>
-          <td th:text="${a.horario}">08:00</td>
+          <td th:text="${a.frequencia}">Diario</td>
+          <td th:text="${a.Horario}">08:00</td>
           <td th:text="${a.canal}">APP</td>
           <td class="actions">
             <a class="btn btn-ghost" th:href="@{|/admin/agendamentos/${a.id}/editar|}">Editar</a>
@@ -49,3 +49,9 @@
 </main></div>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body></html>
+
+
+
+
+
+

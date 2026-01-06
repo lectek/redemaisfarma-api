@@ -47,7 +47,7 @@ public class ProductImageAdminPageController {
         Page<ProdutoEntity> page = produtoRepo.findSemMidia(pageable);
         model.addAttribute("page", page);
         model.addAttribute("totalSemImagem", page.getTotalElements());
-        return "admin/imagens/index";
+        return "pages/admin/imagens/index";
     }
 
     @GetMapping("/api/admin/imagens/produtos/sem-imagem")

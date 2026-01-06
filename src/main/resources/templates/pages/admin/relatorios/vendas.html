@@ -1,31 +1,127 @@
-<!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Relatórios • Vendas</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
-<body class="body-flex">
-<header th:replace="~{fragments/header :: header}"></header>
-<div class="layout">
-<aside th:replace="~{fragments/sidebar :: sidebar('relatorios')}"></aside>
-<main class="container stack mt-4 mb-6">
-  <h1 class="page-title">Vendas</h1>
-  <form class="form-row mb-4" th:action="@{/admin/relatorios/vendas}" method="get">
-    <input class="input" type="date" name="de" th:value="${param.de}"/>
-    <input class="input" type="date" name="ate" th:value="${param.ate}"/>
-    <button class="btn">Gerar</button>
-    <a class="btn" th:href="@{/admin/relatorios/vendas/export?tipo=pdf}">Exportar PDF</a>
-  </form>
-  <section class="card table-responsive">
-    <table class="table">
-      <thead><tr><th>Data</th><th>Pedidos</th><th>Total</th></tr></thead>
-      <tbody>
-        <tr th:each="r : ${linhas}">
-          <td th:text="${#dates.format(r.data,'dd/MM/yyyy')}">…</td>
-          <td th:text="${r.qtd}">0</td>
-          <td th:text="${#numbers.formatCurrency(r.total)}">R$0,00</td>
-        </tr>
-      </tbody>
-      <tfoot><tr><th>Total</th><th th:text="${sumQtd}">0</th><th th:text="${#numbers.formatCurrency(sumTotal)}">R$0,00</th></tr></tfoot>
-    </table>
-  </section>
-</main></div>
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Relatorios de Vendas</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body class="body-flex admin-page">
+<header th:replace="~{fragments/admin-header :: adminHeader}"></header>
+<div class="layout layout--with-sidebar">
+  <aside th:replace="~{fragments/admin-sidebar :: adminSidebar('relatorios')}"></aside>
+  <main class="container stack mt-4 mb-6">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Relatorios</h1>
+        <p class="page-lead">Acompanhe vendas, clientes e produtos em um unico lugar.</p>
+      </div>
+      <div class="page-actions">
+        <a class="btn btn-ghost" th:href="@{/admin/relatorios/vendas/export(tipo='csv',de=${param.de},ate=${param.ate})}">Exportar CSV</a>
+        <button class="btn btn-ghost" type="button" disabled>PDF (em breve)</button>
+      </div>
+    </div>
+
+    <section th:replace="~{fragments/flash :: flash}"></section>
+
+    <nav class="report-tabs">
+      <a class="report-tab is-active" th:href="@{/admin/relatorios/vendas}">Vendas</a>
+      <a class="report-tab" th:href="@{/admin/relatorios/clientes}">Clientes</a>
+      <a class="report-tab" th:href="@{/admin/relatorios/produtos}">Produtos</a>
+    </nav>
+
+    <form class="filter-bar card p-16 mb-4" th:action="@{/admin/relatorios/vendas}" method="get">
+      <input class="input" type="date" name="de" th:value="${param.de}" />
+      <input class="input" type="date" name="ate" th:value="${param.ate}" />
+      <button class="btn">Gerar</button>
+      <a class="btn btn-ghost" th:href="@{/admin/relatorios/vendas}">Limpar</a>
+    </form>
+
+    <section class="stat-grid">
+      <article class="stat-card">
+        <span class="stat-label">Pedidos</span>
+        <span class="stat-value" th:text="${sumQtd ?: 0}">0</span>
+        <span class="stat-hint">Total no periodo</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Dias com vendas</span>
+        <span class="stat-value" th:text="${linhas != null ? #lists.size(linhas) : 0}">0</span>
+        <span class="stat-hint">Linhas no relatorio</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Clientes</span>
+        <span class="stat-value" th:text="${totalClientes ?: 0}">0</span>
+        <span class="stat-hint">Base total</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Faturamento</span>
+        <span class="stat-value" th:text="${#numbers.formatCurrency(sumTotal)}">R$0,00</span>
+        <span class="stat-hint">No periodo</span>
+      </article>
+    </section>
+
+    <section class="card p-4 mb-4" id="resumo-vendas" th:attr="data-total-vendas=${sumTotal ?: 0},data-total-clientes=${totalClientes ?: 0}">
+      <div class="between">
+        <div>
+          <h2 class="section-title">Resumo</h2>
+          <p class="muted">Totais consolidados do periodo</p>
+        </div>
+        <div class="row gap-4">
+          <div>
+            <div class="kpi-label">Total de vendas</div>
+            <div class="kpi-value" th:text="${#numbers.formatCurrency(sumTotal)}">R$0,00</div>
+          </div>
+          <div>
+            <div class="kpi-label">Clientes cadastrados</div>
+            <div class="kpi-value" th:text="${totalClientes}">0</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-bars" aria-label="Grafico de totais">
+        <div class="bar" data-key="vendas">
+          <div class="bar-fill"></div>
+          <span class="bar-label">Vendas</span>
+        </div>
+        <div class="bar" data-key="clientes">
+          <div class="bar-fill"></div>
+          <span class="bar-label">Clientes</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card table-responsive">
+      <table class="table">
+        <thead><tr><th>Data</th><th>Pedidos</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr th:each="r : ${linhas}">
+            <td th:text="${#dates.format(r.data,'dd/MM/yyyy')}">a</td>
+            <td th:text="${r.qtd}">0</td>
+            <td th:text="${#numbers.formatCurrency(r.total)}">R$0,00</td>
+          </tr>
+        </tbody>
+        <tfoot><tr><th>Total</th><th th:text="${sumQtd}">0</th><th th:text="${#numbers.formatCurrency(sumTotal)}">R$0,00</th></tr></tfoot>
+      </table>
+    </section>
+  </main>
+</div>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-</body></html>
+<script>
+  (function () {
+    var el = document.getElementById('resumo-vendas');
+    if (!el) return;
+    var vendasRaw = (el.dataset.totalVendas || '0').toString().replace(',', '.');
+    var clientesRaw = (el.dataset.totalClientes || '0').toString().replace(',', '.');
+    var vendas = parseFloat(vendasRaw) || 0;
+    var clientes = parseFloat(clientesRaw) || 0;
+    var max = Math.max(vendas, clientes, 1);
+    var bars = el.querySelectorAll('.bar');
+    bars.forEach(function (bar) {
+      var key = bar.getAttribute('data-key');
+      var value = key === 'vendas' ? vendas : clientes;
+      var pct = Math.round((value / max) * 100);
+      bar.style.setProperty('--fill', pct + '%');
+    });
+  })();
+</script>
+</body>
+</html>

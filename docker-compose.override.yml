@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
 
   firebird:
@@ -48,7 +46,6 @@ services:
       SPRING_DATASOURCE_LEGACY_PASSWORD: "${ISC_PASSWORD:-masterkey}"
       SPRING_DATASOURCE_LEGACY_DRIVER_CLASS_NAME: "org.firebirdsql.jdbc.FBDriver"
 
-      LEGACY_SYNC_ENABLED: "true"
 
       # 🔍 LOGS
       LOGGING_LEVEL_ROOT: "INFO"
@@ -59,3 +56,5 @@ services:
       MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,loggers"
       MANAGEMENT_ENDPOINT_LOGGERS_ENABLED: "true"
       MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: "ALWAYS"
+
+

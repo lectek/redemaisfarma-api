@@ -1,43 +1,245 @@
-<!-- src/main/resources/templates/produtos/lista.html -->
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Produtos • RedeMaisFarma</title>
+  <title>Produtos - RedeMaisFarma</title>
   <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <link rel="stylesheet" th:href="@{/css/pages/produtos-lista.css}" />
 </head>
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main id="main-content" class="container stack mt-4 mb-6">
-  <h1 class="page-title">Produtos</h1>
+<div class="layout layout--with-sidebar">
+  <aside th:replace="~{fragments/sidebar :: sidebar('produtos')}"></aside>
 
-  <form class="form-row mb-4" th:action="@{/produtos}" method="get" role="search">
-    <input class="input" name="q" type="search" placeholder="Busque por nome, categoria ou código de barras…"
-           th:value="${q}" />
-    <button class="btn">Buscar</button>
-  </form>
+  <main id="main-content" class="container stack mt-4 mb-6 catalog-page">
+    <section class="catalog-hero">
+      <div class="catalog-hero__content">
+        <p class="catalog-eyebrow">Catalogo</p>
+        <h1 class="catalog-title">Produtos essenciais para o dia a dia, com cuidado e confianca</h1>
+        <p class="catalog-subtitle">
+          Busque por nome, codigo de barras ou categoria. Mesmo sem itens cadastrados,
+          a vitrine ja esta pronta para receber seu catalogo.
+        </p>
+        <div class="catalog-actions">
+          <a class="btn btn--primary" th:href="@{/auth/cliente/cadastro}"
+             th:if="${#authorization == null or #authorization.expression('isAnonymous()')}">Criar conta</a>
+          <a class="btn btn--ghost" th:href="@{/sobre}">Conhecer a farmacia</a>
+        </div>
+        <div class="catalog-trust">
+          <div class="trust-item">
+            <span class="trust-dot"></span>
+            <span>Atendimento humano e rapido</span>
+          </div>
+          <div class="trust-item">
+            <span class="trust-dot"></span>
+            <span>Entrega local em poucas horas</span>
+          </div>
+          <div class="trust-item">
+            <span class="trust-dot"></span>
+            <span>Pagamento seguro e flexivel</span>
+          </div>
+        </div>
+      </div>
+      <div class="catalog-hero__panel">
+        <div class="hero-panel__card">
+          <div class="panel-header">Status do catalogo</div>
+          <div class="panel-value" th:text="${page != null ? page.totalElements : 0}">0</div>
+          <div class="panel-meta">itens disponiveis agora</div>
+          <div class="panel-grid">
+            <div class="panel-chip">
+              <span class="chip-title">Suporte farmaceutico</span>
+              <span class="chip-text">Tire duvidas pelo suporte</span>
+            </div>
+            <div class="panel-chip">
+              <span class="chip-title">Reposicao rapida</span>
+              <span class="chip-text">Atualize estoques a qualquer hora</span>
+            </div>
+            <div class="panel-chip">
+              <span class="chip-title">Receita segura</span>
+              <span class="chip-text">Controle de dados sensiveis</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-panel__note">
+          <div class="note-title">Dica rapida</div>
+          <p>Use o campo de busca para encontrar produtos por nome, categoria ou codigo.</p>
+        </div>
+      </div>
+    </section>
 
-  <section th:if="${#lists.isEmpty(page.content)}" class="card p-4 text-center text-muted">
-    Nenhum produto encontrado para a sua busca.
-  </section>
+    <section class="catalog-search" id="catalog-search">
+      <form class="catalog-search__form" th:action="@{/produtos}" method="get" role="search">
+        <div class="search-field">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.8l-.3-.3a6 6 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5-5-5Zm-6 0a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"/></svg>
+          <input class="input input-search" name="q" type="search" placeholder="Busque por nome, categoria ou codigo de barras"
+                 th:value="${q}" />
+        </div>
 
-  <section th:if="${!#lists.isEmpty(page.content)}" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <article th:each="produto : ${page.content}">
-      <th:block th:replace="~{fragments/cards :: card(${produto})}"></th:block>
-    </article>
-  </section>
+        <label class="icon-pill" for="sort" title="Ordenar por preco">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v2H7V4Zm0 7h6v2H7v-2Zm0 7h10v2H7v-2Zm10.5-7 3 3-3 3v-2h-3v-2h3v-2Z"/></svg>
+          <span>Preco</span>
+        </label>
 
-  <!-- Paginação simples -->
-  <nav class="pagination mt-4" th:if="${page.totalPages > 1}" aria-label="Paginação">
-    <a class="btn" th:classappend="${page.first} ? ' disabled'"
-       th:href="@{/produtos(q=${q}, page=${page.number-1}, size=${page.size})}">Anterior</a>
-    <span class="muted">Página <span th:text="${page.number+1}">1</span> de <span th:text="${page.totalPages}">1</span></span>
-    <a class="btn" th:classappend="${page.last} ? ' disabled'"
-       th:href="@{/produtos(q=${q}, page=${page.number+1}, size=${page.size})}">Próxima</a>
-  </nav>
-</main>
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label for="cat">Categoria</label>
+            <select id="cat" name="cat" class="input">
+              <option value="">Todas as categorias</option>
+              <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}" th:selected="${c == cat}"></option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="sort">Ordenar</label>
+            <select id="sort" name="sort" class="input">
+              <option value="dataCadastro,desc">Novidades</option>
+              <option value="precoVenda,asc">Menor preco</option>
+              <option value="precoVenda,desc">Maior preco</option>
+              <option value="nome,asc">Nome A-Z</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="size">Mostrar</label>
+            <select id="size" name="size" class="input">
+              <option value="12">12 itens</option>
+              <option value="18">18 itens</option>
+              <option value="36">36 itens</option>
+            </select>
+          </div>
+
+          <div class="filter-actions">
+            <button class="btn btn--primary" type="submit">Buscar</button>
+            <a class="btn btn--ghost" th:href="@{/produtos}">Limpar</a>
+          </div>
+        </div>
+
+        <div class="filter-meta">
+          <div class="results-meta">
+            <span class="results-count" th:text="${page != null ? page.totalElements : 0}">0</span>
+            <span>produtos</span>
+            <span class="results-query" th:if="${q != null and !#strings.isEmpty(q)}">para "<span th:text="${q}">busca</span>"</span>
+            <span class="results-query" th:if="${cat != null and !#strings.isEmpty(cat)}">em <span th:text="${cat}">categoria</span></span>
+          </div>
+          <div class="filter-tags" th:if="${q != null and !#strings.isEmpty(q)}">
+            <span class="tag">Busca ativa</span>
+          </div>
+        </div>
+
+        <div class="chip-row" th:if="${categorias != null and !#lists.isEmpty(categorias)}">
+          <span class="chip-label">Categorias em alta</span>
+          <a class="chip" th:each="c, iter : ${categorias}" th:if="${iter.index &lt; 8}"
+             th:href="@{/produtos(q=${q}, cat=${c})}" th:text="${c}">Categoria</a>
+        </div>
+        <div class="chip-row" th:if="${categorias == null or #lists.isEmpty(categorias)}">
+          <span class="chip-label">Sugestoes</span>
+          <span class="chip chip--muted">Cuidados diarios</span>
+          <span class="chip chip--muted">Vitaminas</span>
+          <span class="chip chip--muted">Dermocosmeticos</span>
+        </div>
+      </form>
+    </section>
+
+    <section th:if="${#lists.isEmpty(page.content)}" class="empty-state">
+      <div class="empty-hero">
+        <div class="empty-art" aria-hidden="true"></div>
+        <div class="empty-copy">
+          <h2>Seu catalogo esta pronto para brilhar</h2>
+          <p>
+            Assim que voce cadastrar os produtos, eles aparecem aqui. Enquanto isso,
+            aproveite os recursos abaixo para preparar a vitrine e o atendimento.
+          </p>
+          <div class="empty-actions">
+            <a class="btn btn--primary" th:href="@{/admin/produtos}">Cadastrar produtos</a>
+            <a class="btn btn--ghost" th:href="@{/sobre}">Falar com o time</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-grid">
+        <div class="empty-card">
+          <h3>Vitrine automatica</h3>
+          <p>Produtos publicados aparecem com imagens e precos atualizados.</p>
+        </div>
+        <div class="empty-card">
+          <h3>Busca inteligente</h3>
+          <p>Localize itens por nome, codigo de barras ou categoria.</p>
+        </div>
+        <div class="empty-card">
+          <h3>Checkout preparado</h3>
+          <p>Fluxo de compra pronto para receber os primeiros pedidos.</p>
+        </div>
+        <div class="empty-card">
+          <h3>Relatorios prontos</h3>
+          <p>Visualize tendencias assim que os dados comecarem a entrar.</p>
+        </div>
+      </div>
+
+      <div class="empty-steps">
+        <div class="step">
+          <span class="step-number">1</span>
+          <div>
+            <strong>Cadastre o primeiro lote</strong>
+            <p>Inclua nome, categoria e preco para liberar a vitrine.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-number">2</span>
+          <div>
+            <strong>Defina produtos em destaque</strong>
+            <p>Escolha itens estrategicos para aparecer no topo.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-number">3</span>
+          <div>
+            <strong>Ative os pagamentos</strong>
+            <p>Configure PIX, cartao e outras opcoes de pagamento.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="skeleton-grid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </section>
+
+    <section th:if="${!#lists.isEmpty(page.content)}" class="catalog-results">
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <article th:each="produto : ${page.content}">
+          <th:block th:replace="~{fragments/cards :: card(${produto})}"></th:block>
+        </article>
+      </section>
+
+      <nav class="pagination mt-4" th:if="${page.totalPages > 1}" aria-label="Paginacao">
+        <a class="btn" th:classappend="${page.first} ? ' disabled'"
+           th:href="@{/produtos(q=${q}, cat=${cat}, page=${page.number-1}, size=${page.size})}">Anterior</a>
+        <span class="muted">Pagina <span th:text="${page.number+1}">1</span> de <span th:text="${page.totalPages}">1</span></span>
+        <a class="btn" th:classappend="${page.last} ? ' disabled'"
+           th:href="@{/produtos(q=${q}, cat=${cat}, page=${page.number+1}, size=${page.size})}">Proxima</a>
+      </nav>
+    </section>
+
+    <section class="catalog-assurance">
+      <div class="assurance-card">
+        <h3>Entrega rastreavel</h3>
+        <p>Acompanhe pedidos e mantenha o cliente informado em cada etapa.</p>
+      </div>
+      <div class="assurance-card">
+        <h3>Catalogo inteligente</h3>
+        <p>Produtos organizados por categoria, preco e disponibilidade.</p>
+      </div>
+      <div class="assurance-card">
+        <h3>Suporte especializado</h3>
+        <p>Equipe preparada para orientar sobre medicamentos e cuidados.</p>
+      </div>
+    </section>
+  </main>
+</div>
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>

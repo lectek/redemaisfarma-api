@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @EnableScheduling
-@ConditionalOnProperty(prefix = "sync.firebird", name = "enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "legacy.sync", name = "enabled", havingValue = "true", matchIfMissing = false)
 public class ImportProdutosScheduler {
     private static final Logger log = LoggerFactory.getLogger(ImportProdutosScheduler.class);
 

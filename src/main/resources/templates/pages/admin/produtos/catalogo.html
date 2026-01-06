@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Catálogo • Produtos</title>
+  <title>Catalogo - Produtos</title>
   <link rel="stylesheet" th:href="@{/css/main.css}"/>
 
-  <!-- CSRF (para chamadas JS autenticadas, se necessário) -->
+  <!-- CSRF (para chamadas JS autenticadas, se necessario) -->
   <meta name="_csrf" th:content="${_csrf.token}"/>
   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 
@@ -25,32 +25,32 @@
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
 
-<div class="layout">
-  <aside th:replace="~{fragments/sidebar :: sidebar('produtos')}"></aside>
+<div class="layout layout--with-sidebar">
+  <aside th:replace="~{fragments/admin-sidebar :: adminSidebar('produtos')}"></aside>
 
   <main class="container stack mt-4 mb-8" id="conteudo">
     <div class="between mb-4">
-      <h1 class="page-title">Catálogo</h1>
+      <h1 class="page-title">Catalogo</h1>
 
-      <!-- Filtro rápido -->
+      <!-- Filtro rapido -->
       <form class="form-row gap-2" id="form-busca">
-        <input class="input" id="q" name="q" placeholder="Buscar por nome ou EAN…"/>
+        <input class="input" id="q" name="q" placeholder="Buscar por nome ou EAN"/>
         <button class="btn" type="submit">Buscar</button>
         <button class="btn btn-ghost" type="button" id="btn-limpar">Limpar</button>
       </form>
     </div>
 
     <!-- Info do contexto (admin/cliente) -->
-    <div class="alert info mb-3" th:if="${isAdmin}">Modo administrador: você pode editar produtos.</div>
+    <div class="alert info mb-3" th:if="${isAdmin}">Modo administrador: voce pode editar produtos.</div>
 
     <!-- Grid de cards -->
     <section id="catalogo-grid" class="grid grid-4 gap-4" aria-live="polite"></section>
 
-    <!-- Paginação simples -->
+    <!-- Paginacao simples -->
     <div class="center mt-6">
       <button class="btn btn-ghost" id="btn-prev" disabled>Anterior</button>
-      <span id="paginacao-info" class="mx-3 text-muted">Página 1</span>
-      <button class="btn" id="btn-next" disabled>Próxima</button>
+      <span id="paginacao-info" class="mx-3 text-muted">Pagina 1</span>
+      <button class="btn" id="btn-next" disabled>Proxima</button>
     </div>
   </main>
 </div>
@@ -70,3 +70,9 @@
 <script th:src="@{/js/pages/catalogo.js}"></script>
 </body>
 </html>
+
+
+
+
+
+

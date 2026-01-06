@@ -37,7 +37,7 @@ import java.util.UUID;
 public class ConfirmacaoMedicacaoRequestDTO
 implements Serializable {
     private static final long serialVersionUID = 1L;
-    @Schema(description="ID do cliente", example="123", required=true)
+    @Schema(description="ID do cliente", example="123", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{confirmacaoMedicacao.clienteId.notNull}")
     @Min(value=1L, message="{confirmacaoMedicacao.clienteId.min}")
     @JsonProperty(value="clienteId")
@@ -48,23 +48,23 @@ implements Serializable {
     @Schema(description="ID do lembrete associado", example="4fa85f64-5717-4562-b3fc-2c963f66afa6")
     @JsonProperty(value="lembreteId")
     private UUID lembreteId;
-    @Schema(description="Nome do medicamento", example="Dipirona 500mg", required=true)
+    @Schema(description="Nome do medicamento", example="Dipirona 500mg", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{confirmacaoMedicacao.nomeMedicamento.notBlank}")
     @Size(max=100, message="{confirmacaoMedicacao.nomeMedicamento.size}")
     @JsonProperty(value="nomeMedicamento")
     private @NotBlank(message="{confirmacaoMedicacao.nomeMedicamento.notBlank}") @Size(max=100, message="{confirmacaoMedicacao.nomeMedicamento.size}") String nomeMedicamento;
-    @Schema(description="Hor\u00e1rio agendado para ingest\u00e3o do medicamento", type="string", format="date-time", example="2025-07-04T08:00:00", required=true)
+    @Schema(description="Hor\u00e1rio agendado para ingest\u00e3o do medicamento", type="string", format="date-time", example="2025-07-04T08:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{confirmacaoMedicacao.horarioAgendado.notNull}")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     @JsonProperty(value="horarioAgendado")
     private @NotNull(message="{confirmacaoMedicacao.horarioAgendado.notNull}") LocalDateTime horarioAgendado;
-    @Schema(description="Hor\u00e1rio em que a medica\u00e7\u00e3o foi confirmada", type="string", format="date-time", example="2025-07-04T08:05:00", required=true)
+    @Schema(description="Hor\u00e1rio em que a medica\u00e7\u00e3o foi confirmada", type="string", format="date-time", example="2025-07-04T08:05:00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{confirmacaoMedicacao.horarioConfirmado.notNull}")
     @PastOrPresent(message="{confirmacaoMedicacao.horarioConfirmado.pastOrPresent}")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     @JsonProperty(value="horarioConfirmado")
     private @NotNull(message="{confirmacaoMedicacao.horarioConfirmado.notNull}") @PastOrPresent(message="{confirmacaoMedicacao.horarioConfirmado.pastOrPresent}") LocalDateTime horarioConfirmado;
-    @Schema(description="Indicador se o medicamento foi tomado", required=true)
+    @Schema(description="Indicador se o medicamento foi tomado", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{confirmacaoMedicacao.tomou.notNull}")
     @JsonProperty(value="tomou")
     private @NotNull(message="{confirmacaoMedicacao.tomou.notNull}") Boolean tomou;
@@ -76,7 +76,7 @@ implements Serializable {
     @Size(max=500, message="{confirmacaoMedicacao.observacao.size}")
     @JsonProperty(value="observacao")
     private @Size(max=500, message="{confirmacaoMedicacao.observacao.size}") String observacao;
-    @Schema(description="ID do tenant", example="redemaisfarma-001", required=true)
+    @Schema(description="ID do tenant", example="redemaisfarma-001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{confirmacaoMedicacao.tenantId.notBlank}")
     @Size(max=100, message="{confirmacaoMedicacao.tenantId.size}")
     @JsonProperty(value="tenantId")
@@ -84,7 +84,7 @@ implements Serializable {
     @Schema(description="Token de rastreamento", example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
     @JsonProperty(value="traceId")
     private UUID traceId;
-    @Schema(description="Data e hora de cria\u00e7\u00e3o do registro", type="string", format="date-time", example="2025-07-04T08:05:00", required=true)
+    @Schema(description="Data e hora de cria\u00e7\u00e3o do registro", type="string", format="date-time", example="2025-07-04T08:05:00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{confirmacaoMedicacao.dataCriacao.notNull}")
     @PastOrPresent(message="{confirmacaoMedicacao.dataCriacao.pastOrPresent}")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
@@ -270,4 +270,5 @@ implements Serializable {
         return "ConfirmacaoMedicacaoRequestDTO{clienteId=" + this.clienteId + ", confirmacaoId=" + String.valueOf(this.confirmacaoId) + ", lembreteId=" + String.valueOf(this.lembreteId) + ", nomeMedicamento='" + this.nomeMedicamento + "', horarioAgendado=" + String.valueOf(this.horarioAgendado) + ", horarioConfirmado=" + String.valueOf(this.horarioConfirmado) + ", tomou=" + this.tomou + ", automatico=" + this.automatico + ", observacao='" + this.observacao + "', tenantId='" + this.tenantId + "', traceId=" + String.valueOf(this.traceId) + ", dataCriacao=" + String.valueOf(this.dataCriacao) + ", dataAtualizacao=" + String.valueOf(this.dataAtualizacao) + "}";
     }
 }
+
 

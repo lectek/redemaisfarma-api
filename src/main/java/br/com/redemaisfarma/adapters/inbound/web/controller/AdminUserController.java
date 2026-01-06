@@ -23,19 +23,19 @@ public class AdminUserController {
                          @RequestParam(required = false) String papel,
                          Model model) {
         model.addAttribute("usuarios", userService.listar(q, papel));
-        return "admin/usuarios/list";
+        return "pages/admin/usuarios/lista";
     }
 
     @GetMapping("/novo")
     public String novo(Model model) {
         model.addAttribute("usuario", new UsuarioFormDTO(null, "", "", "", "", true));
-        return "admin/usuarios/form";
+        return "pages/admin/usuarios/form";
     }
 
     @GetMapping("/{id}/editar")
     public String editar(@PathVariable Long id, Model model) {
         model.addAttribute("usuario", userService.buscarForm(id));
-        return "admin/usuarios/form";
+        return "pages/admin/usuarios/form";
     }
 
     @PostMapping
@@ -48,7 +48,6 @@ public class AdminUserController {
     public String perfil(@PathVariable Long id, Model model) {
         model.addAttribute("u", userService.buscarPerfil(id));
         model.addAttribute("logs", java.util.Collections.emptyList()); // placeholder
-        return "admin/usuarios/perfil";
+        return "pages/admin/usuarios/perfil";
     }
 }
-

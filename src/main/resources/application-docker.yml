@@ -3,6 +3,9 @@ spring:
     activate:
       on-profile: docker
 
+  main:
+    lazy-initialization: true
+
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
@@ -48,7 +51,7 @@ spring:
       mail.mime.charset: UTF-8
 
   thymeleaf:
-    cache: false
+    cache: true
 
   web:
     resources:
@@ -110,6 +113,8 @@ legacy:
     username: ${FIREBIRD_USER:SYSDBA}
     password: ${ISC_PASSWORD:masterkey}
     driver-class-name: org.firebirdsql.jdbc.FBDriver
+  produtos:
+    last-update-column: LASTUPDATE
 
 app:
   mysql:
@@ -177,12 +182,12 @@ logging:
   exception-conversion-word: "%wEx"
   level:
     root: INFO
-    br.com.redemaisfarma: DEBUG
-    org.springframework.web: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.springframework.mail: DEBUG
+    br.com.redemaisfarma: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO
+    org.springframework.mail: INFO
     org.apache.kafka: INFO
-    org.springframework.kafka: DEBUG
+    org.springframework.kafka: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"

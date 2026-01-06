@@ -54,6 +54,9 @@ public class PedidoEntity implements Serializable {
     @Column(name = "tipo_pagamento", nullable = false, length = 30)
     private TipoPagamento tipoPagamento;
 
+    @Column(name = "metodo_pagamento", length = 80)
+    private String metodoPagamento;
+
     @CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -116,6 +119,9 @@ public class PedidoEntity implements Serializable {
     public TipoPagamento getTipoPagamento() { return tipoPagamento; }
     public void setTipoPagamento(TipoPagamento tipoPagamento) { this.tipoPagamento = tipoPagamento; }
 
+    public String getMetodoPagamento() { return metodoPagamento; }
+    public void setMetodoPagamento(String metodoPagamento) { this.metodoPagamento = metodoPagamento; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
@@ -150,6 +156,7 @@ public class PedidoEntity implements Serializable {
                 ", total=" + total +
                 ", status=" + status +
                 ", tipoPagamento=" + tipoPagamento +
+                ", metodoPagamento=" + metodoPagamento +
                 ", version=" + version +
                 '}';
     }

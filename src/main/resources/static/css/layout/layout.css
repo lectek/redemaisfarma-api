@@ -7,7 +7,7 @@
 • Botões consistentes + foco acessível
 =============================== */
 
-:root {
+body.admin-page {
   --layout-bg: #f9fafb;
   --layout-card: #ffffff;
   --layout-dark: #1f2937;
@@ -33,7 +33,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  body.admin-page {
     --layout-bg: #0f172a;
     --layout-card: #0b1220;
     --layout-dark: #0b1220;
@@ -51,16 +51,16 @@ html, body {
   height: 100%;
 }
 
-body {
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+body.admin-page {
+  font-family: var(--font-sans);
   background-color: var(--layout-bg);
-  color: #111827;
+  color: var(--layout-dark);
   margin: 0;
   line-height: 1.6;
 }
 
 @media (prefers-color-scheme: dark) {
-  body { color: #e5e7eb; }
+  body.admin-page { color: #e5e7eb; }
 }
 
 .no-scroll { overflow: hidden; }
@@ -69,11 +69,11 @@ body {
 .container-fluid {
   max-width: var(--container-w);
   margin-inline: auto;
-  padding-inline: var(--safe-pad);
+  padding-inline: var(--page-pad);
 }
 
 /* HEADER */
-.site-header, .navbar {
+.admin-page .site-header, .admin-page .navbar {
   position: sticky;
   top: 0;
   z-index: var(--z-header);
@@ -91,27 +91,27 @@ body {
   transition: background-color .2s ease, box-shadow .2s ease;
 }
 
-.site-header.scrolled, .navbar.scrolled {
+.admin-page .site-header.scrolled, .admin-page .navbar.scrolled {
   box-shadow: var(--elev-2);
   background-color: color-mix(in oklab, var(--layout-dark), #000 15%);
 }
 
-.header-inner { width: 100%; display: flex; align-items: center; gap: 12px; }
-.logo { height: 48px; display: inline-flex; align-items: center; }
-.logo img { max-height: 40px; }
+.admin-page .header-inner { width: 100%; display: flex; align-items: center; gap: 12px; }
+.admin-page .logo { height: 48px; display: inline-flex; align-items: center; }
+.admin-page .logo img { max-height: 40px; }
 
 /* reserva abaixo da navbar */
 .main-offset { block-size: var(--header-h); }
 
 /* língua */
-.language-selector {
+.admin-page .language-selector {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: .5rem;
 }
 
-.language-selector a {
+.admin-page .language-selector a {
   font-weight: 600;
   font-size: .875rem;
   padding: .3rem .6rem;
@@ -126,11 +126,11 @@ body {
 }
 
 @media (prefers-color-scheme: dark) {
-  .language-selector a { color: #e5e7eb; }
+  .admin-page .language-selector a { color: #e5e7eb; }
 }
 
 /* nav desktop */
-.painel-nav { 
+.admin-page .painel-nav { 
   display: flex;
   gap: .75rem;
   margin-left: auto;
@@ -138,11 +138,11 @@ body {
 }
 
 /* botões */
-.menu-button,
-.nav-toggle,
-.btn,
-.btn-acessar,
-.btn-form {
+.admin-page .menu-button,
+.admin-page .nav-toggle,
+.admin-page .sidebar-toggle,
+.admin-page .btn-acessar,
+.admin-page .btn-form {
   background-color: var(--layout-accent);
   color: #fff;
   font-weight: 700;
@@ -152,40 +152,43 @@ body {
   cursor: pointer;
   transition: background-color .2s ease, transform .2s ease;
 }
-.menu-button:hover,
-.nav-toggle:hover,
-.btn:hover,
-.btn-acessar:hover,
-.btn-form:hover {
+.admin-page .menu-button:hover,
+.admin-page .nav-toggle:hover,
+.admin-page .sidebar-toggle:hover,
+.admin-page .btn-acessar:hover,
+.admin-page .btn-form:hover {
   background-color: var(--layout-accent-hover);
   transform: translateY(-1px);
 }
 
 /* hambúrguer */
-.menu-button .menu-icon,
-.nav-toggle .menu-icon {
+.admin-page .menu-button .menu-icon,
+.admin-page .nav-toggle .menu-icon,
+.admin-page .sidebar-toggle .menu-icon {
   position: relative;
   width: 22px; height: 2px;
   background: #fff;
 }
-.menu-button .menu-icon::before,
-.menu-button .menu-icon::after,
-.nav-toggle .menu-icon::before,
-.nav-toggle .menu-icon::after {
+.admin-page .menu-button .menu-icon::before,
+.admin-page .menu-button .menu-icon::after,
+.admin-page .nav-toggle .menu-icon::before,
+.admin-page .nav-toggle .menu-icon::after,
+.admin-page .sidebar-toggle .menu-icon::before,
+.admin-page .sidebar-toggle .menu-icon::after {
   content: "";
   position: absolute;
   width: 22px; height: 2px;
   background: #fff;
 }
-.menu-button .menu-icon::before { top: -7px; }
-.menu-button .menu-icon::after  { top: 7px; }
+.admin-page .menu-button .menu-icon::before { top: -7px; }
+.admin-page .menu-button .menu-icon::after  { top: 7px; }
 
 html.nav-open .menu-icon { background: transparent; }
 html.nav-open .menu-icon::before { transform: rotate(45deg) translate(3px,3px); }
 html.nav-open .menu-icon::after  { transform: rotate(-45deg) translate(3px,-3px); }
 
 /* NAV MOBILE */
-.primary-nav {
+.admin-page .primary-nav {
   position: fixed;
   inset: var(--header-h) 0 0 0;
   background: var(--layout-card);
@@ -199,31 +202,16 @@ html.nav-open .menu-icon::after  { transform: rotate(-45deg) translate(3px,-3px)
   transition: .18s ease;
 }
 
-html.nav-open .primary-nav {
+html.nav-open body.admin-page .primary-nav {
   opacity: 1;
   transform: none;
   pointer-events: auto;
 }
 
-.nav-backdrop {
-  position: fixed;
-  inset: 0;
-  top: var(--header-h);
-  background: rgba(0,0,0,.35);
-  backdrop-filter: blur(1px);
-  opacity: 0;
-  pointer-events: none;
-  z-index: var(--z-backdrop);
-  transition: .18s ease;
-}
-html.nav-open .nav-backdrop {
-  opacity: 1;
-  pointer-events: auto;
-}
 
 /* MAIN */
 main {
-  padding-block: 2rem;
+  padding-block: clamp(1.5rem, 3vw, 2.5rem);
 }
 main .container,
 main.container {
@@ -233,13 +221,13 @@ main.container {
 }
 
 /* CARDS */
-.painel-grid {
+.admin-page .painel-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
   gap: clamp(16px, 2vw, 24px);
 }
 
-.card {
+.admin-page .card {
   background-color: var(--layout-card);
   border: 1px solid var(--layout-border);
   border-radius: var(--layout-radius);
@@ -248,7 +236,7 @@ main.container {
   transition: .2s ease;
 }
 
-.card:hover {
+.admin-page .card:hover {
   transform: translateY(-4px);
   box-shadow: var(--elev-3);
 }

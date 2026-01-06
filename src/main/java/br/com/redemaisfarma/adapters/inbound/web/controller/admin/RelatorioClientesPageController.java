@@ -11,6 +11,6 @@ public class RelatorioClientesPageController {
     @GetMapping(value = "/admin/relatorios/clientes", produces = MediaType.TEXT_HTML_VALUE)
     public String index() {
         // View Thymeleaf da página do relatório
-        return "pages/admin/relatorios/clientes/index";
+        return "pages/admin/relatorios/clientes";
     }
 }

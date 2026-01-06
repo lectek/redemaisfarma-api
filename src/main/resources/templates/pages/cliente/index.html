@@ -48,32 +48,26 @@
   <header th:replace="~{fragments/header :: header}"></header>
   <div class="main-offset" aria-hidden="true"></div>
 
-  <main id="conteudo-home" role="main" tabindex="-1" aria-label="Conteúdo principal">
+  <div class="layout layout--with-sidebar">
+    <aside th:replace="~{fragments/sidebar :: sidebar('home')}"></aside>
+
+    <main id="conteudo-home" role="main" tabindex="-1" aria-label="Conteúdo principal">
 
     <!-- HERO • headline + busca + provas sociais -->
-    <section class="section hero hero--xl" aria-labelledby="hero-title">
+    <section class="section hero hero--xl" aria-labelledby="hero-title"
+             th:style="${brandingHomeHeroUrl != null and !brandingHomeHeroUrl.isBlank()} ? '--hero-image: url(' + brandingHomeHeroUrl + ');' : null">
       <div class="container">
         <div class="hero__grid">
 
           <div class="hero__text">
-            <h1 id="hero-title" class="hero-title">
+            <h1 id="hero-title" class="hero-title"
+                th:text="${brandingHomeHeroTexto != null and !brandingHomeHeroTexto.isBlank()} ? brandingHomeHeroTexto : 'Cuidar da sua saude ficou simples.'">
               Cuidar da sua saúde ficou simples.
             </h1>
             <p class="hero-sub">
               Medicamentos, perfumaria e cuidados pessoais com
               <strong>entrega rápida</strong> e <strong>preço justo</strong>.
             </p>
-
-            <form class="hero-search" th:action="@{/buscar}" method="get"
-                  role="search" aria-label="Buscar produtos">
-              <label for="q" class="sr-only">Buscar</label>
-              <input id="q" name="q" type="search"
-                     placeholder="Busque por produto, marca ou código de barras…"
-                     autocomplete="off" inputmode="search" required />
-              <button class="btn btn--accent" type="submit" aria-label="Buscar">
-                Buscar
-              </button>
-            </form>
 
             <ul class="hero-benefits" aria-label="Diferenciais da RedeMaisFarma">
               <li>Entrega no mesmo dia*</li>
@@ -83,12 +77,33 @@
             <p class="muted hero-note">*Consulte disponibilidade para seu CEP.</p>
           </div>
 
-          <!-- Imagem do hero -->
-          <figure class="hero__media" aria-hidden="true">
-            <img th:src="@{/img/hero/designpronto.webp}"
-                 src="/img/hero/designpronto.webp"
-                 alt="Mulher sorrindo e segurando um medicamento genérico, representando confiança na RedeMaisFarma"
-                 loading="lazy" />
+          <!-- Produto principal do hero -->
+          <figure class="hero__media" aria-label="Produto principal">
+            <div class="hero-main"
+                 th:if="${vm != null and vm.produtoPrincipal != null}">
+              <a class="hero-main__media"
+                 th:href="@{'/produto/' + ${vm.produtoPrincipal.id}}">
+                <img th:src="${vm.produtoPrincipal.imagem} ?: @{/img/produtos/placeholder-generico.png}"
+                     th:alt="${vm.produtoPrincipal.nome}"
+                     loading="lazy"
+                     onerror="this.src='/img/produtos/placeholder-generico.png'"/>
+              </a>
+              <div class="hero-main__content">
+                <span class="hero-main__tag">Produto principal</span>
+                <h2 class="hero-main__title" th:text="${vm.produtoPrincipal.nome}">Produto principal</h2>
+                <p class="hero-main__price"
+                   th:text="${#numbers.formatCurrency(vm.produtoPrincipal.preco, 'pt_BR')}">R$ 0,00</p>
+                <a class="btn btn--accent"
+                   th:href="@{'/produto/' + ${vm.produtoPrincipal.id}}">Ver produto</a>
+              </div>
+            </div>
+            <div class="hero-main hero-main--placeholder"
+                 th:if="${vm == null or vm.produtoPrincipal == null}">
+              <div class="hero-main__placeholder">
+                <p>Produto principal</p>
+                <small>Defina em /admin/settings: HOME.main_product_id</small>
+              </div>
+            </div>
           </figure>
 
         </div>
@@ -299,7 +314,8 @@
       </div>
     </section>
 
-  </main>
+    </main>
+  </div>
 
   <!-- Footer minimal -->
   <footer th:replace="~{fragments/footer :: footer}"></footer>

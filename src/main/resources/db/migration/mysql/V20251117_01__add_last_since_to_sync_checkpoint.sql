@@ -7,5 +7,17 @@ CREATE TABLE IF NOT EXISTS sync_checkpoint (
 );
 
 -- Adiciona a coluna só se ainda não existir
-ALTER TABLE sync_checkpoint
-    ADD COLUMN IF NOT EXISTS last_since datetime(6) NULL AFTER source;
+SET @sync_checkpoint_has_last_since := (
+  SELECT COUNT(*) FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'sync_checkpoint'
+    AND COLUMN_NAME = 'last_since'
+);
+SET @sync_checkpoint_add_last_since := IF(
+  @sync_checkpoint_has_last_since = 0,
+  'ALTER TABLE sync_checkpoint ADD COLUMN last_since datetime(6) NULL',
+  'SELECT 1'
+);
+PREPARE sync_checkpoint_last_since_stmt FROM @sync_checkpoint_add_last_since;
+EXECUTE sync_checkpoint_last_since_stmt;
+DEALLOCATE PREPARE sync_checkpoint_last_since_stmt;

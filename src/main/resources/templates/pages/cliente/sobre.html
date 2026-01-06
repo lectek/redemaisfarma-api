@@ -3,37 +3,80 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sobre Nós • EMBALANDO</title>
-
-  <!-- Estilos principais -->
+  <title>Sobre nós - RedeMaisFarma</title>
   <link rel="stylesheet" th:href="@{/css/main.css}" />
 </head>
 
 <body class="body-flex">
-  
-  <!-- Cabeçalho com fragmento global -->
   <header th:replace="~{fragments/header :: header}"></header>
 
-  <!-- Conteúdo principal -->
-  <main id="main-content" class="container stack mt-4 mb-4">
+  <div class="layout layout--with-sidebar">
+    <aside th:replace="~{fragments/sidebar :: sidebar('sobre')}"></aside>
 
-    <!-- Introdução -->
-    <section class="text-center mb-4">
-      <h1 class="text-lg font-bold">🐾 Sobre a Embalando</h1>
-      <p class="text-sm">Conheça nossa história, missão e valores.</p>
-    </section>
+    <main id="main-content" class="container stack mt-4 mb-4">
+      <section class="text-center mb-4">
+        <h1 class="text-lg font-bold">Sobre nós</h1>
+        <p class="text-sm">Uma farmacia pensada para cuidar, orientar e entregar com rapidez.</p>
+      </section>
 
-    <!-- Grid principal com duas colunas -->
-    <section class="grid grid-cols-1 md:grid-cols-2 gap-32">
-      <!-- História -->
-      <div class="stack gap-16">
-        <h2 class="text-base font-semibold">Nossa História</h2>
-        <p>
-          A <strong>Embalando</strong> nasceu da paixão por pets e do desejo de transformar o mercado de acessórios com produtos de qualidade, acessíveis e que realmente atendam às necessidades dos animais e seus tutores.
-        </p>
-        <p>
-          Desde 2023, construímos uma comunidade de clientes felizes, com milhares de produtos entregues em todo o Brasil e avaliações positivas que nos motivam a continuar inovando.
-        </p>
-      </div>
+      <section class="card p-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-32">
+          <div class="stack gap-16">
+            <h2 class="text-base font-semibold">Nossa historia</h2>
+            <p>
+              A RedeMaisFarma nasceu em 2023 para aproximar tecnologia e atendimento humano no cuidado
+              com a saude. Evoluimos com foco em experiencia do cliente, organizacao e entrega confiavel.
+            </p>
+            <p>
+              Cada melhoria do catalogo, do checkout e do suporte foi pensada para facilitar o dia a dia
+              de quem precisa de medicamentos com seguranca e agilidade.
+            </p>
+          </div>
+          <div class="stack gap-16">
+            <h2 class="text-base font-semibold">Nossa missao</h2>
+            <p>
+              Facilitar o acesso a medicamentos e cuidados pessoais com atendimento humano, preco justo e
+              entrega rapida.
+            </p>
+            <h2 class="text-base font-semibold">Nossa visao</h2>
+            <p>
+              Ser referencia regional em farmacia digital, combinando tecnologia e confianca em cada compra.
+            </p>
+          </div>
+        </div>
+      </section>
 
-      <!-- Mis
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-16 mb-4">
+        <div class="card p-4">
+          <h3 class="text-base font-semibold">Atendimento humano</h3>
+          <p>Equipe preparada para orientar sobre prescricoes e cuidados.</p>
+        </div>
+        <div class="card p-4">
+          <h3 class="text-base font-semibold">Entrega confiavel</h3>
+          <p>Processos claros e acompanhamento de cada pedido.</p>
+        </div>
+        <div class="card p-4">
+          <h3 class="text-base font-semibold">Catalogo organizado</h3>
+          <p>Produtos classificados para facilitar a busca e a compra.</p>
+        </div>
+      </section>
+
+      <section class="card p-4">
+        <h2 class="text-base font-semibold mb-2">O que voce encontra aqui</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+          <div class="stack gap-16">
+            <p>Medicamentos, cuidados pessoais, dermocosmeticos e itens de bem-estar.</p>
+            <p>Checkout preparado para diferentes formas de pagamento e comunicacao clara no pedido.</p>
+          </div>
+          <div class="stack gap-16">
+            <p>Suporte pelo time da farmacia para duvidas e orientacoes.</p>
+            <p>Atualizacoes constantes de estoque e precos para manter a vitrine confiavel.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

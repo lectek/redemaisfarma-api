@@ -12,6 +12,7 @@ package br.com.redemaisfarma.adapters.outbound.persistence.jpa;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -40,6 +41,8 @@ extends JpaRepository<UsuarioEntity, Long> {
     @Query(value="select u.clienteVip from UsuarioEntity u\nwhere lower(u.email)=lower(:id) or u.cpf=:id\n")
     public Optional<Boolean> verificarClienteVip(@Param(value="id") String var1);
 
+    @Query(value="select u from UsuarioEntity u where u.clienteVip = true")
+    List<UsuarioEntity> findByClienteVipTrue();
+
     public boolean existsByEmail(String var1);
 }
-

@@ -62,6 +62,18 @@ public class UsuarioEntity implements Serializable {
     @Column(nullable = false, length = 255)
     private String senha;
 
+    @Size(max = 25)
+    @Column(length = 25)
+    private String telefone;
+
+    @Size(max = 200)
+    @Column(length = 200)
+    private String endereco;
+
+    @Size(max = 255)
+    @Column(name = "avatar_url", length = 255)
+    private String avatarUrl;
+
     @ManyToMany(fetch = FetchType.EAGER, targetEntity = Role.class)
     @JoinTable(
         name = "usuario_roles",
@@ -101,6 +113,9 @@ public class UsuarioEntity implements Serializable {
         String email,
         String cpf,
         String senha,
+        String telefone,
+        String endereco,
+        String avatarUrl,
         Set<Role> roles,
         LocalDateTime ultimoAcesso,
         Boolean clienteVip,
@@ -114,6 +129,9 @@ public class UsuarioEntity implements Serializable {
         this.email = email;
         this.cpf = cpf;
         this.senha = senha;
+        this.telefone = telefone;
+        this.endereco = endereco;
+        this.avatarUrl = avatarUrl;
         this.roles = (roles != null) ? roles : new HashSet<>();
         this.ultimoAcesso = ultimoAcesso;
         this.clienteVip = clienteVip;
@@ -137,6 +155,15 @@ public class UsuarioEntity implements Serializable {
 
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }
+
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = (telefone != null) ? telefone.trim() : null; }
+
+    public String getEndereco() { return endereco; }
+    public void setEndereco(String endereco) { this.endereco = (endereco != null) ? endereco.trim() : null; }
+
+    public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = (avatarUrl != null) ? avatarUrl.trim() : null; }
 
     public Set<Role> getRoles() { return roles; }
     public void setRoles(Set<Role> roles) { this.roles = (roles != null) ? roles : new HashSet<>(); }
@@ -192,6 +219,8 @@ public class UsuarioEntity implements Serializable {
         if (roles == null) roles = new HashSet<>();
         if (nome != null) nome = nome.trim();
         if (email != null) email = email.trim().toLowerCase();
+        if (telefone != null) telefone = telefone.trim();
+        if (endereco != null) endereco = endereco.trim();
         cpf = normalizeCpf(cpf);
     }
 
@@ -201,6 +230,8 @@ public class UsuarioEntity implements Serializable {
         if (roles == null) roles = new HashSet<>();
         if (nome != null) nome = nome.trim();
         if (email != null) email = email.trim().toLowerCase();
+        if (telefone != null) telefone = telefone.trim();
+        if (endereco != null) endereco = endereco.trim();
         cpf = normalizeCpf(cpf);
     }
 
@@ -231,6 +262,9 @@ public class UsuarioEntity implements Serializable {
             ", email='" + email + '\'' +
             ", cpf='" + cpf + '\'' +
             ", roles=" + getRoleNames() +
+            ", telefone='" + telefone + '\'' +
+            ", endereco='" + endereco + '\'' +
+            ", avatarUrl='" + avatarUrl + '\'' +
             ", clienteVip=" + clienteVip +
             ", tentativasFalhas=" + tentativasFalhas +
             ", createdAt=" + createdAt +

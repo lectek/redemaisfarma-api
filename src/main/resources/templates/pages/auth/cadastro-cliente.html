@@ -31,9 +31,9 @@
       <!-- Área de alerta controlada pelo JS -->
       <div id="alert" class="alert" role="status" aria-live="polite"></div>
 
-      <!-- ✅ Ajustado: action para /auth/cadastro-cliente e objeto de binding cadastro -->
+      <!-- ✅ Ajustado: action para /auth/cliente/cadastro e objeto de binding cadastro -->
       <form id="cadastroForm"
-            th:action="@{/auth/cadastro-cliente}"
+            th:action="@{/auth/cliente/cadastro}"
             th:object="${cadastro}"
             method="post"
             class="form-grid"

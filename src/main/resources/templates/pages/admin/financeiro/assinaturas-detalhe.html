@@ -10,10 +10,10 @@
 <header th:replace="~{fragments/header :: header}"></header>
 
 <div class="layout" th:if="${assinatura != null}">
-  <aside th:replace="~{fragments/sidebar :: sidebar('financeiro')}"></aside>
+  <aside th:replace="~{fragments/admin-sidebar :: adminSidebar('financeiro')}"></aside>
 
   <main class="container stack mt-4 mb-6"
-        th:with="badgeClass=${assinatura.status}=='ATIVA' ? 'badge-success' : (${assinatura.status}=='ATRASADA' ? 'badge-danger' : 'badge-warning')}">
+        th:with="badgeClass=${assinatura.status}=='ATIVA' ? 'badge-success' : (${assinatura.status}=='atrasADA' ? 'badge-danger' : 'badge-warning')}">
     <nav class="breadcrumb mb-2">
       <a th:href="@{/admin}">Admin</a> /
       <a th:href="@{/admin/financeiro/assinaturas}">Assinaturas</a> /
@@ -46,10 +46,10 @@
       </div>
 
       <div class="card">
-        <h2 class="card-title">Ações</h2>
+        <h2 class="card-title">Acoes</h2>
         <div class="stack">
           <a class="btn" th:href="@{/admin/financeiro/assinaturas}">Voltar</a>
-          <!-- Exemplo de ações futuras -->
+          <!-- Exemplo de Acoes futuras -->
           <button class="btn btn-primary" type="button" disabled>Renovar (em breve)</button>
           <button class="btn btn-danger outline" type="button" disabled>Cancelar (em breve)</button>
         </div>
@@ -60,11 +60,17 @@
 
 <!-- fallback simples caso assinatura==null -->
 <div class="container mt-6" th:if="${assinatura == null}">
-  <p class="text-center text-muted">Assinatura não encontrada.</p>
-  <p class="text-center"><a class="btn" th:href="@{/admin/financeiro/assinaturas}">Voltar à lista</a></p>
+  <p class="text-center text-muted">Assinatura nao encontrada.</p>
+  <p class="text-center"><a class="btn" th:href="@{/admin/financeiro/assinaturas}">Voltar A lista</a></p>
 </div>
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>
+
+
+
+
+
+
 

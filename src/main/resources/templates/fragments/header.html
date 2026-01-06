@@ -5,7 +5,7 @@
 
   <div class="header-inner container-fluid">
     <a th:href="@{/}" class="logo" aria-label="PÃ¡gina inicial">
-      <img th:src="@{/images/logofarma.jpg}" alt="RedeMaisFarma" height="40" />
+      <img th:src="${#strings.isEmpty(brandingLogoUrl)} ? @{/images/logofarma.jpg} : ${brandingLogoUrl}" alt="RedeMaisFarma" height="40" />
     </a>
 
     <button class="nav-toggle"
@@ -20,6 +20,7 @@
       <ul class="nav-list">
         <li><a th:href="@{/}"             class="menu-button" data-section="">InÃ­cio</a></li>
         <li><a th:href="@{/produtos}"     class="menu-button" data-section="produtos">Produtos</a></li>
+        <li><a th:href="@{/sobre}"        class="menu-button" data-section="sobre">Sobre nós</a></li>
         <li><a th:href="@{/ofertas}"      class="menu-button" data-section="ofertas">Ofertas</a></li>
         <li><a th:href="@{/contato}"      class="menu-button" data-section="contato">Contato</a></li>
         <li><a th:href="@{/checkout}"     class="menu-button" data-section="checkout">Checkout</a></li>

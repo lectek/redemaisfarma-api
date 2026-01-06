@@ -47,7 +47,7 @@
     &nbsp;•&nbsp;
     <a href="/auth/mudar-senha">Mudar minha senha</a>
     &nbsp;•&nbsp;
-    <a href="/cliente/cadastro">Criar conta de cliente</a>
+    <a href="/auth/cliente/cadastro">Criar conta de cliente</a>
   </nav>
 </form>
 

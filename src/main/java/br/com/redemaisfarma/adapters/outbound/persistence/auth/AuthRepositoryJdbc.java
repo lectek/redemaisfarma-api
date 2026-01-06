@@ -114,7 +114,11 @@ public class AuthRepositoryJdbc implements AuthRepositoryPort {
 
     @Override
     public void registerFailedAttempt(String identifier) {
-        this.failCount.merge(identifier, 1, Integer::sum);
+        this.failCount.merge(identifier, 1, (a, b) -> {
+            int left = (a == null) ? 0 : a;
+            int right = (b == null) ? 0 : b;
+            return left + right;
+        });
     }
 
     @Override

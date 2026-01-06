@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pedido - RedeMaisFarma</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body class="body-flex">
+  <header th:replace="~{fragments/header :: header}"></header>
+
+  <div class="layout layout--with-sidebar">
+    <aside th:replace="~{fragments/sidebar :: sidebar('pedidos')}"></aside>
+
+    <main id="main-content" class="container stack mt-4 mb-8" role="main">
+      <div class="between">
+        <h1 class="page-title">Pedido <span th:text="${pedido.id}">#0001</span></h1>
+        <a class="btn btn--ghost" th:href="@{/cliente/pedidos}">Voltar</a>
+      </div>
+
+      <section class="card">
+        <div class="between">
+          <div>
+            <p><strong>Data:</strong> <span th:text="${#temporals.format(pedido.data, 'dd/MM/yyyy HH:mm')}">--</span></p>
+            <p><strong>Status:</strong> <span class="badge" th:text="${pedido.status}">STATUS</span></p>
+            <p><strong>Pagamento:</strong> <span th:text="${pedido.metodoPagamento}">PIX</span></p>
+          </div>
+          <div>
+            <p class="page-title" th:text="${#numbers.formatCurrency(pedido.total, 'pt_BR')}">R$ 0,00</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card table-responsive">
+        <h2 class="title">Itens</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Qtd</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="i : ${pedido.itens}">
+              <td th:text="${i.produto}">Produto</td>
+              <td th:text="${i.quantidade}">1</td>
+              <td th:text="${#numbers.formatCurrency(i.subtotal, 'pt_BR')}">R$ 0,00</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(pedido.itens)}">
+              <td colspan="3" class="text-center text-muted">Nenhum item encontrado.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

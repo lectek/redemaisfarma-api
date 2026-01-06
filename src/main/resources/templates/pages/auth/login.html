@@ -1,68 +1,117 @@
-<form id="loginForm" th:action="@{/login}" method="post" class="form-grid" autocomplete="on" novalidate>
-  <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:with="title='Entrar - RedeMaisFarma'">
+<head th:replace="~{fragments/layout :: commonHead}"></head>
+<body class="body-flex login-page">
+  <header th:replace="~{fragments/header :: header}"></header>
 
-  <!-- Seletor de perfil define o destino pós-login -->
-  <div class="form-row gap-3 mb-3" role="group" aria-label="Tipo de acesso">
-    <label class="chip">
-      <input type="radio" name="perfil" value="cliente" checked>
-      <span>Cliente</span>
-    </label>
-    <label class="chip">
-      <input type="radio" name="perfil" value="admin">
-      <span>Admin</span>
-    </label>
-  </div>
-  <input type="hidden" name="redirect" id="redirect" value="/cliente/conta"/>
+  <main id="main-content" class="login-shell" tabindex="-1">
+    <section class="login-card" aria-labelledby="titulo-login">
+      <header class="login-header">
+        <p class="login-kicker">Acesso ao sistema</p>
+        <h1 id="titulo-login" class="login-title">Entrar</h1>
+        <p class="login-subtitle">Selecione o perfil e informe suas credenciais.</p>
+      </header>
 
-  <!-- Campos padrão do Spring Security -->
-  <div class="form-group">
-    <label for="usuario">E-mail / CPF / Usuário</label>
-    <input id="usuario" class="input" type="text" name="username" autocomplete="username"
-           placeholder="ex.: joao@dominio.com" required autofocus/>
-  </div>
+      <div th:if="${param.error}" class="alert error">Credenciais invalidas.</div>
+      <div th:if="${param.logout}" class="alert info">Sessao encerrada.</div>
 
-  <div class="form-group">
-    <label for="senha">Senha</label>
-    <div class="input-with-action">
-      <input id="senha" class="input" type="password" name="password"
-             autocomplete="current-password" required minlength="8" maxlength="128"/>
-      <button type="button" class="btn btn--ghost btn--icon" id="toggleSenha"
-              aria-pressed="false" aria-label="Mostrar senha">👁</button>
-    </div>
-    <small class="help">Use 8+ caracteres, com maiúscula, minúscula, número e símbolo.</small>
-  </div>
+      <form id="loginForm" th:action="@{/auth/login}" method="post" class="login-form" autocomplete="on" novalidate>
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-  <label class="remember">
-    <input id="lembrarMe" type="checkbox" name="remember-me"/>
-    <span>Lembrar de mim (sessão maior)</span>
-  </label>
+        <div class="segmented" role="group" aria-label="Tipo de acesso">
+          <label class="segmented__option">
+            <input type="radio" name="perfil" value="cliente" checked>
+            <span>Cliente</span>
+          </label>
+          <label class="segmented__option">
+            <input type="radio" name="perfil" value="admin">
+            <span>Admin</span>
+          </label>
+        </div>
+        <input type="hidden" name="redirect" id="redirect" value="/cliente/conta"/>
 
-  <div class="form-actions" style="display:flex; gap:.5rem; flex-wrap:wrap; align-items:center">
-    <button id="entrarBtn" type="submit" class="btn btn--primary">Entrar</button>
-    <a th:href="@{/auth/esqueci-senha}" class="btn btn--ghost" role="button">Esqueci minha senha</a>
-  </div>
+        <div class="field">
+          <label for="usuario">E-mail / CPF / Usuario</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.4 0-8 2-8 4.5V20h16v-1.5C20 16 16.4 14 12 14Z"/></svg>
+            </span>
+            <input id="usuario" class="input" type="text" name="username" autocomplete="username"
+                   placeholder="ex.: joao@dominio.com" required autofocus/>
+          </div>
+        </div>
 
-  <nav class="links mt-12" aria-label="Acesso rápido">
-    <a th:href="@{/auth/esqueci-senha}">Esqueci a senha</a>
-    &nbsp;•&nbsp;
-    <a th:href="@{/auth/mudar-senha}">Mudar minha senha</a>
-    &nbsp;•&nbsp;
-    <a th:href="@{/cliente/cadastro}">Criar conta de cliente</a>
-  </nav>
-</form>
+        <div class="field">
+          <label for="senha">Senha</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 1 1 12 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Zm2 0h8V8a4 4 0 1 0-8 0v2Z"/></svg>
+            </span>
+            <input id="senha" class="input" type="password" name="password"
+                   autocomplete="current-password" required minlength="8" maxlength="128"/>
+            <button type="button" class="toggle-pass" id="toggleSenha"
+                    aria-pressed="false" aria-label="Mostrar senha">
+              <svg viewBox="0 0 24 24" class="toggle-icon"><path d="M12 5c5 0 9 4.5 10 7-1 2.5-5 7-10 7S3 14.5 2 12c1-2.5 5-7 10-7Zm0 3.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></svg>
+            </button>
+          </div>
+          <small class="help">Use 8+ caracteres, com maiuscula, minuscula, numero e simbolo.</small>
+        </div>
 
-<script>
-  // trocar destino pós-login conforme perfil
-  const redirect = document.getElementById('redirect');
-  document.querySelectorAll('input[name="perfil"]').forEach(r => {
-    r.addEventListener('change', () => {
-      redirect.value = r.value === 'admin' ? '/admin/conta' : '/cliente/conta';
+        <label class="remember">
+          <input id="lembrarMe" type="checkbox" name="remember-me"/>
+          <span>Lembrar de mim (sessao maior)</span>
+        </label>
+
+        <div class="login-actions">
+          <button id="entrarBtn" type="submit" class="btn btn--primary">Entrar</button>
+          <a th:href="@{/auth/esqueci-senha}" class="btn btn--ghost" role="button">Esqueci minha senha</a>
+        </div>
+
+        <div class="signup-divider" role="separator" aria-label="Opcoes de cadastro">
+          <span>Ou cadastre-se com</span>
+        </div>
+
+        <div class="signup-actions" aria-label="Cadastro rapido">
+          <a th:href="@{/cliente/cadastro}" class="btn btn--social btn--email">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Zm2 0 6 4 6-4H6Zm12 12V9.2l-6 4-6-4V18h12Z"/></svg>
+            </span>
+            Cadastrar com email
+          </a>
+          <a th:href="@{/oauth2/authorization/facebook}" class="btn btn--social btn--facebook" th:if="${oauth2Enabled}">
+            <span class="btn-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M13.5 8.5V7.2c0-.8.5-1.2 1.3-1.2H16V3h-2.1C11.7 3 10.5 4.3 10.5 6.6v1.9H8V11h2.5v10H13.5V11h2.7l.4-2.5h-3.1Z"/></svg>
+            </span>
+            Cadastrar com Facebook
+          </a>
+        </div>
+
+        <nav class="login-links" aria-label="Acesso rapido">
+          <a th:href="@{/cliente/cadastro}">Criar conta</a>
+          <span>|</span>
+          <a th:href="@{/auth/mudar-senha}">Mudar minha senha</a>
+        </nav>
+      </form>
+    </section>
+  </main>
+
+  <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+  <script>
+    const redirect = document.getElementById('redirect');
+    document.querySelectorAll('input[name="perfil"]').forEach(r => {
+      r.addEventListener('change', () => {
+        redirect.value = r.value === 'admin' ? '/admin/dashboard' : '/cliente/conta';
+      });
     });
-  });
-  // mostrar/ocultar senha
-  document.getElementById('toggleSenha')?.addEventListener('click', () => {
-    const f = document.getElementById('senha');
-    const on = f.type === 'password';
-    f.type = on ? 'text' : 'password';
-  });
-</script>
+    document.getElementById('toggleSenha')?.addEventListener('click', (ev) => {
+      const f = document.getElementById('senha');
+      const btn = ev.currentTarget;
+      const isHidden = f.type === 'password';
+      f.type = isHidden ? 'text' : 'password';
+      btn.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+      btn.setAttribute('aria-label', isHidden ? 'Ocultar senha' : 'Mostrar senha');
+    });
+  </script>
+</body>
+</html>

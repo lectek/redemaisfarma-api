@@ -1,13 +1,18 @@
 package br.com.redemaisfarma.adapters.inbound.web.controller.site;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import br.com.redemaisfarma.application.core.produto.ProdutoVitrineService;
 import lombok.Generated;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Controller de Vitrine / Catálogo de Produtos da área do cliente.
@@ -48,6 +53,7 @@ public class HomePageController {
      * - Se amanhã mudar a regra de "destaques", muda no service, não no controller.
      */
     private final ProdutoVitrineService vitrine;
+    private final ProdutoRepository produtoRepository;
 
     /**
      * GET /produtos (sem parâmetro q)
@@ -75,10 +81,15 @@ public class HomePageController {
     public String listarProdutos(Model model) {
 
         // 1) Busca até 12 produtos em destaque para compor a vitrine
-        List<ProdutoEntity> destaques = vitrine.listarDestaques(12);
+        int limit = 12;
+        List<ProdutoEntity> destaques = Objects.requireNonNullElse(
+                vitrine.listarDestaques(limit),
+                List.of()
+        );
+        Pageable pageable = PageRequest.of(0, Math.max(1, Math.min(limit, 20)));
 
         // 2) Flag para saber se há produtos disponíveis
-        boolean hasDisponiveis = (destaques != null && !destaques.isEmpty());
+        boolean hasDisponiveis = !destaques.isEmpty();
 
         // 3) Atributos usados pelo template da listagem de produtos
         //    - "destaques"  : lista principal de produtos
@@ -88,9 +99,13 @@ public class HomePageController {
         model.addAttribute("lista", destaques);
         model.addAttribute("hasDisponiveis", hasDisponiveis);
         model.addAttribute("temProdutos", hasDisponiveis);
+        model.addAttribute("page", new PageImpl<>(destaques, pageable, destaques.size()));
+        model.addAttribute("q", "");
+        model.addAttribute("cat", "");
+        model.addAttribute("categorias", produtoRepository.findDistinctCategorias());
 
         // Indica para o layout/header qual página está ativa (útil para menu, breadcrumbs, etc.)
-        model.addAttribute("page", "produtos");
+        model.addAttribute("active", "produtos");
 
         // 4) Template que será renderizado
         // IMPORTANTE:
@@ -111,7 +126,8 @@ public class HomePageController {
      * - Isso deixa o controller desacoplado da implementação concreta.
      */
     @Generated
-    public HomePageController(ProdutoVitrineService vitrine) {
+    public HomePageController(ProdutoVitrineService vitrine, ProdutoRepository produtoRepository) {
         this.vitrine = vitrine;
+        this.produtoRepository = produtoRepository;
     }
 }

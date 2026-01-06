@@ -1,6 +1,7 @@
 package br.com.redemaisfarma.application.controller;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCategoriaRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Controller;
@@ -15,12 +16,15 @@ import java.util.List;
 public class ProdutoViewController {
 
     private final ProdutoRepository produtoRepository;
+    private final ProdutoCategoriaRepository categoriaRepository;
 
-    public ProdutoViewController(ProdutoRepository produtoRepository) {
+    public ProdutoViewController(ProdutoRepository produtoRepository,
+                                 ProdutoCategoriaRepository categoriaRepository) {
         this.produtoRepository = produtoRepository;
+        this.categoriaRepository = categoriaRepository;
     }
 
-    @GetMapping({"/produtos", "/catalogo"})
+    @GetMapping({"/catalogo"})
     public String listar(@RequestParam(value = "q", required = false) String termo,
                          @RequestParam(value = "categoria", required = false) String categoria,
                          @RequestParam(value = "pagina", defaultValue = "0") int pagina,
@@ -46,7 +50,7 @@ public class ProdutoViewController {
 
         model.addAttribute("q", q);
         model.addAttribute("categoriaSelecionada", cat);
-        model.addAttribute("categorias", produtoRepository.findDistinctCategorias());
+        model.addAttribute("categorias", this.categoriaRepository.findAllNomes());
         model.addAttribute("produtos", produtos);
         // PageImpl parametrizado para evitar raw type warning
         model.addAttribute("page", new PageImpl<>(produtos, pageable, page.getTotalElements()));

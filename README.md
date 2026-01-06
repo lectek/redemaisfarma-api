@@ -1,271 +1,684 @@
-💊 REDEMAISFARMA – API Java com Importação de Dados do Sistema Legado
-
-API corporativa em Java 21 e Spring Boot 3.3.x usando Arquitetura Hexagonal (Ports & Adapters).
-Integração nativa com Firebird (.FDB do Digifarma) para importação/sincronização de dados.
-Pronta para ambientes DEV/TEST/PROD, com MapStruct, Lombok, Swagger, Actuator, Testcontainers, Jacoco, SpotBugs, Checkstyle.
-
-✨ Visão Geral
-
-Hexagonal (Domain ↔ Ports ↔ Adapters): regras de negócio desacopladas de infraestrutura.
-
-Importação Firebird nativa via Jaybird (perfil firebird / prod), e MySQL para dev/test.
-
-Qualidade & Observabilidade: Actuator, logs estruturados com X-Correlation-Id, Jacoco, SpotBugs, Checkstyle.
-
-DX: Swagger/OpenAPI, perfis por ambiente, docker-compose para Firebird/MySQL.
-
-🗂️ Estrutura do Projeto (resumo)
-src/main/java/br/com/redemaisfarma/
-├─ RedeMaisFarmaApiApplication.java
-├─ config/                     # DataSources, Security, OpenAPI
-├─ domain/                     # modelos/enums do domínio
-├─ application/
-│  ├─ controller/              # endpoints HTTP (REST)
-│  ├─ dto/
-│  │  ├─ request/              # *RequestDTO
-│  │  └─ response/             # *ResponseDTO
-│  ├─ mapper/                  # MapStruct
-│  ├─ port/                    # ports inbound/outbound
-│  ├─ service/                 # casos de uso/orquestração
-│  ├─ session/                 # sessão/usuário atual
-│  └─ validation/              # validators + annotations
-└─ adapters/
-   ├─ inbound/
-   │  └─ web/                  # filtros/interceptors/security/advice/openapi
-   └─ outbound/                # JPA/HTTP/legacy/mail/cache/storage/kafka-produtores
-
-
-Controllers ficam em application/controller.
-Inbound tem apenas infra de entrada (filtros, interceptors, JWT, exception translator, versionamento, OpenAPI customizers, schedulers/consumidores).
-Outbound concentra persistência (JPA), Firebird legado, clientes HTTP, cache, e integrações externas.
-
-🔧 Requisitos
-
-Java 21 (JDK)
-
-Maven 3.9+
-
-Docker (opcional, para subir Firebird/MySQL localmente)
-
-Arquivo do legado: digifarma6.FDB disponível localmente (ex.: C:\digifarma\database\digifarma6.FDB)
-
-⚙️ Perfis de Execução
-
-dev: MySQL local (ou container), Swagger habilitado, logs DEBUG.
-
-test: Testcontainers (MySQL) em testes de integração.
-
-firebird/prod: conexão nativa ao Firebird (Jaybird) + tunning de produção.
-
-📦 Configuração (properties)
-src/main/resources/application.yml (base)
-spring:
-  application:
-    name: redemaisfarma-api
-  jackson:
-    serialization:
-      WRITE_DATES_AS_TIMESTAMPS: false
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-
-application-dev.properties (MySQL local)
-spring.datasource.url=jdbc:mysql://localhost:3306/redemaisfarma?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
-spring.datasource.username=root
-spring.datasource.password=root
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-springdoc.swagger-ui.enabled=true
-logging.level.org.hibernate.SQL=DEBUG
-
-application-test.properties (Testcontainers)
-spring.jpa.hibernate.ddl-auto=update
-springdoc.swagger-ui.enabled=false
-
-application-firebird.properties (legado Digifarma)
-spring.datasource.url=jdbc:firebirdsql://localhost:3050/C:/digifarma/database/digifarma6.FDB?lc_ctype=UTF8
-spring.datasource.username=sysdba
-spring.datasource.password=masterkey
-spring.jpa.hibernate.ddl-auto=none
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.FirebirdDialect
-logging.level.org.hibernate.SQL=INFO
-
-
-Windows path no Firebird: use barra / ou escape \ duplo no JDBC.
-Ajuste as credenciais conforme seu ambiente.
-
-🐳 docker-compose (opcional p/ DEV)
-
-docker/docker-compose.yml
-
-version: "3.9"
-services:
-  firebird:
-    image: jacobalberty/firebird:3.0
-    container_name: firebird
-    environment:
-      ISC_PASSWORD: masterkey
-      FIREBIRD_DATABASE: digifarma6.fdb
-    ports:
-      - "3050:3050"
-    volumes:
-      - ./firebird/data:/firebird/data   # coloque o .FDB aqui como digifarma6.fdb
-    healthcheck:
-      test: ["CMD-SHELL", "timeout 1 bash -c '< /dev/tcp/127.0.0.1/3050' || exit 1"]
-      interval: 5s
-      timeout: 2s
-      retries: 30
-
-  mysql:
-    image: mysql:8.4
-    container_name: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: redemaisfarma
-    ports:
-      - "3306:3306"
-    volumes:
-      - ./mysql/init:/docker-entrypoint-initdb.d
-
-
-Copie seu digifarma6.FDB para docker/firebird/data/digifarma6.fdb.
-
-🚀 Como subir
-DEV (MySQL)
-# (opcional) subir MySQL via docker-compose
-docker compose -f docker/docker-compose.yml up -d mysql
-
-# compilar e rodar com perfil dev
-mvn clean spring-boot:run -Dspring-boot.run.profiles=dev
-
-Firebird (legado / importação)
-# (opcional) subir Firebird via docker-compose
-docker compose -f docker/docker-compose.yml up -d firebird
-
-# executar apontando para seu .FDB
-mvn clean spring-boot:run -Dspring-boot.run.profiles=firebird
-
-Testes
-# unit + integração (Testcontainers)
-mvn -T 1C clean verify
-
-
-Após verify, abra o Jacoco em target/site/jacoco/index.html.
-
-🔄 Importação & Sincronização do Legado
-
-Serviços-chave (exemplo):
-
-application/service/sync/ProdutoLegacyService.java
-
-application/service/sync/ProdutoSyncService.java
-
-Uso típico:
-
-Endpoint/Job que dispara a leitura no Firebird (via adapter adapters/outbound/legacy) → mapeia para DTO/Model → persiste no MySQL através dos ports/outbound JPA.
-
-Opções de execução:
-
-Endpoint (ex.: POST /api/legacy/produtos/sync)
-
-Scheduler (adapters/inbound/scheduler) para sincronização periódica.
-
-Os mappers (MapStruct) ficam em application/mapper e transformam Legacy → DTO/Domain → Entity.
-
-🔐 Segurança (JWT)
-
-Filtros JWT em adapters/inbound/web/security/* (ex.: JwtOncePerRequestFilter).
-
-Configurações em config/SecurityConfig.java.
-
-Refresh token via repositório em adapters/outbound/auth/jwt/*.
-
-Fluxo típico:
-
-POST /api/auth/login → retorna accessToken + refreshToken.
-
-POST /api/auth/refresh → novo par de tokens.
-
-Rotas protegidas com Authorization: Bearer <token>.
-
-📚 Documentação & Saúde
-
-Swagger UI: http://localhost:8080/swagger-ui/index.html
-
-OpenAPI JSON: /v3/api-docs
-
-Actuator: /actuator/health, /actuator/metrics, /actuator/info
-
-🔗 Endpoints principais (exemplos)
-
-Health: GET /api/ping, GET /actuator/health
-
-Produtos: GET /api/produtos, POST /api/produtos, GET /api/produtos/{id}
-
-Pedidos: POST /api/pedidos, GET /api/pedidos/{id}, PUT /api/pedidos/{id}
-
-Clientes: GET /api/clientes, POST /api/clientes
-
-Config/Admin: GET /api/config, páginas de painel (se expostas)
-
-Os nomes podem variar conforme seus controllers; ajuste aqui se necessário.
-
-🧪 Testes (padrão)
-src/test/java/br/com/redemaisfarma/
-├─ unit/                # testes unitários (services/mappers)
-├─ integration/         # @SpringBootTest + Testcontainers (MySQL)
-│  ├─ BaseIntegrationTest.java
-│  ├─ ProdutoFlowIT.java
-│  ├─ PedidoFlowIT.java
-│  └─ ClienteFlowIT.java
-└─ support/containers/
-   └─ MySqlContainerConfig.java
-
-✅ Qualidade de Código
-
-SpotBugs + Checkstyle: executados em mvn verify.
-
-Jacoco: cobertura HTML em target/site/jacoco/index.html.
-
-🧭 Convenções
-
-Controllers: application/controller
-
-DTOs: application/dto/request|response
-
-Validators: application/validation(+/annotation)
-
-Sessão: application/session
-
-Inbound Infra: adapters/inbound/web/* (filters/interceptors/security/advice/openapi)
-
-Outbound: adapters/outbound/* (JPA, legacy, http, cache, mail, storage, kafka-produtores)
-
-🛠️ Scripts úteis (opcional)
-scripts/
-├─ dev-up.sh        # docker compose up (mysql/firebird)
-├─ dev-down.sh
-├─ clean-all.bat    # limpa Docker + Maven + cache
-└─ verify-local.sh  # mvn -T 1C clean verify -Pdev
-
-📄 Licença
-
-Defina sua licença em LICENSE (ex.: MIT, Apache-2.0).
-
-🤝 Contribuição
-
-Crie branchs por feature (feat/…, fix/…).
-
-Commits semânticos.
-
-PR com descrição, screenshots (se front embutido), e checklist de testes.
-
-💬 Dicas rápidas
-
-Se estiver no Windows, confirme o caminho do .FDB no JDBC e permissões de leitura.
-
-Em Firebird, mantenha lc_ctype=UTF8 para evitar problemas com acentuação.
-
-Para diagnosticar importações, habilite logs dos adapters de legacy (logging.level.br.com.redemaisfarma.adapters.outbound.legacy=DEBUG).
+# RedeMaisFarma API
+
+API corporativa (Java 21 + Spring Boot 3.3) embalada em hexagonal: o módulo `boot-app` entrega REST, páginas
+Thymeleaf e integrações com banco relacional, Firebird legado, storage e e-mail.
+
+## Architecture snapshot
+- Hexagonal layout dentro de `boot-app/src/main/java/br/com/redemaisfarma`: `domain` → `application` → `adapters`.
+- `infra`, `mocks` e `infra` extras carregam helpers de infraestrutura, payloads simulados e scripts de apoio.
+- O módulo principal cuida de filtros, segurança JWT/OAuth2/OpenAPI, Flyway, storage (S3/local), e-mail e jobs.
+
+## Modules & layers
+- `domain`: entidades/enum e serviços core (`EstoqueService`, sync, catálogos, finanças, IA de prompts).
+- `application`: ports, services, mappers/DTOs, validações, sessões e views (admin/cliente).
+- `adapters/inbound`: controllers REST/MVC, filtros, segurança, OpenAPI, templates, schedulers e páginas públicas/admin.
+- `adapters/outbound`: JPA/Flyway, Firebird legacy (Jaybird), storage, HTTP clients, cache (Redis), e-mail, jobs/Kafka.
+- `config`: beans globais, segurança, observabilidade, datasources e mensageria.
+- `docs/`: guias de UI (`admin-frontend-refactor`, `client-flow-wireframes`), complementando `README_DEV.md`.
+
+## Running the platform
+### Build & verify
+- `./mvnw -pl boot-app clean verify` compila, executa unitários/integração e dispara Jacoco, SpotBugs e Checkstyle.
+
+### Executar localmente
+- `./mvnw -pl boot-app spring-boot:run -Dspring-boot.run.profiles=dev` liga o serviço contra MySQL local (host/credenciais em `application-dev.yml` ou `DEV_DATASOURCE_*`).
+
+### Docker-powered dev
+- `docker compose -f docker-compose.dev.yml up -d mysql mailpit cliente-mock` levanta infra; suba o app com `./mvnw -pl boot-app spring-boot:run -Dspring-boot.run.profiles=docker` ou rode o container via compose para o host `18080`.
+
+### Testes e legado
+- `./mvnw -pl boot-app test -Dspring.profiles.active=test` usa Testcontainers (MySQL) e `application-test.yml`; adicione `-DskipITs` para ignorar integrações.
+- Perfil `legacy` (`application-legacy.yml`) ativa o conector Firebird (`FIREBIRD_*`) para sincronização de catálogo via `ProdutoLegacyService`.
+
+## Profiles & configuration
+- `dev` (padrão): MySQL em `localhost:3306`, Swagger ativo, Mailpit opcional.
+- `docker`: usa serviços definidos em `docker-compose.dev.yml`.
+- `test`: Testcontainers com MySQL e perfis de teste.
+- `legacy`/`firebird`: conectores Jaybird, esquema Firebird e variáveis `FIREBIRD_HOST/DB/USER/PASSWORD`.
+- Alertas de estoque configurados por `app.estoque.alerta.*` (limite 10, percentual 10, cron padrão `0 */30 * * * *`, cooldown 60 min, e-mail opcional).
+
+## Observabilidade & docs
+- Swagger UI aparece em `/docs`, OpenAPI em `/v3/api-docs` e Actuator expõe `/actuator/health` e `/actuator/info`.
+- Logging via `logback-spring.xml`, filtros de correlação e auditoria (`HttpAuditFilter`), e métricas de jobs/Kafka.
+- Templates e assets estão em `src/main/resources/templates/pages` e `static/`; JavaScript auxilia UI cliente/admin.
+
+## Key flows & integrations
+- **Auth & conta**: `/api/auth/login`, refresh, OTP/email claim e reset; MVC para login, cadastro e alteração de senha (`AccountController`, `/auth/*`, `/cliente/senha`).
+- **Site público**: landing, carrossel, catálogo/CSV de produtos (`PublicProdutoController`, `ProdutoExportController`, templates em `templates/pages/cliente`).
+- **Cliente self-service**: carrinho REST (`/api/carrinho/itens`), checkout `/api/cliente/me/checkout`, CRUD de perfil/endereços/pedidos (`ClienteSelfController`), e `CurrentClienteProvider` para contexto autenticado.
+- **Admin**: controllers e páginas para catálogo completo, clientes, pedidos, relatórios, marketing, configurações, estoque e rotas OSRM (e.g., `ProdutoAdminRestController`, `AdminEntregaRotaController`, templates em `templates/pages/admin`).
+- **Integrações**: MySQL + Flyway, Firebird legado, storage `S3StorageAdapter`/`LocalStorageAdapter`, e-mail (Mailpit em dev), Kafka desligado por padrão, OSRM para rotas de entrega.
+- **Jobs & alertas**: agendamentos em `adapters/inbound/scheduler`, alerta de estoque via log/e-mail, sincronização de catálogo, limpeza de tokens/OTP.
+
+## Roadmap (em andamento)
+### Email marketing (ideias)
+- Campanha promocional segmentada (categorias, recencia, ticket medio).
+- Carrinho abandonado (1h/24h com cupom).
+- Recompra automatica (medicamentos de uso continuo).
+- Aniversario do cliente (cupom).
+- Lancamentos e novidades por categoria.
+- Volta ao estoque (inscricao por produto).
+- Status de pedido e entrega (confirmacao, separacao, envio, entregue).
+- Cashback/beneficios (saldo, pontos, validade).
+- Conteudo educativo e sazonal.
+- Reengajamento de clientes inativos.
+
+### Outras ideias em andamento
+- Interface mobile cliente alinhada ao web.
+- Pagina de produtos mais chamativa mesmo sem itens (empty state rico).
+- Barra de busca com filtros (ex.: lupa de preco, seletor de categorias).
+- Venda rapida com leitor de codigo de barras confiavel.
+- Melhorias visuais no sidebar admin (recolher) e login (toggle senha).
+- Pagamentos: metodos personalizados + PIX/dinheiro + retirada na loja.
+- Ajustes de branding/hero e imagens iniciais do cliente.
+
+### Backlog tecnico (prioridade + estimativa)
+- P0 | Email marketing minimo viavel (segmentacao basica + fila + templates) | 5-7 dias
+- P0 | Tela de campanhas (CRUD + agendamento) | 4-6 dias
+- P0 | Envio transacional padronizado (pedido/entrega) | 3-4 dias
+- P1 | Carrinho abandonado (regras + disparo) | 3-5 dias
+- P1 | Recompra automatica (ciclos + opt-in) | 4-6 dias
+- P1 | Reengajamento inativos (regra + lista) | 2-3 dias
+- P1 | Volta ao estoque (subscribe + trigger) | 3-4 dias
+- P1 | Integracoes com filtros na busca (preco/categoria) | 2-3 dias
+- P2 | Conteudo educativo (templates + agenda) | 2-3 dias
+- P2 | Cashback/beneficios (comunicacao por email) | 3-4 dias
+
+### Ordem sugerida (milestones)
+1) M1 - Fundacao email: fila + templates + envio transacional
+2) M2 - Campanhas: CRUD + agendamento + segmentacao basica
+3) M3 - Automacoes: carrinho abandonado + reengajamento + recompra
+4) M4 - Engajamento: volta ao estoque + conteudo + cashback
+
+### Detalhamento P0 (tarefas)
+- Modelos e tabelas: campanha, publico, fila, log de envio
+- Serviço de segmentacao: filtros simples (categoria, recencia, ticket)
+- Worker de envio: throttling, retry, status (pendente/enviado/falha)
+- Templates: base + promocao + pedido/entrega
+- Admin UI: lista, criacao, agendamento, preview
+- Observabilidade: logs e metrics por campanha
+
+## Project health & analysis
+- A estrutura hexagonal garante separação clara entre domínio, portos e adaptadores; `boot-app` reúne APIs REST, MVC e infraestrutura.
+- Qualidade e observabilidade estão integradas: `clean verify` cobre Jacoco/SpotBugs/Checkstyle, Actuator e OpenAPI/Swagger rastreiam saúde e contratos.
+- Admin/catalogo está estabilizado (`/admin/produtos`, `/api/admin/produtos`, upload + IA + export); o cliente vê templates e scripts dedicados para login, carrinho, checkout e dashboard.
+- Legacy Firebird é ativado sob demanda (`firebird/legacy`), com sincronização via `ProdutoSyncService` e `LegacyProdutoJdbcAdapter`.
+- Testes unitários e integrações existentes focam auth/produto; faltam cenários ponta a ponta para checkout/pagamento/estoque, marketing/agendamentos, storage/S3 e OSRM.
+
+## Known gaps & next steps
+- PRIORIDADE EXTREMA: adicionar foto de perfil em "Minha Conta" e "Meus Dados" (upload + exibicao).
+- Implementar `AccountController.extrairUsuario` para liberar a alteração de senha do cliente.
+- Documentar novos endpoints (carrinho/checkout, marketing/configurações, rotas de entrega) no OpenAPI com `@Tag`/`@Operation`.
+- Ampliar testes integrando checkout/pagamento/estoque, cliente self-service, marketing/agendamentos, Firebird, storage e OSRM.
+- Alinhar telas admin ao shell em `docs/admin-frontend-refactor.md` e experiência cliente aos wireframes de `docs/client-flow-wireframes.md`.
+
+## Resources & references
+- Guias de UI: `docs/admin-frontend-refactor.md`, `docs/client-flow-wireframes.md`.
+- Desenvolvimento: `README_DEV.md` resume comandos, convenções e checklist de PR.
+- Configuração: `docker-compose*.yml`, `infra/` helpers, `mocks/` payloads, `AGENTS.md` para instruções de agente.
+
+## Plano de 50 passos para o aplicativo (cliente/admin)
+1) Alinhar escopo do app (cliente, admin, ambos) e definir metas de negocio.
+2) Mapear personas, jornada e tarefas criticas do cliente final.
+3) Consolidar requisitos funcionais e nao funcionais.
+4) Definir arquitetura do app (web responsivo, PWA ou mobile nativo).
+5) Definir estrategia de autenticacao (JWT/refresh/OTP) para o app.
+6) Inventariar endpoints atuais e lacunas de API para o app.
+7) Criar backlog de endpoints faltantes e priorizar.
+8) Padronizar contratos de API (DTOs, erros, paginacao).
+9) Documentar fluxo completo de login, cadastro e recuperacao de senha.
+10) Definir layout base (header, nave, tabs) e grids responsivos.
+11) Criar design system do app (tokens, cores, tipografia, icones).
+12) Definir componentes UI base (buttons, inputs, cards, badges).
+13) Especificar estados globais (loading, empty, error, offline).
+14) Definir fluxo de catalogo e filtros (busca, categoria, preco).
+15) Implementar listagem de produtos (publico e logado).
+16) Implementar pagina de detalhe do produto (imagem, preco, estoque).
+17) Adicionar produtos relacionados e recomendacoes basicas.
+18) Definir regra de estoque (alerta, indisponivel, backorder).
+19) Implementar carrinho (add/remove/quantidade).
+20) Implementar checkout (endereco, entrega, pagamento, resumo).
+21) Padronizar mascaras e validacoes de dados do cliente.
+22) Implementar "Minha conta" e "Meus dados".
+23) Implementar upload de foto de perfil (UI + backend + storage).
+24) Implementar lista e detalhe de pedidos do cliente.
+25) Implementar status de pedido e timeline de entrega.
+26) Criar pagina de notificacoes do cliente.
+27) Implementar central de avisos no dashboard admin.
+28) Implementar configuracoes de alertas de estoque (limite e notificacao).
+29) Implementar area de promocoes e ofertas.
+30) Implementar favoritos / lista de desejos.
+31) Implementar historico de buscas e sugestoes.
+32) Implementar cupons e beneficios.
+33) Implementar chatbot/ajuda e FAQ contextual.
+34) Implementar pagina de contato e suporte (email/whatsapp).
+35) Implementar politicas e termos no app.
+36) Adicionar tracking basico (eventos-chave do funil).
+37) Implementar dashboard de metricas basicas (admin).
+38) Padronizar logs e observabilidade do app.
+39) Implementar cache e performance (imagens, lazy load).
+40) Adicionar fallback offline (PWA) ou modo resiliente.
+41) Revisar seguranca (CORS, rate limit, headers).
+42) Revisar acessibilidade (foco, contraste, labels).
+43) Criar suite de testes unitarios e de integracao.
+44) Criar testes E2E para fluxos criticos.
+45) Configurar CI/CD e pipelines de QA.
+46) Preparar ambiente de staging com dados mascarados.
+47) Executar bateria de testes de regressao.
+48) Criar plano de release e rollback.
+49) Monitorar pos-deploy (erros, funil, performance).
+50) Rodar ciclo de melhorias continuas e backlog trimestral.
+
+## Levantamento de endpoints para app cliente (passo 6)
+### Auth
+- POST /api/auth/login
+- POST /api/auth/register
+- POST /api/auth/otp/start
+- POST /api/auth/otp/verify
+- POST /api/auth/register/complete-otp
+- POST /api/auth/password/reset-otp
+- POST /api/auth/esqueci-senha
+- GET  /api/auth/validar-token
+- POST /api/auth/resetar-senha
+- POST /api/auth/email-claim/start
+- POST /api/auth/email-claim/verify
+
+### Catalogo e vitrine
+- GET /produtos (MVC)
+- GET /produtos?q= (MVC)
+- GET /produto/{id} e /produtos/{id} (MVC)
+- GET /api/public/vitrine/destaques
+- GET /api/v2/produtos
+- GET /api/v2/produtos/{id}
+
+### Carrinho e checkout
+- GET /carrinho (MVC)
+- POST /carrinho/adicionar
+- POST /carrinho/atualizar
+- POST /carrinho/remover
+- GET /checkout (MVC)
+
+### Conta do cliente
+- GET /cliente/conta (MVC)
+- GET /cliente/dados (MVC)
+- POST /cliente/dados (MVC)
+- POST /cliente/avatar (MVC)
+- GET /cliente/senha (MVC)
+- POST /cliente/senha (MVC)
+
+### Pedidos do cliente
+- GET /cliente/pedidos (MVC)
+- GET /cliente/pedidos/{id} (MVC)
+- GET /api/v2/pedidos
+- GET /api/v2/pedidos/{id}
+
+### Lacunas para o app mobile
+- API de carrinho (listar/add/update/remover) com auth
+- API de checkout (resumo + finalizar pedido)
+- API de perfil do cliente (meus dados, endereco, foto)
+- API de pedidos do cliente (filtrado por usuario autenticado)
+- API de notificacoes/avisos do cliente
+- API de favoritos/lista de desejos (se entrar no MVP)
+
+## Backlog de endpoints para o app cliente (passo 7)
+### P0 (MVP 1 mes)
+- GET /api/cliente/me (perfil do cliente autenticado)
+- PUT /api/cliente/me (atualizar dados do cliente)
+- POST /api/cliente/me/avatar (upload de foto)
+- GET /api/cliente/me/pedidos (lista pedidos do cliente)
+- GET /api/cliente/me/pedidos/{id} (detalhe pedido)
+- GET /api/cliente/me/carrinho (listar itens)
+- POST /api/cliente/me/carrinho (adicionar item)
+- PUT /api/cliente/me/carrinho/{itemId} (atualizar quantidade)
+- DELETE /api/cliente/me/carrinho/{itemId} (remover item)
+- GET /api/cliente/me/checkout/resumo (resumo do pedido)
+- POST /api/cliente/me/checkout/finalizar (criar pedido)
+
+### P1 (pos-MVP)
+- GET /api/cliente/me/notificacoes
+- POST /api/cliente/me/notificacoes/lidas
+- GET /api/cliente/me/favoritos
+- POST /api/cliente/me/favoritos
+- DELETE /api/cliente/me/favoritos/{produtoId}
+
+## Padrao de contratos de API (passo 8)
+### Envelope de erro (padrao)
+{
+  "timestamp": "2025-01-01T12:00:00Z",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Descricao do erro",
+  "path": "/api/cliente/me"
+}
+
+### Paginacao (padrao)
+{
+  "content": [ ... ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 120,
+  "totalPages": 6
+}
+
+### Exemplos de DTOs (MVP)
+// ClienteResponse
+{
+  "id": 1,
+  "nome": "Cliente",
+  "email": "cliente@email.com",
+  "cpf": "00000000000",
+  "telefone": "",
+  "avatarUrl": "https://...",
+  "enderecos": []
+}
+
+// CartItemResponse
+{
+  "itemId": 10,
+  "produtoId": 2,
+  "nome": "Produto",
+  "imagem": "https://...",
+  "preco": 19.9,
+  "quantidade": 2,
+  "subtotal": 39.8
+}
+
+// PedidoResumoResponse
+{
+  "id": 1001,
+  "data": "2025-01-01T10:00:00Z",
+  "total": 89.9,
+  "status": "CONFIRMADO",
+  "metodoPagamento": "PIX"
+}
+
+// CheckoutResumoResponse
+{
+  "itens": [ ... ],
+  "subtotal": 89.9,
+  "frete": 5.0,
+  "total": 94.9,
+  "metodoPagamento": "PIX"
+}
+
+## Fluxos de autenticacao (passo 9)
+### Login (email/senha)
+1) POST /api/auth/login { usuario, senha }
+2) Recebe accessToken + refreshToken + userId + roles
+3) App salva tokens com expiracao e renova quando necessario
+
+### Cadastro (email/senha + OTP opcional)
+1) POST /api/auth/register { name, email, cpf, password }
+2) (Opcional) POST /api/auth/otp/start { canal, destino }
+3) POST /api/auth/otp/verify { deliveryId, code }
+4) POST /api/auth/register/complete-otp { token, email, nome, senha }
+5) App redireciona para login
+
+### Recuperacao de senha (OTP)
+1) POST /api/auth/otp/start { canal, destino }
+2) POST /api/auth/otp/verify { deliveryId, code } => token
+3) POST /api/auth/password/reset-otp { token, email, novaSenha }
+
+### Reset por token (alternativo)
+1) POST /api/auth/esqueci-senha { email }
+2) GET /api/auth/validar-token?token=...
+3) POST /api/auth/resetar-senha { token, novaSenha }
+
+## Execucao do plano (passos 10-50)
+10) Layout base: tabs inferiores (Home, Catalogo, Carrinho, Pedidos, Conta); header compacto com busca e badge do carrinho.
+11) Design system: tipografia base (sans), escala de cores (primary/secondary/success/error), tokens de espaco e radius.
+12) Componentes base: buttons (primary/ghost), inputs com estados, cards de produto, badges de estoque, chips de filtro.
+13) Estados globais: loading (skeleton), empty state, error state, offline state.
+14) Fluxo de catalogo: busca por nome/codigo, filtros por categoria e ordenacao por preco/novidade.
+15) Listagem de produtos: pagina com grid 2 colunas, pagina��o infinita, usa /api/v2/produtos e /api/public/vitrine/destaques.
+16) Detalhe do produto: imagem, preco, promo, estoque, botao adicionar ao carrinho.
+17) Produtos relacionados: baseados em categoria + fallback por recentes.
+18) Regra de estoque: disponivel se disponivel=true e estoque>0; mostrar aviso <=10.
+19) Carrinho: estado local + sincronizacao com API /api/cliente/me/carrinho.
+20) Checkout: resumo, endereco, pagamento, confirmacao; usar /api/cliente/me/checkout.
+21) Mascaras/validacoes: CPF, telefone, email, senha forte.
+22) Minha conta: dados pessoais, preferencias, atalhos de pedidos.
+23) Foto de perfil: upload no app e API /api/cliente/me/avatar.
+24) Pedidos (lista): status, total e data com filtros simples.
+25) Pedido (detalhe): itens, status e timeline de entrega.
+26) Notificacoes do cliente: tela dedicada com avisos e promo.
+27) Avisos admin: central de alertas no dashboard (fora do app cliente).
+28) Alertas de estoque: configuracao via admin e exibicao no app quando <=10.
+29) Promocoes/ofertas: vitrine dedicada e campanhas sazonais.
+30) Favoritos: wishlist simples por produto.
+31) Historico de buscas: salvar ultimas 5 buscas locais.
+32) Cupons/beneficios: aplicacao no checkout e exibicao no carrinho.
+33) Chatbot/FAQ: pagina de ajuda com topicos e contato rapido.
+34) Suporte: contato via email/whatsapp a partir do app.
+35) Politicas/termos: paginas estaticas acessiveis no app.
+36) Tracking: eventos chave (view produto, add cart, checkout, compra).
+37) Metricas admin: painel basico (fora do app cliente).
+38) Observabilidade: logs estruturados e alertas de erro.
+39) Performance: cache de imagens, lazy load, compressao.
+40) Offline: cache basico de home/catalogo (PWA futuro).
+41) Seguranca: CORS, headers, rate limit, validacao de input.
+42) Acessibilidade: contraste, labels, foco e leitor de tela.
+43) Testes unitarios: services e validacoes.
+44) Testes E2E: login, catalogo, carrinho, checkout.
+45) CI/CD: pipeline com build, testes e deploy automatizado.
+46) Staging: ambiente espelho com dados mascarados.
+47) Regressao: suite de smoke antes de release.
+48) Release/rollback: plano de reversao e comunicacao.
+49) Monitoramento: erros, performance, funil.
+50) Melhoria continua: ciclo mensal de ajustes e backlog.
+# Mobile App Blueprint (Android)
+
+## Stack and architecture
+- Kotlin + Jetpack Compose
+- MVVM + UseCases + Repositories
+- Hilt for DI
+- Retrofit/OkHttp for API
+- Coil for images
+- DataStore (Encrypted) for tokens
+
+## Package
+- br.com.redemaisfarma.mobile
+
+## Modules
+- app (UI)
+- core (network, storage, common)
+- domain (models, use cases)
+- data (repositories, DTOs, mappers)
+
+## Core dependencies
+- androidx.compose.*
+- androidx.navigation:navigation-compose
+- androidx.lifecycle:lifecycle-viewmodel-compose
+- com.google.dagger:hilt-android
+- com.squareup.retrofit2:retrofit
+- com.squareup.okhttp3:okhttp
+- io.coil-kt:coil-compose
+- androidx.datastore:datastore-preferences
+
+## MVP screens
+- Splash
+- Login
+- OTP (opcional)
+- Cadastro
+- Home/Vitrine
+- Catalogo + busca
+- Detalhe do produto
+- Carrinho
+- Checkout
+- Conta
+- Pedidos (lista/detalhe)
+
+## API base
+- Base URL: http://localhost:18090
+- Auth: /api/auth/*
+- Catalogo: /api/v2/produtos
+- Vitrine: /api/public/vitrine/destaques
+
+## Release
+- Keystore + signingConfig
+- versionCode/versionName
+- App bundle (.aab)
+- Play Console listing + privacy policy
+
+## API contracts (detalhado)
+### Auth
+- POST /api/auth/login
+  req: { "usuario": "email", "senha": "senha" }
+  res: { "accessToken": "", "refreshToken": "", "userId": 1, "roles": ["ROLE_CLIENTE"], "expiresAt": "" }
+
+- POST /api/auth/register
+  req: { "name": "", "email": "", "cpf": "", "password": "" }
+  res: { "accessToken": "", "refreshToken": "" }
+
+- POST /api/auth/otp/start
+  req: { "canal": "email", "destino": "email" }
+  res: { "deliveryId": "", "maskedDestino": "", "cooldownSec": 60, "ttlSeconds": 300 }
+
+- POST /api/auth/otp/verify
+  req: { "deliveryId": "", "code": "" }
+  res: { "token": "" }
+
+- POST /api/auth/register/complete-otp
+  req: { "token": "", "email": "", "nome": "", "senha": "" }
+  res: { "message": "Conta criada" }
+
+- POST /api/auth/password/reset-otp
+  req: { "token": "", "email": "", "novaSenha": "" }
+  res: { "message": "Senha redefinida" }
+
+### Catalogo
+- GET /api/v2/produtos?page=0&size=20&sort=dataCadastro,desc
+  res: { "content": [Produto], "page": 0, "size": 20, "totalElements": 100, "totalPages": 5 }
+
+- GET /api/v2/produtos/{id}
+  res: Produto
+
+### Perfil
+- GET /api/cliente/me
+  res: ClienteResponse
+
+- PUT /api/cliente/me
+  req: { "nome": "", "telefone": "", "cpf": "" }
+  res: ClienteResponse
+
+- POST /api/cliente/me/avatar (multipart)
+  res: { "avatarUrl": "" }
+
+### Carrinho
+- GET /api/cliente/me/carrinho
+  res: { "items": [CartItem], "subtotal": 0, "total": 0 }
+
+- POST /api/cliente/me/carrinho
+  req: { "produtoId": 1, "quantidade": 1 }
+  res: { "items": [CartItem], "subtotal": 0, "total": 0 }
+
+- PUT /api/cliente/me/carrinho/{itemId}
+  req: { "quantidade": 2 }
+  res: { "items": [CartItem], "subtotal": 0, "total": 0 }
+
+- DELETE /api/cliente/me/carrinho/{itemId}
+  res: { "items": [CartItem], "subtotal": 0, "total": 0 }
+
+### Checkout
+- GET /api/cliente/me/checkout/resumo
+  res: CheckoutResumoResponse
+
+- POST /api/cliente/me/checkout/finalizar
+  req: { "enderecoId": 1, "metodoPagamento": "PIX" }
+  res: { "pedidoId": 123 }
+
+### Pedidos
+- GET /api/cliente/me/pedidos
+  res: { "content": [PedidoResumo], "page": 0, "size": 20, "totalElements": 10, "totalPages": 1 }
+
+- GET /api/cliente/me/pedidos/{id}
+  res: PedidoDetalhe
+
+## Navigation map
+- Splash -> Login
+- Login -> Home
+- Home -> Catalogo -> Detalhe
+- Detalhe -> Carrinho -> Checkout -> Confirmacao
+- Home -> Pedidos (lista) -> Pedido (detalhe)
+- Home -> Conta -> Dados/Foto
+
+## Auth strategy
+- Access token + refresh token
+- Refresh antes de expirar (ex.: 2 min)
+- Tokens em Encrypted DataStore
+- Interceptor para 401 e refresh
+
+## Build and release
+- versionCode/versionName por build
+- Keystore em CI e local
+- Build AAB para Play Store
+- Flavors: dev, staging, prod
+
+## Play Store checklist
+- App icon, feature graphic, screenshots
+- Descricao curta e longa
+- Politica de privacidade publica
+- Content rating
+- Target SDK atualizado
+
+## CI/CD and QA
+- Pipeline: lint + tests + assemble
+- Release interno para QA
+- Crash reporting (Firebase)
+- Analytics basico (eventos)
+
+
+## API mobile (cliente) - endpoints implementados
+### Perfil
+- GET /api/cliente/me
+- PUT /api/cliente/me
+- POST /api/cliente/me/avatar
+
+### Pedidos
+- GET /api/cliente/me/pedidos
+- GET /api/cliente/me/pedidos/{id}
+
+### Carrinho
+- GET /api/cliente/me/carrinho
+- POST /api/cliente/me/carrinho
+- PUT /api/cliente/me/carrinho/{produtoId}
+- DELETE /api/cliente/me/carrinho/{produtoId}
+
+### Checkout
+- GET /api/cliente/me/checkout/resumo
+- POST /api/cliente/me/checkout/finalizar
+
+### Favoritos
+- GET /api/cliente/me/favoritos
+- POST /api/cliente/me/favoritos
+- DELETE /api/cliente/me/favoritos/{produtoId}
+
+### Notificacoes
+- GET /api/cliente/me/notificacoes
+- POST /api/cliente/me/notificacoes/lidas
+
+### Admin notificacoes
+- GET /admin/notificacoes
+- POST /admin/notificacoes/api/enviar
+- POST /admin/notificacoes/api/enviar/todos
+- POST /admin/notificacoes/api/enviar/usuario/{id}
+- POST /admin/notificacoes/api/enviar/estoque-baixo
+- Job: Estoque baixo -> cria notificacoes para usuarios (cron: app.estoque.alerta.cron)
+- Configuracoes de alerta de estoque: app.estoque.alerta.enabled/limite/cooldown-minutes/cron
+
+## Mobile (Android) - estado atual
+- Projeto em `mobile/` (Gradle Kotlin DSL, Compose, Java 17).
+- Hilt + Retrofit/Moshi + OkHttp + DataStore configurados.
+- Base URL: `BuildConfig.API_BASE_URL` (default `http://10.0.2.2:18090`).
+- Navegacao Compose pronta (home, carrinho, avisos, conta, produto).
+- Telas placeholder: Catalogo, Carrinho, Pedidos, Minha conta, Avisos, Produto.
+- Cookie jar ativo para manter sessao web no mobile.
+
+### Mobile - passo atual
+- Tela Minha conta consome `GET /api/cliente/me` via ViewModel + Repository (Hilt).
+- Estado de UI com loading/sucesso/erro e retry.
+
+### Mobile - passo atual 2
+- Tela Pedidos consome `GET /api/cliente/me/pedidos`.
+- Tela Avisos consome `GET /api/cliente/me/notificacoes` + marca lidas.
+- Tela Carrinho consome `GET /api/cliente/me/carrinho` e remove item.
+
+### Mobile - passo atual 3
+- Tela detalhe de pedido consome `GET /api/cliente/me/pedidos/{id}` e foi ligada na lista de pedidos.
+
+### Mobile - passo atual 4
+- Checkout ligado ao `GET /api/cliente/me/checkout/resumo` e `POST /api/cliente/me/checkout/finalizar` com inputs basicos no carrinho.
+
+### Mobile - passo atual 5
+- Tela Minha conta permite editar dados (PUT /api/cliente/me) e enviar avatar (POST /api/cliente/me/avatar) via seletor de imagem.
+
+### Mobile - passo atual 6
+- Catalogo mobile com favoritos (GET/POST/DELETE /api/cliente/me/favoritos) e toggle visual.
+
+### Mobile - passo atual 7
+- Catalogo mobile consome `GET /api/public/produtos` e detalhe do produto usa `GET /api/public/produtos/{id}` com adicionar ao carrinho.
+
+### Mobile - passo atual 8
+- Catalogo com busca (q) no endpoint `GET /api/public/produtos` e imagens renderizadas no card.
+
+### Mobile - passo atual 9
+- Catalogo com carregamento incremental (paginacao simples) e detalhe do produto com imagem e metadados basicos.
+
+### Mobile - passo atual 10
+- Checkout com validacao basica de CPF/email e feedback via snackbar.
+- Detalhe do produto avisa estoque baixo (<= 10).
+
+### Mobile - passo atual 11
+- Catalogo com indicador de carregamento incremental.
+- CPF com mascara simples e envio apenas de digitos no checkout.
+
+### Mobile - passo atual 12
+- Telefone com mascara no perfil e envio apenas de digitos no update.
+
+### Mobile - passo atual 13
+- Selecionar metodo de pagamento agora destaca o item ativo.
+- Perfil valida telefone (10-11 digitos) antes de salvar.
+
+### Mobile - passo atual 14
+- Catalogo/detalhe com placeholder de imagem quando nao ha foto.
+- Perfil valida email e CPF antes de salvar.
+
+### Mobile - passo atual 15
+- CPF do perfil usa mascara e envia apenas digitos no update.
+
+### Mobile - passo atual 16
+- Estados vazios com icone informativo no carrinho, pedidos e avisos.
+
+### Mobile - passo atual 17
+- Busca no catalogo com debounce (400ms) e disparo automatico a partir de 2 caracteres.
+
+### Mobile - passo atual 18
+- Mensagens de erro agora incluem detalhes HTTP e falha de conexao quando aplicavel.
+- Catalogo mostra texto de carregamento incremental.
+
+### Mobile - passo atual 19
+- Acessibilidade: botoes com altura minima de toque (48dp) e icone de favorito com area maior.
+
+### Mobile - passo atual 20
+- Estados vazios reutilizados em um componente unico para padronizar UI.
+
+### Mobile - passo atual 21
+- Cards de listas padronizados com um composable unico para pedidos, avisos, itens do carrinho e itens do pedido.
+
+### Mobile - passo atual 22
+- Mensagens de erro padronizadas por contexto usando componente unico.
+
+### Mobile - passo atual 23
+- Componentes de UI extraidos para `ui/components` (EmptyState, ErrorState, SimpleCard).
+
+### Mobile - passo atual 24
+- Formatters (CPF/telefone) extraidos para util e cobertos por testes unitarios basicos.
+
+### Mobile - passo atual 25
+- Teste unitario para ErrorMapper (HTTP e IO).
+
+### Mobile - passo atual 26
+- Telas separadas em arquivos por feature (catalogo, carrinho, pedidos, perfil, avisos, detalhe do produto/pedido).
+
+### Mobile - passo atual 27
+- Catalogo agora usa ProductCard padronizado (imagem, favorito, preco e acao) no componente de UI.
+
+### Mobile - passo atual 28
+- Catalogo mostra estado vazio quando nao ha resultados.
+
+### Mobile - passo atual 29
+- Teste basico do CatalogViewModel com dispatcher de teste.
+
+### Mobile - passo atual 30
+- Teste basico do CheckoutViewModel (resumo e finalizar).
+
+### Mobile - passo atual 31
+- Detalhe do produto com linhas padronizadas e tags (marca/categoria/codigo/estoque).
+
+### Mobile - passo atual 32
+- ProductCard indica estoque baixo quando <= 10.
+- Ajuste de label no detalhe do produto.
+
+### APK
+- Para gerar o APK debug: `cd mobile` + `./gradlew assembleDebug`.
+- Saida: `mobile/app/build/outputs/apk/debug/app-debug.apk`.

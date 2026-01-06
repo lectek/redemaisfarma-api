@@ -1,6 +1,7 @@
 // src/main/java/br/com/redemaisfarma/adapters/inbound/web/controller/AdminSalesReportController.java
 package br.com.redemaisfarma.adapters.inbound.web.controller;
 
+import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteRepository;
 import br.com.redemaisfarma.application.report.service.ReportService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -18,9 +19,11 @@ import java.time.LocalDate;
 public class AdminSalesReportController {
 
     private final ReportService reportService;
+    private final ClienteRepository clienteRepository;
 
-    public AdminSalesReportController(ReportService reportService) {
+    public AdminSalesReportController(ReportService reportService, ClienteRepository clienteRepository) {
         this.reportService = reportService;
+        this.clienteRepository = clienteRepository;
     }
 
     @GetMapping("/admin/relatorios/vendas")
@@ -33,8 +36,9 @@ public class AdminSalesReportController {
         model.addAttribute("linhas", resumo.linhas());
         model.addAttribute("sumQtd", resumo.sumQtd());
         model.addAttribute("sumTotal", resumo.sumTotal());
+        model.addAttribute("totalClientes", clienteRepository.count());
 
-        return "admin/relatorios/vendas";
+        return "pages/admin/relatorios/vendas";
     }
 
     // Export simples: CSV (já funciona); para "pdf", devolve 501 por enquanto.

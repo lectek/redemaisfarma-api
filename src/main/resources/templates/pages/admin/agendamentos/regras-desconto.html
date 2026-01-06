@@ -1,18 +1,24 @@
 <!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Regras de Desconto (Aderência)</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
+<title>Regras de Desconto (Aderencia)</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
 <div class="layout">
-<aside th:replace="~{fragments/sidebar :: sidebar('agendamentos')}"></aside>
+<aside th:replace="~{fragments/admin-sidebar :: adminSidebar('agendamentos')}"></aside>
 <main class="container stack mt-4 mb-6">
-  <h1 class="page-title">Regras de desconto por adesão</h1>
+  <h1 class="page-title">Regras de desconto por adesao</h1>
   <form class="card form-grid" th:action="@{/admin/agendamentos/regras}" method="post" th:object="${regra}">
     <div class="form-group"><label>Percentual de desconto</label><input class="input" type="number" step="0.1" th:field="*{percentual}" placeholder="5.0"/></div>
-    <div class="form-group"><label>Janela de confirmação (min)</label><input class="input" type="number" th:field="*{janelaMin}" placeholder="60"/></div>
-    <div class="form-group"><label>Mínimo de confirmações/mês</label><input class="input" type="number" th:field="*{minConfirm}" placeholder="20"/></div>
+    <div class="form-group"><label>Janela de confirmacao (min)</label><input class="input" type="number" th:field="*{janelaMin}" placeholder="60"/></div>
+    <div class="form-group"><label>minimo de confirmacoes/mes</label><input class="input" type="number" th:field="*{minConfirm}" placeholder="20"/></div>
     <div class="form-actions"><button class="btn btn-primary">Salvar</button></div>
   </form>
 </main></div>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body></html>
+
+
+
+
+
+

@@ -5,6 +5,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.ProdutoJpaRepository;
 import br.com.redemaisfarma.application.dto.request.ProdutoRequestDTO;
 import br.com.redemaisfarma.application.dto.response.ProdutoResponseDTO;
+import br.com.redemaisfarma.application.core.media.ImageStorageService;
 import br.com.redemaisfarma.application.mapper.ProdutoMapper;
 import br.com.redemaisfarma.domain.Produto;
 import jakarta.validation.Valid;
@@ -13,10 +14,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -26,10 +27,12 @@ import java.util.UUID;
 public class ProdutoAdminRestController {
 
     private final ProdutoJpaRepository repo;
+    private final ImageStorageService imageStorageService;
 
     @Generated
-    public ProdutoAdminRestController(ProdutoJpaRepository repo) {
+    public ProdutoAdminRestController(ProdutoJpaRepository repo, ImageStorageService imageStorageService) {
         this.repo = repo;
+        this.imageStorageService = imageStorageService;
     }
 
     // ==================================================
@@ -112,12 +115,15 @@ public class ProdutoAdminRestController {
                         return ResponseEntity.badRequest().body("Arquivo vazio");
                     }
 
-                    String filename = "produto-" + id + "-" + StringUtils.cleanPath(file.getOriginalFilename());
-                    entity.setImagem("/media/products/" + filename);
-                    entity.setUpdatedAt(LocalDateTime.now());
-                    repo.save(entity);
-
-                    return ResponseEntity.ok(entity.getImagem());
+                    try {
+                        String imageUrl = imageStorageService.saveProductImage(id, file);
+                        entity.setImagem(imageUrl);
+                        entity.setUpdatedAt(LocalDateTime.now());
+                        repo.save(entity);
+                        return ResponseEntity.ok(imageUrl);
+                    } catch (IOException ex) {
+                        return ResponseEntity.badRequest().body(ex.getMessage());
+                    }
                 })
                 .orElse(ResponseEntity.notFound().build());
     }

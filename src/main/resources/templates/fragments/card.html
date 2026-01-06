@@ -14,3 +14,8 @@
     </div>
   </div>
 </div>
+
+<div class="card" th:fragment="kpi(titulo, valor)">
+  <h3 class="card-title" th:text="${titulo}">Titulo</h3>
+  <p class="card-kpi-value" th:text="${valor != null ? valor : 0}">0</p>
+</div>

@@ -24,13 +24,13 @@ import java.util.UUID;
 public class VendaResponseDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Schema(description = "ID da venda", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6", required = true)
+    @Schema(description = "ID da venda", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "{venda.id.notNull}")
     @JsonProperty("idVenda")
     private UUID idVenda;
 
     @Schema(description = "Data/hora da venda", type = "string", format = "date-time",
-            example = "2025-07-04T14:20:00", required = true)
+            example = "2025-07-04T14:20:00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "{venda.dataHora.notNull}")
     @PastOrPresent(message = "{venda.dataHora.pastOrPresent}")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -41,26 +41,26 @@ public class VendaResponseDTO implements Serializable {
     @JsonProperty("traceId")
     private UUID traceId;
 
-    @Schema(description = "Informações do cliente", required = true)
+    @Schema(description = "Informações do cliente", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "{venda.cliente.notNull}")
     @Valid
     @JsonProperty("cliente")
     private ClienteResponseDTO cliente;
 
-    @Schema(description = "Itens da venda", required = true)
+    @Schema(description = "Itens da venda", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "{venda.itens.notEmpty}")
     @Valid
     @JsonProperty("itens")
     @JsonAlias("itensDetalhados")
     private List<@Valid ItemVendaDTO> itens;
 
-    @Schema(description = "Quantidade total de produtos vendidos", example = "5", required = true)
+    @Schema(description = "Quantidade total de produtos vendidos", example = "5", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "{venda.qtdTotalProdutos.notNull}")
     @Min(value = 1, message = "{venda.qtdTotalProdutos.min}")
     @JsonProperty("qtdTotalProdutos")
     private Integer qtdTotalProdutos;
 
-    @Schema(description = "Valor total bruto da venda", example = "100.00", required = true)
+    @Schema(description = "Valor total bruto da venda", example = "100.00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "{venda.total.notNull}")
     @DecimalMin(value = "0.01", inclusive = true, message = "{venda.total.min}")
     @Digits(integer = 14, fraction = 2, message = "{venda.total.digits}")
@@ -79,14 +79,14 @@ public class VendaResponseDTO implements Serializable {
     @JsonProperty("frete")
     private BigDecimal frete;
 
-    @Schema(description = "Valor líquido da venda (total - desconto + frete)", example = "105.00", required = true)
+    @Schema(description = "Valor líquido da venda (total - desconto + frete)", example = "105.00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "{venda.valorLiquido.notNull}")
     @DecimalMin(value = "0.00", inclusive = true, message = "{venda.valorLiquido.min}")
     @Digits(integer = 14, fraction = 2, message = "{venda.valorLiquido.digits}")
     @JsonProperty("valorLiquido")
     private BigDecimal valorLiquido;
 
-    @Schema(description = "Forma de pagamento", example = "CREDIT_CARD", required = true)
+    @Schema(description = "Forma de pagamento", example = "CREDIT_CARD", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "{venda.formaPagamento.notBlank}")
     @Size(max = 50, message = "{venda.formaPagamento.size}")
     @JsonProperty("formaPagamento")
@@ -97,13 +97,13 @@ public class VendaResponseDTO implements Serializable {
     @JsonProperty("qrCodePagamento")
     private String qrCodePagamento;
 
-    @Schema(description = "Status da venda", example = "CONFIRMADA", required = true,
+    @Schema(description = "Status da venda", example = "CONFIRMADA", requiredMode = Schema.RequiredMode.REQUIRED,
             allowableValues = {"PENDENTE", "CONFIRMADA", "CANCELADA", "ESTORNADA"})
     @NotNull(message = "{venda.status.notNull}")
     @JsonProperty("status")
     private StatusVenda status;
 
-    @Schema(description = "Canal de origem do pedido", example = "APP", required = true,
+    @Schema(description = "Canal de origem do pedido", example = "APP", requiredMode = Schema.RequiredMode.REQUIRED,
             allowableValues = {"SITE", "BALCAO", "DELIVERY", "APP"})
     @NotNull(message = "{venda.origemPedido.notNull}")
     @JsonProperty("origemPedido")
@@ -119,7 +119,7 @@ public class VendaResponseDTO implements Serializable {
     @JsonProperty("entregador")
     private String entregador;
 
-    @Schema(description = "Modo de entrega", example = "ENTREGA", required = true,
+    @Schema(description = "Modo de entrega", example = "ENTREGA", requiredMode = Schema.RequiredMode.REQUIRED,
             allowableValues = {"RETIRADA", "ENTREGA"})
     @NotNull(message = "{venda.modoEntrega.notNull}")
     @JsonProperty("modoEntrega")
@@ -169,3 +169,4 @@ public class VendaResponseDTO implements Serializable {
         SITE, BALCAO, DELIVERY, APP
     }
 }
+

@@ -4,15 +4,15 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Dashboard • Admin</title>
+  <title>Dashboard a Admin</title>
 
   <link rel="stylesheet" th:href="@{/css/main.css}"/>
 </head>
 <body class="body-flex">
-<header th:replace="~{fragments/header :: header}"></header>
+<header th:replace="~{fragments/admin-header :: adminHeader}"></header>
 
-<div class="layout">
-  <aside th:replace="~{fragments/sidebar :: sidebar('dashboard')}"></aside>
+<div class="layout layout--with-sidebar">
+  <aside th:replace="~{fragments/admin-sidebar :: adminSidebar('dashboard')}"></aside>
 
   <main id="main-content" class="container stack mt-4 mb-6">
     <h1 class="page-title">Dashboard</h1>
@@ -25,25 +25,115 @@
       <article th:replace="~{fragments/card :: kpi('Pendentes', ${painelAdmin.qtdPedidosPendentes})}"></article>
     </section>
 
-    <!-- Gráfico -->
+    <!-- Acoes rapidas -->
+    <section class="mt-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-16">
+        <a class="card card-link" th:href="@{/admin/produtos}">
+          <h2 class="card-title">Produtos</h2>
+          <p class="muted">Gerencie Catalogo, estoque e destaques.</p>
+        </a>
+        <a class="card card-link" th:href="@{/admin/pedidos}">
+          <h2 class="card-title">Pedidos</h2>
+          <p class="muted">Atualize status e acompanhe entregas.</p>
+        </a>
+        <a class="card card-link" th:href="@{/admin/clientes}">
+          <h2 class="card-title">Clientes</h2>
+          <p class="muted">Consulte historico e dados do cliente.</p>
+        </a>
+        <a class="card card-link" th:href="@{/admin/configuracoes/geral}">
+          <h2 class="card-title">Configuracoes</h2>
+          <p class="muted">Frete, Horario, Integracoes e avisos.</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- Filtros rapidos -->
+    <section class="mt-6">
+      <div class="card">
+        <h2 class="card-title">Filtros rapidos</h2>
+        <div class="flex gap-8">
+          <a class="btn btn-ghost" th:href="@{/admin/dashboard}">Todos</a>
+          <a class="btn btn-ghost" th:href="@{/admin/dashboard(period='today')}">Hoje</a>
+          <a class="btn btn-ghost" th:href="@{/admin/dashboard(period='week')}">7 dias</a>
+          <a class="btn btn-ghost" th:href="@{/admin/dashboard(period='month')}">30 dias</a>
+        </div>
+      </div>
+    </section>
+    <!-- Grafico -->
     <section class="mt-6">
       <article class="card card-chart">
         <h2 class="card-title">Pedidos por status</h2>
 
         <div style="position:relative;height:320px">
-          <canvas id="grafico-vendas-dia" width="600" height="240"
-                  aria-label="Distribuição de pedidos por status" role="img"></canvas>
+          <canvas id="Grafico-vendas-dia" width="600" height="240"
+                  aria-label="DistribuiAAo de pedidos por status" role="img"></canvas>
         </div>
 
         <!-- Injeta dados do controller -->
         <script th:inline="javascript">
           /*<![CDATA[*/
-          window.RMF_CHART_STATUS = {
+          window.RMF_ChaRT_STATUS = {
             labels: /*[[${chartStatusLabels}]]*/ [],
             data:   /*[[${chartStatusData}]]*/ []
           };
           /*]]>*/
         </script>
+      </article>
+    </section>
+
+    <!-- Alertas -->
+    <section class="mt-6">
+      <article class="card">
+        <div class="between">
+          <h2 class="card-title">Alertas</h2>
+          <a class="btn btn-ghost" th:href="@{/admin/alertas}">Ver todos</a>
+        </div>
+        <ul th:if="${painelAdmin.alertas != null and !painelAdmin.alertas.isEmpty()}">
+          <li th:each="a : ${painelAdmin.alertas}">
+            <strong th:text="${a.tipo}">Tipo</strong>
+            <span th:text="${a.mensagem}">Alerta</span>
+          </li>
+        </ul>
+        <p class="muted" th:if="${painelAdmin.alertas == null or painelAdmin.alertas.isEmpty()}">Sem alertas no momento.</p>
+      </article>
+    </section>
+    <!-- Ultimos pedidos -->
+    <section class="mt-6">
+      <article class="card">
+        <h2 class="card-title">Ultimos pedidos</h2>
+        <div class="table-responsive">
+          <table class="table" aria-label="Tabela de ultimos pedidos">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Data</th>
+                <th scope="col">Itens</th>
+                <th scope="col">Total</th>
+                <th scope="col">Status</th>
+                <th scope="col">Acoes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="p : ${ultimosPedidos}">
+                <td th:text="${p.id}">0001</td>
+                <td th:text="${p.clienteNome}">Cliente exemplo</td>
+                <td th:text="${#temporals.format(p.data, 'dd/MM/yyyy HH:mm')}">15/11/2025</td>
+                <td th:text="${p.totalItens}">3</td>
+                <td th:text="${#numbers.formatCurrency(p.total)}">R$ 129,90</td>
+                <td><span class="badge" th:classappend="' ' + ${p.statusClass}" th:text="${p.statusLabel}">Pago</span></td>
+                <td class="actions">
+                  <a class="btn btn-ghost" th:href="@{|/admin/pedidos/${p.id}|}">Detalhes</a>
+                </td>
+              </tr>
+              <tr th:if="${ultimosPedidos == null or #lists.isEmpty(ultimosPedidos)}">
+                <td colspan="7" class="muted text-center">
+                  Nenhum pedido encontrado.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </article>
     </section>
   </main>
@@ -57,3 +147,8 @@
 <script defer th:src="@{/js/admin-dashboard.js}"></script>
 </body>
 </html>
+
+
+
+
+

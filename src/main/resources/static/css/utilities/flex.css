@@ -63,6 +63,7 @@
 .gap-16  { gap: var(--gap-16); }
 .gap-24  { gap: var(--gap-24); }
 .gap-32  { gap: var(--gap-32); }
+.gap-48  { gap: var(--gap-48); }
 .gap-64  { gap: var(--gap-64); }
 
 .gap-x-4  { column-gap: var(--gap-4); }
@@ -71,6 +72,7 @@
 .gap-x-16 { column-gap: var(--gap-16); }
 .gap-x-24 { column-gap: var(--gap-24); }
 .gap-x-32 { column-gap: var(--gap-32); }
+.gap-x-48 { column-gap: var(--gap-48); }
 .gap-x-64 { column-gap: var(--gap-64); }
 
 .gap-y-4  { row-gap: var(--gap-4); }
@@ -79,6 +81,7 @@
 .gap-y-16 { row-gap: var(--gap-16); }
 .gap-y-24 { row-gap: var(--gap-24); }
 .gap-y-32 { row-gap: var(--gap-32); }
+.gap-y-48 { row-gap: var(--gap-48); }
 .gap-y-64 { row-gap: var(--gap-64); }
 
 /* ========== Flex Grow / Shrink ========== */

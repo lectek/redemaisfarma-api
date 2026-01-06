@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AdminEmailController {
     @GetMapping
     public String index() {
-        return "admin/email/central";
+        return "pages/admin/email/central";
     }
 }
-

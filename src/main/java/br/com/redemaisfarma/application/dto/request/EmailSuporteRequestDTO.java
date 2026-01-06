@@ -33,7 +33,7 @@ public class EmailSuporteRequestDTO implements Serializable {
     private UUID solicitacaoId;
 
     @Schema(description = "Nome completo do cliente",
-            example = "Maria Oliveira", required = true)
+            example = "Maria Oliveira", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "{emailSuporte.nome.notBlank}")
     @Size(min = 5, max = 100, message = "{emailSuporte.nome.size}")
     @Pattern(regexp = ".*\\s+.*", message = "{emailSuporte.nome.nomeCompleto}")
@@ -41,7 +41,7 @@ public class EmailSuporteRequestDTO implements Serializable {
     private String nome;
 
     @Schema(description = "E-mail do cliente",
-            example = "maria@exemplo.com", required = true)
+            example = "maria@exemplo.com", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "{emailSuporte.email.notBlank}")
     @Email(message = "{emailSuporte.email.valid}")
     @Size(max = 150, message = "{emailSuporte.email.size}")
@@ -49,26 +49,26 @@ public class EmailSuporteRequestDTO implements Serializable {
     private String email;
 
     @Schema(description = "Assunto da mensagem",
-            example = "Erro no pedido de medicamento", required = true)
+            example = "Erro no pedido de medicamento", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "{emailSuporte.assunto.notBlank}")
     @Size(max = 150, message = "{emailSuporte.assunto.size}")
     @JsonProperty("assunto")
     private String assunto;
 
     @Schema(description = "Categoria de suporte",
-            required = true, example = "TECNICO")
+            requiredMode = Schema.RequiredMode.REQUIRED, example = "TECNICO")
     @NotNull(message = "{emailSuporte.categoria.notNull}")
     @JsonProperty("categoria")
     private Categoria categoria;
 
     @Schema(description = "Prioridade da solicitação",
-            required = true, example = "HIGH")
+            requiredMode = Schema.RequiredMode.REQUIRED, example = "HIGH")
     @NotNull(message = "{emailSuporte.prioridade.notNull}")
     @JsonProperty("prioridade")
     private Priority prioridade;
 
     @Schema(description = "Conteúdo da mensagem de suporte",
-            example = "Ao tentar finalizar o pedido, recebo erro 500.", required = true)
+            example = "Ao tentar finalizar o pedido, recebo erro 500.", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "{emailSuporte.mensagem.notBlank}")
     @Size(min = 10, max = 2000, message = "{emailSuporte.mensagem.size}")
     @JsonProperty("mensagem")
@@ -87,7 +87,7 @@ public class EmailSuporteRequestDTO implements Serializable {
             )
             String> anexos;
 
-    @Schema(description = "ID do tenant", example = "redemaisfarma-001", required = true)
+    @Schema(description = "ID do tenant", example = "redemaisfarma-001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "{emailSuporte.tenantId.notBlank}")
     @Size(max = 60, message = "{emailSuporte.tenantId.size}")
     @JsonProperty("tenantId")
@@ -100,7 +100,7 @@ public class EmailSuporteRequestDTO implements Serializable {
 
     @Schema(description = "Data/hora do envio",
             type = "string", format = "date-time",
-            example = "2025-07-04T14:30:00", required = true)
+            example = "2025-07-04T14:30:00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "{emailSuporte.dataEnvio.notNull}")
     @PastOrPresent(message = "{emailSuporte.dataEnvio.pastOrPresent}")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -118,3 +118,4 @@ public class EmailSuporteRequestDTO implements Serializable {
     public enum Categoria { PEDIDO, TECNICO, FINANCEIRO, OUTROS }
     public enum Priority  { LOW, MEDIUM, HIGH }
 }
+

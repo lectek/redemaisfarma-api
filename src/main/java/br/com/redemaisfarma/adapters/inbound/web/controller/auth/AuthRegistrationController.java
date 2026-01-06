@@ -8,6 +8,9 @@ import jakarta.validation.constraints.Size;
 import java.beans.PropertyEditor;
 import java.time.LocalDate;
 
+import br.com.redemaisfarma.application.core.exception.CpfDuplicadoException;
+import br.com.redemaisfarma.application.core.exception.EmailDuplicadoException;
+import br.com.redemaisfarma.application.dto.request.CadastroClienteRequestDTO;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import br.com.redemaisfarma.application.port.inbound.RegistrationAppService;
 
 @Controller
 @RequestMapping("/auth")
@@ -35,7 +39,7 @@ public class AuthRegistrationController {
         binder.registerCustomEditor(String.class, (PropertyEditor) new StringTrimmerEditor(true));
     }
 
-    @GetMapping("/cadastro-cliente")
+    @GetMapping("/cliente/cadastro")
     public String cadastroForm(Model model) {
         if (!model.containsAttribute("cadastro")) {
             model.addAttribute("cadastro", new CadastroClienteForm());
@@ -44,7 +48,7 @@ public class AuthRegistrationController {
         return "pages/auth/cadastro-cliente";
     }
 
-    @PostMapping("/cadastro-cliente")
+    @PostMapping("/cliente/cadastro")
     public String processar(
             @Valid @ModelAttribute("cadastro") CadastroClienteForm form,
             BindingResult br,
@@ -70,7 +74,7 @@ public class AuthRegistrationController {
         }
 
         try {
-            registrationAppService.cadastrarNovoCliente(form);
+            registrationAppService.cadastrarNovoCliente(toRequest(form));
             return "redirect:/auth/login?from=cadastro_ok";
         } catch (EmailDuplicadoException e) {
             br.rejectValue("email", "duplicado", "E-mail já cadastrado.");
@@ -179,11 +183,21 @@ public class AuthRegistrationController {
     }
 
     // Exceções de domínio (mantidas para compatibilidade)
-    public static class CpfDuplicadoException extends RuntimeException { }
-    public static class EmailDuplicadoException extends RuntimeException { }
+    private static CadastroClienteRequestDTO toRequest(CadastroClienteForm form) {
+        CadastroClienteRequestDTO dto = new CadastroClienteRequestDTO();
+        dto.setNome(form.getNome());
+        dto.setEmail(form.getEmail());
+        dto.setCpf(form.getCpf());
+        dto.setTelefone(form.getTelefone());
+        dto.setDataDeNascimento(form.getDataDeNascimento());
+        dto.setSenha(form.getSenha());
+        dto.setConfirmarSenha(form.getConfirmarSenha());
+        dto.setCanalOtp(form.getCanalOtp());
+        dto.setOtpDeliveryId(form.getOtpDeliveryId());
+        dto.setOtpToken(form.getOtpToken());
+        dto.setWebsite(form.getWebsite());
+        return dto;
+    }
 
     // Porta de aplicação — interface para o caso real
-    public interface RegistrationAppService {
-        void cadastrarNovoCliente(CadastroClienteForm form);
-    }
 }

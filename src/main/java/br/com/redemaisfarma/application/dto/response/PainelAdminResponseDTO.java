@@ -21,7 +21,7 @@ public class PainelAdminResponseDTO {
     private double satisfacaoCliente;
     private LocalDateTime dataUltimoPedido;
     private List<String> categoriasMaisVendidas;
-    private List<String> alertas;
+    private List<AlertItemDTO> alertas;
     private Map<StatusPedido, Long> pedidosPorStatus = new EnumMap<StatusPedido, Long>(StatusPedido.class);
 
     public String getAdminNome() {
@@ -112,11 +112,11 @@ public class PainelAdminResponseDTO {
         this.categoriasMaisVendidas = categoriasMaisVendidas;
     }
 
-    public List<String> getAlertas() {
+    public List<AlertItemDTO> getAlertas() {
         return this.alertas;
     }
 
-    public void setAlertas(List<String> alertas) {
+    public void setAlertas(List<AlertItemDTO> alertas) {
         this.alertas = alertas;
     }
 
@@ -128,4 +128,3 @@ public class PainelAdminResponseDTO {
         this.pedidosPorStatus = pedidosPorStatus;
     }
 }
-

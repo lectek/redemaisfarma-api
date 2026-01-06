@@ -5,7 +5,7 @@
 
 /* Fonte base e altura da linha */
 body {
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: var(--font-sans);
   font-size: 1rem; /* 16px */
   line-height: 1.6;
   font-weight: 400;
@@ -15,10 +15,11 @@ body {
 
 /* Cabeçalhos com hierarquia visual */
 h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
   font-weight: 700;
   line-height: 1.2;
   margin-bottom: 0.5rem;
-  color: var(--color-primary-text);
+  color: var(--layout-dark);
 }
 
 h1 { font-size: 2.5rem; } /* 40px */
@@ -31,7 +32,7 @@ h6 { font-size: 1rem;   } /* 16px */
 p {
   margin-bottom: 1rem;
   font-size: 1rem;
-  color: var(--color-primary-text);
+  color: var(--layout-dark);
 }
 
 strong {
@@ -118,7 +119,7 @@ thead {
 /* Modo escuro automático */
 @media (prefers-color-scheme: dark) {
   body {
-    color: var(--color-dark);
+    color: var(--color-light);
     background-color: var(--color-neutral-2);
   }
 

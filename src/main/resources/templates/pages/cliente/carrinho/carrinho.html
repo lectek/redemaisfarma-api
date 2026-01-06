@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Carrinho • RedeMaisFarma</title>
+  <title>Carrinho - RedeMaisFarma</title>
 
   <!-- Estilos principais -->
   <link rel="stylesheet" th:href="@{/css/main.css}" />
@@ -11,62 +11,82 @@
 
 <body class="body-flex">
 
-  <!-- Cabeçalho -->
+  <!-- Cabecalho -->
   <header th:replace="~{fragments/header :: header}"></header>
 
-  <!-- Conteúdo do carrinho -->
-  <main id="main-content" class="container mt-4 mb-4">
-    <h1 class="mb-2 text-lg">🧾 Carrinho de Medicamentos</h1>
+  <div class="layout layout--with-sidebar">
+    <aside th:replace="~{fragments/sidebar :: sidebar('carrinho')}"></aside>
 
-    <div class="carrinho grid grid-2 gap-32 mt-4">
-      <!-- Lista de produtos -->
-      <div class="lista-produtos stack gap-16">
+    <!-- Conteudo do carrinho -->
+    <main id="main-content" class="container mt-4 mb-4">
+      <h1 class="mb-2 text-lg">Carrinho de Medicamentos</h1>
+      <section th:replace="~{fragments/flash :: flash}"></section>
+      <div class="alert alert-warning" th:if="${cartHasInvalidItems}">
+        Alguns itens estao indisponiveis ou com estoque insuficiente.
+      </div>
 
-        <!-- Produto 1: Exemplo fixo -->
-        <div class="produto-item card flex gap-16 p-2">
-          <img src="/images/dorflex.png" alt="Dorflex 36 comprimidos"
-               style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px;" />
+      <div class="carrinho grid grid-cols-1 md:grid-cols-2 gap-32 mt-4">
+        <!-- Lista de produtos -->
+        <div class="lista-produtos stack gap-16">
 
-          <div class="produto-info stack gap-8">
-            <span class="produto-nome font-semibold text-base">Dorflex 36 comprimidos</span>
-            <span class="produto-preco text-sm">R$ 19,90</span>
-            <div class="produto-quantidade flex gap-8 items-center">
-              <label for="qtd1" class="visually-hidden">Quantidade</label>
-              <input type="number" id="qtd1" name="qtd1" value="1" min="1"
-                     class="form-input" style="max-width: 64px;" />
-              <button class="btn btn-danger">Remover</button>
+          <div class="produto-item card flex gap-16 p-2" th:each="i : ${cartItems}">
+            <img th:src="${i.imagem} ?: @{/img/produtos/placeholder-generico.png}" th:alt="${i.nome}"
+                 style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px;" />
+
+            <div class="produto-info stack gap-8">
+              <span class="produto-nome font-semibold text-base" th:text="${i.nome}">Produto</span>
+              <span class="produto-preco text-sm" th:text="${#numbers.formatCurrency(i.precoUnitario, 'pt_BR')}">R$ 0,00</span>
+              <span class="text-sm text-muted" th:if="${i.invalid}" th:text="${i.issue}">Indisponivel.</span>
+              <div class="produto-quantidade flex gap-8 items-center">
+                <form th:action="@{/carrinho/atualizar}" method="post" class="inline">
+                  <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                  <input type="hidden" name="produtoId" th:value="${i.produtoId}"/>
+                  <label th:for="${'qtd-' + i.produtoId}" class="visually-hidden">Quantidade</label>
+                  <input type="number" th:id="${'qtd-' + i.produtoId}" name="quantidade" th:value="${i.quantidade}" min="1"
+                         class="form-input" style="max-width: 64px;" />
+                  <button class="btn btn-ghost" type="submit">Atualizar</button>
+                </form>
+                <form th:action="@{/carrinho/remover}" method="post" class="inline">
+                  <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                  <input type="hidden" name="produtoId" th:value="${i.produtoId}"/>
+                  <button class="btn btn-danger" type="submit">Remover</button>
+                </form>
+              </div>
             </div>
+          </div>
+
+          <div class="card p-4 text-center text-muted" th:if="${cartEmpty}">
+            Seu carrinho esta vazio. Volte ao catalogo para adicionar produtos.
           </div>
         </div>
 
-        <!-- Outros produtos serão renderizados dinamicamente -->
+        <!-- Resumo do pedido -->
+        <aside class="resumo-pedido card stack gap-16 p-4">
+          <h2 class="text-base font-semibold">Resumo do Pedido</h2>
+
+          <div class="resumo-linha flex justify-between">
+            <span>Subtotal:</span>
+            <span th:text="${#numbers.formatCurrency(cartSummary.subtotal, 'pt_BR')}">R$ 0,00</span>
+          </div>
+
+          <div class="resumo-linha flex justify-between">
+            <span>Entrega:</span>
+            <span>Gratis</span>
+          </div>
+
+          <div class="resumo-linha total flex justify-between font-bold">
+            <span>Total:</span>
+            <span th:text="${#numbers.formatCurrency(cartSummary.total, 'pt_BR')}">R$ 0,00</span>
+          </div>
+
+          <a th:if="${!cartEmpty}" th:href="@{/checkout}" class="btn btn--primary">Finalizar Compra</a>
+          <span th:if="${cartEmpty}" class="text-sm text-muted">Adicione itens para continuar.</span>
+        </aside>
       </div>
+    </main>
+  </div>
 
-      <!-- Resumo do pedido -->
-      <aside class="resumo-pedido card stack gap-16 p-4">
-        <h2 class="text-base font-semibold">Resumo do Pedido</h2>
-
-        <div class="resumo-linha flex justify-between">
-          <span>Subtotal:</span>
-          <span>R$ 19,90</span>
-        </div>
-
-        <div class="resumo-linha flex justify-between">
-          <span>Entrega:</span>
-          <span>Grátis</span>
-        </div>
-
-        <div class="resumo-linha total flex justify-between font-bold">
-          <span>Total:</span>
-          <span>R$ 19,90</span>
-        </div>
-
-        <a th:href="@{/checkout}" class="btn btn--primary">Finalizar Compra</a>
-      </aside>
-    </div>
-  </main>
-
-  <!-- Rodapé -->
+  <!-- Rodape -->
   <footer th:replace="~{fragments/footer :: footer}"></footer>
 
 </body>

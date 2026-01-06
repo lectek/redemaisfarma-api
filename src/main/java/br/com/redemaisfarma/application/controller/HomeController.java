@@ -1,7 +1,13 @@
 package br.com.redemaisfarma.application.controller;
 
+import br.com.redemaisfarma.application.service.PaymentMethodService;
+import br.com.redemaisfarma.application.service.CartService;
 import br.com.redemaisfarma.application.view.HomePageVM;
+import br.com.redemaisfarma.application.view.CartSummaryVM;
+import br.com.redemaisfarma.application.view.PaymentMethodVM;
+import jakarta.servlet.http.HttpSession;
 import br.com.redemaisfarma.domain.catalogo.HomepageCatalogFacade;
+import java.util.List;
 import lombok.Generated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +40,8 @@ public class HomeController {
      * - Indiretamente, os templates da home, que consomem o HomePageVM que vem da facade.
      */
     private final HomepageCatalogFacade facade;
+    private final PaymentMethodService paymentMethodService;
+    private final CartService cartService;
 
     /**
      * Construtor com injeção de dependência da facade.
@@ -46,8 +54,10 @@ public class HomeController {
      *   um objeto HomepageCatalogFacade pronto para ser usado nas rotas.
      */
     @Generated
-    public HomeController(HomepageCatalogFacade facade) {
+    public HomeController(HomepageCatalogFacade facade, PaymentMethodService paymentMethodService, CartService cartService) {
         this.facade = facade;
+        this.paymentMethodService = paymentMethodService;
+        this.cartService = cartService;
     }
 
     /**
@@ -88,7 +98,8 @@ public class HomeController {
     @GetMapping({"/", "/cliente", "/cliente/index"})
     public String exibirPaginaInicial(
             @RequestParam(value = "onboarding", required = false) String onboarding,
-            Model model) {
+            Model model,
+            HttpSession session) {
 
         HomePageVM vm = null;
 
@@ -112,6 +123,7 @@ public class HomeController {
 
         // Usado pelo layout (ex.: para marcar o menu "Home" ativo)
         model.addAttribute("page", "home");
+        model.addAttribute("cartSummary", cartService.buildSummary(session));
 
         // Diz para o Spring qual template Thymeleaf será renderizado
         // → src/main/resources/templates/pages/cliente/index.html
@@ -147,8 +159,16 @@ public class HomeController {
      *   → src/main/resources/templates/pages/cliente/checkout/checkout.html
      */
     @GetMapping("/checkout")
-    public String exibirCheckout(Model model) {
+    public String exibirCheckout(Model model, HttpSession session) {
         model.addAttribute("page", "checkout");
+        List<PaymentMethodVM> methods = paymentMethodService.listActiveMethods();
+        model.addAttribute("paymentMethods", methods);
+        model.addAttribute("paymentMethodsEmpty", methods.isEmpty());
+        CartSummaryVM summary = cartService.buildSummary(session);
+        model.addAttribute("cartSummary", summary);
+        model.addAttribute("cartItems", summary.items());
+        model.addAttribute("cartEmpty", summary.items().isEmpty());
+        model.addAttribute("cartHasInvalidItems", summary.hasInvalidItems());
         return "pages/cliente/checkout/checkout";
     }
 
@@ -182,7 +202,12 @@ public class HomeController {
      *   → src/main/resources/templates/pages/cliente/carrinho/carrinho.html
      */
     @GetMapping("/carrinho")
-    public String exibirCarrinho(Model model) {
+    public String exibirCarrinho(Model model, HttpSession session) {
+        CartSummaryVM summary = cartService.buildSummary(session);
+        model.addAttribute("cartSummary", summary);
+        model.addAttribute("cartItems", summary.items());
+        model.addAttribute("cartEmpty", summary.items().isEmpty());
+        model.addAttribute("cartHasInvalidItems", summary.hasInvalidItems());
         model.addAttribute("page", "carrinho");
         return "pages/cliente/carrinho/carrinho";
     }
@@ -213,8 +238,10 @@ public class HomeController {
      *   → src/main/resources/templates/pages/cliente/sobre.html
      */
     @GetMapping("/sobre")
-    public String exibirSobre(Model model) {
+    public String exibirSobre(Model model, HttpSession session) {
         model.addAttribute("page", "sobre");
+        model.addAttribute("active", "sobre");
+        model.addAttribute("cartSummary", cartService.buildSummary(session));
         return "pages/cliente/sobre";
     }
 
@@ -249,4 +276,5 @@ public class HomeController {
                 || "true".equalsIgnoreCase(v)
                 || "yes".equalsIgnoreCase(v);
     }
+
 }

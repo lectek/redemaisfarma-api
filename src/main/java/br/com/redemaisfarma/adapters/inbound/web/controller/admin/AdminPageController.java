@@ -1,15 +1,17 @@
 // src/main/java/br/com/redemaisfarma/adapters/inbound/web/controller/admin/AdminPageController.java
 package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
+@Profile("legacy")
 @RequestMapping("/admin")
 public class AdminPageController {
 
-    // dashboard / index do admin
-    @GetMapping({"", "/", "/index"})
+    // index do admin (mantem /admin/index para evitar conflito com redirect)
+    @GetMapping("/index")
     public String adminIndex() {
         return "pages/admin/index";
     }

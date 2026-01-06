@@ -17,7 +17,7 @@
   <link rel="canonical" th:href="@{/}" />
 
   <!-- Favicons -->
-  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}" />
+  <link rel="icon" type="image/png" th:href="${brandingFaviconUrl}" />
   <link rel="apple-touch-icon" th:href="@{/images/favicon-apple.png}" />
 
   <!-- Open Graph -->
@@ -68,7 +68,7 @@
       <div class="footer-column">
         <h4>Sobre a RedeMaisFarma</h4>
         <ul>
-          <li><a th:href="@{/sobre}">Quem somos</a></li>
+          <li><a th:href="@{/sobre}">Sobre nós</a></li>
           <li><a th:href="@{/servicos}">Serviços</a></li>
           <li><a th:href="@{/contato}">Contato</a></li>
         </ul>
@@ -124,13 +124,13 @@
     </div>
 
     <!-- Organization JSON-LD -->
-    <script type="application/ld+json">
+    <script type="application/ld+json" th:inline="javascript">
     {
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "RedeMaisFarma",
       "url": "https://redemaisfarma.local",
-      "logo": "/images/logofarma.jpg",
+      "logo": [[${brandingLogoUrl}]],
       "sameAs": []
     }
     </script>

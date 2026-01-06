@@ -40,35 +40,35 @@ implements Serializable {
     @Schema(description="ID do cliente (envie no update; n\u00e3o envie no create)", example="42")
     @JsonProperty(value="id", access=JsonProperty.Access.READ_ONLY)
     private Long id;
-    @Schema(description="Nome completo do cliente", example="Jo\u00e3o da Silva", required=true)
+    @Schema(description="Nome completo do cliente", example="Jo\u00e3o da Silva", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{cliente.nome.notBlank}")
     @Size(max=100, message="{cliente.nome.size}")
     @JsonProperty(value="nome")
     private @NotBlank(message="{cliente.nome.notBlank}") @Size(max=100, message="{cliente.nome.size}") String nome;
-    @Schema(description="E-mail do cliente", example="joao@email.com", required=true)
+    @Schema(description="E-mail do cliente", example="joao@email.com", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{cliente.email.notBlank}")
     @Email(message="{cliente.email.email}")
     @Size(max=150, message="{cliente.email.size}")
     @JsonProperty(value="email")
     private @NotBlank(message="{cliente.email.notBlank}") @Email(message="{cliente.email.email}") @Size(max=150, message="{cliente.email.size}") String email;
-    @Schema(description="CPF do cliente (com ou sem m\u00e1scara)", example="123.456.789-09", required=true)
+    @Schema(description="CPF do cliente (com ou sem m\u00e1scara)", example="123.456.789-09", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{cliente.cpf.notBlank}")
     @Pattern(regexp="^(\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2})$", message="{cliente.cpf.pattern}")
     @Size(max=14, message="{cliente.cpf.size}")
     @JsonProperty(value="cpf")
     private @NotBlank(message="{cliente.cpf.notBlank}") @Pattern(regexp="^(\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2})$", message="{cliente.cpf.pattern}") @Size(max=14, message="{cliente.cpf.size}") String cpf;
-    @Schema(description="Telefone de contato", example="+55 (83) 99999-9999", required=true)
+    @Schema(description="Telefone de contato", example="+55 (83) 99999-9999", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{cliente.telefone.notBlank}")
     @Pattern(regexp="\\+?\\d{1,3}? ?\\(?\\d{2}\\)? ?\\d{4,5}-?\\d{4}", message="{cliente.telefone.pattern}")
     @Size(max=25, message="{cliente.telefone.size}")
     @JsonProperty(value="telefone")
     private @NotBlank(message="{cliente.telefone.notBlank}") @Pattern(regexp="\\+?\\d{1,3}? ?\\(?\\d{2}\\)? ?\\d{4,5}-?\\d{4}", message="{cliente.telefone.pattern}") @Size(max=25, message="{cliente.telefone.size}") String telefone;
-    @Schema(description="Endere\u00e7o completo", example="Rua das Flores, 123, Jo\u00e3o Pessoa - PB", required=true)
+    @Schema(description="Endere\u00e7o completo", example="Rua das Flores, 123, Jo\u00e3o Pessoa - PB", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{cliente.endereco.notBlank}")
     @Size(max=200, message="{cliente.endereco.size}")
     @JsonProperty(value="endereco")
     private @NotBlank(message="{cliente.endereco.notBlank}") @Size(max=200, message="{cliente.endereco.size}") String endereco;
-    @Schema(description="Grupo de cliente (ex: RETAIL, WHOLESALE)", example="RETAIL", required=true)
+    @Schema(description="Grupo de cliente (ex: RETAIL, WHOLESALE)", example="RETAIL", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{cliente.grupo.notNull}")
     @JsonProperty(value="grupoCliente")
     private @NotNull(message="{cliente.grupo.notNull}") GrupoCliente grupoCliente;
@@ -211,4 +211,5 @@ implements Serializable {
         return "ClienteRequestDTO{id=" + this.id + ", nome='" + this.nome + "', email='" + this.email + "', cpf='" + this.cpf + "', telefone='" + this.telefone + "', endereco='" + this.endereco + "', grupoCliente=" + String.valueOf((Object)this.grupoCliente) + ", observacao='" + this.observacao + "', dataCadastro=" + String.valueOf(this.dataCadastro) + "}";
     }
 }
+
 

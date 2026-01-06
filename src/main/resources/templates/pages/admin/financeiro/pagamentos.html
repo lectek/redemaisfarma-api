@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Financeiro • Pagamentos</title>
+  <title>Financeiro a pagamentos</title>
   <link rel="stylesheet" th:href="@{/css/main.css}" />
 </head>
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
 
 <div class="layout">
-  <aside th:replace="~{fragments/sidebar :: sidebar('financeiro')}"></aside>
+  <aside th:replace="~{fragments/admin-sidebar :: adminSidebar('financeiro')}"></aside>
 
   <main id="main-content" class="container stack mt-4 mb-6">
-    <h1 class="page-title">Pagamentos</h1>
+    <h1 class="page-title">pagamentos</h1>
 
     <section class="grid grid-cols-1 md:grid-cols-3 gap-16">
-      <article th:replace="~{fragments/card :: kpi('Recebido (mês)', ${resumo.recebidoMes})}"></article>
+      <article th:replace="~{fragments/card :: kpi('Recebido (mes)', ${resumo.recebidoMes})}"></article>
       <article th:replace="~{fragments/card :: kpi('Pendente', ${resumo.pendente})}"></article>
       <article th:replace="~{fragments/card :: kpi('Chargebacks', ${resumo.chargebacks})}"></article>
     </section>
 
     <section class="card mt-6 table-responsive">
       <header class="card-header">
-        <h2 class="card-title">Transações</h2>
+        <h2 class="card-title">Transacoes</h2>
         <div class="actions">
           <a class="btn" th:href="@{/admin/financeiro/export?tipo=excel}">Exportar Excel</a>
           <a class="btn" th:href="@{/admin/financeiro/export?tipo=pdf}">Exportar PDF</a>
@@ -33,11 +33,11 @@
       <table class="table">
         <thead>
           <tr>
-            <th>#</th><th>Pedido</th><th>Cliente</th><th>Método</th><th>Valor</th><th>Status</th><th>Data</th>
+            <th>#</th><th>Pedido</th><th>Cliente</th><th>MAtodo</th><th>Valor</th><th>Status</th><th>Data</th>
           </tr>
         </thead>
         <tbody>
-          <tr th:each="t : ${transacoes}">
+          <tr th:each="t : ${Transacoes}">
             <td th:text="${t.id}">1</td>
             <td><a th:href="@{|/admin/pedidos/${t.pedidoId}|}" th:text="${t.pedidoNumero}">#0001</a></td>
             <td th:text="${t.clienteNome}">Fulano</td>
@@ -46,8 +46,8 @@
             <td><span class="badge" th:text="${t.status}">PAGO</span></td>
             <td th:text="${#dates.format(t.criadoEm,'dd/MM/yyyy HH:mm')}">10/10/2025</td>
           </tr>
-          <tr th:if="${#lists.isEmpty(transacoes)}">
-            <td colspan="7" class="text-center text-muted">Sem transações.</td>
+          <tr th:if="${#lists.isEmpty(Transacoes)}">
+            <td colspan="7" class="text-center text-muted">Sem Transacoes.</td>
           </tr>
         </tbody>
       </table>
@@ -58,3 +58,9 @@
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>
+
+
+
+
+
+

@@ -43,6 +43,8 @@ ehthumbs.db
 # Artefatos de build locais
 # ========================
 app.jar
+app_latest.jar
+BOOT-INF/
 *.jar.original
 jacoco.exec
 /*.exec
@@ -82,3 +84,4 @@ mocks/
 # ========================
 docker-compose.generated.yml
 compose.raw.yml
+mobile/

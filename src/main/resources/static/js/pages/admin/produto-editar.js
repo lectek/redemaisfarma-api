@@ -1,5 +1,29 @@
 // pages/produto-editar.js
-import { withCsrf, toast } from '/js/lib/ui.js';
+function getCsrf() {
+  const token = document.querySelector('meta[name="_csrf"]')?.content;
+  const header = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+  return { token, header };
+}
+
+function withCsrf(init = {}) {
+  const { token, header } = getCsrf();
+  init.headers = Object.assign({}, init.headers || {}, token ? { [header]: token } : {});
+  return init;
+}
+
+function toast(msg, type = 'ok') {
+  let box = document.getElementById('toast');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'toast';
+    document.body.appendChild(box);
+  }
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
 
 const $ = (s) => document.querySelector(s);
 
@@ -8,6 +32,7 @@ const $nome = $('#nome');
 const $descricao = $('#descricao');
 const $preco = $('#preco');
 const $imagem = $('#imagem');
+const $imagemArquivo = $('#imagemArquivo');
 const $categoria = $('#categoria');
 const $estoque = $('#estoque');
 const $codigoBarras = $('#codigoBarras');
@@ -16,7 +41,7 @@ const $disponivel = $('#disponivel');
 const $status = $('#status');
 const $btnSalvar = $('#btn-salvar');
 const $btnGerarIA = $('#btn-gerar-ia');
-const $btnRegerarIA = $('#btn-regerar-ia');
+const $btnUploadImagem = $('#btn-upload-imagem');
 
 async function carregarProdutoSeNecessario() {
   // Se já veio do SSR, não precisa. Mantemos apenas como fallback
@@ -83,35 +108,66 @@ async function salvar() {
   }
 }
 
-async function gerarIA(action /* 'queue' | 'regenerate' */) {
+async function uploadImagem() {
   const id = $id?.value;
-  if (!id) return toast('Produto ainda não salvo.', 'err');
+  if (!id) return toast('Produto ainda nao salvo.', 'err');
 
-  const endpoint = action === 'regenerate'
-    ? `/api/admin/imagens/${id}/regenerate`
-    : `/api/admin/imagens/${id}/queue`;
+  const file = $imagemArquivo?.files?.[0];
+  if (!file) return toast('Selecione uma imagem para enviar.', 'err');
 
-  const btn = action === 'regenerate' ? $btnRegerarIA : $btnGerarIA;
-  btn.disabled = true;
+  const formData = new FormData();
+  formData.append('file', file);
+
+  $status.textContent = 'Enviando imagem...';
+  $btnUploadImagem.disabled = true;
+
+  try {
+    const r = await fetch(`/api/admin/produtos/${id}/imagem`, withCsrf({
+      method: 'POST',
+      body: formData,
+      credentials: 'same-origin'
+    }));
+
+    if (!r.ok) throw new Error(await r.text());
+    const url = (await r.text())?.trim();
+    if (url) $imagem.value = url;
+    $status.textContent = 'Imagem enviada.';
+    toast('Imagem atualizada!', 'ok');
+  } catch (e) {
+    console.error(e);
+    $status.textContent = 'Erro ao enviar imagem.';
+    toast('Falha ao enviar imagem', 'err');
+  } finally {
+    $btnUploadImagem.disabled = false;
+  }
+}
+
+async function gerarIA() {
+  const id = $id?.value;
+  if (!id) return toast('Produto ainda nao salvo.', 'err');
+
+  const endpoint = `/api/admin/imagens/${id}/queue`;
+  $btnGerarIA.disabled = true;
 
   try {
     const r = await fetch(endpoint, withCsrf({ method: 'POST', credentials: 'same-origin' }));
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
 
-    toast(action === 'regenerate' ? 'Regeneração solicitada!' : 'Enfileirado com sucesso!', 'ok');
-    $status.textContent = action === 'regenerate' ? 'Regeneração solicitada…' : 'Geração enfileirada…';
+    toast('Enfileirado com sucesso!', 'ok');
+    $status.textContent = 'Geracao enfileirada...';
   } catch (e) {
     console.error(e);
-    toast('Falha na solicitação de imagem', 'err');
+    toast('Falha na solicitacao de imagem', 'err');
   } finally {
-    btn.disabled = false;
+    $btnGerarIA.disabled = false;
   }
 }
 
 // Listeners
 $btnSalvar?.addEventListener('click', salvar);
-$btnGerarIA?.addEventListener('click', () => gerarIA('queue'));
-$btnRegerarIA?.addEventListener('click', () => gerarIA('regenerate'));
+$btnUploadImagem?.addEventListener('click', uploadImagem);
+$btnGerarIA?.addEventListener('click', gerarIA);
 
 // bootstrap
 carregarProdutoSeNecessario();
+

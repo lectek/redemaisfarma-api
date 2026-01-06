@@ -31,16 +31,16 @@ import java.util.Objects;
 public class ItemPedidoRequestDTO
 implements Serializable {
     private static final long serialVersionUID = 1L;
-    @Schema(description="ID do produto", example="101", required=true)
+    @Schema(description="ID do produto", example="101", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{itemPedido.produtoId.notNull}")
     @JsonProperty(value="produtoId")
     private @NotNull(message="{itemPedido.produtoId.notNull}") Long produtoId;
-    @Schema(description="Quantidade desejada do produto", example="3", required=true)
+    @Schema(description="Quantidade desejada do produto", example="3", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{itemPedido.quantidade.notNull}")
     @Min(value=1L, message="{itemPedido.quantidade.min}")
     @JsonProperty(value="quantidade")
     private @NotNull(message="{itemPedido.quantidade.notNull}") @Min(value=1L, message="{itemPedido.quantidade.min}") Integer quantidade;
-    @Schema(description="Pre\u00e7o unit\u00e1rio do produto no momento do pedido", example="9.90", required=true)
+    @Schema(description="Pre\u00e7o unit\u00e1rio do produto no momento do pedido", example="9.90", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{itemPedido.precoUnitario.notNull}")
     @DecimalMin(value="0.01", inclusive=true, message="{itemPedido.precoUnitario.min}")
     @Digits(integer=12, fraction=2, message="{itemPedido.precoUnitario.digits}")
@@ -111,4 +111,5 @@ implements Serializable {
         return "ItemPedidoRequestDTO{produtoId=" + this.produtoId + ", quantidade=" + this.quantidade + ", precoUnitario=" + String.valueOf(this.precoUnitario) + "}";
     }
 }
+
 

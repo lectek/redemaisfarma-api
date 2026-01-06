@@ -30,7 +30,9 @@ public interface ProdutoRepository extends JpaRepository<ProdutoEntity, Long> {
 
     Page<ProdutoEntity> findByCategoriaIgnoreCase(String categoria, Pageable pageable);
 
-    @Query("SELECT p FROM ProdutoEntity p WHERE p.estoque < :limite")
+    long countByCategoriaIgnoreCase(String categoria);
+
+    @Query("SELECT p FROM ProdutoEntity p WHERE p.estoque <= :limite")
     List<ProdutoEntity> findComEstoqueBaixo(@Param("limite") Integer limite);
 
     List<ProdutoEntity> findByDisponivelTrue();
@@ -125,6 +127,22 @@ public interface ProdutoRepository extends JpaRepository<ProdutoEntity, Long> {
             ORDER BY p.dataCadastro DESC, p.id DESC
             """)
     Page<ProdutoEntity> searchPublicPage(@Param("q") String q, Pageable pageable);
+
+    @Query("""
+            SELECT p FROM ProdutoEntity p
+            WHERE p.disponivel = true AND p.estoque > 0 AND p.precoVenda > 0
+              AND (:cat IS NULL OR LOWER(TRIM(p.categoria)) = LOWER(TRIM(:cat)))
+              AND (
+                :q IS NULL
+                OR LOWER(p.descricao) LIKE LOWER(CONCAT('%', :q, '%'))
+                OR LOWER(p.nome)      LIKE LOWER(CONCAT('%', :q, '%'))
+                OR p.codigoBarras     LIKE CONCAT('%', :q, '%')
+              )
+            ORDER BY p.dataCadastro DESC, p.id DESC
+            """)
+    Page<ProdutoEntity> searchPublicPageByCategoria(@Param("q") String q,
+                                                    @Param("cat") String categoria,
+                                                    Pageable pageable);
 
     /* ===================== DEFAULT METHODS (tipadas) ===================== */
 

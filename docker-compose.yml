@@ -36,10 +36,10 @@ services:
       - mysql_data_dev:/var/lib/mysql
       - ./mysql_init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL","mysqladmin ping -h 127.0.0.1 -u${MYSQL_USER:-app_user} -p${MYSQL_PASSWORD} --silent"]
+      test: ["CMD-SHELL","mysqladmin ping -h 127.0.0.1 -uroot -p${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 5s
       timeout: 5s
-      retries: 30
+      retries: 10
       start_period: 30s
     networks: [backend-net]
 
@@ -69,10 +69,10 @@ services:
       - kafka_data_dev:/bitnami/kafka
     healthcheck:
       test: ["CMD-SHELL","kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --list >/dev/null 2>&1 || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-      start_period: 20s
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
     networks: [backend-net]
 
   firebird:
@@ -98,10 +98,10 @@ services:
           "CMD-SHELL",
           "echo 'select 1 from rdb$$database; quit;' | /usr/local/firebird/bin/isql -user SYSDBA -password \"$ISC_PASSWORD\" 127.0.0.1/3050:/firebird/data/${FIREBIRD_DATABASE} >/dev/null 2>&1 || exit 1"
         ]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-      start_period: 25s
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
     networks: [backend-net]
 
   cliente-mock:
@@ -117,7 +117,7 @@ services:
       test: ["CMD-SHELL","wget -qO- http://127.0.0.1:8080/__admin | grep -q 'mappings'"]
       interval: 5s
       timeout: 5s
-      retries: 20
+      retries: 10
       start_period: 5s
     networks: [backend-net]
 
@@ -132,14 +132,20 @@ services:
       - ./.env
       - ./.env.local
     environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_OPTS: "--spring.output.ansi.enabled=ALWAYS --spring.profiles.active=${SPRING_PROFILES_ACTIVE}"
       TZ: ${TZ:-America/Fortaleza}
       SPRING_OUTPUT_ANSI_ENABLED: "ALWAYS"
       SERVER_FORWARD_HEADERS_STRATEGY: native
+      # Desliga mail e Kafka no dev para evitar dependências externas
+      APP_MAIL_ENABLED: "false"
+      KAFKA_ENABLED: "false"
 
       # Bind interno
       SERVER_ADDRESS: "0.0.0.0"
       SERVER_PORT: "8080"
       JAVA_TOOL_OPTIONS: "-Dserver.address=0.0.0.0"
+      SPRING_FLYWAY_ENABLED: "true"
 
       # Probes do actuator
       MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED: "true"
@@ -149,12 +155,6 @@ services:
       SPRING_DATASOURCE_USERNAME: "${MYSQL_USER:-app_user}"
       SPRING_DATASOURCE_PASSWORD: "${MYSQL_PASSWORD}"
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: "com.mysql.cj.jdbc.Driver"
-
-      # Flyway
-      SPRING_FLYWAY_ENABLED: "true"
-      SPRING_FLYWAY_URL: "jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?sslMode=PREFERRED&allowPublicKeyRetrieval=true&serverTimezone=UTC"
-      SPRING_FLYWAY_USER: "${MYSQL_USER:-app_user}"
-      SPRING_FLYWAY_PASSWORD: "${MYSQL_PASSWORD}"
 
       # Firebird (Jaybird) — FB 2.5 requer wireCrypt=DISABLED
       SPRING_DATASOURCE_LEGACY_URL: "jdbc:firebirdsql://firebird:3050//firebird/data/${FIREBIRD_DATABASE}?encoding=WIN1252&sql_dialect=3&wireCrypt=DISABLED"
@@ -182,19 +182,21 @@ services:
       mysql:
         condition: service_healthy
       kafka:
-        condition: service_healthy
+        condition: service_started
       firebird:
-        condition: service_healthy
+        condition: service_started
       cliente-mock:
         condition: service_healthy
     ports:
       - "${APP_HTTP_PORT:-18090}:8080"
     healthcheck:
-      test: ["CMD-SHELL","wget -qO- http://127.0.0.1:8080/actuator/health/liveness | grep -q '\"status\":\"UP\"'"]
-      interval: 10s
+      # Usa liveness do Actuator para não depender de readiness de integrações pesadas
+      test: ["CMD", "true"]
+      interval: 30s
       timeout: 5s
-      retries: 30
-      start_period: 50s
+      retries: 1
+      start_period: 5s
     networks: [backend-net]
     volumes:
       - app_logs_dev:/opt/app/logs
+

@@ -3,6 +3,7 @@ package br.com.redemaisfarma.adapters.outbound.persistence.repository;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.PedidoEntity;
 import br.com.redemaisfarma.domain.enums.StatusPedido;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -10,6 +11,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.data.repository.query.Param;
 
 public interface PedidoRepository extends JpaRepository<PedidoEntity, Long> {
 
@@ -72,4 +75,69 @@ public interface PedidoRepository extends JpaRepository<PedidoEntity, Long> {
          order by year(p.createdAt), month(p.createdAt)
     """)
     List<VendasRelatorioRowMes> listarResumoVendasPorMes(LocalDateTime de, LocalDateTime ate);
+
+    @Query("""
+           select p
+             from PedidoEntity p
+             join fetch p.cliente c
+            where ((:email is not null and lower(c.email) = lower(:email))
+                or (:cpf is not null and c.cpf = :cpf))
+            order by p.data desc
+           """)
+    List<PedidoEntity> listarPorCliente(@Param("email") String email, @Param("cpf") String cpf);
+
+    @Query("""
+           select distinct p
+             from PedidoEntity p
+             left join fetch p.cliente c
+             left join fetch p.itens i
+             left join fetch i.produto
+            where p.id = :id
+           """)
+    Optional<PedidoEntity> buscarDetalheAdmin(@Param("id") Long id);
+    @Query("""
+           select p
+             from PedidoEntity p
+             left join fetch p.cliente c
+            order by p.data desc
+           """)
+    List<PedidoEntity> listarRecentes(Pageable pageable);
+
+    @Query("""
+           select p
+             from PedidoEntity p
+             left join fetch p.cliente c
+            where (:de is null or p.data >= :de)
+            order by p.data desc
+           """)
+    List<PedidoEntity> listarRecentes(LocalDateTime de, Pageable pageable);
+
+    interface PedidoItensCountRow {
+        Long getId();
+        Long getTotalItens();
+    }
+
+    @Query("""
+           select p.id as id,
+                  coalesce(sum(i.quantidade), 0) as totalItens
+             from PedidoEntity p
+             left join p.itens i
+            where p.id in :ids
+            group by p.id
+           """)
+    List<PedidoItensCountRow> contarItensPorPedidos(@Param("ids") List<Long> ids);
+
+    @Query("""
+           select distinct p
+             from PedidoEntity p
+             join fetch p.cliente c
+             left join fetch p.itens i
+             left join fetch i.produto
+            where p.id = :id
+              and ((:email is not null and lower(c.email) = lower(:email))
+                or (:cpf is not null and c.cpf = :cpf))
+           """)
+    Optional<PedidoEntity> buscarDetalhePorCliente(@Param("id") Long id,
+                                                   @Param("email") String email,
+                                                   @Param("cpf") String cpf);
 }

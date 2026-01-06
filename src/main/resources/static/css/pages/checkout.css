@@ -15,7 +15,8 @@
 body{ background:var(--cor-fundo); font-family:var(--font-sans); color:var(--cor-texto); }
 
 main.container{
-  max-width:720px; margin: var(--gap-48) auto;
+  max-width: min(720px, 100%);
+  margin: var(--gap-48) auto;
   padding: var(--gap-32);
   background: var(--cor-input);
   border-radius: var(--raio);

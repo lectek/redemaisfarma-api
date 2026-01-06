@@ -8,8 +8,12 @@
 package br.com.redemaisfarma.adapters.outbound.persistence.repository;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ClienteEntity;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -31,8 +35,15 @@ extends JpaRepository<ClienteEntity, Long> {
 
     public long countByAtivoTrue();
 
+    @Query("""
+        select c
+        from ClienteEntity c
+        where c.ativo = true
+          and coalesce(c.updatedAt, c.createdAt) < :cutoff
+        """)
+    List<ClienteEntity> findInativosAntesDe(@Param("cutoff") LocalDateTime cutoff);
+
     default public long countAtivos() {
         return this.countByAtivoTrue();
     }
 }
-

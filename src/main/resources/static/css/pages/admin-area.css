@@ -1,0 +1,293 @@
+/* Admin area enhancements */
+.admin-page .page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--gap-16);
+  flex-wrap: wrap;
+}
+
+.admin-page .page-lead {
+  margin-top: 4px;
+  color: var(--color-neutral-5, #6b7280);
+}
+
+.admin-page .page-actions {
+  display: flex;
+  gap: var(--gap-12);
+  flex-wrap: wrap;
+}
+
+.admin-page .flash-stack {
+  display: grid;
+  gap: var(--gap-12);
+}
+
+.admin-page .alert-warning {
+  background: color-mix(in oklab, var(--color-warning) 12%, transparent);
+  border-left-color: var(--color-warning);
+  color: color-mix(in oklab, var(--color-warning) 60%, #000);
+}
+
+.admin-page .alert-error {
+  background: color-mix(in oklab, var(--color-error) 12%, transparent);
+  border-left-color: var(--color-error);
+  color: color-mix(in oklab, var(--color-error) 60%, #000);
+}
+
+.admin-page .stat-grid {
+  display: grid;
+  gap: var(--gap-12);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.admin-page .stat-card {
+  background: var(--layout-card, #ffffff);
+  border: 1px solid var(--layout-border, #e5e7eb);
+  border-radius: var(--radius-lg);
+  padding: var(--gap-12) var(--gap-16);
+  display: grid;
+  gap: var(--gap-8);
+}
+
+.admin-page .stat-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-neutral-5, #6b7280);
+}
+
+.admin-page .stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-dark, #0f172a);
+}
+
+.admin-page .stat-hint {
+  font-size: 0.85rem;
+  color: var(--color-neutral-5, #6b7280);
+}
+
+.admin-page .filter-bar {
+  display: grid;
+  gap: var(--gap-12);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+}
+
+.admin-page .filter-bar .btn {
+  justify-self: start;
+}
+
+.admin-page .section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.admin-page .section-subtitle {
+  color: var(--color-neutral-5, #6b7280);
+}
+
+.admin-page .media-grid {
+  display: grid;
+  gap: var(--gap-16);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.admin-page .form-row {
+  gap: var(--gap-24);
+}
+
+.admin-page .card-body {
+  display: grid;
+  gap: var(--gap-16);
+}
+
+.admin-page .media-preview {
+  align-items: flex-start;
+}
+
+.admin-page .preview-block {
+  display: grid;
+  gap: var(--gap-8);
+}
+
+.admin-page .config-geral .media-preview--geral {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--gap-16);
+  align-items: start;
+}
+
+.admin-page .config-geral .media-preview--geral img {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-lg);
+}
+
+.admin-page .config-geral .form-actions--footer {
+  justify-content: flex-start;
+}
+
+.admin-page .config-geral .form-actions--section {
+  justify-content: flex-start;
+}
+
+.admin-page .media-card {
+  border: 1px solid var(--layout-border, #e5e7eb);
+  border-radius: var(--radius-lg);
+  padding: var(--gap-12);
+  background: var(--layout-card, #ffffff);
+  display: grid;
+  gap: var(--gap-12);
+}
+
+.admin-page .media-preview {
+  display: flex;
+  gap: var(--gap-12);
+  align-items: center;
+  background: #f8fafc;
+  border: 1px dashed var(--layout-border, #e5e7eb);
+  border-radius: var(--radius-lg);
+  padding: var(--gap-12);
+}
+
+.admin-page .media-preview img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--layout-border, #e5e7eb);
+  background: #ffffff;
+}
+
+.admin-page .form-hint {
+  font-size: 0.85rem;
+  color: var(--color-neutral-5, #6b7280);
+}
+
+.admin-page .table-actions {
+  display: flex;
+  gap: var(--gap-8);
+  flex-wrap: wrap;
+}
+
+.admin-page .table-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--layout-border, #e5e7eb);
+  background: #ffffff;
+}
+
+.admin-page .report-tabs {
+  display: flex;
+  gap: var(--gap-8);
+  flex-wrap: wrap;
+}
+
+.admin-page .report-tab {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--color-neutral-2);
+  border: 1px solid var(--layout-border, #e5e7eb);
+  color: var(--color-dark, #0f172a);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.admin-page .report-tab.is-active {
+  background: var(--layout-dark);
+  color: #ffffff;
+  border-color: var(--layout-dark);
+}
+
+.admin-page .chart-bars {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap-16);
+  margin-top: 16px;
+}
+
+.admin-page .bar {
+  position: relative;
+  height: 140px;
+  background: var(--color-neutral-2);
+  border-radius: var(--radius-lg);
+  padding: var(--gap-12);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.admin-page .bar-fill {
+  width: 100%;
+  height: var(--fill, 40%);
+  background: linear-gradient(135deg, var(--color-success), #16a34a);
+  border-radius: var(--radius-md);
+  transition: height 0.4s ease;
+}
+
+.admin-page .bar[data-key="clientes"] .bar-fill {
+  background: linear-gradient(135deg, #38bdf8, var(--color-primary));
+}
+
+.admin-page .bar-label {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  font-size: 12px;
+  color: var(--layout-dark);
+  font-weight: 600;
+}
+
+.admin-page .kpi-label {
+  font-size: 12px;
+  color: var(--color-neutral-5);
+}
+
+.admin-page .kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--layout-dark);
+}
+
+.admin-page #toast {
+  position: fixed;
+  right: var(--gap-16);
+  bottom: var(--gap-16);
+  display: grid;
+  gap: var(--gap-8);
+  z-index: 9999;
+}
+
+.admin-page .toast {
+  background: #0f1320;
+  color: #e9eef6;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-lg);
+  padding: var(--gap-12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.admin-page .toast.ok {
+  border-color: rgba(46, 204, 113, 0.5);
+}
+
+.admin-page .toast.err {
+  border-color: rgba(231, 76, 60, 0.5);
+}
+
+@media (max-width: 768px) {
+  .admin-page .page-actions {
+    width: 100%;
+  }
+
+  .admin-page .page-actions .btn {
+    width: 100%;
+  }
+}
+

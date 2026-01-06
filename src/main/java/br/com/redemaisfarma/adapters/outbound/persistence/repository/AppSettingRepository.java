@@ -15,6 +15,8 @@ public interface AppSettingRepository extends JpaRepository<AppSettingEntity, Lo
 
     boolean existsBySettingKey(String settingKey);
 
+    java.util.List<AppSettingEntity> findBySettingKeyIn(java.util.Collection<String> keys);
+
     @Query("""
         select s
         from AppSettingEntity s

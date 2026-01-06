@@ -43,33 +43,33 @@ implements Serializable {
     @Schema(description="ID p\u00fablico (UUID) do produto", example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
     @JsonProperty(value="produtoId")
     private UUID produtoId;
-    @Schema(description="SKU do produto", example="PRD-001-ABC", required=true)
+    @Schema(description="SKU do produto", example="PRD-001-ABC", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{produto.sku.notBlank}")
     @Size(max=50, message="{produto.sku.size}")
     @JsonProperty(value="sku")
     private @NotBlank(message="{produto.sku.notBlank}") @Size(max=50, message="{produto.sku.size}") String sku;
-    @Schema(description="Nome do produto", example="Dipirona 500mg", required=true)
+    @Schema(description="Nome do produto", example="Dipirona 500mg", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{produto.nome.notBlank}")
     @Size(max=100, message="{produto.nome.size}")
     @JsonProperty(value="nome")
     private @NotBlank(message="{produto.nome.notBlank}") @Size(max=100, message="{produto.nome.size}") String nome;
-    @Schema(description="Descri\u00e7\u00e3o detalhada do produto", example="Analg\u00e9sico e antit\u00e9rmico", required=true)
+    @Schema(description="Descri\u00e7\u00e3o detalhada do produto", example="Analg\u00e9sico e antit\u00e9rmico", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{produto.descricao.notBlank}")
     @Size(max=1000, message="{produto.descricao.size}")
     @JsonProperty(value="descricao")
     private @NotBlank(message="{produto.descricao.notBlank}") @Size(max=1000, message="{produto.descricao.size}") String descricao;
-    @Schema(description="Pre\u00e7o unit\u00e1rio do produto", example="12.50", required=true)
+    @Schema(description="Pre\u00e7o unit\u00e1rio do produto", example="12.50", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{produto.preco.notNull}")
     @DecimalMin(value="0.01", inclusive=true, message="{produto.preco.min}")
     @JsonProperty(value="preco")
     private @NotNull(message="{produto.preco.notNull}") @DecimalMin(value="0.01", inclusive=true, message="{produto.preco.min}") BigDecimal preco;
-    @Schema(description="URL da imagem do produto", example="https://cdn.farma/img/produto1.jpg", required=true)
+    @Schema(description="URL da imagem do produto", example="https://cdn.farma/img/produto1.jpg", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{produto.imagem.notBlank}")
     @Size(max=200, message="{produto.imagem.size}")
     @Pattern(regexp="^(http|https)://.*$", message="{produto.imagem.pattern}")
     @JsonProperty(value="imagem")
     private @NotBlank(message="{produto.imagem.notBlank}") @Size(max=200, message="{produto.imagem.size}") @Pattern(regexp="^(http|https)://.*$", message="{produto.imagem.pattern}") String imagem;
-    @Schema(description="Categoria do produto", example="ANALGESICO", required=true)
+    @Schema(description="Categoria do produto", example="ANALGESICO", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{produto.categoria.notBlank}")
     @Size(max=50, message="{produto.categoria.size}")
     @JsonProperty(value="categoria")
@@ -79,7 +79,7 @@ implements Serializable {
     @Pattern(regexp="\\d{8,13}", message="{produto.codigoBarras.pattern}")
     @JsonProperty(value="codigoBarras")
     private @Size(max=50, message="{produto.codigoBarras.size}") @Pattern(regexp="\\d{8,13}", message="{produto.codigoBarras.pattern}") String codigoBarras;
-    @Schema(description="Quantidade em estoque", example="100", required=true)
+    @Schema(description="Quantidade em estoque", example="100", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{produto.estoque.notNull}")
     @Min(value=0L, message="{produto.estoque.min}")
     @JsonProperty(value="estoque")
@@ -95,7 +95,7 @@ implements Serializable {
     @Schema(description="Produto ativo para venda", example="true")
     @JsonProperty(value="ativo")
     private Boolean ativo = Boolean.TRUE;
-    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", required=true)
+    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{produto.tenantId.notBlank}")
     @JsonProperty(value="tenantId")
     private @NotBlank(message="{produto.tenantId.notBlank}") String tenantId;
@@ -281,4 +281,5 @@ implements Serializable {
         return "ProdutoRequestDTO{produtoId=" + String.valueOf(this.produtoId) + ", sku='" + this.sku + "', nome='" + this.nome + "', descricao='" + this.descricao + "', preco=" + String.valueOf(this.preco) + ", imagem='" + this.imagem + "', categoria='" + this.categoria + "', codigoBarras='" + this.codigoBarras + "', estoque=" + this.estoque + ", peso=" + this.peso + ", dimensoes='" + this.dimensoes + "', ativo=" + this.ativo + ", tenantId='" + this.tenantId + "', traceId=" + String.valueOf(this.traceId) + ", criadoEm=" + String.valueOf(this.criadoEm) + ", atualizadoEm=" + String.valueOf(this.atualizadoEm) + "}";
     }
 }
+
 

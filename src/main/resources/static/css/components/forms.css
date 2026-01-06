@@ -7,8 +7,9 @@
   max-width: 700px;
   margin: 0 auto;
   background-color: var(--layout-card, #fff);
-  border-radius: var(--layout-radius, 12px);
-  box-shadow: var(--layout-shadow);
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid var(--layout-border);
+  box-shadow: var(--shadow-2);
 }
 
 .form-title {
@@ -32,7 +33,7 @@
 }
 
 .form-group label {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--layout-dark);
 }
@@ -42,9 +43,9 @@
 .form-group textarea {
   padding: 0.75rem 1rem;
   border: 1px solid var(--layout-border);
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 1rem;
-  background-color: #fff;
+  background-color: var(--color-neutral-1);
   color: var(--layout-dark);
   transition: border 0.2s ease, box-shadow 0.2s ease;
 }
@@ -53,8 +54,41 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--layout-accent);
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  border-color: var(--color-secondary);
+  box-shadow: var(--focus-ring);
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.form-row {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: end;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.form-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--layout-dark);
+}
+
+.form-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-secondary);
 }
 
 /* Estilo do botão de envio */
@@ -98,30 +132,31 @@
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .form-section {
-    background-color: #1e1e1e;
+    background-color: var(--color-neutral-1);
   }
 
   .form-group label {
-    color: #f3f3f3;
+    color: var(--color-light);
   }
 
   .form-group input,
   .form-group select,
   .form-group textarea {
-    background-color: #2a2a2a;
-    color: #e92626;
-    border-color: #444;
+    background-color: var(--color-neutral-1);
+    color: var(--color-light);
+    border-color: var(--layout-border);
   }
 
   .form-group input:focus,
   .form-group select:focus,
   .form-group textarea:focus {
-    border-color: var(--layout-accent);
+    border-color: var(--color-secondary);
+    box-shadow: var(--focus-ring);
   }
 
   .btn-form {
     background-color: var(--layout-accent);
-    color: rgb(191, 18, 18);
+    color: #fff;
   }
 
   .btn-form:hover {

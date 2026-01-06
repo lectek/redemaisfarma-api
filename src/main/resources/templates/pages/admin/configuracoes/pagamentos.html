@@ -3,43 +3,87 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Configurações • Pagamentos</title>
+  <title>Configuracoes de pagamentos</title>
   <link rel="stylesheet" th:href="@{/css/main.css}" />
 </head>
-<body class="body-flex">
-<header th:replace="~{fragments/header :: header}"></header>
+<body class="body-flex admin-page">
+<header th:replace="~{fragments/admin-header :: adminHeader}"></header>
 
-<div class="layout">
-  <aside th:replace="~{fragments/sidebar :: sidebar('conf-pagamentos')}"></aside>
+<div class="layout layout--with-sidebar">
+  <aside th:replace="~{fragments/admin-sidebar :: adminSidebar('configuracoes')}"></aside>
 
   <main id="main-content" class="container stack mt-4 mb-6">
-    <h1 class="page-title">Configurações — Pagamentos</h1>
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Pagamentos</h1>
+        <p class="page-lead">Ative formas de pagamento e defina taxas por canal.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn--primary" type="submit" form="pagamentos-form">Salvar</button>
+      </div>
+    </div>
 
-    <form class="form-grid" th:action="@{/admin/configuracoes/pagamentos}" method="post" th:object="${cfg}">
+    <section th:replace="~{fragments/flash :: flash}"></section>
+
+    <form id="pagamentos-form" class="form-grid card" th:action="@{/admin/configuracoes/pagamentos}" method="post" th:object="${cfg}">
       <fieldset class="fieldset">
-        <legend>Gateways</legend>
+        <legend>Metodos principais</legend>
         <div class="form-row">
           <label class="checkbox"><input type="checkbox" th:field="*{pixAtivo}"/> PIX</label>
-          <label class="checkbox"><input type="checkbox" th:field="*{cartaoAtivo}"/> Cartão</label>
+          <label class="checkbox"><input type="checkbox" th:field="*{cartaoAtivo}"/> Cartao</label>
           <label class="checkbox"><input type="checkbox" th:field="*{boletoAtivo}"/> Boleto</label>
           <label class="checkbox"><input type="checkbox" th:field="*{dinheiroAtivo}"/> Dinheiro</label>
         </div>
       </fieldset>
 
       <fieldset class="fieldset">
-        <legend>Taxas & Parcelamento</legend>
+        <legend>Taxas e parcelamento</legend>
         <div class="form-row">
           <div class="form-group">
-            <label for="taxaCartao">Taxa Cartão (%)</label>
-            <input id="taxaCartao" class="input" type="number" step="0.01" th:field="*{taxaCartao}" placeholder="2.99" />
+            <label for="taxacartao">Taxa cartao (%)</label>
+            <input id="taxacartao" class="input" type="number" step="0.01" th:field="*{taxacartao}" placeholder="2.99" />
           </div>
           <div class="form-group">
-            <label for="maxParcelas">Máx. Parcelas</label>
+            <label for="maxParcelas">Max. parcelas</label>
             <input id="maxParcelas" class="input" type="number" min="1" max="12" th:field="*{maxParcelas}" placeholder="6" />
           </div>
           <div class="form-group">
-            <label for="parcelaMin">Parcela mínima (R$)</label>
+            <label for="parcelaMin">Parcela minima (R$)</label>
             <input id="parcelaMin" class="input" type="number" step="0.01" th:field="*{parcelaMin}" placeholder="20.00" />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend>PIX</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pixTipo">Tipo de chave</label>
+            <select id="pixTipo" class="select" th:field="*{pixTipo}">
+              <option value="aleatoria">Aleatoria</option>
+              <option value="cpf">CPF</option>
+              <option value="cnpj">CNPJ</option>
+              <option value="email">E-mail</option>
+              <option value="telefone">Telefone</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="pixChave">Chave PIX</label>
+            <input id="pixChave" class="input" type="text" th:field="*{pixChave}" placeholder="Informe a chave PIX" />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend>Dinheiro</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="dinheiroMin">Valor minimo (R$)</label>
+            <input id="dinheiroMin" class="input" type="number" step="0.01" th:field="*{dinheiroMinimo}" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label for="dinheiroTrocoMax">Troco maximo (R$)</label>
+            <input id="dinheiroTrocoMax" class="input" type="number" step="0.01" th:field="*{dinheiroTrocoMax}" placeholder="100.00" />
           </div>
         </div>
       </fieldset>
@@ -50,7 +94,7 @@
           <div class="form-group">
             <label for="gateway">Fornecedor</label>
             <select id="gateway" class="select" th:field="*{gateway}">
-              <option value="pagarme">Pagar.me</option>
+              <option value="pagarme">pagar.me</option>
               <option value="pagseguro">PagSeguro</option>
               <option value="mercadopago">Mercado Pago</option>
             </select>
@@ -66,13 +110,91 @@
           <div class="form-group">
             <label for="webhook">Webhook URL</label>
             <input id="webhook" class="input" type="url" th:field="*{webhookUrl}" placeholder="https://.../webhooks/pagamentos" />
+            <small class="help" th:if="${webhookConfigured}">Webhook configurado.</small>
+            <small class="help" th:if="${!webhookConfigured}">Webhook nao configurado.</small>
           </div>
         </div>
       </fieldset>
 
       <div class="form-actions">
-        <button class="btn btn-primary" type="submit">Salvar</button>
+        <button class="btn btn--ghost" type="reset">Cancelar</button>
+        <button class="btn btn--primary" type="submit">Salvar</button>
       </div>
+    </form>
+
+    <section class="card table-responsive">
+      <div class="between mb-12">
+        <div>
+          <h2 class="section-title">Metodos personalizados</h2>
+          <p class="section-subtitle">Adicione metodos alem de PIX, cartao e boleto.</p>
+        </div>
+      </div>
+      <table class="table" aria-label="Metodos personalizados">
+        <thead>
+          <tr>
+            <th>Metodo</th>
+            <th>Tipo</th>
+            <th>Taxa</th>
+            <th>Status</th>
+            <th>Acoes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="m : ${customMethods}">
+            <td th:text="${m.nome}">Convenio</td>
+            <td th:text="${m.tipo}">offline</td>
+            <td th:text="${m.taxa != null ? m.taxa + '%' : '-'}">0.00%</td>
+            <td>
+              <span th:if="${m.ativo}" class="badge badge--success">Ativo</span>
+              <span th:if="${!m.ativo}" class="badge badge--neutral">Inativo</span>
+            </td>
+            <td class="table-actions">
+              <form th:action="@{|/admin/configuracoes/pagamentos/metodos/${m.id}/remover|}" method="post" class="inline">
+                <button class="btn btn--ghost" type="submit">Remover</button>
+              </form>
+            </td>
+          </tr>
+          <tr th:if="${customMethods == null or #lists.isEmpty(customMethods)}">
+            <td colspan="5" class="text-center text-muted">Nenhum metodo adicional cadastrado.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <form id="pagamentos-metodo-form" class="form-grid card" th:action="@{/admin/configuracoes/pagamentos/metodos}"
+          method="post" th:object="${novoMetodo}">
+      <fieldset class="fieldset">
+        <legend>Adicionar metodo de pagamento</legend>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="novoMetodoNome">Nome do metodo</label>
+            <input id="novoMetodoNome" class="input" th:field="*{nome}" placeholder="Ex.: Vale, Convenio, Link de pagamento" />
+          </div>
+          <div class="form-group">
+            <label for="novoMetodoTipo">Tipo</label>
+            <select id="novoMetodoTipo" class="select" th:field="*{tipo}">
+              <option value="">Selecione</option>
+              <option value="offline">Offline (na entrega)</option>
+              <option value="online">Online (gateway)</option>
+              <option value="custom">Personalizado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="novoMetodoTaxa">Taxa (%)</label>
+            <input id="novoMetodoTaxa" class="input" type="number" step="0.01" th:field="*{taxa}" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label for="novoMetodoAtivo">Status</label>
+            <select id="novoMetodoAtivo" class="select" th:field="*{ativo}">
+              <option value="true">Ativo</option>
+              <option value="false">Inativo</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn--primary" type="submit">Adicionar metodo</button>
+        </div>
+      </fieldset>
     </form>
   </main>
 </div>
@@ -80,3 +202,9 @@
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>
+
+
+
+
+
+

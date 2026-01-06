@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Editar produto • Admin</title>
+  <title>Editar produto - Admin</title>
   <link rel="stylesheet" th:href="@{/css/main.css}" />
 
   <!-- CSRF -->
@@ -21,7 +21,10 @@
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main class="container stack mt-4 mb-6" th:with="id=${produtoId} ?: ${produto?.id}">
+<div class="layout layout--with-sidebar">
+  <aside th:replace="~{fragments/admin-sidebar :: adminSidebar('produtos')}"></aside>
+
+  <main class="container stack mt-4 mb-6" th:with="id=${produtoId} ?: ${produto?.id}">
   <div class="between">
     <h1 class="page-title">Editar produto</h1>
     <a class="btn btn-ghost" th:href="@{/admin/produtos}">Voltar</a>
@@ -45,12 +48,12 @@
       </label>
 
       <label class="stack md:col-span-2">
-        <span>Descrição</span>
+        <span>Descricao</span>
         <textarea class="input" id="descricao" rows="3" th:text="${produto?.descricao}"></textarea>
       </label>
 
       <label class="stack">
-        <span>Preço de venda</span>
+        <span>Preco de venda</span>
         <input class="input" id="preco" type="number" step="0.01" min="0" th:value="${produto?.precoVenda}" />
       </label>
 
@@ -60,12 +63,12 @@
       </label>
 
       <label class="stack">
-        <span>Código de barras (EAN)</span>
+        <span>Codigo de barras (EAN)</span>
         <input class="input" id="codigoBarras" type="text" th:value="${produto?.codigoBarras}" />
       </label>
 
       <label class="stack">
-        <span>Disponível</span>
+        <span>Disponivel</span>
         <input id="disponivel" type="checkbox" th:checked="${produto == null ? true : produto.disponivel}" />
       </label>
 
@@ -74,13 +77,19 @@
         <input class="input" id="imagem" type="url" th:value="${produto?.imagem}" />
       </label>
 
-      <!-- Ações IA -->
+      <label class="stack md:col-span-2">
+        <span>Imagem do produto</span>
+        <div class="row gap-2">
+          <input class="input" id="imagemArquivo" type="file" accept="image/*" />
+          <button id="btn-upload-imagem" class="btn btn-ghost" type="button">Enviar imagem</button>
+        </div>
+        <small class="muted">A imagem enviada substitui a atual.</small>
+      </label>
+
+      <!-- Acoes IA -->
       <div class="form-row gap-2 md:col-span-2">
         <button id="btn-gerar-ia" class="btn btn-primary" type="button" th:attr="data-id=${id}">
           Gerar imagem com IA
-        </button>
-        <button id="btn-regerar-ia" class="btn btn-ghost" type="button" th:attr="data-id=${id}">
-          Regenerar
         </button>
       </div>
 
@@ -94,10 +103,17 @@
     </form>
   </div>
 </main>
+</div>
 
 <div id="toast"></div>
 
-<script th:src="@{/js/lib/ui.js}"></script>
 <script th:src="@{/js/pages/produto-editar.js}"></script>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>
+
+
+
+
+

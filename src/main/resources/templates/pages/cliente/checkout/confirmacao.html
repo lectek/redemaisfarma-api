@@ -1,41 +1,57 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Confirmação de Compra | RedeMaisFarma</title>
+  <title>Confirmacao de Compra - RedeMaisFarma</title>
   <link rel="stylesheet" th:href="@{/css/main.css}" />
 </head>
-<body>
-  <div class="confirm-container fade-in">
-    <h1>Pedido Confirmado!</h1>
-    <p>Obrigado por sua compra. Agora precisamos saber como deseja receber sua nota fiscal.</p>
+<body class="body-flex">
+  <header th:replace="~{fragments/header :: header}"></header>
 
-    <form class="nota-fiscal-form" id="notaFiscalForm">
-      <h2>Como deseja receber sua Nota Fiscal?</h2>
-      
-      <label>
-        <input type="radio" name="notaFiscal" value="fisica" required />
-        Receber versão física junto com o pedido
-      </label>
+  <div class="layout layout--with-sidebar">
+    <aside th:replace="~{fragments/sidebar :: sidebar('checkout')}"></aside>
 
-      <label>
-        <input type="radio" name="notaFiscal" value="email" />
-        Receber versão digital por e-mail
-      </label>
+    <main id="main-content" class="container mt-4 mb-4">
+      <div class="confirm-container fade-in">
+        <h1>Pedido Confirmado!</h1>
+        <p>Obrigado por sua compra. Agora precisamos saber como deseja receber sua nota fiscal.</p>
+        <p class="alert alert-info" th:if="${pedidoId}">
+          Numero do pedido: <strong th:text="${pedidoId}">0000</strong>
+        </p>
+        <p class="alert alert-info" th:if="${paymentMethodLabel}">
+          Metodo de pagamento selecionado: <strong th:text="${paymentMethodLabel}">PIX</strong>
+        </p>
 
-      <div id="emailInputGroup" style="display: none;">
-        <label for="email">Digite seu e-mail:</label>
-        <input type="email" name="email" id="email" placeholder="exemplo@rede.com" />
+        <form class="nota-fiscal-form" id="notaFiscalForm">
+          <h2>Como deseja receber sua Nota Fiscal?</h2>
+
+          <label>
+            <input type="radio" name="notaFiscal" value="fisica" required />
+            Receber versao fisica junto com o pedido
+          </label>
+
+          <label>
+            <input type="radio" name="notaFiscal" value="email" />
+            Receber versao digital por e-mail
+          </label>
+
+          <div id="emailInputGroup" style="display: none;">
+            <label for="email">Digite seu e-mail:</label>
+            <input type="email" name="email" id="email" placeholder="exemplo@rede.com" />
+          </div>
+
+          <button type="submit" class="btn-confirmar">Confirmar Preferencia</button>
+        </form>
+
+        <div class="mensagem-confirmacao" id="mensagemConfirmacao" style="display: none;">
+          Sua preferencia foi registrada! Obrigado por escolher a RedeMaisFarma
+        </div>
       </div>
-
-      <button type="submit" class="btn-confirmar">Confirmar Preferência</button>
-    </form>
-
-    <div class="mensagem-confirmacao" id="mensagemConfirmacao" style="display: none;">
-      Sua preferência foi registrada! Obrigado por escolher a RedeMaisFarma 💙
-    </div>
+    </main>
   </div>
+
+  <footer th:replace="~{fragments/footer :: footer}"></footer>
 
   <script>
     const form = document.getElementById('notaFiscalForm');
@@ -56,7 +72,7 @@
       const email = document.getElementById('email').value;
 
       const payload = {
-        nome: "Nome Temporário", // Você pode substituir futuramente por nome real do cliente
+        nome: "Nome Temporario",
         preferencia: selected,
         email: selected === 'email' ? email : ''
       };
@@ -73,10 +89,10 @@
           form.reset();
           emailInputGroup.style.display = 'none';
         } else {
-          alert('Erro ao registrar sua preferência. Tente novamente.');
+          alert('Erro ao registrar sua preferencia. Tente novamente.');
         }
       } catch (error) {
-        alert('Erro de conexão com o servidor.');
+        alert('Erro de conexao com o servidor.');
       }
     });
   </script>

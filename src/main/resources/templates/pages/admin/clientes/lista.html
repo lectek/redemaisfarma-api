@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Clientes - Admin</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body class="body-flex admin-page">
+<header th:replace="~{fragments/admin-header :: adminHeader}"></header>
+
+<div class="layout layout--with-sidebar">
+  <aside th:replace="~{fragments/admin-sidebar :: adminSidebar('clientes')}"></aside>
+
+  <main id="main-content" class="container stack mt-4 mb-6">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Clientes</h1>
+        <p class="page-lead">Acompanhe cadastro, contato e status dos clientes.</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-ghost" type="button" disabled>Importar CSV</button>
+        <button class="btn btn-primary" type="button" disabled>Novo cliente</button>
+      </div>
+    </div>
+
+    <section th:replace="~{fragments/flash :: flash}"></section>
+
+    <section class="stat-grid">
+      <article class="stat-card">
+        <span class="stat-label">Total</span>
+        <span class="stat-value" th:text="${totalClientes ?: 0}">0</span>
+        <span class="stat-hint">Clientes cadastrados</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Ativos</span>
+        <span class="stat-value" th:text="${totalClientesAtivos ?: 0}">0</span>
+        <span class="stat-hint">Com compras recentes</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Inativos</span>
+        <span class="stat-value" th:text="${totalClientesInativos ?: 0}">0</span>
+        <span class="stat-hint">Sem compras no periodo</span>
+      </article>
+    </section>
+
+    <form class="filter-bar card p-16 mb-4" method="get" th:action="@{/admin/clientes}">
+      <input class="input" type="search" name="q" placeholder="Buscar por nome, email ou CPF" th:value="${param.q}"/>
+      <select class="select" name="status">
+        <option value="">Status</option>
+        <option value="ATIVO">Ativo</option>
+        <option value="INATIVO">Inativo</option>
+      </select>
+      <button class="btn">Filtrar</button>
+      <a class="btn btn-ghost" th:href="@{/admin/clientes}">Limpar</a>
+    </form>
+
+    <section class="card table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th>Cadastro</th>
+            <th>Status</th>
+            <th>Acoes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="c : ${clientes}">
+            <td th:text="${c.id}">0001</td>
+            <td th:text="${c.nome}">Cliente exemplo</td>
+            <td th:text="${c.email}">cliente@exemplo.com</td>
+            <td th:text="${c.telefone}">(83) 99999-9999</td>
+            <td th:text="${c.createdAt != null ? #temporals.format(c.createdAt,'dd/MM/yyyy') : '-'}">01/01/2025</td>
+            <td>
+              <span th:if="${c.ativo}" class="badge badge--success">Ativo</span>
+              <span th:if="${!c.ativo}" class="badge badge--neutral">Inativo</span>
+            </td>
+            <td class="table-actions">
+              <a class="btn btn-ghost" href="#">Detalhes</a>
+            </td>
+          </tr>
+          <tr th:if="${clientes == null or #lists.isEmpty(clientes)}">
+            <td colspan="7" class="muted text-center">Nenhum cliente encontrado. Ajuste filtros ou importe sua base.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
+
+
+
+
+

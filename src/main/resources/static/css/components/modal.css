@@ -22,8 +22,9 @@
 
 @keyframes modalIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
 
-@media (max-width:480px){
+@media (max-width: 480px){
   .modal-content{border-radius:10px}
   .modal-footer{flex-direction:column;align-items:stretch}
   .modal-footer button{width:100%}
 }
+

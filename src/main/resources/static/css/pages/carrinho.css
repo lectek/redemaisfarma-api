@@ -14,7 +14,7 @@
 
 body{ font-family:var(--cart-font); background:var(--layout-bg); color:var(--cart-text); }
 
-.container{ max-width:1200px; margin-inline:auto; padding:var(--cart-gap); }
+.container{ max-width:var(--container-max); margin-inline:auto; padding:var(--page-pad); }
 
 .carrinho{
   margin-top:var(--gap-32);

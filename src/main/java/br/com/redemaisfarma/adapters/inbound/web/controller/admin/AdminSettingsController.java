@@ -53,11 +53,16 @@ public class AdminSettingsController {
     public String list(@RequestParam(value="q", required=false) String q, @RequestParam(value="page", defaultValue="0") int page, @RequestParam(value="size", defaultValue="20") int size, Model model) {
         PageRequest pageable = PageRequest.of((int)Math.max(page, 0), (int)Math.max(size, 1));
         Page<AppSettingEntity> pageData = this.service.list(q, (Pageable)pageable);
-        model.addAttribute("page", pageData);
+        model.addAttribute("pageData", pageData);
         model.addAttribute("q", (Object)(q == null ? "" : q));
+        model.addAttribute("size", (Object)size);
+        return "pages/admin/settings";
+    }
+
+    @GetMapping(value={"/new"})
+    public String newForm(Model model) {
         model.addAttribute("form", (Object)new Form());
-        model.addAttribute("isEdit", (Object)false);
-        return "admin/settings";
+        return "pages/admin/settings-form";
     }
 
     @GetMapping(value={"/edit/{id}"})
@@ -65,10 +70,7 @@ public class AdminSettingsController {
         AppSettingEntity entity = this.service.findById(id).orElseThrow(() -> new IllegalArgumentException("Config n\u00e3o encontrada"));
         Form form = Form.from(entity);
         model.addAttribute("form", (Object)form);
-        model.addAttribute("isEdit", (Object)true);
-        model.addAttribute("page", null);
-        model.addAttribute("q", (Object)"");
-        return "admin/settings";
+        return "pages/admin/settings-form";
     }
 
     @PostMapping
@@ -145,4 +147,3 @@ public class AdminSettingsController {
         }
     }
 }
-

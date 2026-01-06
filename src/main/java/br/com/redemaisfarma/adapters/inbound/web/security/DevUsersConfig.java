@@ -25,7 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 @Configuration
-@Profile(value={"dev", "local", "docker"})
+@Profile(value={"dev-inmemory"})
 public class DevUsersConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -38,4 +38,3 @@ public class DevUsersConfig {
         return new InMemoryUserDetailsManager(new UserDetails[]{User.withUsername((String)"dev").password(enc.encode((CharSequence)senha)).roles(new String[]{"DEV"}).build(), User.withUsername((String)"admin").password(enc.encode((CharSequence)senha)).roles(new String[]{"ADMIN"}).build(), User.withUsername((String)"lektecjava@gmail.com").password(enc.encode((CharSequence)senha)).roles(new String[]{"DEV"}).build()});
     }
 }
-

@@ -24,12 +24,9 @@ public class ProdutoQueryServiceImpl implements ProdutoQueryService {
     public List<ProductCardVM> topSellers(Pageable page, boolean incluirIndisponiveis) {
         Sort sort = Sort.by(Sort.Direction.DESC, "estoque");
         PageRequest p = PageRequest.of(page.getPageNumber(), page.getPageSize(), sort);
-        Page<ProdutoEntity> slice = repo.findAll(p);
+        Page<ProdutoEntity> slice = incluirIndisponiveis ? repo.findAll(p) : repo.findByDisponivelTrue(p);
 
         List<ProdutoEntity> list = slice.getContent();
-        if (!incluirIndisponiveis) {
-            list = list.stream().filter(e -> Boolean.TRUE.equals(e.getDisponivel())).toList();
-        }
         return ProductCardVM.fromList(list);
     }
 
@@ -74,6 +71,18 @@ public class ProdutoQueryServiceImpl implements ProdutoQueryService {
                 : repo.findRecentDisponiveis(PageRequest.of(0, size * 3));
         Collections.shuffle(base);
         return ProductCardVM.fromList(base.stream().limit(size).toList());
+    }
+
+    @Override
+    public Optional<ProductCardVM> findById(Long id, boolean incluirIndisponiveis) {
+        if (id == null) return Optional.empty();
+        Optional<ProdutoEntity> opt = repo.findById(id);
+        if (opt.isEmpty()) return Optional.empty();
+        ProdutoEntity p = opt.get();
+        if (!incluirIndisponiveis && !Boolean.TRUE.equals(p.getDisponivel())) {
+            return Optional.empty();
+        }
+        return Optional.of(ProductCardVM.of(p));
     }
 
     private List<Long> parseIds(String csv) {

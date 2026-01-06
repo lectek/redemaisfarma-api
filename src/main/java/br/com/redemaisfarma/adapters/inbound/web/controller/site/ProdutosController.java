@@ -34,11 +34,19 @@ public class ProdutosController {
     private final ProdutoRepository repo;
 
     @GetMapping(params={"q"})
-    public String listPublic(@RequestParam String q, @PageableDefault(size=18, sort={"dataCadastro"}, direction=Sort.Direction.DESC) Pageable pageable, Model model) {
+    public String listPublic(@RequestParam String q,
+                             @RequestParam(required=false) String cat,
+                             @PageableDefault(size=18, sort={"dataCadastro"}, direction=Sort.Direction.DESC) Pageable pageable,
+                             Model model) {
         String termo = q == null || q.isBlank() ? null : q.trim();
-        Page<ProdutoEntity> page = this.repo.searchPublicPage(termo, pageable);
+        String categoria = cat == null || cat.isBlank() ? null : cat.trim();
+        Page<ProdutoEntity> page = categoria == null
+                ? this.repo.searchPublicPage(termo, pageable)
+                : this.repo.searchPublicPageByCategoria(termo, categoria, pageable);
         model.addAttribute("page", page);
         model.addAttribute("q", (Object)(q == null ? "" : q));
+        model.addAttribute("cat", (Object)(categoria == null ? "" : categoria));
+        model.addAttribute("categorias", this.repo.findDistinctCategorias());
         return "pages/cliente/produtos/lista";
     }
 
@@ -47,4 +55,3 @@ public class ProdutosController {
         this.repo = repo;
     }
 }
-

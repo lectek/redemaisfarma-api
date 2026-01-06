@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS pedido (
   total          DECIMAL(19,2) NOT NULL DEFAULT 0.00,
   status         VARCHAR(20)  NOT NULL,
   tipo_pagamento VARCHAR(20)  NOT NULL,
+  metodo_pagamento VARCHAR(80) NULL,
   CONSTRAINT fk_pedido_cliente FOREIGN KEY (cliente_id)
     REFERENCES cliente(id)
     ON UPDATE CASCADE

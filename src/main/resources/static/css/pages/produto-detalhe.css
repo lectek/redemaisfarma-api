@@ -1,0 +1,124 @@
+/* Produto detalhe */
+.produto-detalhe {
+  display: grid;
+  gap: var(--gap-24);
+}
+
+.breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--color-neutral-5);
+}
+
+.breadcrumb a {
+  color: var(--color-secondary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.produto-detalhe__card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: var(--gap-24);
+  padding: var(--gap-24);
+}
+
+.produto-detalhe__media {
+  background: var(--color-neutral-2);
+  border-radius: var(--radius-lg);
+  padding: var(--gap-16);
+  border: 1px solid var(--layout-border);
+}
+
+.produto-detalhe__media img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  background: #fff;
+}
+
+.produto-detalhe__info {
+  display: grid;
+  gap: var(--gap-16);
+}
+
+.produto-detalhe__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.produto-detalhe__title {
+  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  font-weight: 800;
+  color: var(--layout-dark);
+}
+
+.produto-detalhe__desc {
+  color: var(--color-neutral-5);
+  font-size: 1rem;
+}
+
+.produto-detalhe__price {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.price-old {
+  text-decoration: line-through;
+  color: var(--color-neutral-5);
+  font-weight: 600;
+}
+
+.price-now {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-success);
+}
+
+.produto-detalhe__stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.produto-detalhe__cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.produto-detalhe__details {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: var(--gap-12);
+  border-top: 1px solid var(--layout-border);
+  color: var(--color-neutral-5);
+  font-size: 0.95rem;
+}
+
+.produto-detalhe__details > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.detail-label {
+  font-weight: 700;
+  color: var(--layout-dark);
+}
+
+@media (max-width: 1024px) {
+  .produto-detalhe__card {
+    grid-template-columns: 1fr;
+  }
+}
+

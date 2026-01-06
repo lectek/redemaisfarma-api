@@ -15,7 +15,7 @@ import java.util.Objects;
 public class FormaPagamentoRequestDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @Schema(description = "Tipo de pagamento escolhido", example = "cartao_credito", required = true)
+    @Schema(description = "Tipo de pagamento escolhido", example = "cartao_credito", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "{formaPagamento.tipo.notBlank}")
     @Pattern(regexp = "^(cartao_credito|cartao_debito|pix|boleto|dinheiro|carteira)$",
              message = "{formaPagamento.tipo.pattern}")
@@ -29,7 +29,7 @@ public class FormaPagamentoRequestDTO implements Serializable {
     @JsonProperty("parcelas")
     private Integer parcelas;
 
-    @Schema(description = "Valor total desta forma de pagamento", example = "150.00", required = true)
+    @Schema(description = "Valor total desta forma de pagamento", example = "150.00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "{formaPagamento.valor.notNull}")
     @DecimalMin(value = "0.01", inclusive = true, message = "{formaPagamento.valor.min}")
     @Digits(integer = 12, fraction = 2, message = "{formaPagamento.valor.digits}")
@@ -108,3 +108,4 @@ public class FormaPagamentoRequestDTO implements Serializable {
                 '}';
     }
 }
+

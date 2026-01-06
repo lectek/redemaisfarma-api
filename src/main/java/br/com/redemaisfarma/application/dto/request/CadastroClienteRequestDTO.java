@@ -1,41 +1,23 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.validation.constraints.Email
- *  jakarta.validation.constraints.NotBlank
- *  jakarta.validation.constraints.Pattern
- *  jakarta.validation.constraints.Size
- */
 package br.com.redemaisfarma.application.dto.request;
 
-import br.com.redemaisfarma.adapters.inbound.web.validator.annotation.SenhaForte;
-import br.com.redemaisfarma.application.validation.annotation.EmailUnico;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 
 public class CadastroClienteRequestDTO {
-    @NotBlank(message="O nome \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3rio.")
-    @Size(min=2, max=60, message="O nome deve ter entre 2 e 60 caracteres.")
-    private @NotBlank(message="O nome \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3rio.") @Size(min=2, max=60, message="O nome deve ter entre 2 e 60 caracteres.") String nome;
-    @NotBlank(message="O e-mail \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3rio.")
-    @Email(message="Informe um e-mail v\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a1lido.")
-    @EmailUnico(message="Este e-mail j\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a1 est\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a1 em uso.")
-    private @NotBlank(message="O e-mail \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3rio.") @Email(message="Informe um e-mail v\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a1lido.") String email;
-    @SenhaForte
+
+    private String nome;
+    private String email;
+    private String cpf;
+    private String telefone;
+    private LocalDate dataDeNascimento;
     private String senha;
-    @NotBlank(message="A confirma\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a7\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a3o de senha \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3ria.")
-    private @NotBlank(message="A confirma\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a7\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a3o de senha \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3ria.") String confirmarSenha;
-    @NotBlank(message="O telefone \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3rio.")
-    @Pattern(regexp="\\(\\d{2}\\)\\s\\d{4,5}-\\d{4}", message="Telefone inv\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a1lido. Ex: (83) 91234-5678")
-    private @NotBlank(message="O telefone \u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a9 obrigat\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00b3rio.") @Pattern(regexp="\\(\\d{2}\\)\\s\\d{4,5}-\\d{4}", message="Telefone inv\u00c3\u0192\u00c6\u2019\u00c3\u2020\u00e2\u20ac\u2122\u00c3\u0192\u00e2\u20ac\u0161\u00c3\u201a\u00c2\u00a1lido. Ex: (83) 91234-5678") String telefone;
-    private String genero;
-    private String dataNascimento;
+    private String confirmarSenha;
+    private String canalOtp;
+    private String otpDeliveryId;
+    private String otpToken;
+    private String website;
 
     public String getNome() {
-        return this.nome;
+        return nome;
     }
 
     public void setNome(String nome) {
@@ -43,15 +25,39 @@ public class CadastroClienteRequestDTO {
     }
 
     public String getEmail() {
-        return this.email;
+        return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
 
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+
+    public LocalDate getDataDeNascimento() {
+        return dataDeNascimento;
+    }
+
+    public void setDataDeNascimento(LocalDate dataDeNascimento) {
+        this.dataDeNascimento = dataDeNascimento;
+    }
+
     public String getSenha() {
-        return this.senha;
+        return senha;
     }
 
     public void setSenha(String senha) {
@@ -59,43 +65,42 @@ public class CadastroClienteRequestDTO {
     }
 
     public String getConfirmarSenha() {
-        return this.confirmarSenha;
+        return confirmarSenha;
     }
 
     public void setConfirmarSenha(String confirmarSenha) {
         this.confirmarSenha = confirmarSenha;
     }
 
-    public String getTelefone() {
-        return this.telefone;
+    public String getCanalOtp() {
+        return canalOtp;
     }
 
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
+    public void setCanalOtp(String canalOtp) {
+        this.canalOtp = canalOtp;
     }
 
-    public String getGenero() {
-        return this.genero;
+    public String getOtpDeliveryId() {
+        return otpDeliveryId;
     }
 
-    public void setGenero(String genero) {
-        this.genero = genero;
+    public void setOtpDeliveryId(String otpDeliveryId) {
+        this.otpDeliveryId = otpDeliveryId;
     }
 
-    public String getDataNascimento() {
-        return this.dataNascimento;
+    public String getOtpToken() {
+        return otpToken;
     }
 
-    public void setDataNascimento(String dataNascimento) {
-        this.dataNascimento = dataNascimento;
+    public void setOtpToken(String otpToken) {
+        this.otpToken = otpToken;
     }
 
-    public boolean isSenhaConfirmada() {
-        return this.senha != null && this.senha.equals(this.confirmarSenha);
+    public String getWebsite() {
+        return website;
     }
 
-    public String toString() {
-        return "CadastroClienteRequestDTO{nome='" + this.nome + "', email='" + this.email + "', telefone='" + this.telefone + "', genero='" + this.genero + "', dataNascimento='" + this.dataNascimento + "'}";
+    public void setWebsite(String website) {
+        this.website = website;
     }
 }
-

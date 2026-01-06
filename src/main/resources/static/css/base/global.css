@@ -15,9 +15,14 @@ input,select,textarea{
   background:var(--color-neutral-1);color:var(--layout-dark);
   transition:border-color var(--transition-fast),box-shadow var(--transition-fast),background var(--transition-fast);
 }
+input:disabled,select:disabled,textarea:disabled{
+  background:var(--color-neutral-2);
+  color:var(--color-neutral-5);
+  cursor:not-allowed;
+}
 input::placeholder,textarea::placeholder{color:var(--color-neutral-5)}
 input:focus,select:focus,textarea:focus{border-color:var(--color-secondary);box-shadow:var(--focus-ring)}
-.container{max-width:1200px;margin-inline:auto;padding-inline:24px}
+.container{max-width:var(--container-max);margin-inline:auto;padding-inline:var(--page-pad)}
 .grid{display:grid;gap:20px}
 .card{background:var(--layout-card);border:1px solid var(--layout-border);border-radius:var(--layout-radius);box-shadow:var(--shadow-1)}
 .card--elev{box-shadow:var(--shadow-2)}
@@ -26,11 +31,19 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-secondary);box-
 h1,h2,h3,h4,h5,h6{color:var(--layout-dark);font-weight:800;line-height:1.25}
 h1{font-size:2rem} h2{font-size:1.5rem} h3{font-size:1.25rem}
 .muted{color:var(--color-neutral-5)}
+.empty-state{
+  background:var(--layout-card);
+  border:1px dashed var(--layout-border);
+  border-radius:var(--radius-lg);
+  padding:var(--gap-24);
+  color:var(--color-neutral-5);
+}
 .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
-@media (max-width:768px){html{font-size:15px}}
-@media (max-width:480px){html{font-size:14px}}
+@media (max-width: 768px){html{font-size:15px}}
+@media (max-width: 480px){html{font-size:14px}}
 :root[data-theme="dark"] body{background:var(--layout-bg);color:var(--color-light)}
 :root[data-theme="dark"] input,
 :root[data-theme="dark"] select,
 :root[data-theme="dark"] textarea{background:var(--color-neutral-1);color:var(--color-light);border-color:var(--layout-border)}
 :root[data-theme="dark"] a:hover{color:color-mix(in oklab,var(--color-secondary) 70%, white)}
+

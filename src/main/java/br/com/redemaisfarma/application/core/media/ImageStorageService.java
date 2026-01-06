@@ -16,6 +16,7 @@ import java.util.Locale;
 public class ImageStorageService {
 
     private final ImageStorageProperties props;
+    private static final long MAX_IMAGE_BYTES = 2L * 1024L * 1024L;
 
     public ImageStorageService(ImageStorageProperties props) {
         this.props = props;
@@ -23,10 +24,11 @@ public class ImageStorageService {
 
     public String saveProductImage(Long productId, MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) throw new IOException("Arquivo vazio");
+        if (file.getSize() > MAX_IMAGE_BYTES) throw new IOException("Imagem acima de 2MB");
 
         String ctype = file.getContentType();
-        if (ctype == null || !ctype.toLowerCase(Locale.ROOT).startsWith("image/")) {
-            throw new IOException("Tipo de arquivo inválido (somente imagens)");
+        if (ctype == null || !isAllowedImageType(ctype)) {
+            throw new IOException("Tipo de arquivo invalido (somente PNG, JPG ou WEBP)");
         }
 
         Path base = Paths.get(props.getDir()).toAbsolutePath().normalize();
@@ -41,7 +43,30 @@ public class ImageStorageService {
         Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
 
         return joinPublic(props.getPublicBase(), fname);
+    }
+
+    public String saveUserAvatar(Long userId, MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) throw new IOException("Arquivo vazio");
+        if (file.getSize() > MAX_IMAGE_BYTES) throw new IOException("Imagem acima de 2MB");
+
+        String ctype = file.getContentType();
+        if (ctype == null || !isAllowedImageType(ctype)) {
+            throw new IOException("Tipo de arquivo invalido (somente PNG, JPG ou WEBP)");
         }
+
+        Path base = Paths.get(props.getUserDir()).toAbsolutePath().normalize();
+        Files.createDirectories(base);
+
+        String original = StringUtils.cleanPath(file.getOriginalFilename() == null ? "image" : file.getOriginalFilename());
+        String ext = extractExtension(original);
+        String ts  = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String fname = "usuario-" + (userId == null ? "na" : userId) + "-" + ts + ext;
+
+        Path target = base.resolve(fname);
+        Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+
+        return joinPublic(props.getUserPublicBase(), fname);
+    }
 
     private static String extractExtension(String name) {
         int i = name.lastIndexOf('.');
@@ -54,5 +79,12 @@ public class ImageStorageService {
         String b = base.endsWith("/") ? base.substring(0, base.length() - 1) : base;
         String f = file.startsWith("/") ? file.substring(1) : file;
         return b + "/" + f;
+    }
+
+    private static boolean isAllowedImageType(String contentType) {
+        String normalized = contentType.toLowerCase(Locale.ROOT);
+        return normalized.equals("image/jpeg")
+                || normalized.equals("image/png")
+                || normalized.equals("image/webp");
     }
 }

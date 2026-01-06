@@ -47,22 +47,22 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class FiltroRelatorioRequestDTO
 implements Serializable {
     private static final long serialVersionUID = 1L;
-    @Schema(description="ID do cliente", example="123", required=true)
+    @Schema(description="ID do cliente", example="123", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{filtroRelatorio.clienteId.notNull}")
     @JsonProperty(value="clienteId")
     private @NotNull(message="{filtroRelatorio.clienteId.notNull}") Long clienteId;
-    @Schema(description="ID da filial", example="10", required=true)
+    @Schema(description="ID da filial", example="10", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{filtroRelatorio.filialId.notNull}")
     @JsonProperty(value="filialId")
     private @NotNull(message="{filtroRelatorio.filialId.notNull}") Long filialId;
-    @Schema(description="Data inicial (inclusive)", type="string", format="date", example="2025-01-01", required=true)
+    @Schema(description="Data inicial (inclusive)", type="string", format="date", example="2025-01-01", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{filtroRelatorio.dataInicial.notNull}")
     @DateTimeFormat(iso=DateTimeFormat.ISO.DATE)
     @PastOrPresent(message="{filtroRelatorio.dataInicial.pastOrPresent}")
     @JsonFormat(pattern="yyyy-MM-dd")
     @JsonProperty(value="dataInicial")
     private @NotNull(message="{filtroRelatorio.dataInicial.notNull}") @PastOrPresent(message="{filtroRelatorio.dataInicial.pastOrPresent}") LocalDate dataInicial;
-    @Schema(description="Data final (inclusive)", type="string", format="date", example="2025-12-31", required=true)
+    @Schema(description="Data final (inclusive)", type="string", format="date", example="2025-12-31", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{filtroRelatorio.dataFinal.notNull}")
     @DateTimeFormat(iso=DateTimeFormat.ISO.DATE)
     @FutureOrPresent(message="{filtroRelatorio.dataFinal.futureOrPresent}")
@@ -73,7 +73,7 @@ implements Serializable {
     @Size(max=10, message="{filtroRelatorio.categoriasProduto.size}")
     @JsonProperty(value="categoriasProduto")
     private @Size(max=10, message="{filtroRelatorio.categoriasProduto.size}") List<@NotBlank(message="{filtroRelatorio.categoriasProduto.notBlank}") @Size(max=60, message="{filtroRelatorio.categoriasProduto.item.size}") String> categoriasProduto;
-    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", required=true)
+    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{filtroRelatorio.tenantId.notBlank}")
     @Size(max=60, message="{filtroRelatorio.tenantId.size}")
     @JsonProperty(value="tenantId")
@@ -219,4 +219,5 @@ implements Serializable {
         return "FiltroRelatorioRequestDTO{clienteId=" + this.clienteId + ", filialId=" + this.filialId + ", dataInicial=" + String.valueOf(this.dataInicial) + ", dataFinal=" + String.valueOf(this.dataFinal) + ", categoriasProduto=" + String.valueOf(this.categoriasProduto) + ", tenantId='" + this.tenantId + "', traceId=" + String.valueOf(this.traceId) + ", page=" + this.page + ", size=" + this.size + ", sort=" + String.valueOf(this.sort) + "}";
     }
 }
+
 

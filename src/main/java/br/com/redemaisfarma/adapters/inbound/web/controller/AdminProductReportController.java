@@ -33,6 +33,6 @@ public class AdminProductReportController {
             LocalDateTime fim = (ate != null) ? ate.plusDays(1).atStartOfDay() : null;
             model.addAttribute("linhas", reportService.listarProdutoResumo(ini, fim));
         }
-        return "admin/relatorios/produtos";
+        return "pages/admin/relatorios/produtos";
     }
 }

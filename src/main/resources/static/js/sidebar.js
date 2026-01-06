@@ -134,11 +134,23 @@ function initSidebar(opts = {}) {
   highlightActiveLink(sidebar);
 
   // Modo compacto persistente (desktop)
-  const COMPACT_KEY = "sidebar_compact_v1";
-  if (localStorage.getItem(COMPACT_KEY) === "1") sidebar.classList.add("sidebar--compact");
+  const COMPACT_KEY = "sidebar_collapsed_v1";
+  const layout = sidebar.closest(".layout--with-sidebar");
+  const setCollapsed = (collapsed) => {
+    sidebar.classList.toggle("sidebar--collapsed", collapsed);
+    if (layout) layout.classList.toggle("layout--sidebar-collapsed", collapsed);
+    compactBtns.forEach((btn) => {
+      btn.setAttribute("aria-label", collapsed ? "Expandir menu lateral" : "Recolher menu lateral");
+      const label = btn.querySelector("span");
+      if (label) label.textContent = collapsed ? "Abrir" : "Recolher";
+    });
+  };
+
+  if (localStorage.getItem(COMPACT_KEY) === "1") setCollapsed(true);
   function toggleCompact() {
-    sidebar.classList.toggle("sidebar--compact");
-    localStorage.setItem(COMPACT_KEY, sidebar.classList.contains("sidebar--compact") ? "1" : "0");
+    const collapsed = !sidebar.classList.contains("sidebar--collapsed");
+    setCollapsed(collapsed);
+    localStorage.setItem(COMPACT_KEY, collapsed ? "1" : "0");
   }
   compactBtns.forEach((btn) => btn.addEventListener("click", toggleCompact));
 

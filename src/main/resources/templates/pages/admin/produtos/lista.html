@@ -3,45 +3,65 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Produtos • Admin</title>
+  <title>Produtos - Admin</title>
   <link rel="stylesheet" th:href="@{/css/main.css}" />
 
   <!-- CSRF (Spring Security + Thymeleaf) -->
   <meta name="_csrf" th:content="${_csrf.token}"/>
   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 
-  <style>
-    /* extras leves para os botões/badges (mantém seu visual) */
-    .actions{display:flex;gap:.5rem;flex-wrap:wrap}
-    .badge{font-size:.75rem;padding:.15rem .5rem;border-radius:999px;white-space:nowrap}
-    .badge-ok{background:rgba(46,204,113,.15);color:#2ecc71}
-    .badge-warn{background:rgba(241,196,15,.15);color:#f1c40f}
-    #toast{position:fixed;right:16px;bottom:16px;display:grid;gap:8px;z-index:9999}
-    .toast{background:#0f1320;color:#e9eef6;border:1px solid rgba(255,255,255,.07);
-           border-radius:12px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-    .toast.ok{border-color:rgba(46,204,113,.5)}
-    .toast.err{border-color:rgba(231,76,60,.5)}
-  </style>
 </head>
-<body class="body-flex">
-<header th:replace="~{fragments/header :: header}"></header>
+<body class="body-flex admin-page">
+<header th:replace="~{fragments/admin-header :: adminHeader}"></header>
 
-<div class="layout">
-  <aside th:replace="~{fragments/sidebar :: sidebar('produtos')}"></aside>
+<div class="layout layout--with-sidebar">
+  <aside th:replace="~{fragments/admin-sidebar :: adminSidebar('produtos')}"></aside>
 
   <main id="main-content" class="container stack mt-4 mb-6">
-    <div class="between">
-      <h1 class="page-title">Produtos</h1>
-      <a class="btn btn-primary" th:href="@{/admin/produtos/novo}">Novo produto</a>
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Produtos</h1>
+        <p class="page-lead">Gerencie catalogo, estoque e imagens com foco no cliente.</p>
+      </div>
+      <div class="page-actions">
+        <a class="btn btn-ghost" th:href="@{/admin/produtos/export.csv(q=${param.q},categoria=${param.categoria})}">Exportar CSV</a>
+        <a class="btn btn-primary" th:href="@{/admin/produtos/novo}">Novo produto</a>
+      </div>
     </div>
 
-    <form class="form-row mb-4" th:action="@{/admin/produtos}" method="get">
-      <input class="input" name="q" type="search" placeholder="Buscar por nome, categoria, SKU…" th:value="${param.q}" />
+    <section th:replace="~{fragments/flash :: flash}"></section>
+
+    <section class="stat-grid">
+      <article class="stat-card">
+        <span class="stat-label">Produtos cadastrados</span>
+        <span class="stat-value" th:text="${page.totalElements}">0</span>
+        <span class="stat-hint">Base total</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Estoque baixo</span>
+        <span class="stat-value" th:text="${#lists.size(produtos.?[estoque != null and estoque <= 5])}">0</span>
+        <span class="stat-hint">Ate 5 unidades</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Sem imagem</span>
+        <span class="stat-value" th:text="${#lists.size(produtos.?[imagem == null or #strings.isEmpty(imagem)])}">0</span>
+        <span class="stat-hint">Precisa gerar</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-label">Disponiveis</span>
+        <span class="stat-value" th:text="${#lists.size(produtos.?[disponivel == true])}">0</span>
+        <span class="stat-hint">Visiveis no site</span>
+      </article>
+    </section>
+
+    <form class="filter-bar card p-16 mb-4" th:action="@{/admin/produtos}" method="get">
+      <input class="input" name="q" type="search" placeholder="Buscar por nome, categoria, SKU" th:value="${param.q}" />
       <select class="select" name="categoria" th:value="${param.categoria}">
         <option value="">Todas categorias</option>
         <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}">Categoria</option>
       </select>
       <button class="btn">Filtrar</button>
+      <a class="btn btn-ghost" th:href="@{/admin/produtos}">Limpar</a>
     </form>
 
     <section class="card table-responsive">
@@ -50,32 +70,39 @@
           <tr>
             <th>Imagem</th>
             <th>Nome</th>
-            <th>Preço</th>
+            <th>Codigo de barras</th>
+            <th>Preco</th>
             <th>Estoque</th>
             <th>Categoria</th>
+            <th>Status</th>
             <th>Imagem IA</th>
-            <th>Ações</th>
+            <th>Acoes</th>
           </tr>
         </thead>
         <tbody>
           <tr th:each="p : ${produtos}">
             <td>
-              <img th:src="${p.imagemUrl} ?: @{/img/placeholder.png}" alt="" width="48" height="48" loading="lazy"/>
+              <img class="table-thumb" th:src="${p.imagem} ?: @{/img/placeholder.png}" alt="" width="48" height="48" loading="lazy"/>
             </td>
             <td th:text="${p.nome}">Dipirona 500mg</td>
-            <td th:text="${#numbers.formatCurrency(p.preco)}">R$ 0,00</td>
+            <td th:text="${p.codigoBarras}">7890000000000</td>
+            <td th:text="${#numbers.formatCurrency(p.precoVenda)}">R$ 0,00</td>
             <td th:text="${p.estoque}">0</td>
-            <td th:text="${p.categoria}">Genérico</td>
+            <td th:text="${p.categoria}">Generico</td>
+            <td>
+              <span th:if="${p.disponivel}" class="badge badge--success">Ativo</span>
+              <span th:if="${p.disponivel == null or !p.disponivel}" class="badge badge--warning">Indisponivel</span>
+            </td>
 
             <!-- status imagem IA -->
             <td>
-              <span th:if="${p.imagemUrl == null or #strings.isEmpty(p.imagemUrl)}"
-                    class="badge badge-warn">Sem imagem</span>
-              <a th:if="${p.imagemUrl != null and !#strings.isEmpty(p.imagemUrl)}"
-                 th:href="${p.imagemUrl}" target="_blank" class="badge badge-ok">Ver</a>
+              <span th:if="${p.imagem == null or #strings.isEmpty(p.imagem)}"
+                    class="badge badge--warning">Sem imagem</span>
+              <a th:if="${p.imagem != null and !#strings.isEmpty(p.imagem)}"
+                 th:href="${p.imagem}" target="_blank" class="badge badge--success">Ver</a>
             </td>
 
-            <td class="actions">
+            <td class="table-actions">
               <a class="btn btn-ghost" th:href="@{|/admin/produtos/${p.id}/editar|}">Editar</a>
               <button class="btn btn-ghost" type="button" th:attr="data-id=${p.id}" data-open="#modal-excluir">Excluir</button>
 
@@ -91,20 +118,20 @@
                       type="button"
                       data-action="regen"
                       th:attr="data-id=${p.id}"
-                      th:disabled="${p.imagemUrl != null and !#strings.isEmpty(p.imagemUrl)}">
+                      th:disabled="${p.imagem != null and !#strings.isEmpty(p.imagem)}">
                 Regenerar
               </button>
             </td>
           </tr>
 
           <tr th:if="${#lists.isEmpty(produtos)}">
-            <td colspan="7" class="text-center text-muted">Nenhum produto cadastrado.</td>
+            <td colspan="9" class="text-center text-muted">Nenhum produto cadastrado.</td>
           </tr>
         </tbody>
       </table>
     </section>
 
-    <section th:replace="~{fragments/modal :: confirm('modal-excluir','Excluir produto','Essa ação não pode ser desfeita.','Excluir','Cancelar')}"></section>
+    <section th:replace="~{fragments/modal :: confirm('modal-excluir','Excluir produto','Essa acao nao pode ser desfeita.','Excluir','Cancelar')}"></section>
   </main>
 </div>
 
@@ -113,21 +140,21 @@
 <div id="toast"></div>
 
 <script defer>
-  // Modal excluir (já existia)
+  // Modal excluir (ja existia)
   document.addEventListener('click',(e)=>{
     if(e.target.matches('[data-open]')){
-      const sel=e.target.getAttribute('data-open');
-      const modal=document.querySelector(sel);
+      const sel = e.target.getAttribute('data-open');
+      const modal = document.querySelector(sel);
       modal?.removeAttribute('hidden');
       modal.querySelector('[data-confirm]')?.addEventListener('click',()=>{
-        const id=e.target.getAttribute('data-id');
+        const id = e.target.getAttribute('data-id');
         // fetch(`/admin/produtos/${id}`,{method:'DELETE'})...
         modal.setAttribute('hidden','');
       },{once:true});
     }
   });
 
-  // ---- Integração Imagem IA (queue/regenerate) ----
+  // ---- Integracao Imagem IA (queue/regenerate) ----
   (()=>{
     const toastBox = document.getElementById('toast');
     const toast = (m,t='ok')=>{
@@ -157,19 +184,19 @@
       try{
         const res = await fetch(endpoint, withCsrf({ method:'POST', credentials:'same-origin' }));
         if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        toast(action==='regen' ? 'Regeneração solicitada' : 'Enfileirado com sucesso','ok');
+        toast(action==='regen' ? 'Regeneracao solicitada' : 'Enfileirado com sucesso','ok');
 
         // Atualiza badge da linha (opcional)
         const row = btn.closest('tr');
         if(row){
-          const badgeCell = row.querySelector('td:nth-child(6)'); // coluna "Imagem IA"
+          const badgeCell = row.querySelector('td:nth-child(8)'); // coluna "Imagem IA"
           if(badgeCell){
-            badgeCell.innerHTML = '<span class="badge badge-warn">Em processamento…</span>';
+            badgeCell.innerHTML = '<span class="badge badge--warning">Em processamento...</span>';
           }
         }
       }catch(err){
         console.error(err);
-        toast('Falha ao enviar ação','err');
+        toast('Falha ao enviar acao','err');
       }finally{
         btn.disabled = false;
       }
@@ -178,3 +205,14 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+

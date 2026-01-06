@@ -1,55 +1,62 @@
+# syntax=docker/dockerfile:1.5
+
 # ========================
-# 🏗️ FASE DE BUILD
+# BUILD STAGE
 # ========================
 FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
 WORKDIR /workspace
 ENV SPRING_PROFILES_ACTIVE=docker
 
-# Copia o POM e o Maven Wrapper (para cache de dependências)
+# Copy POM and Maven Wrapper (dependency cache)
 COPY pom.xml mvnw* ./
 COPY .mvn .mvn
 
-# Cache das dependências
-RUN mvn -B -ntp dependency:go-offline
+# Dependency cache
+RUN --mount=type=cache,target=/root/.m2,sharing=locked mvn -B -ntp dependency:go-offline
 
-# Copia o código-fonte
+# Copy source
 COPY src src
 
-# Compila e empacota o JAR (sem testes)
-RUN mvn -B -ntp -DskipTests=true package
+# Package jar (skip tests)
+RUN --mount=type=cache,target=/root/.m2,sharing=locked mvn -B -ntp -DskipTests=true -DskipITs=true package
 
+# Extract layers for faster rebuilds
+RUN java -Djarmode=layertools -jar /workspace/target/*.jar extract --destination /workspace/target/layers
 
 # ========================
-# 🚀 FASE DE EXECUÇÃO
+# RUNTIME STAGE
 # ========================
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-# (1) Instala curl e certificados na imagem final (para healthchecks e debug)
+# Install curl and certificates for healthchecks/debug (optional)
+ARG INSTALL_DEBUG_TOOLS=false
 USER root
-RUN apt-get update \
- && apt-get install -y --no-install-recommends curl ca-certificates \
- && rm -rf /var/lib/apt/lists/*
+RUN if [ "$INSTALL_DEBUG_TOOLS" = "true" ]; then \
+      apt-get update \
+      && apt-get install -y --no-install-recommends curl ca-certificates \
+      && rm -rf /var/lib/apt/lists/*; \
+    fi
 
-# (2) Copia o artefato gerado
-COPY --from=builder /workspace/target/*.jar /app/app.jar
+# Copy layered artifacts
+COPY --from=builder /workspace/target/layers/dependencies/ /app/
+COPY --from=builder /workspace/target/layers/spring-boot-loader/ /app/
+COPY --from=builder /workspace/target/layers/snapshot-dependencies/ /app/
+COPY --from=builder /workspace/target/layers/application/ /app/
 
-# (3) Opcional: usuário não-root para rodar o app
-#    (se preferir ficar como root, pode remover esta seção)
+# Optional non-root user
 RUN useradd -r -u 1001 -g root appuser \
  && chown -R appuser:root /app
 USER appuser
 
-# (4) Configuração de memória e codificação
+# Memory and encoding
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Dfile.encoding=UTF-8"
 
-# (5) Ativa logs coloridos e perfis via env externo (compose .env/.env.local)
+# Enable ANSI logs and profiles via env
 ENV SPRING_OPTS="--spring.output.ansi.enabled=ALWAYS --spring.profiles.active=${SPRING_PROFILES_ACTIVE}"
 
-# Expondo a porta padrão do app
 EXPOSE 8080
 
-# Comando de entrada (usa 'exec' para repassar sinais ao Java)
-ENTRYPOINT ["sh", "-lc", "exec java $JAVA_OPTS -jar /app/app.jar $SPRING_OPTS"]
+ENTRYPOINT ["sh", "-lc", "exec java $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher $SPRING_OPTS"]

@@ -1,31 +1,47 @@
 <!DOCTYPE html><html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Pedido • Detalhe</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
+<title>Pedido a Detalhe</title><link rel="stylesheet" th:href="@{/css/main.css}"/></head>
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
-<div class="layout">
-<aside th:replace="~{fragments/sidebar :: sidebar('pedidos')}"></aside>
+<div class="layout layout--with-sidebar">
+<aside th:replace="~{fragments/admin-sidebar :: adminSidebar('pedidos')}"></aside>
 <main class="container stack mt-4 mb-6">
-  <h1 class="page-title">Pedido <span th:text="${pedido.numero}">#0001</span></h1>
+  <h1 class="page-title">
+    Pedido
+    <span th:if="${pedido.numero != null and !#strings.isEmpty(pedido.numero)}"
+          th:text="${pedido.numero}"></span>
+  </h1>
 
   <section class="grid grid-cols-1 md:grid-cols-3 gap-16">
     <article class="card">
       <h2 class="card-title">Cliente</h2>
-      <p th:text="${pedido.clienteNome}">Fulano</p>
-      <p th:text="${pedido.clienteEmail}">fulano@ex.com</p>
-      <p th:text="${pedido.enderecoEntrega}">Endereço…</p>
+      <p th:if="${pedido.clienteNome != null and !#strings.isEmpty(pedido.clienteNome)}"
+         th:text="${pedido.clienteNome}"></p>
+      <p th:if="${pedido.clienteEmail != null and !#strings.isEmpty(pedido.clienteEmail)}"
+         th:text="${pedido.clienteEmail}"></p>
+      <p th:if="${pedido.enderecoEntrega != null and !#strings.isEmpty(pedido.enderecoEntrega)}"
+         th:text="${pedido.enderecoEntrega}"></p>
     </article>
     <article class="card">
-      <h2 class="card-title">Pagamento</h2>
-      <p><strong>Método:</strong> <span th:text="${pedido.pagamento.metodo}">PIX</span></p>
-      <p><strong>Status:</strong> <span th:text="${pedido.pagamento.status}">PAGO</span></p>
-      <p><strong>Total:</strong> <span th:text="${#numbers.formatCurrency(pedido.total)}">R$ 0,00</span></p>
+      <h2 class="card-title">pagamento</h2>
+      <p><strong>MAtodo:</strong>
+        <span th:if="${pedido.pagamento != null and pedido.pagamento.metodo != null and !#strings.isEmpty(pedido.pagamento.metodo)}"
+              th:text="${pedido.pagamento.metodo}"></span>
+      </p>
+      <p><strong>Status:</strong>
+        <span th:if="${pedido.pagamento != null and pedido.pagamento.status != null and !#strings.isEmpty(pedido.pagamento.status)}"
+              th:text="${pedido.pagamento.status}"></span>
+      </p>
+      <p><strong>Total:</strong>
+        <span th:if="${pedido.total != null}"
+              th:text="${#numbers.formatCurrency(pedido.total, 'pt_BR')}"></span>
+      </p>
     </article>
     <article class="card">
       <h2 class="card-title">Status do Pedido</h2>
       <form th:action="@{|/admin/pedidos/${pedido.id}/status|}" method="post" class="form-row">
         <select class="select" name="status" th:value="${pedido.status}">
-          <option>AGUARDANDO</option><option>PAGO</option><option>SEPARACAO</option><option>ENTREGA</option><option>FINALIZADO</option>
+          <option>AGUARDANDO</option><option>PAGO</option><option>separacao</option><option>ENTREGA</option><option>FINALIZADO</option>
         </select>
         <button class="btn">Atualizar</button>
       </form>
@@ -35,20 +51,26 @@
   <section class="card mt-6 table-responsive">
     <h2 class="card-title">Itens</h2>
     <table class="table">
-      <thead><tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Subtotal</th></tr></thead>
+      <thead><tr><th>Produto</th><th>Qtd</th><th>Preco</th><th>Subtotal</th></tr></thead>
       <tbody>
         <tr th:each="i : ${pedido.itens}">
-          <td th:text="${i.nome}">Dipirona</td>
-          <td th:text="${i.qtd}">1</td>
-          <td th:text="${#numbers.formatCurrency(i.preco)}">R$0,00</td>
-          <td th:text="${#numbers.formatCurrency(i.subtotal)}">R$0,00</td>
+          <td th:text="${i.nome}">-</td>
+          <td th:text="${i.qtd}">-</td>
+          <td th:text="${#numbers.formatCurrency(i.preco, 'pt_BR')}">-</td>
+          <td th:text="${#numbers.formatCurrency(i.subtotal, 'pt_BR')}">-</td>
         </tr>
       </tbody>
       <tfoot>
-        <tr><th colspan="3" class="text-right">Total</th><th th:text="${#numbers.formatCurrency(pedido.total)}">R$0,00</th></tr>
+        <tr><th colspan="3" class="text-right">Total</th><th th:text="${#numbers.formatCurrency(pedido.total, 'pt_BR')}">-</th></tr>
       </tfoot>
     </table>
   </section>
 </main></div>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body></html>
+
+
+
+
+
+

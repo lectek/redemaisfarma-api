@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Categorias • Produtos</title>
+  <title>Categorias a Produtos</title>
   <link rel="stylesheet" th:href="@{/css/main.css}"/>
   <meta name="_csrf" th:content="${_csrf.token}"/>
   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
@@ -11,7 +11,7 @@
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
 <div class="layout">
-<aside th:replace="~{fragments/sidebar :: sidebar('produtos')}"></aside>
+<aside th:replace="~{fragments/admin-sidebar :: adminSidebar('produtos')}"></aside>
 <main class="container stack mt-4 mb-6">
   <h1 class="page-title">Categorias</h1>
 
@@ -23,7 +23,10 @@
   <section class="card">
     <ul class="list" th:each="c : ${categorias}">
       <li class="between">
-        <span th:text="${c.nome}">Genéricos</span>
+        <form class="form-row" th:action="@{|/admin/produtos/categorias/${c.id}/atualizar|}" method="post">
+          <input class="input" name="nome" th:value="${c.nome}" required/>
+          <button class="btn" type="submit">Salvar</button>
+        </form>
         <form th:action="@{|/admin/produtos/categorias/${c.id}/remover|}" method="post">
           <button class="btn btn-ghost" type="submit">Remover</button>
         </form>
@@ -35,3 +38,9 @@
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>
+
+
+
+
+
+

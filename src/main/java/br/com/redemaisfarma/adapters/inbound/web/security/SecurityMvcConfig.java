@@ -13,11 +13,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.SavedRequest;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -57,7 +62,8 @@ public class SecurityMvcConfig {
                 csrf.csrfTokenRepository(repo);
                 csrf.ignoringRequestMatchers(
                         new AntPathRequestMatcher("/admin/export/**"),
-                        new AntPathRequestMatcher("/login", "POST")
+                        new AntPathRequestMatcher("/login", "POST"),
+                        new AntPathRequestMatcher("/auth/login", "POST")
                 );
                 if (dev) {
                     csrf.ignoringRequestMatchers(
@@ -70,7 +76,7 @@ public class SecurityMvcConfig {
             .authorizeHttpRequests(auth -> {
                 // recursos estáticos
                 auth.requestMatchers(
-                        "/assets/**", "/css/**", "/js/**", "/images/**",
+                        "/assets/**", "/css/**", "/js/**", "/images/**", "/media/**",
                         "/webjars/**", "/static/**", "/favicon.ico",
                         "/index.html", "/robots.txt"
                 ).permitAll();
@@ -82,8 +88,8 @@ public class SecurityMvcConfig {
                 auth.requestMatchers(
                         "/api/public/**",
                         "/", "/catalogo", "/produtos", "/carrinho", "/checkout",
-                        "/sobre", "/login", "/logout", "/cadastro", "/cadastro-cliente",
-                        "/clientes/cadastro", "/error"
+                        "/sobre", "/login", "/auth/login", "/logout", "/cadastro", "/cadastro-cliente",
+                        "/auth/cliente/cadastro", "/clientes/cadastro", "/error"
                 ).permitAll();
 
                 // (REMOVIDO /pos-login)
@@ -121,29 +127,31 @@ public class SecurityMvcConfig {
 
                 // criação de cliente via POST
                 auth.requestMatchers(HttpMethod.POST, "/clientes").permitAll();
-                auth.requestMatchers(HttpMethod.POST, "/login").permitAll();
+                auth.requestMatchers(HttpMethod.POST, "/login", "/auth/login").permitAll();
 
                 // (REMOVIDOS TODOS OS MATCHERS /admin E SUBROTAS)
                 // área do cliente permanece protegida por ROLE_CLIENTE
-                auth.requestMatchers("/cliente", "/cliente/**").hasRole("CLIENTE");
+                auth.requestMatchers("/cliente", "/cliente/**")
+                        .hasAnyRole("CLIENTE", "DEVELOPER", "DEV", "ADMIN", "USER");
 
                 // qualquer outra rota exige autenticação
+                auth.requestMatchers("/admin/vendas/rapida", "/admin/vendas/rapida/**")
+                        .hasAnyRole("CAIXA", "DEV", "DEVELOPER");
+
                 auth.anyRequest().authenticated();
             })
             .formLogin(form -> form
-                    .loginPage("/login")
-                    .loginProcessingUrl("/login")
-                    .usernameParameter("usuario")
-                    .passwordParameter("senha")
-                    // pós-login: usa apenas /login como entrada,
-                    // e redireciona para /cliente como padrão
-                    .defaultSuccessUrl("/cliente") // sem 'true' para respeitar SavedRequest
-                    .failureUrl("/login?error")
+                    .loginPage("/auth/login")
+                    .loginProcessingUrl("/auth/login")
+                    .usernameParameter("username")
+                    .passwordParameter("password")
+                    .successHandler(successHandler())
+                    .failureUrl("/auth/login?error")
                     .permitAll()
             )
             .logout(l -> l
                     .logoutUrl("/logout")
-                    .logoutSuccessUrl("/login?logout=true")
+                    .logoutSuccessUrl("/auth/login?logout=true")
                     .invalidateHttpSession(true)
                     .deleteCookies("JSESSIONID", "XSRF-TOKEN")
             )
@@ -172,6 +180,41 @@ public class SecurityMvcConfig {
 
         http.addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
         return http.build();
+    }
+
+    private AuthenticationSuccessHandler successHandler() {
+        return (request, response, authentication) -> {
+            String target = resolvePostLoginTarget(request, response, authentication);
+            response.sendRedirect(target);
+        };
+    }
+
+    private String resolvePostLoginTarget(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication
+    ) {
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+        boolean isCaixa = authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_CAIXA".equals(a.getAuthority()));
+        String roleDefault = isAdmin
+                ? "/admin/dashboard"
+                : (isCaixa ? "/admin/vendas/rapida" : "/cliente/conta");
+
+        String requested = request.getParameter("redirect");
+        if (StringUtils.hasText(requested) && requested.startsWith("/") && !requested.startsWith("//")) {
+            if (!requested.startsWith("/admin") || isAdmin) {
+                return requested;
+            }
+        }
+
+        SavedRequest saved = new HttpSessionRequestCache().getRequest(request, response);
+        if (saved != null && StringUtils.hasText(saved.getRedirectUrl())) {
+            return saved.getRedirectUrl();
+        }
+
+        return roleDefault;
     }
 
     static class CsrfCookieFilter extends OncePerRequestFilter {

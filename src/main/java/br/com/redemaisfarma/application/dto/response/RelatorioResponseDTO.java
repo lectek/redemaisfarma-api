@@ -48,12 +48,12 @@ import java.util.UUID;
 public class RelatorioResponseDTO
 implements Serializable {
     private static final long serialVersionUID = 1L;
-    @Schema(description="Data de in\u00edcio do relat\u00f3rio", type="string", format="date", example="2025-07-01", required=true)
+    @Schema(description="Data de in\u00edcio do relat\u00f3rio", type="string", format="date", example="2025-07-01", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{relatorio.dataInicio.notNull}")
     @JsonProperty(value="dataInicio")
     @JsonFormat(pattern="yyyy-MM-dd")
     private @NotNull(message="{relatorio.dataInicio.notNull}") LocalDate dataInicio;
-    @Schema(description="Data de fim do relat\u00f3rio", type="string", format="date", example="2025-07-31", required=true)
+    @Schema(description="Data de fim do relat\u00f3rio", type="string", format="date", example="2025-07-31", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{relatorio.dataFim.notNull}")
     @JsonProperty(value="dataFim")
     @JsonFormat(pattern="yyyy-MM-dd")
@@ -62,25 +62,25 @@ implements Serializable {
     @Size(max=100, message="{relatorio.categoriaFiltro.size}")
     @JsonProperty(value="categoriaFiltro")
     private @Size(max=100, message="{relatorio.categoriaFiltro.size}") String categoriaFiltro;
-    @Schema(description="Total de vendas no per\u00edodo", example="15000.50", required=true)
+    @Schema(description="Total de vendas no per\u00edodo", example="15000.50", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{relatorio.totalVendas.notNull}")
     @DecimalMin(value="0.00", inclusive=true, message="{relatorio.totalVendas.min}")
     @Digits(integer=14, fraction=2, message="{relatorio.totalVendas.digits}")
     @JsonProperty(value="totalVendas")
     private @NotNull(message="{relatorio.totalVendas.notNull}") @DecimalMin(value="0.00", inclusive=true, message="{relatorio.totalVendas.min}") @Digits(integer=14, fraction=2, message="{relatorio.totalVendas.digits}") BigDecimal totalVendas;
-    @Schema(description="Margem de lucro (%)", example="25.50", required=true)
+    @Schema(description="Margem de lucro (%)", example="25.50", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{relatorio.margemLucro.notNull}")
     @DecimalMin(value="0.00", inclusive=true, message="{relatorio.margemLucro.min}")
     @DecimalMax(value="100.00", inclusive=true, message="{relatorio.margemLucro.max}")
     @Digits(integer=3, fraction=2, message="{relatorio.margemLucro.digits}")
     @JsonProperty(value="margemLucro")
     private @NotNull(message="{relatorio.margemLucro.notNull}") @DecimalMin(value="0.00", inclusive=true, message="{relatorio.margemLucro.min}") @DecimalMax(value="100.00", inclusive=true, message="{relatorio.margemLucro.max}") @Digits(integer=3, fraction=2, message="{relatorio.margemLucro.digits}") BigDecimal margemLucro;
-    @Schema(description="Quantidade de produtos vendidos", example="1200", required=true)
+    @Schema(description="Quantidade de produtos vendidos", example="1200", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{relatorio.quantidadeProdutosVendidos.notNull}")
     @Min(value=0L, message="{relatorio.quantidadeProdutosVendidos.min}")
     @JsonProperty(value="quantidadeProdutosVendidos")
     private @NotNull(message="{relatorio.quantidadeProdutosVendidos.notNull}") @Min(value=0L, message="{relatorio.quantidadeProdutosVendidos.min}") Long quantidadeProdutosVendidos;
-    @Schema(description="Total de pedidos realizados", example="300", required=true)
+    @Schema(description="Total de pedidos realizados", example="300", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{relatorio.totalPedidos.notNull}")
     @Min(value=0L, message="{relatorio.totalPedidos.min}")
     @JsonProperty(value="totalPedidos")
@@ -99,18 +99,18 @@ implements Serializable {
     @Schema(description="Produtos mais vendidos no per\u00edodo")
     @JsonProperty(value="produtosMaisVendidos")
     private List<@NotBlank @Size(max=150) String> produtosMaisVendidos;
-    @Schema(description="Data/hora de gera\u00e7\u00e3o do relat\u00f3rio", type="string", format="date-time", example="2025-08-01T08:00:00", required=true)
+    @Schema(description="Data/hora de gera\u00e7\u00e3o do relat\u00f3rio", type="string", format="date-time", example="2025-08-01T08:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{relatorio.dataGeracaoRelatorio.notNull}")
     @PastOrPresent(message="{relatorio.dataGeracaoRelatorio.pastOrPresent}")
     @JsonProperty(value="dataGeracaoRelatorio")
     @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     private @NotNull(message="{relatorio.dataGeracaoRelatorio.notNull}") @PastOrPresent(message="{relatorio.dataGeracaoRelatorio.pastOrPresent}") LocalDateTime dataGeracaoRelatorio;
-    @Schema(description="Usu\u00e1rio solicitante", example="joao.silva", required=true)
+    @Schema(description="Usu\u00e1rio solicitante", example="joao.silva", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{relatorio.usuarioSolicitante.notBlank}")
     @Size(max=100, message="{relatorio.usuarioSolicitante.size}")
     @JsonProperty(value="usuarioSolicitante")
     private @NotBlank(message="{relatorio.usuarioSolicitante.notBlank}") @Size(max=100, message="{relatorio.usuarioSolicitante.size}") String usuarioSolicitante;
-    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", required=true)
+    @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{relatorio.tenantId.notBlank}")
     @Size(max=100, message="{relatorio.tenantId.size}")
     @JsonProperty(value="tenantId")
@@ -125,7 +125,7 @@ implements Serializable {
     @Schema(description="M\u00e9todo de exporta\u00e7\u00e3o do relat\u00f3rio", example="PDF", allowableValues={"PDF", "EXCEL", "CSV", "JSON"})
     @JsonProperty(value="metodoExportacao")
     private MetodoExportacao metodoExportacao;
-    @Schema(description="Status da gera\u00e7\u00e3o do relat\u00f3rio", example="SUCCESS", required=true, allowableValues={"SUCCESS", "EMPTY", "ERROR"})
+    @Schema(description="Status da gera\u00e7\u00e3o do relat\u00f3rio", example="SUCCESS", requiredMode = Schema.RequiredMode.REQUIRED, allowableValues={"SUCCESS", "EMPTY", "ERROR"})
     @NotNull(message="{relatorio.statusConsulta.notNull}")
     @JsonProperty(value="statusConsulta")
     private @NotNull(message="{relatorio.statusConsulta.notNull}") StatusConsulta statusConsulta;
@@ -340,4 +340,5 @@ implements Serializable {
 
     }
 }
+
 

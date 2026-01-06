@@ -12,6 +12,9 @@ package br.com.redemaisfarma.application.core.settings;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.AppSettingEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.AppSettingRepository;
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -58,6 +61,16 @@ public class AppSettingService {
         this.repository.deleteById(id);
     }
 
+    @Transactional
+    public AppSettingEntity upsert(String key, String value, String description) {
+        return this.repository.findBySettingKey(key).map(existing -> {
+            existing.setSettingKey(key);
+            existing.setSettingValue(value);
+            existing.setDescription(description);
+            return (AppSettingEntity)this.repository.save(existing);
+        }).orElseGet(() -> (AppSettingEntity)this.repository.save(new AppSettingEntity(key, value, description)));
+    }
+
     @Transactional(readOnly=true)
     public Optional<AppSettingEntity> findById(Long id) {
         return this.repository.findById(id);
@@ -66,6 +79,20 @@ public class AppSettingService {
     @Transactional(readOnly=true)
     public Optional<String> get(String key) {
         return this.repository.findBySettingKey(key).map(AppSettingEntity::getSettingValue);
+    }
+
+    @Transactional(readOnly=true)
+    public Map<String, String> getAllByKeys(Collection<String> keys) {
+        if (keys == null || keys.isEmpty()) {
+            return Map.of();
+        }
+        Map<String, String> out = new HashMap<>();
+        for (AppSettingEntity entity : this.repository.findBySettingKeyIn(keys)) {
+            if (entity.getSettingKey() != null && entity.getSettingValue() != null) {
+                out.put(entity.getSettingKey(), entity.getSettingValue());
+            }
+        }
+        return out;
     }
 
     @Transactional(readOnly=true)
@@ -122,4 +149,3 @@ public class AppSettingService {
         }).orElse(defaultValue);
     }
 }
-

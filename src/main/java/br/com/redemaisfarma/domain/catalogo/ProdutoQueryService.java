@@ -21,10 +21,11 @@ public interface ProdutoQueryService {
 
     public List<ProductCardVM> recommended(Pageable var1, boolean var2);
 
+    public java.util.Optional<ProductCardVM> findById(Long id, boolean incluirIndisponiveis);
+
     default public List<ProductCardVM> featured(int limit) {
         int size = Math.max(1, Math.min(limit, 50));
         PageRequest page = PageRequest.of((int)0, (int)size);
         return this.featured((Pageable)page, false);
     }
 }
-

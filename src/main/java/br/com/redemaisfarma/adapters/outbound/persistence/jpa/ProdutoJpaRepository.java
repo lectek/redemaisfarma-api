@@ -35,6 +35,8 @@ public interface ProdutoJpaRepository extends JpaRepository<ProdutoEntity, Long>
 
     Page<ProdutoEntity> findByDescricaoContainingIgnoreCaseOrCodigoBarrasContainingIgnoreCase(String var1, String var2, Pageable var3);
 
+    Page<ProdutoEntity> findByDisponivelTrue(Pageable var1);
+
     @Query("SELECT p FROM ProdutoEntity p WHERE p.imagem IS NULL OR TRIM(p.imagem) = ''")
     Page<ProdutoEntity> findSemMidia(Pageable var1);
 

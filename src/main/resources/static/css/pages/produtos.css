@@ -18,7 +18,7 @@
 
 body{ font-family:var(--produto-font); background:var(--produto-bg); color:var(--produto-text); line-height:1.6; }
 
-.container{ max-width:1200px; margin:0 auto; padding:var(--produto-gap); }
+.container{ max-width:var(--container-max); margin:0 auto; padding:var(--page-pad); }
 
 .produto-container{ padding-block:3rem; }
 

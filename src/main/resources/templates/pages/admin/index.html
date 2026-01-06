@@ -2,7 +2,7 @@
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: commonHead}"></head>
 <body class="body-flex" data-page="admin">
-  <a href="#conteudo-admin" class="skip-link">Pular para o conteúdo</a>
+  <a href="#conteudo-admin" class="skip-link">Pular para o conteudo</a>
 
   <!-- Header global -->
   <header th:replace="~{fragments/header :: header}"></header>
@@ -13,7 +13,7 @@
         tabindex="-1"
         aria-label="Painel administrativo da RedeMaisFarma">
 
-    <!-- HERO / TÍTULO DO PAINEL -->
+    <!-- HERO / TATULO DO PAINEL -->
     <section class="section section--alt" aria-label="Resumo do painel">
       <div class="container">
         <header class="painel-header">
@@ -23,12 +23,12 @@
           </p>
         </header>
 
-        <!-- MÉTRICAS RÁPIDAS -->
+        <!-- MATRICAS rapidaS -->
         <div class="painel-grid painel-grid--metrics">
           <article class="card card-metric" aria-label="Pedidos de hoje">
             <h2>Pedidos hoje</h2>
             <p class="metric">--</p>
-            <p class="muted">Total de pedidos confirmados nas últimas 24h.</p>
+            <p class="muted">Total de pedidos confirmados nas Altimas 24h.</p>
           </article>
 
           <article class="card card-metric" aria-label="Faturamento aproximado">
@@ -43,22 +43,22 @@
             <p class="muted">Clientes que fizeram pelo menos 1 compra recente.</p>
           </article>
 
-          <article class="card card-metric" aria-label="Produtos em estoque crítico">
-            <h2>Estoque crítico</h2>
+          <article class="card card-metric" aria-label="Produtos em estoque Critico">
+            <h2>Estoque Critico</h2>
             <p class="metric">--</p>
-            <p class="muted">Produtos com quantidade abaixo do mínimo definido.</p>
+            <p class="muted">Produtos com quantidade abaixo do minimo definido.</p>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- ATALHOS RÁPIDOS -->
-    <section class="section" aria-label="Atalhos rápidos">
+    <!-- ATALHOS rapidoS -->
+    <section class="section" aria-label="Atalhos rapidos">
       <div class="container">
         <header class="painel-header">
-          <h2>Atalhos rápidos</h2>
+          <h2>Atalhos rapidos</h2>
           <p class="muted">
-            Acesse rapidamente as principais áreas de gestão da farmácia.
+            Acesse rapidamente as principais Areas de gestao da farmacia.
           </p>
         </header>
 
@@ -70,35 +70,35 @@
 
           <a class="card card-link" th:href="@{/admin/produtos}">
             <h3>Produtos</h3>
-            <p>Gerenciar catálogo, preços, estoque e produtos em destaque.</p>
+            <p>Gerenciar Catalogo, Precos, estoque e produtos em destaque.</p>
           </a>
 
           <a class="card card-link" th:href="@{/admin/clientes}">
             <h3>Clientes</h3>
-            <p>Acompanhar histórico de compras e dados dos clientes.</p>
+            <p>Acompanhar historico de compras e dados dos clientes.</p>
           </a>
 
-          <a class="card card-link" th:href="@{/admin/configuracoes}">
-            <h3>Configurações</h3>
-            <p>Ajustar regras de frete, horários, integrações e avisos.</p>
+          <a class="card card-link" th:href="@{/admin/configuracoes/geral}">
+            <h3>Configuracoes</h3>
+            <p>Ajustar regras de frete, horarios, Integracoes e avisos.</p>
           </a>
         </div>
       </div>
     </section>
 
-    <!-- ÚLTIMOS PEDIDOS -->
-    <section class="section section--alt" aria-label="Últimos pedidos">
+    <!-- UltimoS PEDIDOS -->
+    <section class="section section--alt" aria-label="Ultimos pedidos">
       <div class="container">
         <header class="painel-header">
-          <h2>Últimos pedidos</h2>
+          <h2>Ultimos pedidos</h2>
           <p class="muted">
-            Visão rápida dos pedidos mais recentes realizados na plataforma.
+            Visao rapida dos pedidos mais recentes realizados na plataforma.
           </p>
         </header>
 
         <div class="card card-table">
           <div class="table-responsive">
-            <table class="table" aria-label="Tabela de últimos pedidos">
+            <table class="table" aria-label="Tabela de Ultimos pedidos">
               <thead>
                 <tr>
                   <th scope="col">#</th>
@@ -106,11 +106,11 @@
                   <th scope="col">Data</th>
                   <th scope="col">Total</th>
                   <th scope="col">Status</th>
-                  <th scope="col" class="text-right">Ações</th>
+                  <th scope="col" class="text-right">Acoes</th>
                 </tr>
               </thead>
               <tbody>
-                <!-- Placeholder estático; depois você pode trocar por th:each -->
+                <!-- Placeholder estatico; depois voce pode trocar por th:each -->
                 <tr>
                   <td>0001</td>
                   <td>Cliente exemplo</td>
@@ -130,7 +130,7 @@
                   <td>Cliente exemplo</td>
                   <td>15/11/2025</td>
                   <td>R$ 59,90</td>
-                  <td><span class="badge badge--warning">Em análise</span></td>
+                  <td><span class="badge badge--warning">Em analise</span></td>
                   <td class="text-right">
                     <a class="btn btn--sm"
                        href="#"
@@ -155,8 +155,13 @@
 
   <footer th:replace="~{fragments/layout :: footer}"></footer>
 
-  <!-- JS globais / específicos -->
+  <!-- JS globais / especificos -->
   <script defer th:src="@{/js/header.js}"></script>
   <script defer th:src="@{/js/admin-dashboard.js}"></script>
 </body>
 </html>
+
+
+
+
+

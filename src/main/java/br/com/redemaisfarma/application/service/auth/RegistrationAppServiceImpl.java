@@ -1,6 +1,9 @@
 package br.com.redemaisfarma.application.service.auth;
 
-import br.com.redemaisfarma.adapters.inbound.web.controller.auth.AuthRegistrationController;
+import br.com.redemaisfarma.application.core.exception.CpfDuplicadoException;
+import br.com.redemaisfarma.application.core.exception.EmailDuplicadoException;
+import br.com.redemaisfarma.application.dto.request.CadastroClienteRequestDTO;
+import br.com.redemaisfarma.application.port.inbound.RegistrationAppService;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.UsuarioJpaRepository;
 import br.com.redemaisfarma.domain.user.Role;
@@ -9,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class RegistrationAppServiceImpl implements AuthRegistrationController.RegistrationAppService {
+public class RegistrationAppServiceImpl implements RegistrationAppService {
 
     private final UsuarioJpaRepository usuarioRepo;
     private final PasswordEncoder encoder;
@@ -21,19 +24,19 @@ public class RegistrationAppServiceImpl implements AuthRegistrationController.Re
 
     @Override
     @Transactional
-    public void cadastrarNovoCliente(AuthRegistrationController.CadastroClienteForm form) {
-        final String email = safe(form.getEmail());
-        final String cpf   = normalizeCpf(form.getCpf());
-        final String nome  = safe(form.getNome());
-        final String raw   = safe(form.getSenha());
+    public void cadastrarNovoCliente(CadastroClienteRequestDTO request) {
+        final String email = safe(request.getEmail());
+        final String cpf   = normalizeCpf(request.getCpf());
+        final String nome  = safe(request.getNome());
+        final String raw   = safe(request.getSenha());
 
         // --- unicidade ---
         if (usuarioRepo.existsByEmail(email)) {
-            throw new AuthRegistrationController.EmailDuplicadoException();
+            throw new EmailDuplicadoException();
         }
         // usa a query flexível existente para checar CPF
         if (usuarioRepo.findByEmailOrCpf(cpf).isPresent()) {
-            throw new AuthRegistrationController.CpfDuplicadoException();
+            throw new CpfDuplicadoException();
         }
 
         // --- montar entidade ---

@@ -1,6 +1,5 @@
 package br.com.redemaisfarma.application.service;
 
-import br.com.redemaisfarma.adapters.outbound.email.adapter.MailSenderAdapter;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.EmailDelivery;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.EmailDeliveryRepository;
@@ -8,6 +7,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.jpa.UsuarioJpaReposito
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.otp.OtpCodeEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.otp.OtpCodeRepository;
 import br.com.redemaisfarma.domain.user.Role;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +18,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,27 +28,27 @@ public class DevProvisioningService {
     private static final SecureRandom RNG = new SecureRandom();
 
     private final OtpCodeRepository otpRepo;
-    private final MailSenderAdapter mailer;
     private final EmailDeliveryRepository emailDeliveryRepo;
     private final UsuarioJpaRepository usuarioRepo;
     private final PasswordEncoder encoder;
+    private final ObjectMapper objectMapper;
 
     // Fallback: se app.web.base-url não estiver no application, usa APP_WEB_BASE_URL do ambiente.
     private final String baseUrl;
 
     public DevProvisioningService(
             OtpCodeRepository otpRepo,
-            MailSenderAdapter mailer,
             EmailDeliveryRepository emailDeliveryRepo,
             UsuarioJpaRepository usuarioRepo,
             PasswordEncoder encoder,
-            @Value("${app.web.base-url:${APP_WEB_BASE_URL}}") String baseUrl
+            ObjectMapper objectMapper,
+            @Value("${app.web.base-url:${APP_WEB_BASE_URL:http://localhost:8080}}") String baseUrl
     ) {
         this.otpRepo = otpRepo;
-        this.mailer = mailer;
         this.emailDeliveryRepo = emailDeliveryRepo;
         this.usuarioRepo = usuarioRepo;
         this.encoder = encoder;
+        this.objectMapper = objectMapper;
         this.baseUrl = baseUrl;
     }
 
@@ -93,19 +94,14 @@ public class DevProvisioningService {
         ed.setPurpose("DEV_CREATE_CODE");
         ed.setDestination(email);
         ed.setProvider("SMTP");
-        ed.setStatus("SENT"); // se preferir, salve como "PENDING" e atualize depois
-        ed.setAttempts(1);
+        ed.setStatus("PENDING");
+        ed.setAttempts(0);
         ed.setMessageId(null);
-        ed.setPayloadJson("""
-                {"subject":"%s","link":"%s","deliveryId":"%s"}
-                """.formatted(subject, link, deliveryId));
+        ed.setPayloadJson(buildPayloadJson(subject, html, link, deliveryId));
         ed.setCreatedAt(now); // importante se coluna é NOT NULL
         // Se existir campo "deliveryId" na entidade, descomente:
         // ed.setDeliveryId(deliveryId);
         emailDeliveryRepo.save(ed);
-
-        // Envia o e-mail
-        mailer.send(email, subject, html);
 
         return deliveryId;
     }
@@ -172,6 +168,19 @@ public class DevProvisioningService {
             return Base64.getEncoder().encodeToString(md.digest(code.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             throw new IllegalStateException("hash failure", e);
+        }
+    }
+
+    private String buildPayloadJson(String subject, String html, String link, String deliveryId) {
+        try {
+            return objectMapper.writeValueAsString(Map.of(
+                    "subject", subject,
+                    "html", html,
+                    "link", link,
+                    "deliveryId", deliveryId
+            ));
+        } catch (Exception ex) {
+            throw new IllegalStateException("payload_json_build_failed", ex);
         }
     }
 }
