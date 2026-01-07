@@ -36,18 +36,19 @@ import java.util.Map;
 )
 public class MySqlDataSourceConfig {
 
-    private static final String RAILWAY_MYSQL_URL = System.getenv("RAILWAY_MYSQL_URL");
+    // Railway provides MYSQL_URL automatically; use it as the single source of truth.
+    private static final String MYSQL_URL = System.getenv("MYSQL_URL");
 
     @Bean(name = {"dataSource", "mysqlDataSource"})
     @Primary
     public DataSource mysqlDataSource() {
-        if (isBlank(RAILWAY_MYSQL_URL)) {
+        if (isBlank(MYSQL_URL)) {
             throw new IllegalStateException(
-                    "RAILWAY_MYSQL_URL nao definida. Configure a variavel no Railway."
+                    "MYSQL_URL nao definida. Configure a variavel no Railway."
             );
         }
 
-        ParsedUrl parsed = parseRailwayUrl(RAILWAY_MYSQL_URL);
+        ParsedUrl parsed = parseRailwayUrl(MYSQL_URL);
 
         HikariConfig cfg = new HikariConfig();
         cfg.setJdbcUrl(parsed.jdbcUrl());
@@ -112,7 +113,7 @@ public class MySqlDataSourceConfig {
     private ParsedUrl parseRailwayUrl(String rawUrl) {
         URI uri = URI.create(rawUrl);
         if (!"mysql".equalsIgnoreCase(uri.getScheme())) {
-            throw new IllegalStateException("RAILWAY_MYSQL_URL invalida (esperado mysql://).");
+            throw new IllegalStateException("MYSQL_URL invalida (esperado mysql://).");
         }
 
         String host = uri.getHost();
@@ -121,7 +122,7 @@ public class MySqlDataSourceConfig {
         String db = (path != null && path.startsWith("/")) ? path.substring(1) : path;
 
         if (isBlank(host) || isBlank(db)) {
-            throw new IllegalStateException("RAILWAY_MYSQL_URL invalida (host/db ausentes).");
+            throw new IllegalStateException("MYSQL_URL invalida (host/db ausentes).");
         }
 
         String userInfo = uri.getUserInfo();
