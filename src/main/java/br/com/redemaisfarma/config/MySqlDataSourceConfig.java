@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -18,7 +17,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
-import java.util.Arrays;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,68 +36,32 @@ import java.util.Map;
 )
 public class MySqlDataSourceConfig {
 
-    private final Environment env;
-
-    public MySqlDataSourceConfig(Environment env) {
-        this.env = env;
-    }
+    private static final String RAILWAY_MYSQL_URL = System.getenv("RAILWAY_MYSQL_URL");
 
     @Bean(name = {"dataSource", "mysqlDataSource"})
     @Primary
     public DataSource mysqlDataSource() {
-        ParsedMysqlUrl parsedMysqlUrl = parseMysqlUrl(
-                firstNonBlank(env.getProperty("MYSQL_URL"), env.getProperty("MYSQL_PUBLIC_URL"))
-        );
-        String jdbcUrl = firstNonBlank(
-                env.getProperty("spring.datasource.hikari.jdbc-url"),
-                env.getProperty("spring.datasource.jdbc-url"),
-                env.getProperty("spring.datasource.url"),
-                env.getProperty("SPRING_DATASOURCE_HIKARI_JDBC_URL"),
-                env.getProperty("SPRING_DATASOURCE_JDBC_URL"),
-                env.getProperty("SPRING_DATASOURCE_URL"),
-                parsedMysqlUrl != null ? parsedMysqlUrl.jdbcUrl() : null,
-                buildFromMysqlEnv()
-        );
-        String username = firstNonBlank(
-                env.getProperty("spring.datasource.username"),
-                env.getProperty("SPRING_DATASOURCE_USERNAME"),
-                parsedMysqlUrl != null ? parsedMysqlUrl.username() : null,
-                env.getProperty("MYSQL_USERNAME"),
-                env.getProperty("MYSQL_USER")
-        );
-        String password = firstNonBlank(
-                env.getProperty("spring.datasource.password"),
-                env.getProperty("SPRING_DATASOURCE_PASSWORD"),
-                parsedMysqlUrl != null ? parsedMysqlUrl.password() : null,
-                env.getProperty("MYSQL_ROOT_PASSWORD"),
-                env.getProperty("MYSQL_PASSWORD")
-        );
-
-        if (isBlank(jdbcUrl)) {
-            String profiles = String.join(",", env.getActiveProfiles());
+        if (isBlank(RAILWAY_MYSQL_URL)) {
             throw new IllegalStateException(
-                    "MySQL sem jdbcUrl! Defina spring.datasource.url OU spring.datasource.hikari.jdbc-url (profiles ativos: "
-                            + (profiles.isEmpty() ? "<none>" : profiles) + ")."
+                    "RAILWAY_MYSQL_URL nao definida. Configure a variavel no Railway."
             );
         }
 
-        HikariConfig cfg = new HikariConfig();
-        cfg.setJdbcUrl(jdbcUrl);
-        if (!isBlank(username)) cfg.setUsername(username);
-        if (!isBlank(password)) cfg.setPassword(password);
-        cfg.setDriverClassName(firstNonBlank(
-                env.getProperty("spring.datasource.driver-class-name"),
-                env.getProperty("SPRING_DATASOURCE_DRIVER_CLASS_NAME"),
-                "com.mysql.cj.jdbc.Driver"
-        ));
+        ParsedUrl parsed = parseRailwayUrl(RAILWAY_MYSQL_URL);
 
-        // Ajustes de robustez na inicialização
+        HikariConfig cfg = new HikariConfig();
+        cfg.setJdbcUrl(parsed.jdbcUrl());
+        cfg.setUsername(parsed.username());
+        cfg.setPassword(parsed.password());
+        cfg.setDriverClassName("com.mysql.cj.jdbc.Driver");
+
+        // Startup-friendly defaults for Railway.
         cfg.setMaximumPoolSize(10);
         cfg.setMinimumIdle(2);
         cfg.setConnectionTimeout(8000);
         cfg.setValidationTimeout(3000);
-        cfg.setInitializationFailTimeout(0);   // não falhar se a 1ª conexão der erro (MySQL atrasado)
-        cfg.setKeepaliveTime(15000);           // mantém sockets quentes
+        cfg.setInitializationFailTimeout(0);
+        cfg.setKeepaliveTime(15000);
         cfg.setIdleTimeout(60000);
         cfg.setConnectionTestQuery("SELECT 1");
 
@@ -132,87 +95,55 @@ public class MySqlDataSourceConfig {
     @Bean(name = "jpaSharedEM_mysqlEntityManagerFactory")
     @Primary
     public EntityManager mysqlSharedEntityManager(
-            @Qualifier("mysqlEntityManagerFactory") EntityManagerFactory emf
-    ) {
+            @Qualifier("mysqlEntityManagerFactory") EntityManagerFactory emf) {
         return SharedEntityManagerCreator.createSharedEntityManager(emf);
     }
 
     private Map<String, Object> jpaProps() {
         Map<String, Object> p = new HashMap<>();
-        putIfPresent(p, "hibernate.hbm2ddl.auto",
-                firstNonBlank(
-                        env.getProperty("spring.jpa.hibernate.ddl-auto"),
-                        env.getProperty("SPRING_JPA_HIBERNATE_DDL_AUTO"),
-                        env.getProperty("SPRING_JPA_MYSQL_HIBERNATE_DDL_AUTO"),
-                        "none"));
-        putIfPresent(p, "hibernate.dialect",
-                firstNonBlank(
-                        env.getProperty("spring.jpa.properties.hibernate.dialect"),
-                        env.getProperty("SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT"),
-                        env.getProperty("SPRING_JPA_MYSQL_PROPERTIES_HIBERNATE_DIALECT")));
-        putIfPresent(p, "hibernate.show_sql",
-                firstNonBlank(
-                        env.getProperty("spring.jpa.show-sql"),
-                        env.getProperty("SPRING_JPA_SHOW_SQL"),
-                        env.getProperty("SPRING_JPA_MYSQL_SHOW_SQL")));
-        putIfPresent(p, "hibernate.format_sql",
-                firstNonBlank(
-                        env.getProperty("spring.jpa.properties.hibernate.format_sql"),
-                        env.getProperty("SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL")));
-        putIfPresent(p, "hibernate.jdbc.time_zone",
-                firstNonBlank(env.getProperty("spring.jpa.properties.hibernate.jdbc.time_zone"), "UTC"));
+        p.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+        p.put("hibernate.hbm2ddl.auto", "none");
+        p.put("hibernate.show_sql", "false");
+        p.put("hibernate.format_sql", "true");
+        p.put("hibernate.jdbc.time_zone", "UTC");
         return p;
     }
 
-    private void putIfPresent(Map<String, Object> map, String key, String val) {
-        if (!isBlank(val)) map.put(key, val);
-    }
-
-    private String buildFromMysqlEnv() {
-        String db = firstNonBlank(env.getProperty("MYSQLDATABASE"), env.getProperty("MYSQL_DATABASE"));
-        if (isBlank(db)) return null;
-        String host = firstNonBlank(env.getProperty("MYSQLHOST"), "mysql");
-        String port = firstNonBlank(env.getProperty("MYSQLPORT"), "3306");
-        return "jdbc:mysql://" + host + ":" + port + "/" + db
-                + "?sslMode=PREFERRED&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-    }
-
-    private ParsedMysqlUrl parseMysqlUrl(String rawUrl) {
-        if (isBlank(rawUrl)) return null;
-        try {
-            java.net.URI uri = java.net.URI.create(rawUrl);
-            if (!"mysql".equalsIgnoreCase(uri.getScheme())) return null;
-
-            String host = uri.getHost();
-            int port = uri.getPort();
-            String path = uri.getPath();
-            String db = (path != null && path.startsWith("/")) ? path.substring(1) : path;
-            if (isBlank(host) || isBlank(db)) return null;
-
-            String userInfo = uri.getUserInfo();
-            String user = null;
-            String pass = null;
-            if (!isBlank(userInfo)) {
-                String[] parts = userInfo.split(":", 2);
-                user = parts[0];
-                if (parts.length > 1) pass = parts[1];
-            }
-
-            String jdbcUrl = "jdbc:mysql://" + host + ":" + (port > 0 ? port : 3306) + "/" + db
-                    + "?sslMode=PREFERRED&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-            return new ParsedMysqlUrl(jdbcUrl, user, pass);
-        } catch (IllegalArgumentException ex) {
-            return null;
+    private ParsedUrl parseRailwayUrl(String rawUrl) {
+        URI uri = URI.create(rawUrl);
+        if (!"mysql".equalsIgnoreCase(uri.getScheme())) {
+            throw new IllegalStateException("RAILWAY_MYSQL_URL invalida (esperado mysql://).");
         }
-    }
 
-    private record ParsedMysqlUrl(String jdbcUrl, String username, String password) {}
+        String host = uri.getHost();
+        int port = uri.getPort() > 0 ? uri.getPort() : 3306;
+        String path = uri.getPath();
+        String db = (path != null && path.startsWith("/")) ? path.substring(1) : path;
+
+        if (isBlank(host) || isBlank(db)) {
+            throw new IllegalStateException("RAILWAY_MYSQL_URL invalida (host/db ausentes).");
+        }
+
+        String userInfo = uri.getUserInfo();
+        String username = null;
+        String password = null;
+        if (!isBlank(userInfo)) {
+            String[] parts = userInfo.split(":", 2);
+            username = parts[0];
+            if (parts.length > 1) {
+                password = parts[1];
+            }
+        }
+
+        String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + db
+                + "?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+
+        return new ParsedUrl(jdbcUrl, username, password);
+    }
 
     private static boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }
 
-    private static String firstNonBlank(String... vals) {
-        return Arrays.stream(vals).filter(v -> v != null && !v.trim().isEmpty()).findFirst().orElse(null);
-    }
+    private record ParsedUrl(String jdbcUrl, String username, String password) {}
 }
