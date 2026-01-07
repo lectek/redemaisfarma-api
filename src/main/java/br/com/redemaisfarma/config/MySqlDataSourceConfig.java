@@ -46,6 +46,9 @@ public class MySqlDataSourceConfig {
     @Bean(name = {"dataSource", "mysqlDataSource"})
     @Primary
     public DataSource mysqlDataSource() {
+        ParsedMysqlUrl parsedMysqlUrl = parseMysqlUrl(
+                firstNonBlank(env.getProperty("MYSQL_URL"), env.getProperty("MYSQL_PUBLIC_URL"))
+        );
         String jdbcUrl = firstNonBlank(
                 env.getProperty("spring.datasource.hikari.jdbc-url"),
                 env.getProperty("spring.datasource.jdbc-url"),
@@ -53,16 +56,21 @@ public class MySqlDataSourceConfig {
                 env.getProperty("SPRING_DATASOURCE_HIKARI_JDBC_URL"),
                 env.getProperty("SPRING_DATASOURCE_JDBC_URL"),
                 env.getProperty("SPRING_DATASOURCE_URL"),
+                parsedMysqlUrl != null ? parsedMysqlUrl.jdbcUrl() : null,
                 buildFromMysqlEnv()
         );
         String username = firstNonBlank(
                 env.getProperty("spring.datasource.username"),
                 env.getProperty("SPRING_DATASOURCE_USERNAME"),
+                parsedMysqlUrl != null ? parsedMysqlUrl.username() : null,
+                env.getProperty("MYSQL_USERNAME"),
                 env.getProperty("MYSQL_USER")
         );
         String password = firstNonBlank(
                 env.getProperty("spring.datasource.password"),
                 env.getProperty("SPRING_DATASOURCE_PASSWORD"),
+                parsedMysqlUrl != null ? parsedMysqlUrl.password() : null,
+                env.getProperty("MYSQL_ROOT_PASSWORD"),
                 env.getProperty("MYSQL_PASSWORD")
         );
 
@@ -161,11 +169,44 @@ public class MySqlDataSourceConfig {
     }
 
     private String buildFromMysqlEnv() {
-        String db = env.getProperty("MYSQL_DATABASE");
+        String db = firstNonBlank(env.getProperty("MYSQLDATABASE"), env.getProperty("MYSQL_DATABASE"));
         if (isBlank(db)) return null;
-        return "jdbc:mysql://mysql:3306/" + db
+        String host = firstNonBlank(env.getProperty("MYSQLHOST"), "mysql");
+        String port = firstNonBlank(env.getProperty("MYSQLPORT"), "3306");
+        return "jdbc:mysql://" + host + ":" + port + "/" + db
                 + "?sslMode=PREFERRED&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     }
+
+    private ParsedMysqlUrl parseMysqlUrl(String rawUrl) {
+        if (isBlank(rawUrl)) return null;
+        try {
+            java.net.URI uri = java.net.URI.create(rawUrl);
+            if (!"mysql".equalsIgnoreCase(uri.getScheme())) return null;
+
+            String host = uri.getHost();
+            int port = uri.getPort();
+            String path = uri.getPath();
+            String db = (path != null && path.startsWith("/")) ? path.substring(1) : path;
+            if (isBlank(host) || isBlank(db)) return null;
+
+            String userInfo = uri.getUserInfo();
+            String user = null;
+            String pass = null;
+            if (!isBlank(userInfo)) {
+                String[] parts = userInfo.split(":", 2);
+                user = parts[0];
+                if (parts.length > 1) pass = parts[1];
+            }
+
+            String jdbcUrl = "jdbc:mysql://" + host + ":" + (port > 0 ? port : 3306) + "/" + db
+                    + "?sslMode=PREFERRED&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+            return new ParsedMysqlUrl(jdbcUrl, user, pass);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    private record ParsedMysqlUrl(String jdbcUrl, String username, String password) {}
 
     private static boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
