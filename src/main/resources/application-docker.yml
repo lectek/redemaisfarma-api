@@ -167,9 +167,12 @@ management:
   endpoint:
     mappings:
       enabled: true
+  server:
+    # Mantém o Actuator na mesma porta do app e respeita PORT/SERVER_PORT
+    port: ${MANAGEMENT_SERVER_PORT:${PORT:${SERVER_PORT:8080}}}
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:${SERVER_PORT:8080}}
   servlet:
     context-path: /
   forward-headers-strategy: framework

@@ -99,7 +99,7 @@ spring:
     # Em dev, não definimos bootstrap-servers para não tentar conectar
 
 server:
-  port: 8080
+  port: ${PORT:${SERVER_PORT:8080}}
   servlet:
     context-path: /
   forward-headers-strategy: framework

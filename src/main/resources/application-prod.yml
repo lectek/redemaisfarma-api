@@ -64,9 +64,13 @@ spring:
     password: ${spring.datasource.password}
 
   kafka:
+    enabled: false
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:}
     listener:
       missing-topics-fatal: ${SPRING_KAFKA_MISSING_TOPICS_FATAL:true}
+
+redis:
+  enabled: false
 
   task:
     scheduling:
@@ -74,7 +78,7 @@ spring:
         size: ${SPRING_TASK_SCHEDULING_POOL_SIZE:2}
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:${SERVER_PORT:8080}}
   servlet:
     context-path: /
     encoding:
@@ -101,6 +105,9 @@ management:
       show-details: ${MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS:when_authorized}
       probes:
         enabled: ${MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED:true}
+  server:
+    # Health divulgates na mesma porta do app com fallback PORT/SERVER_PORT
+    port: ${MANAGEMENT_SERVER_PORT:${PORT:${SERVER_PORT:8080}}}
 
 logging:
   level:

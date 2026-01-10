@@ -83,7 +83,7 @@ springdoc:
       paths-to-match: /actuator/**
 
 server:
-  port: 8080
+  port: ${PORT:${SERVER_PORT:8080}}
   servlet:
     context-path: /
   forward-headers-strategy: framework
@@ -95,8 +95,8 @@ server:
 
 management:
   server:
-    # Mantém o Actuator na MESMA porta do app (8080) para casar com o healthcheck do container
-    port: ${MANAGEMENT_SERVER_PORT:8080}
+    # Mantém o Actuator na MESMA porta do app para casar com o healthcheck do container
+    port: ${MANAGEMENT_SERVER_PORT:${PORT:${SERVER_PORT:8080}}}
   endpoints:
     web:
       base-path: /actuator

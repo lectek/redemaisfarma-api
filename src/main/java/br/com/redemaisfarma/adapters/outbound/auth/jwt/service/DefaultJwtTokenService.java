@@ -31,9 +31,14 @@ public class DefaultJwtTokenService implements JwtTokenService {
 
     public DefaultJwtTokenService(JwtProperties props) {
         this.props = props;
-        String secret = Objects.requireNonNull(props.getSecret(), "jwt.secret não pode ser nulo");
+        String secret = Objects.requireNonNull(
+                props.getSecret(),
+                "jwt.secret (env JWT_SECRET) não pode ser nulo; defina JWT_SECRET no Railway antes de subir."
+        );
         if (secret.length() < 32) {
-            throw new IllegalStateException("jwt.secret deve ter pelo menos 32 caracteres (HMAC).");
+            throw new IllegalStateException(
+                    "jwt.secret (env JWT_SECRET) deve ter pelo menos 32 caracteres (HMAC); gere uma chave longa e configure JWT_SECRET no Railway."
+            );
         }
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
