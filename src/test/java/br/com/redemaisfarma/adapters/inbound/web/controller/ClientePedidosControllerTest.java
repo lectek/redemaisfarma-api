@@ -4,15 +4,23 @@ import br.com.redemaisfarma.adapters.outbound.persistence.entity.ClienteEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.PedidoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.PedidoRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepository;
+import br.com.redemaisfarma.application.core.settings.AppSettingService;
 import br.com.redemaisfarma.application.service.PaymentMethodService;
+import br.com.redemaisfarma.application.service.otp.OtpServicePort;
 import br.com.redemaisfarma.domain.enums.StatusPedido;
 import br.com.redemaisfarma.domain.enums.TipoPagamento;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -23,6 +31,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,6 +52,28 @@ class ClientePedidosControllerTest {
 
     @MockBean
     private PaymentMethodService paymentMethodService;
+
+    @MockBean
+    private AppSettingService appSettingService;
+
+    @MockBean
+    private OtpServicePort otpServicePort;
+
+    @MockBean
+    private ThymeleafViewResolver thymeleafViewResolver;
+    @BeforeEach
+    void setupAuthentication() throws Exception {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("cliente-test", "N/A",
+                        List.of(new SimpleGrantedAuthority("ROLE_CLIENTE"))));
+        when(thymeleafViewResolver.resolveViewName(any(), any()))
+                .thenReturn(new MappingJackson2JsonView());
+    }
+
+    @AfterEach
+    void cleanupAuthentication() {
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void listarUsaPrincipalQuandoUsuarioNaoEncontrado() throws Exception {
