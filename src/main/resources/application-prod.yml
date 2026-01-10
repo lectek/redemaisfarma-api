@@ -148,3 +148,7 @@ app:
   kafka:
     groups:
       pedidos: ${APP_KAFKA_GROUP_PEDIDOS:pedidos-consumer}
+
+legacy:
+  sync:
+    enabled: false
