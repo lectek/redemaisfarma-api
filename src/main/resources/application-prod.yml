@@ -152,3 +152,7 @@ app:
 legacy:
   sync:
     enabled: false
+
+admin:
+  legacy:
+    enabled: false

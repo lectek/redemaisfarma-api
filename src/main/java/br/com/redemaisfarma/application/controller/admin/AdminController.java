@@ -10,6 +10,7 @@
  */
 package br.com.redemaisfarma.application.controller.admin;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @Profile("legacy")
+@ConditionalOnProperty(name = "admin.legacy.enabled", havingValue = "true", matchIfMissing = false)
 @RequestMapping(value={"/admin"})
 public class AdminController {
     private static final String VIEW_PREFIX = "pages/admin/";
@@ -52,12 +54,6 @@ public class AdminController {
     private static void setCommon(Model model, String pageTitle, String active) {
         model.addAttribute("pageTitle", (Object)pageTitle);
         model.addAttribute("active", (Object)active);
-    }
-
-    @GetMapping(value={"/dashboard"})
-    public String dashboard(Model model) {
-        AdminController.setCommon(model, "Dashboard", "dashboard");
-        return this.viewRoot("dashboard");
     }
 
     @GetMapping(value={"/painel"})
