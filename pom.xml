@@ -585,6 +585,21 @@
         </executions>
       </plugin>
 
+      <!-- Git commit metadata for runtime diagnostics -->
+      <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <version>4.0.0</version>
+        <executions>
+          <execution>
+            <goals><goal>revision</goal></goals>
+          </execution>
+        </executions>
+        <configuration>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
+        </configuration>
+      </plugin>
+
       <!-- Flyway Maven Plugin (local MySQL; override mysql.port if you map Compose to a different host port) -->
       <plugin>
       <groupId>org.flywaydb</groupId>

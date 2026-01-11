@@ -6,7 +6,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.info.GitProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -42,14 +44,20 @@ import java.util.regex.Pattern;
 )
 public class MySqlDataSourceConfig {
 
+    private final GitProperties gitProperties;
     private static final Logger LOGGER = LoggerFactory.getLogger(MySqlDataSourceConfig.class);
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
     private static final String EXPECTED_FORMAT_MESSAGE = "Formato esperado: mysql://usuario:senha@host:porta/dbname (uma linha, sem espacos e terminando com /dbname).";
     private static final List<String> FALLBACK_URL_ENVS = List.of("RAILWAY_MYSQL_URL", "DATABASE_URL");
 
+    public MySqlDataSourceConfig(@Autowired(required = false) GitProperties gitProperties) {
+        this.gitProperties = gitProperties;
+    }
+
     @Bean(name = {"dataSource", "mysqlDataSource"})
     @Primary
     public DataSource mysqlDataSource() {
+        logStartupDiagnostics();
         String rawUrl = resolveDatabaseUrl();
         ParsedUrl parsed = parseDatabaseUrl(rawUrl);
         validateExpectedDatabase(parsed.database());
@@ -270,9 +278,28 @@ public class MySqlDataSourceConfig {
         LOGGER.info("MySQL config resolved host={}, port={}, db={}", parsed.host(), parsed.port(), parsed.database());
     }
 
+    private void logStartupDiagnostics() {
+        LOGGER.info("Env presence  MYSQL_URL={}, RAILWAY_MYSQL_URL={}, DATABASE_URL={}",
+                hasEnvValue("MYSQL_URL"),
+                hasEnvValue("RAILWAY_MYSQL_URL"),
+                hasEnvValue("DATABASE_URL"));
+        String commit = null;
+        if (gitProperties != null) {
+            commit = gitProperties.getShortCommitId();
+            if (isBlank(commit)) {
+                commit = gitProperties.getCommitId();
+            }
+        }
+        LOGGER.info("Build commit={}", commit != null ? commit : "<unknown>");
+    }
+
     private static String trimEnv(String key) {
         String value = System.getenv(key);
         return value != null ? value.trim() : null;
+    }
+
+    private static boolean hasEnvValue(String key) {
+        return !isBlank(trimEnv(key));
     }
 
     private static String decodeComponent(String component) {
