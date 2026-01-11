@@ -4,6 +4,8 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +20,12 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Primary
 @Configuration(proxyBeanMethods = false)
@@ -36,19 +42,18 @@ import java.util.Map;
 )
 public class MySqlDataSourceConfig {
 
-    // Railway provides MYSQL_URL automatically; use it as the single source of truth.
-    private static final String MYSQL_URL = System.getenv("MYSQL_URL");
+    private static final Logger LOGGER = LoggerFactory.getLogger(MySqlDataSourceConfig.class);
+    private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
+    private static final String EXPECTED_FORMAT_MESSAGE = "Formato esperado: mysql://usuario:senha@host:porta/dbname (uma linha, sem espacos e terminando com /dbname).";
+    private static final List<String> FALLBACK_URL_ENVS = List.of("RAILWAY_MYSQL_URL", "DATABASE_URL");
 
     @Bean(name = {"dataSource", "mysqlDataSource"})
     @Primary
     public DataSource mysqlDataSource() {
-        if (isBlank(MYSQL_URL)) {
-            throw new IllegalStateException(
-                    "MYSQL_URL nao definida. Configure a variavel no Railway."
-            );
-        }
-
-        ParsedUrl parsed = parseRailwayUrl(MYSQL_URL);
+        String rawUrl = resolveDatabaseUrl();
+        ParsedUrl parsed = parseDatabaseUrl(rawUrl);
+        validateExpectedDatabase(parsed.database());
+        logResolvedConfiguration(parsed);
 
         HikariConfig cfg = new HikariConfig();
         cfg.setJdbcUrl(parsed.jdbcUrl());
@@ -110,41 +115,176 @@ public class MySqlDataSourceConfig {
         return p;
     }
 
-    private ParsedUrl parseRailwayUrl(String rawUrl) {
-        URI uri = URI.create(rawUrl);
-        if (!"mysql".equalsIgnoreCase(uri.getScheme())) {
-            throw new IllegalStateException("MYSQL_URL invalida (esperado mysql://).");
+    private String resolveDatabaseUrl() {
+        String mysqlUrl = trimEnv("MYSQL_URL");
+        if (!isBlank(mysqlUrl)) {
+            return mysqlUrl;
         }
 
-        String host = uri.getHost();
-        int port = uri.getPort() > 0 ? uri.getPort() : 3306;
-        String path = uri.getPath();
-        String db = (path != null && path.startsWith("/")) ? path.substring(1) : path;
-
-        if (isBlank(host) || isBlank(db)) {
-            throw new IllegalStateException("MYSQL_URL invalida (host/db ausentes).");
+        for (String envKey : FALLBACK_URL_ENVS) {
+            String candidate = trimEnv(envKey);
+            if (!isBlank(candidate)) {
+                return candidate;
+            }
         }
 
-        String userInfo = uri.getUserInfo();
+        throw new IllegalStateException("Nenhuma das variaveis MYSQL_URL, RAILWAY_MYSQL_URL ou DATABASE_URL foi definida. Configure o Railway/MySQL corretamente.");
+    }
+
+    private void validateExpectedDatabase(String actualDatabase) {
+        String expectedDatabase = System.getenv("MYSQL_DATABASE");
+        if (!isBlank(expectedDatabase)) {
+            expectedDatabase = expectedDatabase.trim();
+            if (!expectedDatabase.equals(actualDatabase)) {
+                throw new IllegalStateException(String.format("MYSQL_DATABASE (%s) difere do banco informado na URL (%s).", expectedDatabase, actualDatabase));
+            }
+        }
+    }
+
+    private ParsedUrl parseDatabaseUrl(String rawUrl) {
+        if (isBlank(rawUrl)) {
+            throw new IllegalStateException("A URL do MySQL esta vazia. " + EXPECTED_FORMAT_MESSAGE);
+        }
+
+        String normalized = rawUrl.trim();
+        if (hasWhitespace(normalized)) {
+            throw new IllegalStateException("A URL do MySQL contem espacos ou quebras de linha. " + EXPECTED_FORMAT_MESSAGE);
+        }
+
+        if (normalized.startsWith("jdbc:")) {
+            normalized = normalized.substring("jdbc:".length());
+        }
+
+        if (!normalized.startsWith("mysql://")) {
+            throw new IllegalStateException("A URL do MySQL deve começar com mysql://. " + EXPECTED_FORMAT_MESSAGE);
+        }
+
+        ParsedUrl parsed = tryParseWithUri(normalized);
+        if (parsed != null) {
+            return parsed;
+        }
+
+        return parseManually(normalized);
+    }
+
+    private ParsedUrl tryParseWithUri(String rawUrl) {
+        try {
+            URI uri = URI.create(rawUrl);
+            String host = uri.getHost();
+            String path = uri.getPath();
+            String db = (path != null && path.startsWith("/")) ? path.substring(1) : path;
+            db = decodeComponent(db);
+            if (isBlank(host) || isBlank(db)) {
+                return null;
+            }
+            if (db.contains("/")) {
+                throw new IllegalStateException("A URL do MySQL deve terminar com /dbname. " + EXPECTED_FORMAT_MESSAGE);
+            }
+
+            int port = uri.getPort() > 0 ? uri.getPort() : 3306;
+            String userInfo = uri.getUserInfo();
+            String username = null;
+            String password = null;
+            if (!isBlank(userInfo)) {
+                String[] parts = userInfo.split(":", 2);
+                username = decodeComponent(parts[0]);
+                if (parts.length > 1) {
+                    password = decodeComponent(parts[1]);
+                }
+            }
+
+            String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + db
+                    + "?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+            return new ParsedUrl(jdbcUrl, username, password, db, host, port);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    private ParsedUrl parseManually(String normalizedUrl) {
+        String withoutScheme = normalizedUrl.substring("mysql://".length());
+        int atIndex = withoutScheme.lastIndexOf('@');
+        if (atIndex <= 0 || atIndex == withoutScheme.length() - 1) {
+            throw new IllegalStateException("MYSQL_URL invalida (host e caminho devem estar presentes). " + EXPECTED_FORMAT_MESSAGE);
+        }
+
+        String userInfo = withoutScheme.substring(0, atIndex);
+        String hostPart = withoutScheme.substring(atIndex + 1);
+
+        int slashIndex = hostPart.indexOf('/');
+        if (slashIndex <= 0 || slashIndex == hostPart.length() - 1) {
+            throw new IllegalStateException("MYSQL_URL invalida (host e caminho devem estar presentes). " + EXPECTED_FORMAT_MESSAGE);
+        }
+
+        String hostPort = hostPart.substring(0, slashIndex);
+        String dbPart = hostPart.substring(slashIndex + 1);
+        int queryIndex = dbPart.indexOf('?');
+        String dbSegment = queryIndex >= 0 ? dbPart.substring(0, queryIndex) : dbPart;
+        String db = decodeComponent(dbSegment);
+
+        String host;
+        int port = 3306;
+        int portIdx = hostPort.lastIndexOf(':');
+        if (portIdx > 0 && portIdx < hostPort.length() - 1) {
+            host = hostPort.substring(0, portIdx);
+            try {
+                port = Integer.parseInt(hostPort.substring(portIdx + 1));
+            } catch (NumberFormatException ignored) {
+                port = 3306;
+            }
+        } else {
+            host = hostPort;
+        }
+
         String username = null;
         String password = null;
-        if (!isBlank(userInfo)) {
-            String[] parts = userInfo.split(":", 2);
-            username = parts[0];
-            if (parts.length > 1) {
-                password = parts[1];
-            }
+        int userSep = userInfo.indexOf(':');
+        if (userSep >= 0) {
+            username = decodeComponent(userInfo.substring(0, userSep));
+            password = decodeComponent(userInfo.substring(userSep + 1));
+        } else if (!isBlank(userInfo)) {
+            username = decodeComponent(userInfo);
+        }
+
+        if (isBlank(host) || isBlank(db)) {
+            throw new IllegalStateException("MYSQL_URL invalida (host e caminho devem estar presentes). " + EXPECTED_FORMAT_MESSAGE);
+        }
+
+        if (db.contains("/")) {
+            throw new IllegalStateException("A URL do MySQL deve terminar com /dbname. " + EXPECTED_FORMAT_MESSAGE);
         }
 
         String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + db
                 + "?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-
-        return new ParsedUrl(jdbcUrl, username, password);
+        return new ParsedUrl(jdbcUrl, username, password, db, host, port);
     }
 
     private static boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }
+    private static boolean hasWhitespace(String value) {
+        return value != null && WHITESPACE_PATTERN.matcher(value).find();
+    }
 
-    private record ParsedUrl(String jdbcUrl, String username, String password) {}
+    private static void logResolvedConfiguration(ParsedUrl parsed) {
+        LOGGER.info("MySQL config resolved host={}, port={}, db={}", parsed.host(), parsed.port(), parsed.database());
+    }
+
+    private static String trimEnv(String key) {
+        String value = System.getenv(key);
+        return value != null ? value.trim() : null;
+    }
+
+    private static String decodeComponent(String component) {
+        if (isBlank(component)) {
+            return null;
+        }
+        try {
+            return URLDecoder.decode(component, StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException ex) {
+            return component;
+        }
+    }
+
+    private record ParsedUrl(String jdbcUrl, String username, String password, String database, String host, int port) {}
 }
