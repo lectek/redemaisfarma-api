@@ -29,11 +29,14 @@ public class RedeMaisFarmaApiApplication {
             boolean hasActiveProfile =
                     System.getProperty("spring.profiles.active") != null
                     || System.getenv("SPRING_PROFILES_ACTIVE") != null;
+            boolean isRailway = isRunningOnRailway();
 
-            if (!hasActiveProfile) {
+            if (!hasActiveProfile && !isRailway) {
                 Map<String, Object> defaults = new HashMap<>();
                 defaults.put("spring.profiles.default", "dev");
                 app.setDefaultProperties(defaults);
+            } else if (!hasActiveProfile) {
+                logger.info("Railway environment detected; relying on SPRING_PROFILES_ACTIVE for profile selection.");
             }
 
             ConfigurableEnvironment env = app.run(args).getEnvironment();
@@ -52,5 +55,18 @@ public class RedeMaisFarmaApiApplication {
             logger.error("❌ Erro ao iniciar a aplicação RedeMaisFarma:", e);
             System.exit(1);
         }
+    }
+
+    private static boolean isRunningOnRailway() {
+        return isEnvPresent("RAILWAY_ENVIRONMENT_NAME")
+                || isEnvPresent("RAILWAY_SERVICE_NAME")
+                || isEnvPresent("RAILWAY_SERVICE_ID")
+                || isEnvPresent("RAILWAY_STATIC_URL")
+                || isEnvPresent("RAILWAY_REGION");
+    }
+
+    private static boolean isEnvPresent(String envKey) {
+        String value = System.getenv(envKey);
+        return value != null && !value.trim().isEmpty();
     }
 }

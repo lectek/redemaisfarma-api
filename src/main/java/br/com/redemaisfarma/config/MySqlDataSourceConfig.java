@@ -49,7 +49,7 @@ public class MySqlDataSourceConfig {
     private final GitProperties gitProperties;
     private static final Logger LOGGER = LoggerFactory.getLogger(MySqlDataSourceConfig.class);
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
-    private static final Pattern INVISIBLE_CHAR_PATTERN = Pattern.compile("[\\uFEFF\\u200B\\u200C\\u200D\\u2060]");
+    private static final Pattern INVISIBLE_CHAR_PATTERN = Pattern.compile("[\\uFEFF\\u00A0\\u200B\\u200C\\u200D\\u202F\\u2060]");
     private static final Pattern COMBINING_MARKS_PATTERN = Pattern.compile("\\p{M}+");
     private static final String EXPECTED_FORMAT_MESSAGE = "Formato esperado: mysql://usuario:senha@host:porta/dbname (uma linha, sem espacos e terminando com /dbname).";
     private static final List<String> FALLBACK_URL_ENVS = List.of("RAILWAY_MYSQL_URL", "DATABASE_URL");
@@ -63,11 +63,20 @@ public class MySqlDataSourceConfig {
     @Primary
     public DataSource mysqlDataSource() {
         logStartupDiagnostics();
-        String rawUrl = resolveDatabaseUrl();
-        String sanitizedUrl = sanitizeUrl(rawUrl);
-        ParsedUrl parsed = parseDatabaseUrl(sanitizedUrl);
+        ResolvedDatabaseUrl resolved = resolveDatabaseUrl();
+        String sanitizedUrl = sanitizeUrl(resolved.rawValue());
+        String maskedUrl = maskCredentials(sanitizedUrl);
+
+        ParsedUrl parsed;
+        try {
+            parsed = parseDatabaseUrl(sanitizedUrl);
+        } catch (RuntimeException ex) {
+            logParseFailure(resolved, maskedUrl, ex);
+            throw ex;
+        }
+
         validateExpectedDatabase(parsed.database());
-        logResolvedConfiguration(parsed);
+        logResolvedConfiguration(parsed, resolved.envKey(), maskedUrl);
 
         HikariConfig cfg = new HikariConfig();
         cfg.setJdbcUrl(parsed.jdbcUrl());
@@ -129,16 +138,16 @@ public class MySqlDataSourceConfig {
         return p;
     }
 
-    private String resolveDatabaseUrl() {
+    private ResolvedDatabaseUrl resolveDatabaseUrl() {
         String mysqlUrl = trimEnv("MYSQL_URL");
         if (!isBlank(mysqlUrl)) {
-            return mysqlUrl;
+            return new ResolvedDatabaseUrl("MYSQL_URL", mysqlUrl);
         }
 
         for (String envKey : FALLBACK_URL_ENVS) {
             String candidate = trimEnv(envKey);
             if (!isBlank(candidate)) {
-                return candidate;
+                return new ResolvedDatabaseUrl(envKey, candidate);
             }
         }
 
@@ -287,8 +296,20 @@ public class MySqlDataSourceConfig {
         return value != null && WHITESPACE_PATTERN.matcher(value).find();
     }
 
-    private static void logResolvedConfiguration(ParsedUrl parsed) {
-        LOGGER.info("MySQL config resolved host={}, port={}, db={}", parsed.host(), parsed.port(), parsed.database());
+    private static void logResolvedConfiguration(ParsedUrl parsed, String envKey, String maskedUrl) {
+        LOGGER.info("MySQL config resolved host={}, port={}, db={} (env={}, url={})",
+                parsed.host(), parsed.port(), parsed.database(),
+                envKey != null ? envKey : "<unknown>", maskedUrl != null ? maskedUrl : "<masked>");
+    }
+
+    private void logParseFailure(ResolvedDatabaseUrl resolved, String maskedUrl, RuntimeException ex) {
+        String envKey = resolved != null ? resolved.envKey() : "<unknown>";
+        LOGGER.error("Falha ao interpretar URL do MySQL (env={}, url={}, cause={}): {}",
+                envKey,
+                maskedUrl,
+                ex.getClass().getSimpleName(),
+                ex.getMessage(),
+                ex);
     }
 
     private void logStartupDiagnostics() {
@@ -348,6 +369,36 @@ public class MySqlDataSourceConfig {
         return DATABASE_NAME_OVERRIDES.getOrDefault(normalized, normalized);
     }
 
+    private static String maskCredentials(String sanitizedUrl) {
+        if (isBlank(sanitizedUrl)) {
+            return "<masked>";
+        }
+        int schemeEnd = sanitizedUrl.indexOf("://");
+        if (schemeEnd < 0) {
+            return sanitizedUrl;
+        }
+        int atIndex = sanitizedUrl.indexOf('@', schemeEnd + 3);
+        if (atIndex < 0) {
+            return sanitizedUrl;
+        }
+
+        String prefix = sanitizedUrl.substring(0, schemeEnd + 3);
+        String credentialSegment = sanitizedUrl.substring(schemeEnd + 3, atIndex);
+        String hostSuffix = sanitizedUrl.substring(atIndex);
+        int colonIndex = credentialSegment.indexOf(':');
+        String maskedCredentials;
+        if (colonIndex >= 0) {
+            String username = credentialSegment.substring(0, colonIndex);
+            maskedCredentials = username + ":***";
+        } else if (!credentialSegment.isEmpty()) {
+            maskedCredentials = credentialSegment + ":***";
+        } else {
+            maskedCredentials = "***";
+        }
+
+        return prefix + maskedCredentials + hostSuffix;
+    }
+
     private static String decodeComponent(String component) {
         if (isBlank(component)) {
             return null;
@@ -358,6 +409,6 @@ public class MySqlDataSourceConfig {
             return component;
         }
     }
-
     private record ParsedUrl(String jdbcUrl, String username, String password, String database, String host, int port) {}
+    private record ResolvedDatabaseUrl(String envKey, String rawValue) {}
 }

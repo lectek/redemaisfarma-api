@@ -145,11 +145,11 @@
   <!-- =================================================================== -->
   <springProfile name="prod">
     <!-- Níveis -->
-    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework" level="INFO"/>
     <logger name="org.springframework.web" level="INFO"/>
     <logger name="org.springframework.security" level="INFO"/>
-    <logger name="org.hibernate.SQL" level="INFO"/>
-    <logger name="org.hibernate.orm.jdbc.bind" level="WARN"/>
+    <logger name="org.hibernate.SQL" level="WARN"/>
+    <logger name="org.hibernate.orm.jdbc.bind" level="OFF"/>
     <logger name="com.zaxxer.hikari" level="INFO"/>
     <logger name="org.springframework.kafka" level="INFO"/>
     <logger name="br.com.redemaisfarma" level="INFO"/>
