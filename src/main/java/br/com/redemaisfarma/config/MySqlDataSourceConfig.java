@@ -24,8 +24,10 @@ import javax.sql.DataSource;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -47,8 +49,11 @@ public class MySqlDataSourceConfig {
     private final GitProperties gitProperties;
     private static final Logger LOGGER = LoggerFactory.getLogger(MySqlDataSourceConfig.class);
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
+    private static final Pattern INVISIBLE_CHAR_PATTERN = Pattern.compile("[\\uFEFF\\u200B\\u200C\\u200D\\u2060]");
+    private static final Pattern COMBINING_MARKS_PATTERN = Pattern.compile("\\p{M}+");
     private static final String EXPECTED_FORMAT_MESSAGE = "Formato esperado: mysql://usuario:senha@host:porta/dbname (uma linha, sem espacos e terminando com /dbname).";
     private static final List<String> FALLBACK_URL_ENVS = List.of("RAILWAY_MYSQL_URL", "DATABASE_URL");
+    private static final Map<String, String> DATABASE_NAME_OVERRIDES = Map.of("ferrovia", "railway");
 
     public MySqlDataSourceConfig(@Autowired(required = false) GitProperties gitProperties) {
         this.gitProperties = gitProperties;
@@ -59,7 +64,8 @@ public class MySqlDataSourceConfig {
     public DataSource mysqlDataSource() {
         logStartupDiagnostics();
         String rawUrl = resolveDatabaseUrl();
-        ParsedUrl parsed = parseDatabaseUrl(rawUrl);
+        String sanitizedUrl = sanitizeUrl(rawUrl);
+        ParsedUrl parsed = parseDatabaseUrl(sanitizedUrl);
         validateExpectedDatabase(parsed.database());
         logResolvedConfiguration(parsed);
 
@@ -140,12 +146,9 @@ public class MySqlDataSourceConfig {
     }
 
     private void validateExpectedDatabase(String actualDatabase) {
-        String expectedDatabase = System.getenv("MYSQL_DATABASE");
-        if (!isBlank(expectedDatabase)) {
-            expectedDatabase = expectedDatabase.trim();
-            if (!expectedDatabase.equals(actualDatabase)) {
-                throw new IllegalStateException(String.format("MYSQL_DATABASE (%s) difere do banco informado na URL (%s).", expectedDatabase, actualDatabase));
-            }
+        String expectedDatabase = normalizeDatabaseName(System.getenv("MYSQL_DATABASE"));
+        if (!isBlank(expectedDatabase) && !expectedDatabase.equals(actualDatabase)) {
+            throw new IllegalStateException(String.format("MYSQL_DATABASE (%s) difere do banco informado na URL (%s).", expectedDatabase, actualDatabase));
         }
     }
 
@@ -188,6 +191,10 @@ public class MySqlDataSourceConfig {
             if (db.contains("/")) {
                 throw new IllegalStateException("A URL do MySQL deve terminar com /dbname. " + EXPECTED_FORMAT_MESSAGE);
             }
+            String normalizedDb = normalizeDatabaseName(db);
+            if (isBlank(normalizedDb)) {
+                return null;
+            }
 
             int port = uri.getPort() > 0 ? uri.getPort() : 3306;
             String userInfo = uri.getUserInfo();
@@ -201,9 +208,9 @@ public class MySqlDataSourceConfig {
                 }
             }
 
-            String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + db
+            String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + normalizedDb
                     + "?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-            return new ParsedUrl(jdbcUrl, username, password, db, host, port);
+            return new ParsedUrl(jdbcUrl, username, password, normalizedDb, host, port);
         } catch (IllegalArgumentException ex) {
             return null;
         }
@@ -262,14 +269,20 @@ public class MySqlDataSourceConfig {
             throw new IllegalStateException("A URL do MySQL deve terminar com /dbname. " + EXPECTED_FORMAT_MESSAGE);
         }
 
-        String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + db
+        String normalizedDb = normalizeDatabaseName(db);
+        if (isBlank(normalizedDb)) {
+            throw new IllegalStateException("MYSQL_URL invalida (nome do banco invalido). " + EXPECTED_FORMAT_MESSAGE);
+        }
+
+        String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + normalizedDb
                 + "?sslMode=REQUIRED&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        return new ParsedUrl(jdbcUrl, username, password, db, host, port);
+        return new ParsedUrl(jdbcUrl, username, password, normalizedDb, host, port);
     }
 
     private static boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }
+    
     private static boolean hasWhitespace(String value) {
         return value != null && WHITESPACE_PATTERN.matcher(value).find();
     }
@@ -300,6 +313,39 @@ public class MySqlDataSourceConfig {
 
     private static boolean hasEnvValue(String key) {
         return !isBlank(trimEnv(key));
+    }
+
+    private static String sanitizeUrl(String rawUrl) {
+        if (rawUrl == null) {
+            return null;
+        }
+        return stripInvisibleAndQuotes(rawUrl.trim());
+    }
+
+    private static String sanitizeComponent(String component) {
+        if (component == null) {
+            return null;
+        }
+        return stripInvisibleAndQuotes(component.trim());
+    }
+
+    private static String stripInvisibleAndQuotes(String value) {
+        if (value == null) {
+            return null;
+        }
+        String cleaned = INVISIBLE_CHAR_PATTERN.matcher(value).replaceAll("");
+        return cleaned.replace("\"", "").replace("'", "");
+    }
+
+    private static String normalizeDatabaseName(String rawDb) {
+        String sanitized = sanitizeComponent(rawDb);
+        if (isBlank(sanitized)) {
+            return null;
+        }
+        String normalized = Normalizer.normalize(sanitized, Normalizer.Form.NFKD);
+        normalized = COMBINING_MARKS_PATTERN.matcher(normalized).replaceAll("");
+        normalized = normalized.toLowerCase(Locale.ROOT);
+        return DATABASE_NAME_OVERRIDES.getOrDefault(normalized, normalized);
     }
 
     private static String decodeComponent(String component) {
