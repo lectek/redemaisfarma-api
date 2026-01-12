@@ -4,19 +4,24 @@ import br.com.redemaisfarma.adapters.outbound.persistence.entity.EmailDelivery;
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.EmailDeliveryRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.DependsOn;
 
 @Service
+@DependsOn("flyway")
 public class EmailDeliveryWorker {
     private static final Logger log = LoggerFactory.getLogger(EmailDeliveryWorker.class);
     private static final String STATUS_PENDING = "PENDING";
@@ -28,6 +33,7 @@ public class EmailDeliveryWorker {
     private final EmailDeliveryRepository repository;
     private final MailService mailService;
     private final ObjectMapper objectMapper;
+    private final AtomicBoolean missingTableLogged = new AtomicBoolean(false);
 
     public EmailDeliveryWorker(
             EmailDeliveryRepository repository,
@@ -43,10 +49,17 @@ public class EmailDeliveryWorker {
     @Transactional
     public void processBatch() {
         int batchSize = Math.max(1, Integer.getInteger("email.delivery.worker.batch-size", 50));
-        List<EmailDelivery> batch = repository.findByStatusOrderByCreatedAtAsc(
-                STATUS_PENDING,
-                PageRequest.of(0, batchSize)
-        );
+        List<EmailDelivery> batch;
+        try {
+            batch = repository.findByStatusOrderByCreatedAtAsc(
+                    STATUS_PENDING,
+                    PageRequest.of(0, batchSize)
+            );
+            missingTableLogged.set(false);
+        } catch (DataAccessException ex) {
+            handleMissingTable(ex);
+            return;
+        }
         if (batch.isEmpty()) {
             return;
         }
@@ -93,7 +106,7 @@ public class EmailDeliveryWorker {
         } catch (Exception ex) {
             String error = ex.getMessage() == null ? "Falha ao enviar email." : ex.getMessage();
             markFailed(item, error);
-            log.warn("[email-delivery] falha ao enviar para {}: {}", item.getDestination(), error);
+            log.warn("[email-delivery] falha ao enviar para {}: {}", maskDestination(item.getDestination()), error);
         }
     }
 
@@ -192,6 +205,49 @@ public class EmailDeliveryWorker {
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    private void handleMissingTable(DataAccessException ex) {
+        if (isTableMissing(ex)) {
+            if (missingTableLogged.compareAndSet(false, true)) {
+                log.error("[email-delivery] tabela 'email_delivery' ausente; worker ficará aguardando a aplicação das migrations. Cause: {}", rootCauseMessage(ex));
+            } else {
+                log.debug("[email-delivery] ainda aguardando tabela 'email_delivery'; próxima tentativa será na próxima execução.");
+            }
+            return;
+        }
+        throw ex;
+    }
+
+    private String maskDestination(String destination) {
+        if (destination == null || destination.isBlank()) {
+            return "<desconhecido>";
+        }
+        int at = destination.indexOf('@');
+        if (at <= 0) {
+            return "<destino oculto>";
+        }
+        String domain = destination.substring(at + 1);
+        return "***@" + domain;
+    }
+
+    private String rootCauseMessage(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return cause.getMessage();
+    }
+
+    private boolean isTableMissing(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause != null) {
+            if (cause instanceof SQLException sql && "42S02".equals(sql.getSQLState())) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 
     private static final class EmailPayload {

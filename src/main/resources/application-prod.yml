@@ -53,17 +53,7 @@ spring:
         jdbc:
           time_zone: UTC
 
-  flyway:
-    enabled: true
-    table: flyway_schema_history
-    # ✅ inclui PROD para que V20251005_01__... rode em produção
-    locations: classpath:db/migration,classpath:db/migration-mysql,classpath:db/migration/PROD
-    # usa as mesmas credenciais do datasource (app_user). Se não tiver DDL/INDEX, use bloco "usuário dedicado" abaixo.
-    url: ${spring.datasource.url}
-    user: ${spring.datasource.username}
-    password: ${spring.datasource.password}
-
-  kafka:
+  flyway:\n    enabled: true\n    table: flyway_schema_history\n    locations: classpath:db/migration,classpath:db/migration-mysql,classpath:db/migration/PROD\n    url: \n    user: \n    password: \n\n  kafka:
     enabled: false
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:}
     listener:
@@ -156,3 +146,4 @@ legacy:
 admin:
   legacy:
     enabled: false
+
