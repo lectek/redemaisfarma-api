@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" data-theme="light">
 <head>
   <meta charset="UTF-8" />
@@ -61,7 +61,7 @@
 
           <div class="hero__text">
             <h1 id="hero-title" class="hero-title"
-                th:text="${brandingHomeHeroTexto != null and !brandingHomeHeroTexto.isBlank()} ? brandingHomeHeroTexto : 'Cuidar da sua saude ficou simples.'">
+                th:text="${brandingHomeHeroTexto != null and !brandingHomeHeroTexto.isBlank()} ? brandingHomeHeroTexto : 'Cuidar da sua saúde ficou simples.'">
               Cuidar da sua saúde ficou simples.
             </h1>
             <p class="hero-sub">
@@ -74,7 +74,7 @@
               <li>Pagamento seguro</li>
               <li>Atendimento humanizado</li>
             </ul>
-            <p class="muted hero-note">*Consulte disponibilidade para seu CEP.</p>
+            <p class="muted hero-note">*Consulte disponibilidade para o seu CEP.</p>
           </div>
 
           <!-- Produto principal do hero -->
@@ -123,7 +123,7 @@
             <a th:href="@{/produtos(categoria='MEDICAMENTOS')}"
                href="/produtos?categoria=MEDICAMENTOS"
                class="cat-card" aria-label="Medicamentos">
-              <span aria-hidden="true">💊</span>
+              <span aria-hidden="true">Rx</span>
               <span>Medicamentos</span>
             </a>
           </li>
@@ -131,7 +131,7 @@
             <a th:href="@{/produtos(categoria='VITAMINAS')}"
                href="/produtos?categoria=VITAMINAS"
                class="cat-card" aria-label="Vitaminas e Suplementos">
-              <span aria-hidden="true">🧴</span>
+              <span aria-hidden="true">Vit</span>
               <span>Vitaminas</span>
             </a>
           </li>
@@ -139,7 +139,7 @@
             <a th:href="@{/produtos(categoria='SAUDE')}"
                href="/produtos?categoria=SAUDE"
                class="cat-card" aria-label="Cuidados com a Saúde">
-              <span aria-hidden="true">🩺</span>
+              <span aria-hidden="true">Sa</span>
               <span>Saúde</span>
             </a>
           </li>
@@ -147,7 +147,7 @@
             <a th:href="@{/produtos(categoria='PESSOAIS')}"
                href="/produtos?categoria=PESSOAIS"
                class="cat-card" aria-label="Cuidados Pessoais">
-              <span aria-hidden="true">🧼</span>
+              <span aria-hidden="true">PC</span>
               <span>Pessoais</span>
             </a>
           </li>
@@ -177,9 +177,9 @@
           <section class="carousel" data-carousel>
             <div id="carousel-viewport" class="carousel__viewport" aria-live="polite"></div>
             <button id="carousel-prev" class="carousel__btn prev"
-                    type="button" aria-label="Anterior">‹</button>
+                    type="button" aria-label="Anterior">&lsaquo;</button>
             <button id="carousel-next" class="carousel__btn next"
-                    type="button" aria-label="Próximo">›</button>
+                    type="button" aria-label="Próximo">&rsaquo;</button>
             <div id="carousel-dots" class="carousel__dots"
                  role="tablist" aria-label="Paginação"></div>
           </section>
@@ -301,7 +301,7 @@
         <header class="section-head">
           <div>
             <h2>Produtos em destaque</h2>
-            <p class="muted">Carregando catálogo…</p>
+            <p class="muted">Carregando catálogo...</p>
           </div>
         </header>
         <ul id="grid" class="product-grid" aria-live="polite"></ul>

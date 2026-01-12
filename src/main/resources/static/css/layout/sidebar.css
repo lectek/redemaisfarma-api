@@ -195,7 +195,7 @@
    📱 Mobile: drawer lateral
    – Use .sidebar + .sidebar-overlay (irmão)
 =============================== */
-@media (max-width: 768px) {
+@media (max-width: 1023.98px) {
   .sidebar {
     position: fixed;
     inset: env(safe-area-inset-top) auto env(safe-area-inset-bottom) 0;

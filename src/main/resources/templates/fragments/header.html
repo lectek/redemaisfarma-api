@@ -1,11 +1,14 @@
 ﻿<!-- templates/fragments/header.html -->
 <header class="site-header" role="banner" th:fragment="header">
-  <!-- atalho para conteÃºdo principal -->
-  <a class="skip-link" href="#main-content">Pular para o conteÃºdo</a>
+  <!-- atalho para conteúdo principal -->
+  <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
 
   <div class="header-inner container-fluid">
-    <a th:href="@{/}" class="logo" aria-label="PÃ¡gina inicial">
-      <img th:src="${#strings.isEmpty(brandingLogoUrl)} ? @{/images/logofarma.jpg} : ${brandingLogoUrl}" alt="RedeMaisFarma" height="40" />
+    <!-- Logo / Marca -->
+    <a th:href="@{/}" class="logo-link" aria-label="Página inicial">
+      <img class="brand-logo"
+           th:src="${#strings.isEmpty(brandingLogoUrl)} ? @{/images/logofarma.jpg} : ${brandingLogoUrl}"
+           alt="RedeMaisFarma" />
     </a>
 
     <button class="nav-toggle"
@@ -13,32 +16,36 @@
             aria-label="Abrir menu"
             aria-controls="primary-nav"
             aria-expanded="false">
-      <span class="menu-icon" aria-hidden="true"></span>
+      <span class="menu-icon hamburger" aria-hidden="true"></span>
     </button>
 
     <nav id="primary-nav" class="primary-nav" aria-label="Menu principal">
-      <ul class="nav-list">
-        <li><a th:href="@{/}"             class="menu-button" data-section="">InÃ­cio</a></li>
-        <li><a th:href="@{/produtos}"     class="menu-button" data-section="produtos">Produtos</a></li>
-        <li><a th:href="@{/sobre}"        class="menu-button" data-section="sobre">Sobre nós</a></li>
-        <li><a th:href="@{/ofertas}"      class="menu-button" data-section="ofertas">Ofertas</a></li>
-        <li><a th:href="@{/contato}"      class="menu-button" data-section="contato">Contato</a></li>
-        <li><a th:href="@{/checkout}"     class="menu-button" data-section="checkout">Checkout</a></li>
+      <div>
+        <ul class="nav-list">
+          <li><a th:href="@{/}"             class="menu-button" data-section="">Início</a></li>
+          <li><a th:href="@{/produtos}"     class="menu-button" data-section="produtos">Produtos</a></li>
+          <li><a th:href="@{/sobre}"        class="menu-button" data-section="sobre">Sobre nós</a></li>
+          <li><a th:href="@{/ofertas}"      class="menu-button" data-section="ofertas">Ofertas</a></li>
+          <li><a th:href="@{/contato}"      class="menu-button" data-section="contato">Contato</a></li>
+          <li><a th:href="@{/checkout}"     class="menu-button" data-section="checkout">Checkout</a></li>
 
-        <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
-          <a th:href="@{/admin/painel}"    class="menu-button" data-section="admin/painel">Painel</a>
-        </li>
-        <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
-          <a th:href="@{/admin/produtos}"  class="menu-button" data-section="admin/produtos">Produtos</a>
-        </li>
-        <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
-          <a th:href="@{/admin/pedidos}"   class="menu-button" data-section="admin/pedidos">Pedidos</a>
-        </li>
-        <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
-          <a th:href="@{/admin/clientes}"  class="menu-button" data-section="admin/clientes">Clientes</a>
-        </li>
-      </ul>
+          <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
+            <a th:href="@{/admin/painel}"    class="menu-button" data-section="admin/painel">Painel</a>
+          </li>
+          <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
+            <a th:href="@{/admin/produtos}"  class="menu-button" data-section="admin/produtos">Produtos</a>
+          </li>
+          <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
+            <a th:href="@{/admin/pedidos}"   class="menu-button" data-section="admin/pedidos">Pedidos</a>
+          </li>
+          <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
+            <a th:href="@{/admin/clientes}"  class="menu-button" data-section="admin/clientes">Clientes</a>
+          </li>
+        </ul>
+      </div>
     </nav>
   </div>
-</header>
 
+  <!-- backdrop do menu mobile (você já tem CSS pronto pra isso) -->
+  <div class="nav-backdrop" aria-hidden="true"></div>
+</header>
