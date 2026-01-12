@@ -219,7 +219,7 @@ public class EmailDeliveryWorker {
         throw ex;
     }
 
-    private String maskDestination(String destination) {
+    String maskDestination(String destination) {
         if (destination == null || destination.isBlank()) {
             return "<desconhecido>";
         }
