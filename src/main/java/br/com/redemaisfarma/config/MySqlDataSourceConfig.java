@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.info.GitProperties;
+import org.springframework.core.env.Environment;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -47,6 +48,7 @@ import java.util.regex.Pattern;
 public class MySqlDataSourceConfig {
 
     private final GitProperties gitProperties;
+    private final Environment environment;
     private static final Logger LOGGER = LoggerFactory.getLogger(MySqlDataSourceConfig.class);
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
     private static final Pattern INVISIBLE_CHAR_PATTERN = Pattern.compile("[\\uFEFF\\u00A0\\u200B\\u200C\\u200D\\u202F\\u2060]");
@@ -55,8 +57,10 @@ public class MySqlDataSourceConfig {
     private static final List<String> FALLBACK_URL_ENVS = List.of("RAILWAY_MYSQL_URL", "DATABASE_URL");
     private static final Map<String, String> DATABASE_NAME_OVERRIDES = Map.of("ferrovia", "railway");
 
-    public MySqlDataSourceConfig(@Autowired(required = false) GitProperties gitProperties) {
+    public MySqlDataSourceConfig(@Autowired(required = false) GitProperties gitProperties,
+                                 Environment environment) {
         this.gitProperties = gitProperties;
+        this.environment = environment;
     }
 
     @Bean(name = {"dataSource", "mysqlDataSource"})
@@ -76,7 +80,7 @@ public class MySqlDataSourceConfig {
         }
 
         validateExpectedDatabase(parsed.database());
-        logResolvedConfiguration(parsed, resolved.envKey(), maskedUrl);
+        logResolvedConfiguration(parsed, resolved.envKey());
 
         HikariConfig cfg = new HikariConfig();
         cfg.setJdbcUrl(parsed.jdbcUrl());
@@ -139,25 +143,48 @@ public class MySqlDataSourceConfig {
     }
 
     private ResolvedDatabaseUrl resolveDatabaseUrl() {
-        String mysqlUrl = trimEnv("MYSQL_URL");
-        if (!isBlank(mysqlUrl)) {
-            return new ResolvedDatabaseUrl("MYSQL_URL", mysqlUrl);
+        boolean prodProfile = isProdProfileActive();
+        ResolvedDatabaseUrl railwayUrl = resolveRailwayUrl();
+        if (railwayUrl != null) {
+            return railwayUrl;
         }
 
+        if (!prodProfile) {
+            String mysqlUrl = trimEnv("MYSQL_URL");
+            if (!isBlank(mysqlUrl)) {
+                return new ResolvedDatabaseUrl("MYSQL_URL", mysqlUrl);
+            }
+        }
+
+        throw new IllegalStateException("Nenhuma das variaveis RAILWAY_MYSQL_URL ou DATABASE_URL foi definida. Configure o Railway/MySQL corretamente.");
+    }
+
+    private ResolvedDatabaseUrl resolveRailwayUrl() {
         for (String envKey : FALLBACK_URL_ENVS) {
             String candidate = trimEnv(envKey);
             if (!isBlank(candidate)) {
                 return new ResolvedDatabaseUrl(envKey, candidate);
             }
         }
+        return null;
+    }
 
-        throw new IllegalStateException("Nenhuma das variaveis MYSQL_URL, RAILWAY_MYSQL_URL ou DATABASE_URL foi definida. Configure o Railway/MySQL corretamente.");
+    private boolean isProdProfileActive() {
+        if (environment != null) {
+            for (String profile : environment.getActiveProfiles()) {
+                if ("prod".equalsIgnoreCase(profile)) {
+                    return true;
+                }
+            }
+        }
+        return containsProdProfile(System.getenv("SPRING_PROFILES_ACTIVE"))
+                || containsProdProfile(System.getProperty("spring.profiles.active"));
     }
 
     private void validateExpectedDatabase(String actualDatabase) {
         String expectedDatabase = normalizeDatabaseName(System.getenv("MYSQL_DATABASE"));
         if (!isBlank(expectedDatabase) && !expectedDatabase.equals(actualDatabase)) {
-            throw new IllegalStateException(String.format("MYSQL_DATABASE (%s) difere do banco informado na URL (%s).", expectedDatabase, actualDatabase));
+            throw new IllegalStateException("MYSQL_DATABASE diverge do nome do banco na URL resolvida.");
         }
     }
 
@@ -296,10 +323,24 @@ public class MySqlDataSourceConfig {
         return value != null && WHITESPACE_PATTERN.matcher(value).find();
     }
 
-    private static void logResolvedConfiguration(ParsedUrl parsed, String envKey, String maskedUrl) {
-        LOGGER.info("MySQL config resolved host={}, port={}, db={} (env={}, url={})",
-                parsed.host(), parsed.port(), parsed.database(),
-                envKey != null ? envKey : "<unknown>", maskedUrl != null ? maskedUrl : "<masked>");
+    private static boolean containsProdProfile(String rawProfiles) {
+        if (isBlank(rawProfiles)) {
+            return false;
+        }
+        for (String candidate : rawProfiles.split(",")) {
+            if ("prod".equalsIgnoreCase(candidate.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void logResolvedConfiguration(ParsedUrl parsed, String envKey) {
+        LOGGER.info("MySQL config resolved source={} host={} port={} db={}",
+                envKey != null ? envKey : "<unknown>",
+                parsed.host(),
+                parsed.port(),
+                parsed.database());
     }
 
     private void logParseFailure(ResolvedDatabaseUrl resolved, String maskedUrl, RuntimeException ex) {
@@ -313,8 +354,10 @@ public class MySqlDataSourceConfig {
     }
 
     private void logStartupDiagnostics() {
-        LOGGER.info("Env presence  MYSQL_URL={}, RAILWAY_MYSQL_URL={}, DATABASE_URL={}",
-                hasEnvValue("MYSQL_URL"),
+        boolean prodProfile = isProdProfileActive();
+        boolean mysqlUrlReported = !prodProfile && hasEnvValue("MYSQL_URL");
+        LOGGER.info("Env presence MYSQL_URL={}, RAILWAY_MYSQL_URL={}, DATABASE_URL={}",
+                mysqlUrlReported,
                 hasEnvValue("RAILWAY_MYSQL_URL"),
                 hasEnvValue("DATABASE_URL"));
         String commit = null;
