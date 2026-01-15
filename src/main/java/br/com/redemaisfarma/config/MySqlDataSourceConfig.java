@@ -54,7 +54,7 @@ public class MySqlDataSourceConfig {
     private static final Pattern INVISIBLE_CHAR_PATTERN = Pattern.compile("[\\uFEFF\\u00A0\\u200B\\u200C\\u200D\\u202F\\u2060]");
     private static final Pattern COMBINING_MARKS_PATTERN = Pattern.compile("\\p{M}+");
     private static final String EXPECTED_FORMAT_MESSAGE = "Formato esperado: mysql://usuario:senha@host:porta/dbname (uma linha, sem espacos e terminando com /dbname).";
-    private static final List<String> FALLBACK_URL_ENVS = List.of("RAILWAY_MYSQL_URL", "DATABASE_URL");
+    private static final List<String> FALLBACK_URL_ENVS = List.of("RAILWAY_MYSQL_URL", "DATABASE_URL", "MYSQL_PRIVATE_URL");
     private static final Map<String, String> DATABASE_NAME_OVERRIDES = Map.of("ferrovia", "railway");
 
     public MySqlDataSourceConfig(@Autowired(required = false) GitProperties gitProperties,
