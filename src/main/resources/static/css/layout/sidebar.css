@@ -8,13 +8,13 @@
 =============================== */
 
 .sidebar {
-  --sidebar-bg: #0f4d37;
-  --sidebar-bg-2: #0b3f2b;
-  --sidebar-ink: #f2f7f4;
-  --sidebar-muted: rgba(242, 247, 244, 0.7);
-  --sidebar-pill: rgba(255, 255, 255, 0.14);
-  --sidebar-pill-hover: rgba(255, 255, 255, 0.22);
-  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-bg: #b91c1c;
+  --sidebar-bg-2: #7f1d1d;
+  --sidebar-ink: #fff5f5;
+  --sidebar-muted: rgba(255, 255, 255, 0.75);
+  --sidebar-pill: rgba(255, 255, 255, 0.18);
+  --sidebar-pill-hover: rgba(255, 255, 255, 0.32);
+  --sidebar-border: rgba(255, 255, 255, 0.25);
 
   width: 272px;
   min-height: 100dvh;
