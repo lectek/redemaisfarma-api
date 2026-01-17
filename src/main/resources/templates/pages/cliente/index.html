@@ -39,6 +39,56 @@
   <!-- CSS global -->
   <link rel="stylesheet"
         th:href="@{/css/main.css(v=${#dates.createNow().time})}" />
+  <style>
+    :root {
+      color-scheme: light;
+    }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: #fff;
+      color: #0f172a;
+    }
+    .layout {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      min-height: calc(100vh - 4rem);
+    }
+    .hero, .section {
+      padding: 0.5rem 1rem;
+    }
+    .hero__media img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    footer {
+      display: block !important;
+      background-color: #0f172a;
+      color: #fff;
+      padding: 2rem 1rem;
+      text-align: center;
+      position: relative;
+      z-index: 0;
+    }
+    .skip-link {
+      position: absolute;
+      left: -999px;
+      top: auto;
+      width: auto;
+      height: auto;
+      padding: 0.75rem 1rem;
+      background: #0f172a;
+      color: #fff;
+    }
+    .skip-link:focus {
+      left: 1rem;
+      top: 1rem;
+      z-index: 1000;
+    }
+  </style>
 </head>
 
 <body class="body-flex" data-page="home">
