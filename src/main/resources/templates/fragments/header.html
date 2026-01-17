@@ -7,7 +7,7 @@
     <!-- Logo / Marca -->
     <a th:href="@{/}" class="logo-link" aria-label="Página inicial">
       <img class="brand-logo"
-           th:src="${#strings.isEmpty(brandingLogoUrl)} ? @{/images/logofarma.jpg} : ${brandingLogoUrl}"
+           th:src="${#strings.isEmpty(brandingLogoUrl)} ? @{/images/logofarma.png} : ${brandingLogoUrl}"
            th:classappend="${brandingLogoSize != null} ? ' brand-logo--' + brandingLogoSize : ' brand-logo--medium'"
            th:attr="data-logo-size=${brandingLogoSize != null ? brandingLogoSize : 'medium'}"
            alt="RedeMaisFarma" />

@@ -18,7 +18,7 @@ public class BrandingModelAdvice {
     private static final String LEGACY_HOME_HERO_URL = "GERAL.home_hero_imagem_url";
     private static final String LEGACY_HOME_HERO_TEXTO = "GERAL.home_hero_texto";
 
-    private static final String FALLBACK_LOGO = "/images/logofarma.jpg";
+    private static final String FALLBACK_LOGO = "/images/logofarma.png";
     private static final String FALLBACK_FAVICON = "/images/favicon.png";
 
     private final AppSettingService settings;
