@@ -16,21 +16,23 @@
   --sidebar-pill-hover: rgba(255, 255, 255, 0.32);
   --sidebar-border: rgba(255, 255, 255, 0.25);
 
-  width: 272px;
+  width: 100%;
+  max-width: 320px;
+  margin: clamp(1rem, 3vw, 1.8rem) auto;
   min-height: 100dvh;
   position: sticky;
-  top: 0;
+  top: clamp(2rem, 4vw, 3rem);
   background: linear-gradient(180deg, var(--sidebar-bg), var(--sidebar-bg-2));
   color: var(--sidebar-ink);
-  padding: clamp(16px, 2vw, 20px);
-  border-right: 1px solid var(--sidebar-border);
-  border-radius: 18px;
-  box-shadow: 0 18px 40px rgba(10, 20, 15, 0.28);
+  padding: clamp(24px, 3vw, 30px) clamp(18px, 2.5vw, 22px);
+  border: 1px solid var(--sidebar-border);
+  border-radius: 28px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  align-items: stretch;
-  text-align: left;
+  gap: 1.25rem;
+  align-items: center;
+  text-align: center;
 
   /* desempenho e suavidade */
   will-change: transform;
@@ -39,6 +41,15 @@
 }
 
 /* Header / brand */
+.sidebar__nav {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2vw, 1.5rem);
+  justify-content: center;
+  align-items: center;
+}
+
 .sidebar__logo {
   display: flex;
   align-items: center;
@@ -110,11 +121,22 @@
 .sidebar__brand {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: .75rem;
   color: var(--sidebar-ink);
   text-decoration: none;
   width: 100%;
-  justify-content: center;
+  padding: 0.35rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.sidebar__brand:hover,
+.sidebar__brand:focus-visible {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 .sidebar__brand-icon {
@@ -150,25 +172,28 @@
 .sidebar__list {
   list-style: none;
   margin: 0;
-  padding: .25rem 0;
-  display: grid;
-  gap: .35rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
   width: 100%;
-  justify-items: stretch;
+  align-items: center;
 }
 
 .sidebar__link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: .75rem;
-  padding: .65rem .85rem;
+  justify-content: center;
+  gap: .65rem;
+  padding: .75rem 1.5rem;
   color: var(--sidebar-ink);
   text-decoration: none;
   border-radius: 999px;
   transition: background .2s ease, color .2s ease, transform .12s ease;
-  min-height: 44px;
-  justify-content: flex-start;
-  width: 100%;
+  min-height: 48px;
+  width: min(220px, 100%);
+  font-weight: 600;
+  letter-spacing: .02em;
 }
 
 .sidebar__link:hover {
