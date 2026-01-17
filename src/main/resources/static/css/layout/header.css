@@ -17,6 +17,18 @@
   --sidebar-gap: 10px;
 
   --sidebar-ring: 0 0 0 3px color-mix(in oklab, var(--sidebar-accent) 30%, transparent);
+
+  --header-height: 72px;
+  --header-bg: #ffffff;
+  --header-border: var(--layout-border, #e5e7eb);
+  --header-shadow: 0 10px 35px rgba(15, 23, 42, 0.08);
+  --header-z: 1100;
+  --header-link-color: var(--layout-dark, #111827);
+  --header-link-hover: color-mix(in oklab, var(--header-link-color) 70%, #000 30%);
+  --header-link-border: transparent;
+  --header-link-hover-bg: color-mix(in oklab, var(--header-bg) 80%, #0f172a 20%);
+  --header-cta-bg: #0ea5e9;
+  --header-cta-bg-hover: #0284c7;
 }
 
 .sidebar{
@@ -204,4 +216,175 @@ html.sidebar-compact .sidebar__link span{
 .brand-logo--large {
   height: 80px;
   max-height: 80px;
+}
+
+.site-header {
+  position: sticky;
+  inset: 0;
+  z-index: var(--header-z);
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--header-border);
+  box-shadow: var(--header-shadow);
+  backdrop-filter: saturate(120%) blur(14px);
+}
+
+.site-header .header-inner {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.primary-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.primary-nav .nav-list {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.primary-nav .nav-list li {
+  display: inline-flex;
+}
+
+.site-header .menu-button {
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid var(--header-link-border);
+  background: transparent;
+  color: var(--header-link-color);
+  text-decoration: none;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.site-header .menu-button:hover,
+.site-header .menu-button:focus-visible {
+  border-color: var(--header-link-border, #d1d5db);
+  background: var(--header-link-hover-bg);
+  color: var(--header-link-hover);
+  outline: none;
+}
+
+.site-header .menu-button.ativo {
+  background: var(--header-cta-bg);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35);
+}
+
+.nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--header-link-color);
+  cursor: pointer;
+}
+
+.nav-toggle:hover,
+.nav-toggle:focus-visible {
+  border-color: var(--header-border);
+}
+
+.menu-icon {
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  position: relative;
+  display: inline-block;
+}
+
+.menu-icon::before,
+.menu-icon::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  left: 0;
+}
+
+.menu-icon::before { top: -6px; }
+.menu-icon::after { top: 6px; }
+
+.primary-nav {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.nav-backdrop {
+  display: none;
+}
+
+@media (max-width: 1023.98px) {
+  .nav-toggle {
+    display: flex;
+  }
+
+  .primary-nav {
+    position: fixed;
+    inset: var(--header-height) 0 0 0;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.25rem max(1rem, 4vw);
+    gap: 0.75rem;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--header-border);
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+  }
+
+  html.nav-open .primary-nav {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .primary-nav .nav-list {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .primary-nav .nav-list li {
+    width: 100%;
+  }
+
+  .primary-nav .menu-button {
+    width: 100%;
+    text-align: left;
+    border-radius: 12px;
+  }
+
+  .nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: var(--header-height) 0 0 0;
+    background: rgba(15, 23, 42, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  html.nav-open .nav-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: calc(var(--header-z) - 1);
+  }
 }
