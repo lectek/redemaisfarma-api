@@ -303,6 +303,27 @@ html.sidebar-compact .sidebar__link span{
   border-color: var(--header-border);
 }
 
+.sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--header-link-color);
+  cursor: pointer;
+  margin-left: 0.5rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.sidebar-toggle:hover,
+.sidebar-toggle:focus-visible {
+  border-color: var(--header-border);
+  background: color-mix(in oklab, var(--header-bg) 82%, #000 18%);
+}
+
 .menu-icon {
   width: 22px;
   height: 2px;

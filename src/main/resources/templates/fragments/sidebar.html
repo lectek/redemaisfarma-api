@@ -5,23 +5,6 @@
        aria-label="Menu lateral"
        xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
   <nav class="sidebar__nav">
-    <div class="sidebar__logo">
-      <a th:href="@{/}" class="sidebar__brand">
-        <svg xmlns="http://www.w3.org/2000/svg" class="sidebar__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8.009 8.009 0 0 1-8 8Z"/>
-        </svg>
-        <span>RedeMaisFarma</span>
-      </a>
-    </div>
-
-    <button class="sidebar__toggle sidebar__toggle--icon sidebar-compact-toggle"
-            type="button"
-            data-sidebar-compact-toggle
-            aria-label="Recolher menu lateral"
-            title="Recolher menu lateral">
-      <span class="sidebar__toggle-label">Recolher menu lateral</span>
-    </button>
-
     <ul class="sidebar__list">
       <li>
         <a th:href="@{/}"
