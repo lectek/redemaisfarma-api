@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR"
+      xmlns:th="http://www.thymeleaf.org"
+      th:with="headExtras=~{::forgotHeadExtras}">
+<head th:replace="~{fragments/layout :: commonHead}"></head>
+<body class="body-flex auth-page">
+  <header th:replace="~{fragments/header :: header}"></header>
+
+  <main id="main-content" class="form-container" tabindex="-1">
+    <section class="form-card" aria-labelledby="titulo-esqueci-senha">
+      <h1 id="titulo-esqueci-senha" class="form-title">Esqueci minha senha</h1>
+      <p class="text-muted" style="margin-bottom: 0.5rem;">
+        Informe o e-mail cadastrado e enviaremos um link seguro para redefinir sua senha.
+      </p>
+
+      <div id="alert" class="alert" role="status" aria-live="polite"></div>
+
+      <form id="esqueciSenhaForm"
+            th:action="@{/auth/esqueci-senha}"
+            method="post"
+            class="form-grid"
+            autocomplete="on"
+            novalidate>
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input id="email"
+                 name="identificador"
+                 type="email"
+                 class="input"
+                 placeholder="voce@dominio.com"
+                 autocomplete="email"
+                 required />
+          <p class="help" style="margin-bottom:0;">Você receberá um link e um código temporário.</p>
+        </div>
+
+        <button id="enviarBtn" type="submit" class="btn btn--primary">Enviar link</button>
+
+        <p class="mt-6" style="text-align:center">
+          Já possui conta? <a th:href="@{/auth/login}">Entrar</a>
+        </p>
+      </form>
+    </section>
+  </main>
+
+  <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+  <dialog id="otpDialog" aria-labelledby="otpTitle" aria-describedby="otpDesc" aria-modal="true">
+    <form method="dialog" class="otp-card" id="otpForm">
+      <h2 id="otpTitle">Verificar seu código</h2>
+      <p id="otpDesc">Enviamos um código para <strong id="otpDestino"></strong>. Digite abaixo:</p>
+
+      <div class="otp-grid" role="group" aria-label="Código de 6 dígitos">
+        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 1" />
+        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 2" />
+        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 3" />
+        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 4" />
+        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 5" />
+        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 6" />
+      </div>
+
+      <p id="otpError" class="error-message" aria-live="polite"></p>
+
+      <div class="otp-actions">
+        <button id="otpConfirmBtn" class="btn btn--primary" type="submit" value="confirm">Confirmar</button>
+        <button id="otpResendBtn" class="btn btn--ghost" type="button">Reenviar código</button>
+        <button class="btn btn--ghost" value="cancel">Cancelar</button>
+      </div>
+
+      <div class="otp-secondary">
+        <small id="otpTimer" class="help" aria-live="polite"></small>
+      </div>
+    </form>
+  </dialog>
+
+  <script defer th:src="@{/js/layout.js}"></script>
+  <script defer th:src="@{/js/esqueci-senha.js}"></script>
+
+  <th:block th:fragment="forgotHeadExtras">
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
+  </th:block>
+</body>
+</html>
