@@ -75,7 +75,9 @@ public class RedeMaisFarmaApiApplication {
             "RAILWAY_SERVICE_NAME",
             "RAILWAY_SERVICE_ID",
             "RAILWAY_STATIC_URL",
-            "RAILWAY_REGION"
+            "RAILWAY_REGION",
+            "RAILWAY_MYSQL_URL",
+            "DATABASE_URL"
     };
 
     private static boolean isRunningOnRailway() {
