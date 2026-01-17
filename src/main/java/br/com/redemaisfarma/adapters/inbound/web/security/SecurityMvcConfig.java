@@ -163,10 +163,10 @@ public class SecurityMvcConfig {
             .headers(headers -> headers
                     .contentSecurityPolicy(csp -> csp.policyDirectives(
                             "default-src 'self'; " +
-                            "style-src 'self' 'unsafe-inline'; " +
+                            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; " +
                             "script-src 'self' 'unsafe-inline'; " +
                             "img-src 'self' data: blob:; " +
-                            "font-src 'self' data:; " +
+                            "font-src 'self' data: https://fonts.gstatic.com; " +
                             "connect-src 'self'; " +
                             "frame-ancestors 'self'"
                     ))
