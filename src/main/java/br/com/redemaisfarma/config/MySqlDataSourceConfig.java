@@ -20,6 +20,7 @@ import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.flywaydb.core.Flyway;
 
 import javax.sql.DataSource;
 import java.net.URI;
@@ -130,6 +131,18 @@ public class MySqlDataSourceConfig {
     public EntityManager mysqlSharedEntityManager(
             @Qualifier("mysqlEntityManagerFactory") EntityManagerFactory emf) {
         return SharedEntityManagerCreator.createSharedEntityManager(emf);
+    }
+
+    @Bean(name = "flyway")
+    @Primary
+    public Flyway flyway(@Qualifier("dataSource") DataSource dataSource) {
+        Flyway flyway = Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration", "classpath:db/migration-mysql")
+                .baselineOnMigrate(true)
+                .load();
+        flyway.migrate();
+        return flyway;
     }
 
     private Map<String, Object> jpaProps() {

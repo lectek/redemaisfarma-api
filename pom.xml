@@ -6,7 +6,7 @@
 
   <groupId>br.com.redemaisfarma</groupId>
   <artifactId>redemaisfarma-api</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
   <name>RedeMaisFarma API</name>
   <description>API Spring Boot</description>
   <packaging>jar</packaging>
