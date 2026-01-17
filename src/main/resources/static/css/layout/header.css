@@ -18,7 +18,7 @@
 
   --sidebar-ring: 0 0 0 3px color-mix(in oklab, var(--sidebar-accent) 30%, transparent);
 
-  --header-height: 72px;
+  --header-height: 96px;
   --header-bg: #ffffff;
   --header-border: var(--layout-border, #e5e7eb);
   --header-shadow: 0 10px 35px rgba(15, 23, 42, 0.08);
@@ -226,14 +226,16 @@ html.sidebar-compact .sidebar__link span{
   border-bottom: 1px solid var(--header-border);
   box-shadow: var(--header-shadow);
   backdrop-filter: saturate(120%) blur(14px);
+  padding-block: clamp(0.5rem, 1vw, 1rem);
 }
 
 .site-header .header-inner {
-  height: var(--header-height);
+  min-height: var(--header-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1.25rem;
+  padding-inline: clamp(1rem, 2vw, 1.5rem);
 }
 
 .primary-nav {
