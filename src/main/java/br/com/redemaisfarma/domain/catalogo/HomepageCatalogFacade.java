@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,14 +47,32 @@ public class HomepageCatalogFacade {
         if (paraVoce.isEmpty()) {
             paraVoce = maisVendidos;
         }
-        Optional<ProductCardVM> principal = resolveProdutoPrincipal(cfg, exibirIndisp);
+        List<ProductCardVM> fallbackCandidates = Stream.of(
+                destaques,
+                paraVoce,
+                novidades,
+                maisVendidos
+        ).filter(list -> list != null && !list.isEmpty())
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+
+        Optional<ProductCardVM> principal = resolveProdutoPrincipal(cfg, exibirIndisp, fallbackCandidates);
         return new HomePageVM(principal.orElse(null), paraVoce, maisVendidos, novidades, destaques);
     }
 
-    private Optional<ProductCardVM> resolveProdutoPrincipal(Map<String, String> cfg, boolean incluirIndisponiveis) {
+    private Optional<ProductCardVM> resolveProdutoPrincipal(Map<String, String> cfg, boolean incluirIndisponiveis, List<ProductCardVM> fallbackCandidates) {
         long id = HomepageCatalogFacade.parseLongOrDefault(cfg.get("HOME.main_product_id"), 0L);
         if (id <= 0L) return Optional.empty();
-        return this.produtoQuery.findById(id, incluirIndisponiveis);
+        Optional<ProductCardVM> configured = this.produtoQuery.findById(id, incluirIndisponiveis);
+        if (configured.isPresent()) {
+            return configured;
+        }
+        for (ProductCardVM candidate : fallbackCandidates) {
+            if (candidate != null) {
+                return Optional.of(candidate);
+            }
+        }
+        return Optional.empty();
     }
 
     private static int parseIntOrDefault(String v, int def) {
