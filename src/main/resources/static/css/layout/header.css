@@ -175,3 +175,33 @@ html.sidebar-compact .sidebar__brand span,
 html.sidebar-compact .sidebar__link span{
   display: none;
 }
+
+.logo-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+}
+
+.brand-logo {
+  height: 56px;
+  max-height: 56px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  transition: height 0.2s ease, max-height 0.2s ease;
+}
+
+.brand-logo--small {
+  height: 36px;
+  max-height: 36px;
+}
+
+.brand-logo--medium {
+  height: 56px;
+  max-height: 56px;
+}
+
+.brand-logo--large {
+  height: 80px;
+  max-height: 80px;
+}

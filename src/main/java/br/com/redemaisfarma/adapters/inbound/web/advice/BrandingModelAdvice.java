@@ -12,6 +12,7 @@ public class BrandingModelAdvice {
     private static final String KEY_FAVICON_URL = "branding.favicon_url";
     private static final String KEY_HOME_HERO_URL = "branding.home_hero_url";
     private static final String KEY_HOME_HERO_TEXTO = "branding.home_hero_texto";
+    private static final String KEY_LOGO_SIZE = "branding.logo_size";
     private static final String LEGACY_LOGO_URL = "GERAL.logo_inicial_url";
     private static final String LEGACY_FAVICON_URL = "GERAL.favicon_url";
     private static final String LEGACY_HOME_HERO_URL = "GERAL.home_hero_imagem_url";
@@ -52,6 +53,7 @@ public class BrandingModelAdvice {
         model.addAttribute("brandingFaviconUrl", faviconUrl);
         model.addAttribute("brandingHomeHeroUrl", heroUrl);
         model.addAttribute("brandingHomeHeroTexto", heroTexto);
+        model.addAttribute("brandingLogoSize", parseLogoSize(settings.get(KEY_LOGO_SIZE).orElse("medium")));
     }
 
     private static String firstNonBlank(String primary, String fallback, String defaultValue) {
@@ -62,5 +64,17 @@ public class BrandingModelAdvice {
             return fallback;
         }
         return defaultValue;
+    }
+
+    private static String parseLogoSize(String raw) {
+        if (raw == null) {
+            return "medium";
+        }
+        String normalized = raw.trim().toLowerCase();
+        return switch (normalized) {
+            case "small", "compact" -> "small";
+            case "large", "expanded" -> "large";
+            default -> "medium";
+        };
     }
 }

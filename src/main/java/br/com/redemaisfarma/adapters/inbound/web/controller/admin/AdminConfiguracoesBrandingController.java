@@ -38,6 +38,7 @@ public class AdminConfiguracoesBrandingController {
     private static final String KEY_FONT_FAMILY = "branding.font_family";
     private static final String KEY_THEME = "branding.tema";
     private static final String KEY_RADIUS = "branding.radius";
+    private static final String KEY_LOGO_SIZE = "branding.logo_size";
 
     private static final String LEGACY_LOGO_URL = "GERAL.logo_inicial_url";
     private static final String LEGACY_FAVICON_URL = "GERAL.favicon_url";
@@ -56,6 +57,7 @@ public class AdminConfiguracoesBrandingController {
             KEY_FONT_FAMILY,
             KEY_THEME,
             KEY_RADIUS,
+            KEY_LOGO_SIZE,
             LEGACY_LOGO_URL,
             LEGACY_FAVICON_URL,
             LEGACY_HOME_HERO_URL
@@ -98,6 +100,7 @@ public class AdminConfiguracoesBrandingController {
         settings.upsert(KEY_FONT_FAMILY, nullSafe(branding.getFontFamily()), "Font-family");
         settings.upsert(KEY_THEME, nullSafe(branding.getTema()), "Tema");
         settings.upsert(KEY_RADIUS, nullSafe(branding.getRadius()), "Raio de borda");
+        settings.upsert(KEY_LOGO_SIZE, nullSafe(branding.getLogoSize()), "Tamanho da logo");
 
         if (uploadFailed) {
             ra.addFlashAttribute("warning", "Alguns uploads falharam; verifique os arquivos enviados.");
@@ -122,6 +125,7 @@ public class AdminConfiguracoesBrandingController {
         form.setFontFamily(cfg.getOrDefault(KEY_FONT_FAMILY, ""));
         form.setTema(cfg.getOrDefault(KEY_THEME, "auto"));
         form.setRadius(cfg.getOrDefault(KEY_RADIUS, ""));
+        form.setLogoSize(cfg.getOrDefault(KEY_LOGO_SIZE, "medium"));
         return form;
     }
 
@@ -165,6 +169,7 @@ public class AdminConfiguracoesBrandingController {
         private String fontFamily;
         private String tema;
         private String radius;
+        private String logoSize;
 
         public String getLogoUrl() {
             return logoUrl;
@@ -260,6 +265,14 @@ public class AdminConfiguracoesBrandingController {
 
         public void setRadius(String radius) {
             this.radius = radius;
+        }
+
+        public String getLogoSize() {
+            return logoSize;
+        }
+
+        public void setLogoSize(String logoSize) {
+            this.logoSize = logoSize;
         }
     }
 }

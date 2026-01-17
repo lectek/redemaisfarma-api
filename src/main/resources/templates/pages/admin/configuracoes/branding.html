@@ -48,6 +48,15 @@
               <input id="logoUrlDark" class="input" type="url" th:field="*{logoUrlDark}" placeholder="https://..." />
             </div>
             <div class="form-group">
+              <label for="logoSize">Tamanho da logo</label>
+              <select id="logoSize" class="select" th:field="*{logoSize}">
+                <option value="small">Compacto (32px)</option>
+                <option value="medium">Padrão (56px)</option>
+                <option value="large">Maior (80px)</option>
+              </select>
+              <p class="form-hint">Ajusta altura/margem do logo para caber em cabeçalhos estreitos ou mais ricos.</p>
+            </div>
+            <div class="form-group">
               <label for="faviconUrl">Favicon (URL)</label>
               <input id="faviconUrl" class="input" type="url" th:field="*{faviconUrl}" placeholder="https://..." />
             </div>
