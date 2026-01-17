@@ -195,8 +195,8 @@ html.sidebar-compact .sidebar__link span{
 }
 
 .brand-logo {
-  height: 56px;
-  max-height: 56px;
+  height: 80px;
+  max-height: 80px;
   width: auto;
   display: block;
   object-fit: contain;
@@ -204,18 +204,18 @@ html.sidebar-compact .sidebar__link span{
 }
 
 .brand-logo--small {
-  height: 36px;
-  max-height: 36px;
+  height: 48px;
+  max-height: 48px;
 }
 
 .brand-logo--medium {
-  height: 56px;
-  max-height: 56px;
+  height: 80px;
+  max-height: 80px;
 }
 
 .brand-logo--large {
-  height: 80px;
-  max-height: 80px;
+  height: 96px;
+  max-height: 96px;
 }
 
 .site-header {
