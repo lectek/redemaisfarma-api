@@ -43,6 +43,7 @@
 
   <th:block th:if="${headExtras != null}" th:replace="${headExtras}"></th:block>
   <th:block th:if="${headExtras == null}" th:replace="~{fragments/layout :: emptyHeadExtras}"></th:block>
+  <th:block th:fragment="emptyHeadExtras"></th:block>
 </head>
 
 <body class="body-flex" data-page="layout">
@@ -145,5 +146,4 @@
   <script defer th:src="@{/js/layout.js}"></script>
 </body>
 
-<th:block th:fragment="emptyHeadExtras"></th:block>
 </html>
