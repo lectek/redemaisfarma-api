@@ -101,7 +101,7 @@ body.admin-page {
 .admin-page .logo img { max-height: 40px; }
 
 /* reserva abaixo da navbar */
-.main-offset { block-size: var(--header-h); }
+.main-offset { block-size: var(--header-height, var(--header-h)); }
 
 /* língua */
 .admin-page .language-selector {

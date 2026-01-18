@@ -24,16 +24,17 @@
 
     <!-- WhatsApp -->
     <a class="contact-item"
-       href="https://wa.me/5583988853265"
+       th:if="${@appProps.whatsappLink != ''}"
+       th:href="${@appProps.whatsappLink}"
        target="_blank"
        rel="noopener"
-       aria-label="WhatsApp (83) 98885-3265">
+       th:attr="aria-label=${'WhatsApp ' + @appProps.whatsappDisplay}">
 
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M20 3.9A10 10 0 004 19.5L3 22l2.6-.7A10 10 0 1020 3.9zM8.6 7.8c.2-.5.4-.5.6-.5h.5c.2 0 .4 0 .5.4.2.5.7 1.8.7 1.8.1.2.1.4 0 .6-.2.3-.5.7-.6.8-.1.1-.2.3 0 .6.2.3.9 1.4 2.2 2.2 1.5.9 1.8.8 2.1.7.2-.1.5-.4.6-.6.1-.2.3-.2.5-.1l1.7.8c.2.1.4.2.4.4 0 .3-.1 1-1 2-.9 1-2.2 1.1-3 .9-1-.2-2.2-.7-3.7-1.8-1.3-1-2.3-2.2-2.6-3.2-.3-1 0-2 .2-2.5z"/>
       </svg>
 
-      <span>(83) 98885-3265</span>
+      <span th:text="${@appProps.whatsappDisplay}"></span>
     </a>
 
     <!-- Endereço (Google Maps) -->
@@ -66,7 +67,7 @@
   </div>
 
   <!-- JSON-LD mínimo -->
-  <script type="application/ld+json">
+    <script type="application/ld+json" th:inline="javascript">
   {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -81,7 +82,7 @@
       "postalCode": "58058-800",
       "addressCountry": "BR"
     },
-    "telephone": "+55 83 98885-3265"
+    "telephone": "[[${@appProps.whatsappTelephone}]]"
   }
   </script>
 

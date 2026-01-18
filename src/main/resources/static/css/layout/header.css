@@ -324,6 +324,27 @@ html.sidebar-compact .sidebar__link span{
   background: color-mix(in oklab, var(--header-bg) 82%, #000 18%);
 }
 
+@media (max-width: 768px) {
+  .site-header {
+    padding-inline-start: calc(env(safe-area-inset-left, 0) + 1rem);
+    padding-inline-end: calc(env(safe-area-inset-right, 0) + 1rem);
+  }
+
+  .site-header .header-inner {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .logo-link {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+  }
+
+  .sidebar-toggle {
+    margin-left: 0;
+  }
+}
+
 .menu-icon {
   width: 22px;
   height: 2px;

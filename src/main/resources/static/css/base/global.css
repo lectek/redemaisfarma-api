@@ -39,7 +39,13 @@ h1{font-size:2rem} h2{font-size:1.5rem} h3{font-size:1.25rem}
   color:var(--color-neutral-5);
 }
 .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
-@media (max-width: 768px){html{font-size:15px}}
+@media (max-width: 768px){
+  html{font-size:15px}
+  body{
+    padding-inline-start: calc(env(safe-area-inset-left, 0px) + 1rem);
+    padding-inline-end: calc(env(safe-area-inset-right, 0px) + 1rem);
+  }
+}
 @media (max-width: 480px){html{font-size:14px}}
 :root[data-theme="dark"] body{background:var(--layout-bg);color:var(--color-light)}
 :root[data-theme="dark"] input,

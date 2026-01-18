@@ -151,8 +151,15 @@
             <div class="hero-main hero-main--placeholder"
                  th:if="${vm == null or vm.produtoPrincipal == null}">
               <div class="hero-main__placeholder">
-                <p>Produto principal</p>
-                <small>Defina em /admin/settings: HOME.main_product_id</small>
+                <p>Produto em destaque em breve</p>
+                <p class="muted hero-main__placeholder-text">
+                  Estamos finalizando os melhores itens para você.
+                </p>
+                <div class="hero-main__placeholder-bars" aria-hidden="true">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
               </div>
             </div>
           </figure>
@@ -332,11 +339,13 @@
               Tire dúvidas sobre prescrição, disponibilidade e entrega com nosso time.
             </p>
           </div>
-          <a class="btn btn--accent"
-             th:href="@{'https://wa.me/' + ${@appProps.whatsapp}}"
+          <a class="btn btn--accent cta__whatsapp"
+             th:href="${@appProps.whatsappLink}"
              target="_blank"
-             rel="noopener">
-            Falar no WhatsApp
+             rel="noopener"
+             th:attr="aria-label=${'Falar no WhatsApp ' + @appProps.whatsapp}">
+            <span>Falar no WhatsApp</span>
+            <small th:text="${@appProps.whatsappDisplay}"></small>
           </a>
         </div>
       </div>
