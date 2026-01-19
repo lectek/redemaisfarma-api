@@ -7,9 +7,13 @@
    - Toggle com animação hamburger → chevron (via .is-open)
    =========================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
-  initSidebar({ autoMountToggle: true });
-});
+const initSidebarApp = () => initSidebar({ autoMountToggle: true });
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initSidebarApp);
+} else {
+  initSidebarApp();
+}
 
 function initSidebar(opts = {}) {
   const { autoMountToggle = false } = opts;
