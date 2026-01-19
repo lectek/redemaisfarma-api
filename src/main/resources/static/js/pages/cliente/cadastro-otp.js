@@ -342,6 +342,12 @@ if (form) {
       if (otpDestinoEl) otpDestinoEl.textContent = maskedDestino;
       if (cooldownSec != null) resendCooldown = Number(cooldownSec) || 60;
 
+      const autoCode = pick(data, "demoCode", "demo_code");
+      if (autoCode && /^\d{6}$/.test(autoCode)) {
+        await handleAutoOtp(autoCode);
+        return;
+      }
+
       // abre modal OTP (ou prompt fallback)
       clearOtp();
       if (otpDialog?.showModal) {
@@ -416,6 +422,15 @@ async function confirmarOtpEContinuar(code) {
     setOtpState({ loading: false });
     if (otpConfirmBtn) otpConfirmBtn.disabled = false;
   }
+}
+
+async function handleAutoOtp(code) {
+  if (otpDialog?.open) {
+    otpDialog.close();
+  }
+  startCooldown();
+  setAlert(MSG.otpEnviado, "info");
+  await confirmarOtpEContinuar(code);
 }
 
 // Clique no confirmar do modal

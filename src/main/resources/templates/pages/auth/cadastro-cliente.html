@@ -73,7 +73,7 @@
         </div>
 
         <div class="form-group">
-          <label for="telefone">Telefone</label>
+          <label for="telefone">Telefone <small class="help">(Opcional)</small></label>
           <input id="telefone" type="tel" th:field="*{telefone}" class="input"
                  placeholder="(83) 91234-5678" autocomplete="tel" inputmode="tel" />
           <p class="error-message" data-for="telefone"></p>
@@ -81,7 +81,7 @@
         </div>
 
         <div class="form-group">
-          <label for="dataNascimento">Data de nascimento</label>
+          <label for="dataNascimento">Data de nascimento <small class="help">(Opcional)</small></label>
           <input id="dataNascimento" type="date" th:field="*{dataDeNascimento}" class="input" autocomplete="bday"/>
           <p class="error-message" data-for="dataNascimento"></p>
           <p th:if="${#fields.hasErrors('dataDeNascimento')}" th:errors="*{dataDeNascimento}" class="error-message"></p>
