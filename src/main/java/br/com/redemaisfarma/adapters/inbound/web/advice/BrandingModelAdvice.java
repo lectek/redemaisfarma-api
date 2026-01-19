@@ -1,12 +1,20 @@
 package br.com.redemaisfarma.adapters.inbound.web.advice;
 
 import br.com.redemaisfarma.application.core.settings.AppSettingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+@Component
 @ControllerAdvice
 public class BrandingModelAdvice {
+
+    private static final Logger log = LoggerFactory.getLogger(BrandingModelAdvice.class);
 
     private static final String KEY_LOGO_URL = "branding.logo_url";
     private static final String KEY_FAVICON_URL = "branding.favicon_url";
@@ -23,9 +31,11 @@ public class BrandingModelAdvice {
     private static final String FALLBACK_HOME_HERO = "/images/absorventepronto.png";
 
     private final AppSettingService settings;
+    private final ResourceLoader resourceLoader;
 
-    public BrandingModelAdvice(AppSettingService settings) {
+    public BrandingModelAdvice(AppSettingService settings, ResourceLoader resourceLoader) {
         this.settings = settings;
+        this.resourceLoader = resourceLoader;
     }
 
     @ModelAttribute
@@ -50,11 +60,22 @@ public class BrandingModelAdvice {
                 settings.get(LEGACY_HOME_HERO_TEXTO).orElse(""),
                 ""
         );
+
+        Resource fallback = resourceLoader.getResource("classpath:static" + FALLBACK_HOME_HERO);
+        boolean fallbackAvailable = fallback.exists();
+        boolean fallbackInUse = FALLBACK_HOME_HERO.equals(heroUrl);
+
         model.addAttribute("brandingLogoUrl", logoUrl);
         model.addAttribute("brandingFaviconUrl", faviconUrl);
         model.addAttribute("brandingHomeHeroUrl", heroUrl);
         model.addAttribute("brandingHomeHeroTexto", heroTexto);
         model.addAttribute("brandingLogoSize", parseLogoSize(settings.get(KEY_LOGO_SIZE).orElse("medium")));
+        model.addAttribute("brandingHeroPublic", true);
+        model.addAttribute("brandingHeroFallbackUsed", fallbackInUse);
+        model.addAttribute("brandingHeroFallbackAvailable", fallbackAvailable);
+
+        log.info("Hero available publicly (logged-out) {} (fallbackUsed={}, fileExists={})",
+                heroUrl, fallbackInUse, fallbackAvailable);
     }
 
     private static String firstNonBlank(String primary, String fallback, String defaultValue) {
