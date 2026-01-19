@@ -16,6 +16,22 @@ function initSidebar(opts = {}) {
 
   const sidebar = document.querySelector(".sidebar");
   if (!sidebar) return;
+  const headerEl = document.querySelector(".site-header");
+
+  const syncHeaderHeight = () => {
+    if (!headerEl) return;
+    const height = Math.round(headerEl.getBoundingClientRect().height);
+    if (Number.isFinite(height) && height > 0) {
+      document.documentElement.style.setProperty("--site-header-height", `${height}px`);
+    }
+  };
+  syncHeaderHeight();
+  if (headerEl) {
+    window.addEventListener("resize", syncHeaderHeight, { passive: true });
+    if (typeof ResizeObserver === "function") {
+      new ResizeObserver(syncHeaderHeight).observe(headerEl);
+    }
+  }
 
   // Auto-injetar botão no header (mobile), se não existir
   if (autoMountToggle) autoMountSidebarToggle();

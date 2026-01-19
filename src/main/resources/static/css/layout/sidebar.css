@@ -21,7 +21,8 @@
   margin: clamp(1rem, 3vw, 1.8rem) auto;
   min-height: 100dvh;
   position: sticky;
-  top: calc(var(--header-height, 72px) + env(safe-area-inset-top, 0px));
+  --sidebar-offset-top: calc(var(--site-header-height, var(--header-height, 96px)) + env(safe-area-inset-top, 0px));
+  top: var(--sidebar-offset-top);
   background: linear-gradient(180deg, var(--sidebar-bg), var(--sidebar-bg-2));
   color: var(--sidebar-ink);
   padding: clamp(24px, 3vw, 30px) clamp(18px, 2.5vw, 22px);
@@ -237,7 +238,7 @@
 
   .sidebar {
     position: fixed;
-    top: calc(var(--header-height, 72px) + env(safe-area-inset-top, 0));
+    top: var(--sidebar-offset-top);
     inset: auto auto env(safe-area-inset-bottom, 0) 0;
     z-index: 92;
     width: min(80vw, 320px);
