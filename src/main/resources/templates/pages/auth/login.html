@@ -1,6 +1,36 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" th:with="title='Entrar - RedeMaisFarma'">
-<head th:replace="~{fragments/layout :: commonHead}"></head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#0ea5e9" />
+
+  <title th:text="${title} ?: 'Entrar - RedeMaisFarma'">Entrar - RedeMaisFarma</title>
+  <meta name="description"
+        content="RedeMaisFarma: medicamentos, perfumaria e cuidados pessoais com entrega rápida e segura." />
+
+  <link rel="canonical" href="/" />
+  <link rel="icon" type="image/png" th:href="@{/images/favicon.png}" />
+  <link rel="apple-touch-icon" th:href="@{/images/favicon-apple.png}" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:site_name" content="RedeMaisFarma" />
+  <meta property="og:title" content="RedeMaisFarma • Sua farmácia de confiança" />
+  <meta property="og:description"
+        content="Compre com segurança e receba em casa. Atendimento rápido, preços justos e ofertas!" />
+  <meta property="og:image" th:content="@{/images/og-cover.png}" />
+  <meta property="og:url" href="/" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="RedeMaisFarma • Sua farmácia de confiança" />
+  <meta name="twitter:description" content="Medicamentos e perfumaria com entrega rápida." />
+  <meta name="twitter:image" th:content="@{/images/og-cover.png}" />
+
+  <link rel="stylesheet" th:href="@{/css/main.css(v=${#dates.createNow().time})}" />
+  <link rel="stylesheet" th:href="@{/css/pages/login.css(v=${#dates.createNow().time})}" />
+</head>
 <body class="body-flex login-page">
   <header th:replace="~{fragments/header :: header}"></header>
 
@@ -96,6 +126,8 @@
   </main>
 
   <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+  <script defer th:src="@{/js/layout.js}"></script>
 
   <script>
     const redirect = document.getElementById('redirect');
