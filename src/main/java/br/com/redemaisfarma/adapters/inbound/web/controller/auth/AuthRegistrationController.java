@@ -132,8 +132,8 @@ public class AuthRegistrationController {
 
         @Size(min = 8, max = 128, message = "A senha deve ter entre 8 e 128 caracteres.")
         @Pattern(
-            regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&]).{8,128}$",
-            message = "A senha precisa de maiúscula, minúscula, número e símbolo."
+            regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,128}$",
+            message = "A senha precisa de maiúscula, minúscula, número e caractere especial."
         )
         private String senha;
 
