@@ -50,11 +50,12 @@ public class BrandingModelAdvice {
                 settings.get(LEGACY_FAVICON_URL).orElse(""),
                 FALLBACK_FAVICON
         );
-        String heroUrl = firstNonBlank(
+        String heroSetting = firstNonBlank(
                 settings.get(KEY_HOME_HERO_URL).orElse(""),
                 settings.get(LEGACY_HOME_HERO_URL).orElse(""),
-                FALLBACK_HOME_HERO
+                ""
         );
+        String heroUrl = resolveHeroUrl(heroSetting);
         String heroTexto = firstNonBlank(
                 settings.get(KEY_HOME_HERO_TEXTO).orElse(""),
                 settings.get(LEGACY_HOME_HERO_TEXTO).orElse(""),
@@ -63,7 +64,7 @@ public class BrandingModelAdvice {
 
         Resource fallback = resourceLoader.getResource("classpath:static" + FALLBACK_HOME_HERO);
         boolean fallbackAvailable = fallback.exists();
-        boolean fallbackInUse = FALLBACK_HOME_HERO.equals(heroUrl);
+        boolean fallbackInUse = FALLBACK_HOME_HERO.equals(heroUrl) && !looksLikeImage(heroSetting);
 
         model.addAttribute("brandingLogoUrl", logoUrl);
         model.addAttribute("brandingFaviconUrl", faviconUrl);
@@ -74,8 +75,25 @@ public class BrandingModelAdvice {
         model.addAttribute("brandingHeroFallbackUsed", fallbackInUse);
         model.addAttribute("brandingHeroFallbackAvailable", fallbackAvailable);
 
-        log.info("Hero available publicly (logged-out) {} (fallbackUsed={}, fileExists={})",
-                heroUrl, fallbackInUse, fallbackAvailable);
+        log.info("Hero available publicly (logged-out) {} (fallbackUsed={}, fileExists={}, heroSetting={})",
+                heroUrl, fallbackInUse, fallbackAvailable, heroSetting);
+    }
+
+    private String resolveHeroUrl(String heroSetting) {
+        if (heroSetting == null || heroSetting.isBlank()) {
+            return FALLBACK_HOME_HERO;
+        }
+        if (looksLikeImage(heroSetting)) {
+            return heroSetting;
+        }
+        return FALLBACK_HOME_HERO;
+    }
+
+    private static boolean looksLikeImage(String url) {
+        if (url == null) {
+            return false;
+        }
+        return url.matches("(?i).*\\.(png|jpg|jpeg|webp|gif|svg|avif)(\\?.*)?$");
     }
 
     private static String firstNonBlank(String primary, String fallback, String defaultValue) {
