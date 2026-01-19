@@ -240,7 +240,7 @@
     position: fixed;
     top: var(--sidebar-offset-top);
     inset: auto auto env(safe-area-inset-bottom, 0) 0;
-    z-index: 92;
+    z-index: 1200;
     width: min(80vw, 320px);
     max-width: 320px;
     transform: translate3d(-110%, 0, 0);
@@ -254,6 +254,7 @@
 
   .sidebar.is-open {
     transform: translate3d(0, 0, 0);
+    z-index: 1250;
   }
 
   html.nav-open main,
@@ -268,7 +269,7 @@
   .sidebar-overlay {
     position: fixed;
     inset: 0;
-    z-index: 90;
+    z-index: 1220;
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(0px);
     opacity: 0;
