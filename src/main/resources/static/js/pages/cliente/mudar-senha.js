@@ -12,7 +12,7 @@
   const MSG = {
     requiredAtual: 'Informe sua senha atual.',
     requiredNova: 'Informe a nova senha.',
-    pattern: 'A nova senha precisa ter: 8+ caracteres, letra maiúscula, minúscula, número e símbolo (@ $ ! % * ? &).',
+    pattern: 'A nova senha precisa ter: 8+ caracteres, letra maiúscula, minúscula, número e caractere especial.',
     confirm: 'As senhas não conferem.',
     capsOn: 'Atenção: Caps Lock ligado.',
     saved: 'Senha alterada com sucesso!',
@@ -97,7 +97,7 @@
   [atual, nova, confirmar].forEach(addToggle);
 
   // ===== checagens =====
-  const senhaPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,128}$/;
+const senhaPattern = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,128}$/;
 
   const validate = () => {
     let ok = true;
