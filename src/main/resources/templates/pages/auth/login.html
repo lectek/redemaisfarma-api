@@ -144,6 +144,14 @@
       btn.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
       btn.setAttribute('aria-label', isHidden ? 'Ocultar senha' : 'Mostrar senha');
     });
+
+    const registerLink = document.querySelector('.btn--email');
+    registerLink?.addEventListener('click', (ev) => {
+      const href = registerLink.getAttribute('href');
+      if (!href) return;
+      ev.preventDefault();
+      window.location.href = href;
+    });
   </script>
 </body>
 </html>
