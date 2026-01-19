@@ -20,6 +20,7 @@ public class BrandingModelAdvice {
 
     private static final String FALLBACK_LOGO = "/images/logofarma.png";
     private static final String FALLBACK_FAVICON = "/images/favicon.png";
+    private static final String FALLBACK_HOME_HERO = "/images/absorventepronto.png";
 
     private final AppSettingService settings;
 
@@ -42,7 +43,7 @@ public class BrandingModelAdvice {
         String heroUrl = firstNonBlank(
                 settings.get(KEY_HOME_HERO_URL).orElse(""),
                 settings.get(LEGACY_HOME_HERO_URL).orElse(""),
-                ""
+                FALLBACK_HOME_HERO
         );
         String heroTexto = firstNonBlank(
                 settings.get(KEY_HOME_HERO_TEXTO).orElse(""),
