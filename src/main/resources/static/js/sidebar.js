@@ -108,12 +108,13 @@ function initSidebar(opts = {}) {
 
   function isOpen() { return sidebar.classList.contains("is-open"); }
 
-  function open() {
-    if (isOpen()) return;
-    lastFocused = document.activeElement;
-    sidebar.classList.add("is-open");
-    sidebar.setAttribute("aria-hidden", "false");
-    toggleBtns.forEach((b) => {
+function open() {
+  if (isOpen()) return;
+  lastFocused = document.activeElement;
+  sidebar.classList.add("is-open");
+  sidebar.setAttribute("aria-hidden", "false");
+  document.documentElement.classList.add("nav-open");
+  toggleBtns.forEach((b) => {
       b.classList.add("is-open");                 // <-- ativa animação chevron
       b.setAttribute("aria-expanded", "true");
       b.setAttribute("aria-label", "Fechar menu");
@@ -125,10 +126,11 @@ function initSidebar(opts = {}) {
     document.addEventListener("keydown", trapKeydown);
   }
 
-  function close() {
-    if (!isOpen()) return;
-    sidebar.classList.remove("is-open");
-    sidebar.setAttribute("aria-hidden", "true");
+function close() {
+  if (!isOpen()) return;
+  sidebar.classList.remove("is-open");
+  sidebar.setAttribute("aria-hidden", "true");
+  document.documentElement.classList.remove("nav-open");
     toggleBtns.forEach((b) => {
       b.classList.remove("is-open");              // <-- volta ao hamburger
       b.setAttribute("aria-expanded", "false");
