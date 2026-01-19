@@ -90,6 +90,12 @@
   }
 }
 
+@media (max-width: 640px) {
+  .hero__bg {
+    display: none;
+  }
+}
+
 /* Bloco de texto em “cartão de vidro” */
 .hero__text {
   max-width: 420px;
