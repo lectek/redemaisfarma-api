@@ -86,7 +86,7 @@ const MSG = {
   cpf: "CPF inválido.",
   telefone: "Telefone inválido.",
   senhaVazia: "Informe uma senha.",
-  senhaPattern: senha?.dataset?.patternMsg || "Senha fora do padrão.",
+  senhaPattern: senha?.dataset?.patternMsg || "A senha precisa ter 8+ caracteres, maiúscula, minúscula, número e caractere especial.",
   confirmar: "As senhas não coincidem.",
   network: "Falha de rede. Tente novamente.",
   otpEnviado: "Código enviado. Verifique sua caixa de entrada.",

@@ -92,7 +92,7 @@
           <input id="senha" type="password" th:field="*{senha}" class="input"
                  required minlength="8" maxlength="128" autocomplete="new-password"
                  pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,128}$"
-                 data-pattern-msg="A senha precisa ter: 8+ caracteres, letra maiúscula, minúscula, número e símbolo (qualquer caractere especial)." />
+                 data-pattern-msg="A senha precisa ter 8+ caracteres, maiúscula, minúscula, número e caractere especial." />
           <small class="help">Use pelo menos 8 caracteres (maiúscula, minúscula, número e símbolo).</small>
           <p class="error-message" data-for="senha"></p>
           <p th:if="${#fields.hasErrors('senha')}" th:errors="*{senha}" class="error-message"></p>
