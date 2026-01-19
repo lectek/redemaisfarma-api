@@ -107,7 +107,7 @@
     <!-- HERO • headline + busca + provas sociais -->
     <section class="section hero hero--xl" aria-labelledby="hero-title"
              th:with="heroImageUrl=${brandingHomeHeroImageUrl} ?: @{/images/absorventepronto.png}"
-             th:style="'--hero-image: url(' + ${heroImageUrl} + ');'">
+             th:style="'--hero-image: url(' + ${heroImageUrl} + '); --hero-bg-image: url(' + ${heroImageUrl} + ');'">
       <div class="hero__bg" th:style="'background-image: url(' + ${heroImageUrl} + ');'"></div>
       <div class="container">
         <div class="hero__grid">

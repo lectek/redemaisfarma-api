@@ -36,6 +36,7 @@
   position: relative;
   overflow: hidden;
   isolation: isolate;
+  min-height: clamp(300px, 30vw, 420px);
 
   /* Fundo apenas com gradiente + highlight, sem imagem */
   background:
@@ -77,6 +78,19 @@
   z-index: 0;
   pointer-events: none;
   filter: saturate(0.95) brightness(1.1);
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(15, 23, 42, 0.85), transparent 55%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.7), rgba(2, 6, 23, 0.9)),
+    var(--hero-bg-image, url(/images/absorventepronto.png));
+  background-size: cover;
+  background-position: center 35%;
+  background-repeat: no-repeat;
+}
+@media (max-width: 768px) {
+  .hero__bg {
+    opacity: 0.4;
+    filter: saturate(0.8) brightness(1);
+  }
 }
 
 /* Bloco de texto em “cartão de vidro” */
