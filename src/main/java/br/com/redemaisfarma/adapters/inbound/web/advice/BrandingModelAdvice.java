@@ -68,7 +68,8 @@ public class BrandingModelAdvice {
 
         model.addAttribute("brandingLogoUrl", logoUrl);
         model.addAttribute("brandingFaviconUrl", faviconUrl);
-        model.addAttribute("brandingHomeHeroUrl", heroUrl);
+        model.addAttribute("brandingHomeHeroUrl", heroSetting);
+        model.addAttribute("brandingHomeHeroImageUrl", heroUrl);
         model.addAttribute("brandingHomeHeroTexto", heroTexto);
         model.addAttribute("brandingLogoSize", parseLogoSize(settings.get(KEY_LOGO_SIZE).orElse("medium")));
         model.addAttribute("brandingHeroPublic", true);

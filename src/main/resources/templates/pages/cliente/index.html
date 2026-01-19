@@ -106,7 +106,7 @@
 
     <!-- HERO • headline + busca + provas sociais -->
     <section class="section hero hero--xl" aria-labelledby="hero-title"
-             th:with="heroImageUrl=${brandingHomeHeroUrl != null and !brandingHomeHeroUrl.isBlank()} ? brandingHomeHeroUrl : @{/images/absorventepronto.png}"
+             th:with="heroImageUrl=${brandingHomeHeroImageUrl} ?: @{/images/absorventepronto.png}"
              th:style="'--hero-image: url(' + ${heroImageUrl} + ');'">
       <div class="container">
         <div class="hero__grid">
