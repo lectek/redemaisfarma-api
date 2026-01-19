@@ -73,14 +73,14 @@
   height: 75%;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.4;
-  filter: saturate(0.9) brightness(1);
+  opacity: 0.3;
+  filter: saturate(0.7) brightness(1);
   background-image:
-    radial-gradient(circle at 15% 15%, rgba(15, 23, 42, 0.92), transparent 70%),
+    radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.9), transparent 80%),
     linear-gradient(180deg, rgba(15, 23, 42, 0.7), rgba(2, 6, 23, 0.95)),
     var(--hero-bg-image, url(/images/absorventepronto.png));
-  background-size: 40% auto;
-  background-position: right 12% bottom 10%;
+  background-size: 35% auto;
+  background-position: center;
   background-repeat: no-repeat;
 }
 @media (max-width: 768px) {
