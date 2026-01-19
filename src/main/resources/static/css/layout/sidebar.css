@@ -231,33 +231,49 @@
    – Use .sidebar + .sidebar-overlay (irmão)
 =============================== */
 @media (max-width: 1023.98px) {
+  .layout--with-sidebar {
+    display: block;
+  }
+
   .sidebar {
     position: fixed;
-    inset: env(safe-area-inset-top) auto env(safe-area-inset-bottom) 0;
-    z-index: 60;
-    transform: translate3d(-102%, 0, 0);
-    transition: transform .25s ease;
-    height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    max-width: min(84%, 320px);
+    inset: env(safe-area-inset-top, 0) auto env(safe-area-inset-bottom, 0) 0;
+    z-index: 92;
+    width: min(80vw, 320px);
+    max-width: 320px;
+    transform: translate3d(-110%, 0, 0);
+    transition: transform .25s ease, box-shadow .25s ease;
+    height: calc(100dvh - env(safe-area-inset-top, 0) - env(safe-area-inset-bottom, 0));
     margin: 0;
     border-radius: 0 16px 16px 0;
     touch-action: pan-y;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.4);
   }
+
   .sidebar.is-open {
     transform: translate3d(0, 0, 0);
+  }
+
+  html.nav-open main,
+  html.nav-open .layout--with-sidebar main,
+  html.nav-open .hero,
+  html.nav-open .section {
+    filter: saturate(0.96);
+    pointer-events: none;
   }
 
   /* Overlay separado para não poluir a árvore da sidebar */
   .sidebar-overlay {
     position: fixed;
     inset: 0;
-    z-index: 59;
-    background: rgba(15, 23, 42, .45);
-    backdrop-filter: blur(2px);
+    z-index: 90;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(0px);
     opacity: 0;
     pointer-events: none;
     transition: opacity .18s ease;
   }
+  html.nav-open .sidebar-overlay,
   .sidebar-overlay.is-open {
     opacity: 1;
     pointer-events: auto;
