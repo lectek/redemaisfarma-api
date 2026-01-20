@@ -92,7 +92,13 @@
 
 @media (max-width: 640px) {
   .hero__bg {
-    display: none;
+    inset: 2rem auto 0 50%;
+    width: 70%;
+    height: 60%;
+    background-size: contain;
+    background-position: center top;
+    opacity: 0.25;
+    filter: saturate(0.6) brightness(1.1);
   }
 }
 
