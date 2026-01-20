@@ -218,6 +218,24 @@ html.sidebar-compact .sidebar__link span{
   max-height: 96px;
 }
 
+@media (max-width: 768px) {
+  .brand-logo {
+    height: 120px;
+    max-height: 120px;
+  }
+  .brand-logo--small {
+    height: 100px;
+    max-height: 100px;
+  }
+  .brand-logo--medium {
+    height: 120px;
+    max-height: 120px;
+  }
+  .site-header {
+    padding-block: 1rem;
+  }
+}
+
 .site-header {
   position: sticky;
   inset: 0;
