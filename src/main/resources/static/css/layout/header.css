@@ -304,7 +304,7 @@ html.sidebar-compact .sidebar__link span{
 }
 
 .sidebar-toggle {
-  display: inline-flex;
+  display: none;
   align-items: center;
   justify-content: center;
   width: 48px;
@@ -342,6 +342,13 @@ html.sidebar-compact .sidebar__link span{
 
   .sidebar-toggle {
     margin-left: 0;
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 1023.98px) {
+  .sidebar-toggle {
+    display: inline-flex;
   }
 }
 

@@ -105,6 +105,7 @@ function initSidebar(opts = {}) {
   }
 
   const mqDesktop = window.matchMedia("(min-width: 769px)");
+  const isHomePage = document.body?.dataset.page === "home";
 
   function isOpen() { return sidebar.classList.contains("is-open"); }
 
@@ -120,7 +121,7 @@ function open() {
       b.setAttribute("aria-label", "Fechar menu");
     });
     document.body.classList.add("no-scroll");
-    if (!mqDesktop.matches) ensureOverlay().style.display = "block";
+    if (!mqDesktop.matches || isHomePage) ensureOverlay().style.display = "block";
     const first = sidebar.querySelector(focusableSel);
     (first || sidebar).focus();
     document.addEventListener("keydown", trapKeydown);
