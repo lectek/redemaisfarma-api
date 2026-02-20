@@ -38,15 +38,40 @@ Thymeleaf e integrações com banco relacional, Firebird legado, storage e e-mai
 - Alertas de estoque configurados por `app.estoque.alerta.*` (limite 10, percentual 10, cron padrão `0 */30 * * * *`, cooldown 60 min, e-mail opcional).
 
 ## Observabilidade & docs
-- Swagger UI aparece em `/docs`, OpenAPI em `/v3/api-docs` e Actuator expõe `/actuator/health` e `/actuator/info`.
+- Swagger UI aparece em `/docs`, OpenAPI em `/v3/api-docs` e Actuator expõe `/actuator/health`, `/actuator/info` e `/actuator/metrics`.
 - Logging via `logback-spring.xml`, filtros de correlação e auditoria (`HttpAuditFilter`), e métricas de jobs/Kafka.
 - Templates e assets estão em `src/main/resources/templates/pages` e `static/`; JavaScript auxilia UI cliente/admin.
+- **Campanhas por e-mail**: o worker registra Micrometer `email_campaign.worker.processed/sent/retry/failed` visível em `/actuator/metrics`; use esses counters para alertar quando `failed > 0` ou quando filas não avançam. A UI admin também exibe preview, cancelamento e agora suporta filtros por categoria, recência (dias) e ticket médio, mantendo os campos VIP/Inativos/Todos e agilizando pausa/retoma sem impactar a fila atual.
+- **Automação de recompra**: o scheduler lê pedidos `ENTREGUE`, evita reenvios usando `email_campaign_queue` e dispara campanhas usando o template `mail/recompra`. Monitore `recompra.automation.processed`, `.skipped` e `.enqueued` via Actuator/Prometheus para confirmar que o volume e a deduplicação estão dentro do esperado; qualquer falha retorna log detalhado e a fila `email_campaign_queue` mostra os emails ligados.
+- **Volta ao estoque**: clientes se inscrevem por produto (`product_stock_subscription`) via `POST /api/public/produtos/{produtoId}/stock/subscribe` (`email`, `nome`). O job `mail/back-in-stock` rastreia o estoque > 0 e dispara notificações únicas pelo `email_campaign_queue`. Observe `back_in_stock.automation.processed`, `.skipped` e `.enqueued` no Actuator/Prometheus e no painel `/admin/marketing/emails/campanhas/fila` para garantir entregas consistentes.
+
+-## Produtos
+-O domínio de produtos gira em torno de `ProdutoEntity`, que carrega nome, descrição, preço de custo/venda, código de barras, estoque, marca, categoria e timestamps (`dataCadastro`, `dataAtualizacao`, `PublicadoEm`). Os DTOs (`ProdutoResponseDTO`, `ProdutoRequestDTO`) expõem esses campos aos serviços públicos e ao admin.
+-O catálogo público usa `PublicProdutoController` e `ProdutoExportController` para listar/filtrar/exportar produtos (`/api/public/produtos`, `/api/public/produtos/{id}`, exportação CSV/XLS) com buscas por categoria, tags e destaque em promoções. A API autenticada (`/api/v2/produtos`) mantém paginação com filtros predefinidos.
+-O painel admin (`ProdutoAdminRestController`, `ProdutoAdminPageController`) dá suporte a CRUD completo, publicação, upload de imagens, sincronização com Firebird via `ProdutoSyncService` e repositórios JPA para disponibilidade global.
+-A OpenAPI (`/v3/api-docs`) expõe `/api/admin/produtos` com seus parâmetros extras (validador, upload, imagem IA, validar/publicar) para consumidores Swagger/QA.
+-Automatizações ligadas a produtos incluem `ProductBackInStockAutomationService` (assinaturas via `POST /api/public/produtos/{produtoId}/stock/subscribe`) e campanhas de e-mail (`mail/back-in-stock`, `mail/cart-abandon`, `mail/reengagement`) alimentadas pela fila `EmailCampaignQueue`.
+-Produtos também são fonte de relatórios e dashboards (via `RelatorioResponseDTO`, `ReportService`, `AdminProductReportController`) e alimentam os feeds usados pelo frontend e mobile para mostrar estoque, promoções, destaques e alertas em tempo real.
+-### Fluxo de imagem IA
+-A página `/admin/imagens` e os endpoints `POST /api/admin/imagens/{produtoId}/queue` e `/regenerate` disparam eventos `ProductImageRequestedEvent` e forçam novos jobs via `ProductImageJobService`. `ProductImageAdminPageController` expõe também `/api/admin/imagens/jobs` para listar jobs (status QUEUED/PROCESSADO/ERRO) e retorna `EnqueueResponse` com metadados (status, última execução). Usem esses dados para atualizar a UI de edição/listagem (toasts, badges de fila) e encadear feedback imediato sempre que o job for enfileirado ou regenerado para o mesmo produto.
+-### Adicionar/atualizar produtos
+-1. `POST /api/admin/produtos` cria produtos a partir de `ProdutoRequestDTO` (nome, descrição, preçoVenda, estoque, categoria, códigoBarras e `imagem` opcional). O backend exige imagem quando `ativo=true`, valida nome único e marca o registro como `IMPORTADO`.
+-2. Após criar, atualize a imagem com `POST /api/admin/produtos/{id}/imagem` (multipart/form-data com campo `file`), que salva o arquivo via `ImageStorageService` e atualiza o `ProdutoEntity`.
+-3. Para liberar o item no catálogo público mova o status: `POST /api/admin/produtos/{id}/validar?validador={user}` registra `ProdutoStatus.VALIDADO` e `POST /api/admin/produtos/{id}/publicar?validador={user}` define `STATUS.PUBLICADO`, `publicadoEm` e `situacao`.
+-4. O `PUT /api/admin/produtos/{id}` ajusta atributos (preço, estoque, texto); `DELETE /api/admin/produtos/{id}` remove o registro e as automações de marketing (carrinho, recompra, volta ao estoque) só consideram produtos ativos com `preco > 0`, `estoque > 0` e `disponivel=true`.
+-5. Use o DTO `ProdutoResponseDTO` combinado com `ProdutoMapper` para visualizar os dados (incluindo `situacao`, `destaqueCarrossel` e `tags`). Filtre pelo painel admin antes de acionar o webhook da fila `EmailCampaignQueue` para evitar duplicatas.
 
 ## Key flows & integrations
 - **Auth & conta**: `/api/auth/login`, refresh, OTP/email claim e reset; MVC para login, cadastro e alteração de senha (`AccountController`, `/auth/*`, `/cliente/senha`).
 - **Site público**: landing, carrossel, catálogo/CSV de produtos (`PublicProdutoController`, `ProdutoExportController`, templates em `templates/pages/cliente`).
 - **Cliente self-service**: carrinho REST (`/api/carrinho/itens`), checkout `/api/cliente/me/checkout`, CRUD de perfil/endereços/pedidos (`ClienteSelfController`), e `CurrentClienteProvider` para contexto autenticado.
+- **Cliente self-service** (perfil público/cliente autenticado): além de `/api/cliente/me`/endereços/checkout/pedidos, os controladores `ClienteSelfApiController` e `AccountController` expõem troca de senha, OTP/resets (`/api/auth/otp/*`, `/api/auth/resetar-senha`, `/api/auth/password/reset-otp`), encerramento de sessões ativas e logout para limpar cookies/tokens.
 - **Admin**: controllers e páginas para catálogo completo, clientes, pedidos, relatórios, marketing, configurações, estoque e rotas OSRM (e.g., `ProdutoAdminRestController`, `AdminEntregaRotaController`, templates em `templates/pages/admin`).
+- **Clientes (Admin)**: `/api/admin/clientes/{id}/resumo`, `/api/admin/clientes/{id}` (GET/PATCH), `/ativar`, `/desativar`, `/pedidos`, `/enderecos` (GET/POST/PUT/DELETE); esses endpoints permitem consultar histórico, atualizar contatos, habilitar/desabilitar contas e listar pedidos detalhados.
+- **Admin marketing**: `AdminMarketingEmailCampaignController` e a nova API `/api/admin/marketing/emails/campanhas` permitem CRUD/preview/segmentos, com o painel `/admin/marketing/emails/campanhas/fila` exibindo status da fila e logs do worker junto aos contadores `email_campaign.worker.*`.
+- Essa API agora aceita/exibe os campos `segmentoDetalhado`, `agendarTimezone` e `validationStatus`, permitindo gravar filtros ricos e validar a campanha com a timezone correta antes de disparar os envios.
+- O endpoint `POST /api/admin/marketing/emails/campanhas/{id}/validate` ajusta o `validationStatus` (PENDING/APPROVED/REJECTED/READY) e é recomendado para QA aprovar o conteúdo/público antes de liberar envios.
+- Agora existem endpoints `POST /api/admin/marketing/emails/campanhas/{id}/pause` e `/resume` para desligar/retomar uma campanha agendada sem precisar recriá-la, mantendo os logs `/fila` e os counters `email_campaign.worker.*` em sincronia.
 - **Integrações**: MySQL + Flyway, Firebird legado, storage `S3StorageAdapter`/`LocalStorageAdapter`, e-mail (Mailpit em dev), Kafka desligado por padrão, OSRM para rotas de entrega.
 - **Jobs & alertas**: agendamentos em `adapters/inbound/scheduler`, alerta de estoque via log/e-mail, sincronização de catálogo, limpeza de tokens/OTP.
 
@@ -62,6 +87,8 @@ Thymeleaf e integrações com banco relacional, Firebird legado, storage e e-mai
 - Cashback/beneficios (saldo, pontos, validade).
 - Conteudo educativo e sazonal.
 - Reengajamento de clientes inativos.
+
+Em M3 estamos automatizando carrinho abandonado (envios para 1h e 24h) e reengajamento (30/60/90 dias) via `EmailCampaignQueue` para campanhas com cupons e mensagens específicas; o dashboard `/admin/marketing/emails/campanhas/fila` mostra o status das filas/ logs e as métricas `email_campaign.worker.*` acompanham cada job.
 
 ### Outras ideias em andamento
 - Interface mobile cliente alinhada ao web.
@@ -112,10 +139,56 @@ Thymeleaf e integrações com banco relacional, Firebird legado, storage e e-mai
 - Ampliar testes integrando checkout/pagamento/estoque, cliente self-service, marketing/agendamentos, Firebird, storage e OSRM.
 - Alinhar telas admin ao shell em `docs/admin-frontend-refactor.md` e experiência cliente aos wireframes de `docs/client-flow-wireframes.md`.
 
+## Sinopse do plano de desenvolvimento da API
+- **Progresso**: a fundação e os contratos principais (autenticação, carrinho, checkout, cliente) estão descritos nos passos 6-9, e as milestones M1-M4 estão registradas em `docs/backlog.md`.
+- **Decisões chave**: priorizar o worker de e-mail e métricas Micrometer no M1, seguir o cronograma de campanhas do backlog e usar o plano de 50 passos para orientar front-end e mobile.
+- **Qualidade e testes**: cada milestone exige `./mvnw -pl boot-app clean verify` ou `./mvnw -pl boot-app test -Dspring.profiles.active=test`, cobertura de OTP/reset e instrumentação dos jobs (`/actuator/metrics`, `email_campaign.worker.*`).
+- **Próximos passos imediatos**: concluir upload de avatar/foto de perfil, ajustar `AccountController.extrairUsuario`, documentar perfis/env vars no README e alinhar QA com `README_DEV.md`, `docker-compose.dev.yml` e as instruções do backlog.
+- **Restrições e dependências**: validar Firebird (`legacy`/`firebird`), storage (S3 vs local), SMTP/queue (`APP_MAIL_*`, `email_delivery`, `email_campaign_queue`) e manter os scripts de observabilidade descritos no backlog.
+
+
+
+## API roadmap (prioridade)
+### M1 - APIs principais do cliente
+- Completar os endpoints P0 listados em  Backlog de endpoints para o app cliente (GET/PUT /api/cliente/me, avatar, carrinho CRUD, checkout resumo/finalizar e pedidos list/detalhe) antes de pular para automacoes de marketing.
+- Garantir que os contratos usados por cada contrato referenciem o envelope de erro, paginacao e DTOs descritos nos passos 8-9 (ex: ClienteResponse, CartItemResponse, PedidoResumoResponse).
+- Resolver os gaps imediatos (foto de perfil backend/storage e AccountController.extrairUsuario) para permitir atualizacao de senha e upload/exibicao de avatar dentro do mesmo ciclo.
+
+### M2 - Testes e observabilidade
+- Rodar ./mvnw clean verify ou ./mvnw test -Dspring.profiles.active=test (com Docker/Testcontainers ativos) para cobrir auth, produto, checkout/pagamento/estoque, marketing/agendamentos, Firebird, storage e OSRM antes de liberar cada milestone.
+- Adotar o checklist do README_DEV.md (ambiente Docker, clean verify, QA de checkout) e criar testes de controlador para /api/admin/produtos e fluxos de alerta (estoque baixo, fila de e-mail, jobs/Kafka desativados) com logs/metrics observaveis.
+- Monitorar storage/S3 e Firebird via os mesmos hooks usados hoje (Actuator, app.estoque.alerta.*, EmailDelivery) para validar entregas e dependencias externas.
+- Cobrir `/api/admin/produtos` (listar, criar, atualizar, excluir, validar, publicar e upload de imagem) e o `EstoqueBaixoNotificacaoJob` com testes dedicados garante regressões do admin e dos alertas; acompanhe os indicadores pelos endpoints `/actuator/health`, `/actuator/metrics`, pelo status de Firebird/Storage/S3 e pelos flags `app.estoque.alerta.*` + a fila `email_delivery` do `EmailDeliveryWorker`.
+
+### M3 - Documentacao e onboarding de endpoints
+- Usar Tag/Operation para cada novo contrato (carrinho, marketing, rotas de entrega), atualizar Swagger/OpenAPI e expor no /docs e /v3/api-docs para que clientes e mobile vejam os recursos vivos.
+- Registrar fluxos de OTP/email claim/reset no README (incluindo curl para /api/auth/otp/start, /api/auth/resetar-senha, env vars relevantes APP_MAIL_*, APP_WEB_BASE_URL, APP_MAIL_REPLY_TO), reforcando os passos 9 e a operacao do plano operacional descrito no final do README.
+- Documentar a diferenca entre perfis (dev, docker, test, legacy/firebird) e quais variaveis devem ser populadas para SMTP, DB e storage (como exigido no plano operacional), incluindo os scripts/QA no README.
+- #### Fluxos OTP e e-mail marketing
+- 1. `POST /api/auth/otp/start` ({{APP_WEB_BASE_URL}}/api/auth/otp/start): envie `{ "canal": "email", "destino": "cliente@exemplo.com" }` e guarde `deliveryId`; `APP_MAIL_ENABLED=true`, `APP_MAIL_FROM`/`APP_MAIL_REPLY_TO` precisam estar configurados no perfil usado.
+- 2. `POST /api/auth/otp/verify` com `{ "deliveryId": "...", "code": "123456" }` obtém o token temporário; confirme os logs `Hero available...` para garantir que o sender (`SettingsMailSenderAdapter`) carregou APP_MAIL_*.
+- 3. Para reset de senha via token, pague `POST /api/auth/esqueci-senha`, aguarde o e-mail (`email_delivery`, `email_campaign_queue`), use `/api/auth/validar-token?token=...` e finalize com `POST /api/auth/resetar-senha`.
+- 4. O `EmailDeliveryWorker` monitora `email_delivery` e respeita `APP_MAIL_*`, `APP_MAIL_REPLY_TO` e o status `email_delivery.status` (PENDING → SENT); use `curl -H "Authorization: Bearer $TOKEN" https://.../actuator/health` e `/actuator/metrics` para validar dependências (MySQL/Testcontainers, S3, Firebird).
+- #### Perfis e variáveis
+- - `dev` roda contra MySQL local/Swagger/Mailpit; ative `APP_MAIL_ENABLED=true` (Mailpit) e `APP_WEB_BASE_URL=http://localhost:18090`.
+- - `docker` aponta para os serviços do `docker-compose.dev.yml`; mantenha `APP_MAIL_*` definidas (FROM, REPLY_TO, CSS_URL) e `APP_WEB_BASE_URL` no `config`.
+- - `test` usa Testcontainers/MySQL e desativa Mailpit (APP_MAIL_ENABLED=false); a fila `email_delivery` é limpa a cada ciclo.
+- - `legacy` habilita Firebird/Jaybird e os env vars `FIREBIRD_*` para sincronização; documente o fallback `StorageAdapter` (S3 vs Local) e os indicadores do `app.estoque.alerta.*`.
+
+### M4 - Engajamento, marketing e integracoes legadas
+- Avancar nos itens de email marketing (campanhas, automacoes, recompras, volta ao estoque, cashback e conteudo educativo) conforme o backlog P0/P1/P2 e os milestones M1-M4 descritos na secao de Roadmap atual.
+- Ampliar integracoes com legacy Firebird, storage e OSRM usando as rotinas existentes de sincronizacao (ProdutoSyncService, LegacyProdutoJdbcAdapter, alertas de estoque) antes de ativar filtros de busca e integracoes adicionais.
+- Documentar no README como o admin observa logs/QA (filtros, sidebar, hero responsive) e incluir checkpoints de QA a cada entrega (ex: email_delivery, email_campaign_queue, env vars Railway, scripts temp_*).
+
 ## Resources & references
 - Guias de UI: `docs/admin-frontend-refactor.md`, `docs/client-flow-wireframes.md`.
 - Desenvolvimento: `README_DEV.md` resume comandos, convenções e checklist de PR.
 - Configuração: `docker-compose*.yml`, `infra/` helpers, `mocks/` payloads, `AGENTS.md` para instruções de agente.
+
+## Branding & hero loop
+- Atualize o hero público em `/admin/configuracoes/geral` → **Marca no site**: mantenha o upload/URL da imagem principal e use o novo campo **Loop em vídeo (URL)** para apontar um WebM/MP4 loopado (preferencialmente WebM VP9 com alfa) hospedado em CDN/S3/local acessível. O hero usa `absorventepronto.png` como fallback e permite que o texto de destaque continue sendo controlado por `branding.home_hero_texto`.
+- O controller `BrandingModelAdvice` agrega `brandingHomeHeroVideoUrl`, `brandingHomeHeroVideoPoster` e `brandingHomeHeroVideoType`; a view renderiza `<video autoplay loop muted playsinline preload="auto">` com esse poster para clientes que suportam o vídeo e aplica o gradiente atualizado no CSS para garantir contraste (o vídeo fica em evidência e o produto continua destacado no card que já existia).
+- Teste o hero em desktop, tablet e mobile para confirmar que o vídeo autoload funciona, que o fallback (imagem+texto) aparece quando o vídeo não carrega e que o log `Hero available publicly...` indica qual recurso foi usado no momento da requisição. Mantemos o mesmo card de produto principal (com CTA) ao lado da mídia animada para preservar a experiência de publicidade.
 
 ## Plano de 50 passos para o aplicativo (cliente/admin)
 1) Alinhar escopo do app (cliente, admin, ambos) e definir metas de negocio.
@@ -229,8 +302,8 @@ Thymeleaf e integrações com banco relacional, Firebird legado, storage e e-mai
 - GET /api/cliente/me/pedidos/{id} (detalhe pedido)
 - GET /api/cliente/me/carrinho (listar itens)
 - POST /api/cliente/me/carrinho (adicionar item)
-- PUT /api/cliente/me/carrinho/{itemId} (atualizar quantidade)
-- DELETE /api/cliente/me/carrinho/{itemId} (remover item)
+- PUT /api/cliente/me/carrinho/{produtoId} (atualizar quantidade)
+- DELETE /api/cliente/me/carrinho/{produtoId} (remover item)
 - GET /api/cliente/me/checkout/resumo (resumo do pedido)
 - POST /api/cliente/me/checkout/finalizar (criar pedido)
 
@@ -274,13 +347,15 @@ Thymeleaf e integrações com banco relacional, Firebird legado, storage e e-mai
 
 // CartItemResponse
 {
-  "itemId": 10,
   "produtoId": 2,
   "nome": "Produto",
   "imagem": "https://...",
   "preco": 19.9,
   "quantidade": 2,
-  "subtotal": 39.8
+  "subtotal": 39.8,
+  "invalido": false,
+  "motivo": null,
+  "estoque": 35
 }
 
 // PedidoResumoResponse
@@ -330,7 +405,7 @@ Thymeleaf e integrações com banco relacional, Firebird legado, storage e e-mai
 12) Componentes base: buttons (primary/ghost), inputs com estados, cards de produto, badges de estoque, chips de filtro.
 13) Estados globais: loading (skeleton), empty state, error state, offline state.
 14) Fluxo de catalogo: busca por nome/codigo, filtros por categoria e ordenacao por preco/novidade.
-15) Listagem de produtos: pagina com grid 2 colunas, pagina��o infinita, usa /api/v2/produtos e /api/public/vitrine/destaques.
+15) Listagem de produtos: pagina com grid 2 colunas, pagina��o infinita, usa /api/v2/produtos e /api/public/vitrine/destaques.
 16) Detalhe do produto: imagem, preco, promo, estoque, botao adicionar ao carrinho.
 17) Produtos relacionados: baseados em categoria + fallback por recentes.
 18) Regra de estoque: disponivel se disponivel=true e estoque>0; mostrar aviso <=10.
@@ -472,11 +547,11 @@ Thymeleaf e integrações com banco relacional, Firebird legado, storage e e-mai
   req: { "produtoId": 1, "quantidade": 1 }
   res: { "items": [CartItem], "subtotal": 0, "total": 0 }
 
-- PUT /api/cliente/me/carrinho/{itemId}
+- PUT /api/cliente/me/carrinho/{produtoId}
   req: { "quantidade": 2 }
   res: { "items": [CartItem], "subtotal": 0, "total": 0 }
 
-- DELETE /api/cliente/me/carrinho/{itemId}
+- DELETE /api/cliente/me/carrinho/{produtoId}
   res: { "items": [CartItem], "subtotal": 0, "total": 0 }
 
 ### Checkout
@@ -682,3 +757,54 @@ Thymeleaf e integrações com banco relacional, Firebird legado, storage e e-mai
 ### APK
 - Para gerar o APK debug: `cd mobile` + `./gradlew assembleDebug`.
 - Saida: `mobile/app/build/outputs/apk/debug/app-debug.apk`.
+## Plano operacional (50 etapas)
+1. Validar o status atual da fila `email_delivery` e confirmar que está em `PENDING`.
+2. Garantir que todas as variáveis Railway de SMTP estão populadas com os valores corretos e marcadas como sensíveis.
+3. Redeployar o serviço após a revisão das variáveis para forçar leitura das configurações.
+4. Disparar manualmente `/api/auth/email-claim/start` com curl e guardar `deliveryId/demoCode`.
+5. Verificar na tabela `email_delivery` se o registro associado muda para `SENT`.
+6. Se ficar em `PENDING`, habilitar logs `br.com.redemaisfarma=DEBUG` e `org.springframework.mail=DEBUG`.
+7. Revisar o `SettingsMailSenderAdapter` para garantir fallback seguro para variáveis ambientais.
+8. Confirmar que o fallback foi adotado no deploy (log `Hero available publicly...` ajuda a saber se settings carregaram).
+9. Documentar no README cortes de variáveis e fallback em um subtítulo (feito com este plano).
+10. Atualizar o fragmento `header.html` para manter o botão toggle e logo responsivos.
+11. Ajustar a CSS do header para logos maiores no mobile e adicionar padding extra.
+12. Revisar `sidebar.js` e garantir o overlay/escuro funciona para tocar fora.
+13. Testar a abertura do drawer em um dispositivo Android WebView via DevTools remote (emulação).
+14. Garantir que `nav-open` é adicionado ao `<html>` e que `main` não captura cliques quando o drawer está aberto.
+15. Atualizar `.hero__bg` para usar dimensões menores e centralizadas com gradiente.
+16. Adicionar query para ocultar `.hero__bg` em widths abaixo de 640px mantendo a imagem visível.
+17. Incluir fallback fixo `absorventepronto.png` no hero e garantir o asset está empacotado.
+18. Garantir que `BrandingModelAdvice` injeta `brandingHomeHeroImageUrl` limpando URLs inválidas (ex.: `/css/...`).
+19. Logar no servidor qual fallback foi usado para ajudar debug.
+20. Reduzir a opacidade do background hero e ajustar saturação para foco no conteúdo.
+21. Configurar testes manuais para confirmar o hero aparece em desktop e mobile.
+22. Atualizar `LoginRequest` e `cadastro-cliente.html` para aceitar qualquer caractere especial.
+23. Manter a mensagem de ajuda consistente (`A senha precisa...`) nos campos e no JS.
+24. Ajustar `cadastro-otp.js` para aceitar `demoCode` automático e submeter OTP imediatamente.
+25. Inserir um usuário admin seed via script Flyway/SQL (caso necessário).
+26. Garantir que o e-mail de testes dispara via admin e log registra `SENT`.
+27. Criar script Python opcional para inspecionar `email_delivery` e disparar OTP manualmente.
+28. Documentar esse script na sequência de README e /docs para futuras execuções.
+29. Focar no layout mobile: alinhar header, hero e CTA sem sobreposição.
+30. Criar uma lista de verificação de QA no README para testes pós-deploy (assets, login, sidebar).
+31. Auditar `sidebar` para remover duplicação de itens e garantir overlay escuro com `click` closing.
+32. Implementar botão fixo de "voltar ao topo" com delay e visibilidade condicional (já presente).
+33. Documentar no README como configurar env de produção vs dev (SMTP, DB, base URL).
+34. Garantir `app_settings` tem as chaves `branding.*` e `email.*` necessárias e mapear para README.
+35. Escrever instruções para carregar arte hero via admin (upload, URL e loop em vídeo) e mencionar formatos recomendados.
+36. Validar que a base `/images` serve o `absorventepronto.png` e não gera 404.
+37. Verificar se `/css/pages/brandingHomeHeroUrl` parou de ser requisitado após ajustes.
+38. Mapear no README como executar `./mvnw spotbugs:check` e `./mvnw checkstyle:check`.
+39. Registrar no README o fluxo de deploy (variáveis e comandos Railway).
+40. Confirmar que o login apresenta OTP form adequadamente após digitar a senha.
+41. Documentar no README o `curl` para OTP start/verify para testes rápidos.
+42. Adicionar no README instruções de reset de senha via `/auth/esqueci-senha`.
+43. Listar no README as métricas observáveis via Railway (logs, fila, job schedules).
+44. Registrar no README como expandir `sidebar` e a tecla Esc para fechar.
+45. Criar uma seção no README para alertar sobre as mensagens técnicas que devem sumir (cards com config).
+46. Acompanhar `email_delivery` e `email_campaign_queue` logs regularmente após deploy.
+47. Atualizar README com o contato de suporte e WhatsApp corrigido.
+48. Garantir README documenta o uso do `APP_MAIL_REPLY_TO`, `APP_WEB_BASE_URL` e `APP_MAIL_ENABLED`.
+49. Colocar links no README para o `README_DEV.md`, `AGENTS.md` e doc de testes.
+50. Finalizar com a confirmação no README que o plano de 50 etapas está completo e revisá-lo para clareza.

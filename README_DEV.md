@@ -9,6 +9,7 @@
 - CatÃ¡logo admin funcional: pÃ¡ginas `/admin/produtos`, `/admin/produtos/novo`, `/admin/produtos/{id}/editar` consumindo `/api/admin/produtos` (CRUD, validaÃ§Ã£o/publicaÃ§Ã£o, upload de imagem, aÃ§Ãµes IA).
 - ImportaÃ§Ã£o legado ativa via perfil `firebird` (conector Firebird Jaybird).
 - Observabilidade e qualidade ativas: Actuator, Jacoco, SpotBugs, Checkstyle.
+- Testes de controlador (ProdutoAdminRestControllerTest) e do job de alerta (EstoqueBaixoNotificacaoJobTest) cobrem /api/admin/produtos e o alerta de estoque; monitore as flags app.estoque.alerta.*, a fila email_delivery/EmailDeliveryWorker e os endpoints /actuator/health e /actuator/metrics para validar dependencias externas (storage/S3, Firebird).
 - Estoque: reservas no checkout/pagamento via `EstoqueService`, baixa em venda rÃ¡pida, job de alerta de estoque baixo (log/e-mail) configurÃ¡vel em `app.estoque.alerta.*`.
 
 ## Fluxos de produto (admin)
@@ -52,16 +53,7 @@
 - Mapper: `ProdutoMapper` converte domainâ†”entity/DTO.
 - Imagem IA: aÃ§Ãµes em lista/ediÃ§Ã£o chamam `/api/admin/imagens/{id}/queue|regenerate`.
 
-## PrÃ³ximos passos sugeridos
-- Garantir ambiente de teste com Docker ativo ou MySQL real para rodar ITs com Testcontainers.
-- Adicionar testes de controlador para `/api/admin/produtos` (CRUD feliz + erros) e cobrir principais validaÃ§Ãµes; novos ITs para checkout/pagamento/estoque e alerta.
-- Atualizar Swagger/OpenAPI com rotas admin de produtos e parÃ¢metros (validador, upload, imagem IA) e com fluxo de estoque/pagamento/checkout.
-- Revisar fluxo de imagem IA (queue/regenerate) e adicionar feedback na UI lista/ediÃ§Ã£o quando concluÃ­da.
-- Clientes (Admin) prÃ³ximos passos: CRUD de contatos/endereÃ§o, ativar/desativar conta, reset de senha/OTP, encerrar sessÃµes, listar pedidos detalhados.
-
 ## Blocos de Desenvolvimento (mÃ³dulos)
-- **Produtos (Admin)**: CRUD completo via `/api/admin/produtos`, pÃ¡ginas `/admin/produtos`, `/novo`, `/editar`, aÃ§Ãµes de imagem IA, export CSV.
-- **Clientes (Admin)**: resumo em `/api/admin/clientes/{id}/resumo`; detalhe/atualizaÃ§Ã£o parcial em `/api/admin/clientes/{id}` (PATCH), ativar/desativar (`/ativar`/`/desativar`), pedidos do cliente em `/api/admin/clientes/{id}/pedidos`, endereÃ§os em `/api/admin/clientes/{id}/enderecos` (GET/POST/PUT/DELETE). PrÃ³ximos passos: reset de senha/OTP, encerrar sessÃµes.
 - **Cliente (Self-service)**: `/api/cliente/me` (GET/PUT perfil), `/api/cliente/me/enderecos` (CRUD), `/api/cliente/me/pedidos` (paginado). Usa CurrentClienteProvider para extrair cliente autenticado do token.
 - **Legado/ImportaÃ§Ã£o**: conectores Firebird (perfil `firebird`), serviÃ§os de sincronizaÃ§Ã£o; monitorar logs em `adapters.outbound.legacy`.
 - **Qualidade/Observabilidade**: Actuator, Jacoco, SpotBugs, Checkstyle jÃ¡ integrados; manter `clean verify` no PR.
@@ -70,32 +62,39 @@
 - Expor troca de senha/OTP e encerrar sessÃµes em `/api/cliente/me`.
 - UI "Minha Conta" (cliente) consumindo `/api/cliente/me` e `/me/enderecos`.
 
-## Próximos 25 passos para conclusão web
-11. Confirmar com o time de produto os critérios de aceitação restantes: checkout completo, pagamentos, notificações e fluxos de erro esperados.
-12. Completar o inventário de telas/classes front-end (carrinho, checkout, pagamento, confirmação) e identificar gaps em componentes reutilizáveis.
-13. Mapear APIs/backlog necessárias para cada tela pendente, incluindo contratos de frete, promoções, cupom e estoque.
-14. Priorizar integrações críticas de backend com base no valor percebido pelo comprador e dependências técnicas.
-15. Checar o estado atual dos mocks/testes existentes para os endpoints de checkout e criar versões atualizadas, se necessário.
+## Prï¿½ximos 25 passos para conclusï¿½o web
+11. Confirmar com o time de produto os critï¿½rios de aceitaï¿½ï¿½o restantes: checkout completo, pagamentos, notificaï¿½ï¿½es e fluxos de erro esperados.
+12. Completar o inventï¿½rio de telas/classes front-end (carrinho, checkout, pagamento, confirmaï¿½ï¿½o) e identificar gaps em componentes reutilizï¿½veis.
+13. Mapear APIs/backlog necessï¿½rias para cada tela pendente, incluindo contratos de frete, promoï¿½ï¿½es, cupom e estoque.
+14. Priorizar integraï¿½ï¿½es crï¿½ticas de backend com base no valor percebido pelo comprador e dependï¿½ncias tï¿½cnicas.
+15. Checar o estado atual dos mocks/testes existentes para os endpoints de checkout e criar versï¿½es atualizadas, se necessï¿½rio.
 16. Gerar ou atualizar componentes UI responsivos para carrinho/checkout com estados de loading, sucesso e erro.
-17. Implementar validações de front-end (dados do cliente, n.º de cartão, CPF, CEP) alinhadas ao backend e ao UX.
-18. Garantir que o catálogo esteja atualizado antes do carrinho: cache, atualização assíncrona ou fallback.
-19. Conectar o front ao backend oficial para frete/pagamento, cuidando da autenticação e do token CSRF.
-20. Sincronizar estoque/preço ao abrir o carrinho e antes do pagamento, mostrando avisos de indisponibilidade.
-21. Implementar logs e métricas para o fluxo de checkout (eventos, tempo médio, falhas) visando monitoramento.
-22. Validar o fluxo com testes automatizados (unitários e integrados) e documentar os cenários cobertos.
-23. Realizar smoke tests manuais no ambiente dev com versões completas de banco e integrações (MySQL/Testcontainers).
-24. Ajustar performance (lazy load, debounce, minificação) e garantir acessibilidade básica (contrast, tab order).
+17. Implementar validaï¿½ï¿½es de front-end (dados do cliente, n.ï¿½ de cartï¿½o, CPF, CEP) alinhadas ao backend e ao UX.
+18. Garantir que o catï¿½logo esteja atualizado antes do carrinho: cache, atualizaï¿½ï¿½o assï¿½ncrona ou fallback.
+19. Conectar o front ao backend oficial para frete/pagamento, cuidando da autenticaï¿½ï¿½o e do token CSRF.
+20. Sincronizar estoque/preï¿½o ao abrir o carrinho e antes do pagamento, mostrando avisos de indisponibilidade.
+21. Implementar logs e mï¿½tricas para o fluxo de checkout (eventos, tempo mï¿½dio, falhas) visando monitoramento.
+22. Validar o fluxo com testes automatizados (unitï¿½rios e integrados) e documentar os cenï¿½rios cobertos.
+23. Realizar smoke tests manuais no ambiente dev com versï¿½es completas de banco e integraï¿½ï¿½es (MySQL/Testcontainers).
+24. Ajustar performance (lazy load, debounce, minificaï¿½ï¿½o) e garantir acessibilidade bï¿½sica (contrast, tab order).
 25. Preparar release notes e atualizar README/OpenAPI com os novos fluxos e endpoints expostos.
-26. Coordenar com QA e suporte o plano de testes de regressão, registrando bugs e fechando bloqueios.
-27. Fazer deploy em homologação, executar testes finais de ponta a ponta e coletar logs de erro/sucesso.
-28. Receber feedback de QA/PO, corrigir falhas críticas e reorganizar prioridades residuais.
-29. Atualizar scripts de implantação e configuração (env vars, secrets) caso novos serviços sejam utilizados.
-30. Acompanhar métricas pós-deploy, monitorar integrações externas e validar rollback/alertas.
-31. Comunicar o time e stakeholders da entrega com checklist, teste executado e próximos passos.
+26. Coordenar com QA e suporte o plano de testes de regressï¿½o, registrando bugs e fechando bloqueios.
+27. Fazer deploy em homologaï¿½ï¿½o, executar testes finais de ponta a ponta e coletar logs de erro/sucesso.
+28. Receber feedback de QA/PO, corrigir falhas crï¿½ticas e reorganizar prioridades residuais.
+29. Atualizar scripts de implantaï¿½ï¿½o e configuraï¿½ï¿½o (env vars, secrets) caso novos serviï¿½os sejam utilizados.
+30. Acompanhar mï¿½tricas pï¿½s-deploy, monitorar integraï¿½ï¿½es externas e validar rollback/alertas.
+31. Comunicar o time e stakeholders da entrega com checklist, teste executado e prï¿½ximos passos.
 32. Reavaliar o backlog para adicionar ajustes finos de UX/performance detectados durante testes.
-33. Garantir documentação interna atualizada (diagramas, contratos, endpoints) antes do fechamento.
+33. Garantir documentaï¿½ï¿½o interna atualizada (diagramas, contratos, endpoints) antes do fechamento.
 34. Treinar suporte/operations sobre o novo fluxo e preparar runbooks para incidentes.
-35. Planejar iteração seguinte com foco em novos requisitos ou otimizações após estabilizar a entrega.
+35. Planejar iteraï¿½ï¿½o seguinte com foco em novos requisitos ou otimizaï¿½ï¿½es apï¿½s estabilizar a entrega.
 
 ## Prioridade extrema
 - foto de perfil em 'Minha Conta' e 'Meus Dados' (upload + exibicao).
+
+
+
+
+## Observabilidade das campanhas
+- A fila de campanhas gera email_campaign.worker.processed/sent/retry/failed e pode ser monitorada via /actuator/metrics; configure alertas quando ailed > 0 ou processados pararem.
+- O formulï¿½rio admin agora aceita filtros adicionais (categoria comprada, recï¿½ncia em dias, ticket mï¿½dio) antes de enfileirar, alï¿½m de preview/cancelamento/pause para ajustar antes do envio.
