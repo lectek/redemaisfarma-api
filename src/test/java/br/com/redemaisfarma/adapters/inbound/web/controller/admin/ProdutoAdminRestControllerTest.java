@@ -1,0 +1,248 @@
+package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
+
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
+import br.com.redemaisfarma.adapters.outbound.persistence.jpa.ProdutoJpaRepository;
+import br.com.redemaisfarma.application.core.media.ImageStorageService;
+import br.com.redemaisfarma.application.dto.request.ProdutoRequestDTO;
+import br.com.redemaisfarma.application.core.settings.AppSettingService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(controllers = ProdutoAdminRestController.class)
+@AutoConfigureMockMvc(addFilters = false)
+class ProdutoAdminRestControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private ProdutoJpaRepository repo;
+
+    @MockBean
+    private ImageStorageService imageStorageService;
+
+    @MockBean
+    private AppSettingService appSettingService;
+
+    private ProdutoEntity sampleEntity;
+
+    @BeforeEach
+    void setup() {
+        sampleEntity = buildEntity(1L);
+        when(repo.findByNomeIgnoreCase(anyString())).thenReturn(Optional.empty());
+    }
+
+    @Test
+    void listReturnsPagedProducts() throws Exception {
+        when(repo.searchPage(any(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(sampleEntity)));
+
+        mockMvc.perform(get("/api/admin/produtos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].nome").value("Produto 1"));
+    }
+
+    @Test
+    void getProductNotFound() throws Exception {
+        when(repo.findById(1L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/admin/produtos/1"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void createProductReturnsCreated() throws Exception {
+        when(repo.save(any())).thenReturn(sampleEntity);
+        ProdutoRequestDTO request = buildRequest();
+
+        mockMvc.perform(post("/api/admin/produtos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.nome").value("Produto 1"))
+                .andExpect(jsonPath("$.situacao").value("ESGOTADO"));
+
+        verify(repo).save(any());
+    }
+
+    @Test
+    void updateProductReturnsOk() throws Exception {
+        when(repo.findById(1L)).thenReturn(Optional.of(sampleEntity));
+        when(repo.save(any())).thenReturn(sampleEntity);
+        when(repo.findByNomeIgnoreCase(anyString())).thenReturn(Optional.of(sampleEntity));
+        ProdutoRequestDTO request = buildRequest();
+
+        mockMvc.perform(put("/api/admin/produtos/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nome").value("Produto 1"));
+    }
+
+    @Test
+    void createProductRequiresImageWhenActive() throws Exception {
+        when(repo.save(any())).thenReturn(sampleEntity);
+        ProdutoRequestDTO request = buildRequest();
+        request.setAtivo(true);
+        request.setImagem(null);
+
+        mockMvc.perform(post("/api/admin/produtos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value(containsString("Imagem obrigatória para produtos disponibilizados na web.")));
+    }
+
+    @Test
+    void createProductRejectsDuplicateName() throws Exception {
+        when(repo.findByNomeIgnoreCase(anyString())).thenReturn(Optional.of(sampleEntity));
+        ProdutoRequestDTO request = buildRequest();
+        request.setNome(sampleEntity.getNome());
+
+        mockMvc.perform(post("/api/admin/produtos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value(containsString("Produto com este nome já existe – pesquise antes de criar.")));
+    }
+
+    @Test
+    void deleteReturnsNoContent() throws Exception {
+        when(repo.existsById(1L)).thenReturn(true);
+
+        mockMvc.perform(delete("/api/admin/produtos/1"))
+                .andExpect(status().isNoContent());
+
+        verify(repo).deleteById(1L);
+    }
+
+    @Test
+    void deleteReturnsNotFound() throws Exception {
+        when(repo.existsById(1L)).thenReturn(false);
+
+        mockMvc.perform(delete("/api/admin/produtos/1"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void uploadImageUpdatesProduct() throws Exception {
+        when(repo.findById(1L)).thenReturn(Optional.of(sampleEntity));
+        when(imageStorageService.saveProductImage(anyLong(), any())).thenReturn("https://cdn.example.com/produtos/1.png");
+        when(repo.save(any())).thenReturn(sampleEntity);
+
+        MockMultipartFile file = new MockMultipartFile("file", "image.png", MediaType.IMAGE_PNG_VALUE, "ok".getBytes());
+
+        mockMvc.perform(multipart("/api/admin/produtos/1/imagem").file(file))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value("https://cdn.example.com/produtos/1.png"));
+    }
+
+    @Test
+    void uploadImageNotFound() throws Exception {
+        when(repo.findById(1L)).thenReturn(Optional.empty());
+
+        MockMultipartFile file = new MockMultipartFile("file", "image.png", MediaType.IMAGE_PNG_VALUE, "ok".getBytes());
+
+        mockMvc.perform(multipart("/api/admin/produtos/1/imagem").file(file))
+                .andExpect(status().isNotFound());
+
+        verify(imageStorageService, never()).saveProductImage(anyLong(), any());
+    }
+
+    @Test
+    void validateProductSetsStatus() throws Exception {
+        when(repo.findById(1L)).thenReturn(Optional.of(sampleEntity));
+        when(repo.save(any())).thenReturn(sampleEntity);
+
+        mockMvc.perform(post("/api/admin/produtos/1/validar").param("validador", "qa"))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<ProdutoEntity> captor = ArgumentCaptor.forClass(ProdutoEntity.class);
+        verify(repo).save(captor.capture());
+        assertThat(captor.getValue().getStatus()).isEqualTo(ProdutoStatus.VALIDADO);
+        assertThat(captor.getValue().getValidador()).isEqualTo("qa");
+    }
+
+    @Test
+    void publicarProductSetsStatusAndPublished() throws Exception {
+        when(repo.findById(1L)).thenReturn(Optional.of(sampleEntity));
+        when(repo.save(any())).thenReturn(sampleEntity);
+
+        mockMvc.perform(post("/api/admin/produtos/1/publicar").param("validador", "qa"))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<ProdutoEntity> captor = ArgumentCaptor.forClass(ProdutoEntity.class);
+        verify(repo).save(captor.capture());
+        assertThat(captor.getValue().getStatus()).isEqualTo(ProdutoStatus.PUBLICADO);
+        assertThat(captor.getValue().getValidador()).isEqualTo("qa");
+        assertThat(captor.getValue().getPublicadoEm()).isNotNull();
+    }
+
+    private ProdutoEntity buildEntity(Long id) {
+        ProdutoEntity entity = new ProdutoEntity();
+        entity.setId(id);
+        entity.setNome("Produto " + id);
+        entity.setDescricao("Descrição");
+        entity.setPrecoVenda(BigDecimal.valueOf(12.50));
+        entity.setCategoria("ANALGESICO");
+        entity.setCodigoBarras("7891234567895");
+        entity.setEstoque(5);
+        entity.setDisponivel(false);
+        entity.setStatus(ProdutoStatus.PUBLICADO);
+        entity.setImagem("https://cdn.example.com/produtos/" + id + ".png");
+        entity.setCreatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setHashLegado("hash-" + id);
+        return entity;
+    }
+
+    private ProdutoRequestDTO buildRequest() {
+        ProdutoRequestDTO request = new ProdutoRequestDTO();
+        request.setSku("SKU-001");
+        request.setNome("Produto 1");
+        request.setDescricao("Descrição");
+        request.setPreco(BigDecimal.valueOf(12.50));
+        request.setImagem("https://cdn.example.com/produtos/1.png");
+        request.setCategoria("ANALGESICO");
+        request.setCodigoBarras("7891234567895");
+        request.setEstoque(5);
+        request.setTenantId("tenant");
+        request.setAtivo(false);
+        return request;
+    }
+}
