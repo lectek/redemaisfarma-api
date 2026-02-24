@@ -19,7 +19,11 @@
   <main id="main-content" class="login-shell" tabindex="-1">
     <section class="login-stage" aria-label="Area de login">
       <header class="login-brand">
-        <img th:src="@{/images/logofarma.png}" alt="SaudeMais Farma" loading="eager" decoding="async" />
+        <img class="login-brand-logo"
+             th:src="${#strings.isEmpty(brandingLogoUrl) or #strings.containsIgnoreCase(brandingLogoUrl, 'logofarma.png') or #strings.containsIgnoreCase(brandingLogoUrl, 'logo-redemaisfarma.png') or #strings.containsIgnoreCase(brandingLogoUrl, 'novalogo.webp')} ? @{/images/logonova.png} : ${brandingLogoUrl}"
+             alt="RedeMaisFarma"
+             loading="eager"
+             decoding="async" />
       </header>
 
       <div class="login-layout">
@@ -85,24 +89,7 @@
         </section>
 
         <aside class="login-illustration" aria-hidden="true">
-          <div class="pill-friend">
-            <span class="pill-friend__spark pill-friend__spark--a"></span>
-            <span class="pill-friend__spark pill-friend__spark--b"></span>
-            <span class="pill-friend__spark pill-friend__spark--c"></span>
-            <span class="pill-friend__mini-heart pill-friend__mini-heart--a"></span>
-            <span class="pill-friend__mini-heart pill-friend__mini-heart--b"></span>
-            <span class="pill-friend__mini-heart pill-friend__mini-heart--c"></span>
-            <div class="pill-friend__head"></div>
-            <div class="pill-friend__body"></div>
-            <div class="pill-friend__eye pill-friend__eye--left"></div>
-            <div class="pill-friend__eye pill-friend__eye--right"></div>
-            <div class="pill-friend__smile"></div>
-            <div class="pill-friend__hand pill-friend__hand--left"></div>
-            <div class="pill-friend__hand pill-friend__hand--right"></div>
-            <div class="pill-friend__heart"></div>
-            <div class="pill-friend__leg pill-friend__leg--left"></div>
-            <div class="pill-friend__leg pill-friend__leg--right"></div>
-          </div>
+          <img class="login-mascot-image" th:src="@{/images/mascote-login.png}" alt="Mascote SaudeMais Farma" loading="lazy" decoding="async" />
         </aside>
       </div>
     </section>

@@ -81,7 +81,7 @@
   align-items: center;
 }
 
-.login-brand img {
+.login-brand .login-brand-logo {
   width: clamp(220px, 30vw, 440px);
   height: auto;
   display: block;
@@ -344,6 +344,13 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
+}
+
+.login-mascot-image {
+  width: min(360px, 95%);
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 20px 34px rgba(0, 0, 0, 0.45));
 }
 
 .pill-friend {
@@ -641,9 +648,8 @@
     min-height: auto;
   }
 
-  .pill-friend {
-    width: min(320px, 90vw);
-    height: 400px;
+  .login-mascot-image {
+    width: min(340px, 90vw);
   }
 }
 
@@ -656,7 +662,7 @@
     gap: 10px;
   }
 
-  .login-brand img {
+  .login-brand .login-brand-logo {
     width: clamp(210px, 56vw, 320px);
   }
 
@@ -673,7 +679,7 @@
     font-size: 0.94rem;
   }
 
-  .pill-friend {
+  .login-mascot-image {
     display: none;
   }
 }
