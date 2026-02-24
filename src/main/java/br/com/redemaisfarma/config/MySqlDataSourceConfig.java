@@ -146,10 +146,15 @@ public class MySqlDataSourceConfig {
     @Bean(name = "flyway")
     @Primary
     public Flyway flyway(@Qualifier("dataSource") DataSource dataSource) {
+        boolean outOfOrder = Boolean.parseBoolean(
+                System.getenv().getOrDefault("FLYWAY_OUT_OF_ORDER", "true"));
+        LOGGER.info("Flyway config outOfOrder={}", outOfOrder);
+
         Flyway flyway = Flyway.configure()
                 .dataSource(dataSource)
                 .locations("classpath:db/migration", "classpath:db/migration-mysql")
                 .baselineOnMigrate(true)
+                .outOfOrder(outOfOrder)
                 .load();
         flyway.migrate();
         return flyway;
