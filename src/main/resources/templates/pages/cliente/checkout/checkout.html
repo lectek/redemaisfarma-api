@@ -1,107 +1,215 @@
-<!-- src/main/resources/templates/pages/checkout.html -->
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Finalizar Pedido - RedeMaisFarma</title>
-
-  <!-- Estilos -->
-  <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <link rel="stylesheet" th:href="@{/css/main.css(v=${#dates.createNow().time})}" />
 </head>
-<body class="body-flex">
+<body class="body-flex checkout-page" data-page="checkout">
+  <main id="main-content" class="checkout-window" tabindex="-1">
+    <section class="checkout-window__topbar" aria-label="Barra da janela">
+      <p class="checkout-window__title">Finalizar Pedido</p>
+      <div class="checkout-window__actions" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </section>
 
-  <!-- Header -->
-  <header th:replace="~{fragments/header :: header}"></header>
+    <section class="checkout-head" aria-label="Cabecalho checkout">
+      <a class="checkout-brand" th:href="@{/}">
+        <img th:src="@{/images/logofarma.png}" alt="SaudeMais Farma" />
+      </a>
 
-  <div class="layout layout--with-sidebar">
-    <aside th:replace="~{fragments/sidebar :: sidebar('checkout')}"></aside>
+      <nav class="checkout-nav" aria-label="Menu principal">
+        <a th:href="@{/}">Inicio</a>
+        <a th:href="@{/produtos}">Produtos</a>
+        <a th:href="@{/sobre}">Sobre nos</a>
+        <a th:href="@{/produtos(q='ofertas')}">Ofertas</a>
+      </nav>
 
-    <div class="container mt-4 mb-4">
-      <!-- Titulo -->
-      <h1 class="text-center text-lg mt-4">Finalizar Pedido</h1>
-      <section th:replace="~{fragments/flash :: flash}"></section>
+      <div class="checkout-tools" aria-label="Acoes rapidas">
+        <a class="checkout-tool" th:href="@{/produtos}" aria-label="Buscar produtos">
+          <svg viewBox="0 0 24 24"><path d="M10 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12Zm0-2a8 8 0 1 0 4.9 14.3l4.4 4.4 1.4-1.4-4.4-4.4A8 8 0 0 0 10 2Z"/></svg>
+        </a>
+        <a class="checkout-tool" th:href="@{/cliente/conta}" aria-label="Minha conta">
+          <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.4 0-8 2-8 4.5V20h16v-1.5C20 16 16.4 14 12 14Z"/></svg>
+        </a>
+        <a class="checkout-tool checkout-tool--cart" th:href="@{/carrinho}" aria-label="Carrinho">
+          <svg viewBox="0 0 24 24"><path d="M7 5h14l-1.6 8.4a2 2 0 0 1-2 1.6H10a2 2 0 0 1-2-1.6L6.5 4H3V2h5.2l.4 2Zm3 15a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 .001 4A2 2 0 0 0 18 20Z"/></svg>
+          <span class="checkout-tool__count" th:text="${#lists.size(cartItems)}">0</span>
+        </a>
+      </div>
+    </section>
 
-      <!-- Conteudo principal -->
-      <main id="main-content" class="grid grid-cols-1 md:grid-cols-2 gap-32 mt-4 mb-4">
+    <section class="checkout-stepper" aria-label="Etapas do pedido">
+      <span>Carrinho</span>
+      <span>Dados</span>
+      <span class="is-active">Pagamento</span>
+      <span>Confirmacao</span>
+    </section>
 
-        <!-- Formulario de checkout -->
-        <form class="card stack gap-16" th:action="@{/pedido/finalizar}" method="post" novalidate>
-          <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <section class="checkout-flash" th:replace="~{fragments/flash :: flash}"></section>
 
-          <fieldset class="stack gap-8">
-            <legend class="text-base font-semibold">Informacoes do Paciente</legend>
+    <section class="checkout-workspace">
+      <aside class="checkout-rail" aria-label="Atalhos checkout">
+        <a class="checkout-rail__cta" th:href="@{/checkout}">
+          <span class="checkout-rail__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm3 4v2h10V7H7Zm0 4v2h7v-2H7Z"/></svg>
+          </span>
+          <span>Finalizar Pedido</span>
+        </a>
 
-            <div class="stack gap-4">
-              <label for="nome">Nome Completo *</label>
-              <input type="text" id="nome" name="nome" required placeholder="Seu nome completo" class="form-input" />
+        <nav class="checkout-rail__menu" aria-label="Menu lateral checkout">
+          <a th:href="@{/}" class="is-active">Home</a>
+          <a th:href="@{/cliente/conta}">Minha conta</a>
+          <a th:href="@{/cliente/dados}">Meus dados</a>
+          <a th:href="@{/produtos}">Produtos</a>
+          <a th:href="@{/carrinho}">Meu carrinho</a>
+        </nav>
+      </aside>
+
+      <section class="checkout-content">
+        <header class="checkout-content__head">
+          <article class="checkout-info-card">
+            <h1>Dados do Cliente</h1>
+            <p>Informacoes do paciente</p>
+          </article>
+
+          <article class="checkout-safe-card">
+            <div class="checkout-safe-card__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 9.8 8 11 4.6-1.2 8-6 8-11V5Zm0 2.1 6 2.2v4.7c0 3.9-2.5 7.8-6 9-3.5-1.2-6-5.1-6-9V6.3Zm-1.4 9.8-2.2-2.2L7 13.1l3.6 3.6L17.5 10l-1.4-1.4Z"/></svg>
             </div>
-
-            <div class="stack gap-4">
-              <label for="cpf">CPF *</label>
-              <input type="text" id="cpf" name="cpf" required placeholder="000.000.000-00" class="form-input" />
+            <div>
+              <strong>Compra 100% segura</strong>
+              <p>Dados criptografados</p>
             </div>
+          </article>
+        </header>
 
-            <div class="stack gap-4">
-              <label for="email">E-mail para contato *</label>
-              <input type="email" id="email" name="email" required placeholder="exemplo@dominio.com" class="form-input" />
-            </div>
+        <section class="checkout-grid">
+          <form id="checkoutForm" class="checkout-form" th:action="@{/pedido/finalizar}" method="post" novalidate>
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-            <div class="stack gap-4">
-              <label for="endereco">Endereco de Entrega *</label>
-              <input type="text" id="endereco" name="endereco" required placeholder="Rua, numero, bairro, cidade" class="form-input" />
-            </div>
-          </fieldset>
+            <article class="checkout-panel">
+              <h2>Dados do Cliente</h2>
 
-          <fieldset class="stack gap-8">
-            <legend class="text-base font-semibold">Forma de Pagamento</legend>
+              <div class="checkout-fields">
+                <label class="checkout-field" for="nome">
+                  <span>Nome completo *</span>
+                  <input type="text" id="nome" name="nome" required autocomplete="name" placeholder="Joao da Silva" class="form-input" />
+                </label>
 
-            <div class="stack gap-4">
-              <label for="pagamento">Selecione o metodo *</label>
-              <select id="pagamento" name="pagamento" required class="form-input" th:disabled="${paymentMethodsEmpty}">
-                <option value="">Selecione</option>
-                <option th:each="m : ${paymentMethods}" th:value="${m.value}" th:text="${m.label}">PIX</option>
-              </select>
+                <label class="checkout-field" for="cpf">
+                  <span>CPF *</span>
+                  <input type="text" id="cpf" name="cpf" required inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" class="form-input" />
+                </label>
+
+                <label class="checkout-field" for="email">
+                  <span>E-mail para contato *</span>
+                  <input type="email" id="email" name="email" required autocomplete="email" placeholder="seu@email.com" class="form-input" />
+                </label>
+
+                <label class="checkout-field" for="endereco">
+                  <span>Endereco de entrega *</span>
+                  <input type="text" id="endereco" name="endereco" required autocomplete="street-address" placeholder="Rua, numero, bairro, cidade" class="form-input" />
+                </label>
+              </div>
+            </article>
+
+            <article class="checkout-panel">
+              <h2>Forma de Pagamento</h2>
+
+              <div class="checkout-payment-pills" aria-hidden="true">
+                <span>PIX</span>
+                <span>Cartao de Credito</span>
+                <span>Dinheiro (troco)</span>
+              </div>
+
+              <label class="checkout-field" for="pagamento">
+                <span>Selecione o metodo *</span>
+                <select id="pagamento" name="pagamento" required class="form-input" th:disabled="${paymentMethodsEmpty}">
+                  <option value="">Selecione</option>
+                  <option th:each="m : ${paymentMethods}" th:value="${m.value}" th:text="${m.label}">PIX</option>
+                </select>
+              </label>
+
               <p class="alert alert-info" th:if="${paymentMethodsEmpty}">
                 Nenhum metodo de pagamento esta ativo. Finalize isso no painel admin.
               </p>
               <p class="alert alert-warning" th:if="${cartHasInvalidItems}">
                 Ajuste os itens do carrinho antes de confirmar o pedido.
               </p>
+            </article>
+          </form>
+
+          <aside class="checkout-summary"
+                 th:with="subtotalValue=${cartSummary.subtotal != null ? cartSummary.subtotal : T(java.math.BigDecimal).ZERO},
+                          totalValue=${cartSummary.total != null ? cartSummary.total : T(java.math.BigDecimal).ZERO},
+                          discount=${subtotalValue.compareTo(totalValue) > 0 ? subtotalValue.subtract(totalValue) : T(java.math.BigDecimal).ZERO},
+                          shipping=${T(java.math.BigDecimal).ZERO}">
+            <h2>Resumo do Pedido</h2>
+
+            <div th:if="${!cartEmpty}" class="checkout-summary__items">
+              <article class="checkout-item" th:each="i : ${cartItems}">
+                <img class="checkout-item__image" th:src="${#strings.isEmpty(i.imagem) ? '/img/produtos/placeholder-generico.png' : i.imagem}" alt="Produto" loading="lazy" />
+                <div class="checkout-item__meta">
+                  <p class="checkout-item__name" th:text="${i.nome}">Produto</p>
+                  <p class="checkout-item__qty" th:text="${i.quantidade + ' unidade(s)'}">1 unidade(s)</p>
+                </div>
+                <p class="checkout-item__subtotal" th:text="${#numbers.formatCurrency(i.subtotal, 'pt_BR')}">R$ 0,00</p>
+              </article>
+
+              <div class="checkout-summary__line">
+                <span>Subtotal</span>
+                <span th:text="${#numbers.formatCurrency(subtotalValue, 'pt_BR')}">R$ 0,00</span>
+              </div>
+              <div class="checkout-summary__line">
+                <span>Frete</span>
+                <span th:text="${#numbers.formatCurrency(shipping, 'pt_BR')}">R$ 0,00</span>
+              </div>
+              <div class="checkout-summary__line">
+                <span>Cupom de Desconto</span>
+                <span th:text="${'-' + #numbers.formatCurrency(discount, 'pt_BR')}">-R$ 0,00</span>
+              </div>
+
+              <div class="checkout-summary__total">
+                <span>Total</span>
+                <strong th:text="${#numbers.formatCurrency(totalValue, 'pt_BR')}">R$ 0,00</strong>
+              </div>
+
+              <button form="checkoutForm" type="submit" class="btn btn--primary checkout-submit"
+                      th:disabled="${paymentMethodsEmpty or cartEmpty or cartHasInvalidItems}">
+                Finalizar Pedido
+              </button>
+
+              <a class="checkout-summary__continue" th:href="@{/produtos}">ou continue comprando</a>
             </div>
-          </fieldset>
 
-          <div class="text-right">
-            <button type="submit" class="btn btn--primary" th:disabled="${paymentMethodsEmpty or cartEmpty or cartHasInvalidItems}">Confirmar Pedido</button>
-          </div>
+            <p class="checkout-empty" th:if="${cartEmpty}">Seu carrinho esta vazio.</p>
 
-          <div class="trust-badges flex items-center gap-8 mt-4">
-            <img src="/img/ssl.svg" alt="SSL Seguro" width="24" height="24" />
-            <span class="text-sm">Ambiente 100% seguro</span>
-          </div>
-        </form>
+            <article class="checkout-pix-banner" aria-hidden="true">
+              <div class="checkout-pix-banner__copy">
+                <strong>pix</strong>
+                <p>Sacola e compra rapida com confirmacao imediata.</p>
+              </div>
+              <div class="checkout-pix-banner__mascot">
+                <span class="mascot-head"></span>
+                <span class="mascot-body"></span>
+                <span class="mascot-shield"></span>
+              </div>
+            </article>
+          </aside>
+        </section>
 
-        <!-- Resumo do pedido -->
-        <aside class="card stack gap-16">
-          <h2 class="text-base font-semibold">Resumo do Pedido</h2>
-          <div class="stack gap-8" th:if="${!cartEmpty}">
-            <div class="between text-sm" th:each="i : ${cartItems}">
-              <span th:text="${i.nome}">Produto</span>
-              <span th:text="${#numbers.formatCurrency(i.subtotal, 'pt_BR')}">R$ 0,00</span>
-            </div>
-            <div class="between font-semibold">
-              <span>Total</span>
-              <span th:text="${#numbers.formatCurrency(cartSummary.total, 'pt_BR')}">R$ 0,00</span>
-            </div>
-          </div>
-          <p class="text-sm text-gray-600" th:if="${cartEmpty}">Seu carrinho esta vazio.</p>
-        </aside>
-      </main>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer th:replace="~{fragments/footer :: footer}"></footer>
-
+        <footer class="checkout-legal">
+          <span>2024 RedeMaisFarma</span>
+          <a th:href="@{/sobre}">Termos &amp; Condicoes</a>
+          <a th:href="@{/sobre}">Politica de Privacidade</a>
+        </footer>
+      </section>
+    </section>
+  </main>
 </body>
 </html>
