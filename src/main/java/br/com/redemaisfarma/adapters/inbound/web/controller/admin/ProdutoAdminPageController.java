@@ -8,6 +8,7 @@ import lombok.Generated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -23,6 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -146,6 +148,25 @@ public class ProdutoAdminPageController {
         return "pages/admin/produtos/form";
     }
 
+    @GetMapping(value = "/busca-rapida", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<ProdutoLookupItem> buscaRapida(
+            @RequestParam("q") String q,
+            @RequestParam(defaultValue = "8") int limit
+    ) {
+        String termo = this.normalize(q);
+        if (termo.isBlank()) {
+            return List.of();
+        }
+        int safeLimit = Math.max(1, Math.min(limit, 20));
+        Pageable pageable = PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.ASC, "nome"));
+        return this.produtoRepository.searchPageByCategoria(termo, null, pageable)
+                .getContent()
+                .stream()
+                .map(ProdutoLookupItem::from)
+                .toList();
+    }
+
     @GetMapping("/form")
     public String redirectFormToNovo() {
         return "redirect:/admin/produtos/novo";
@@ -167,6 +188,34 @@ public class ProdutoAdminPageController {
 
     private String normalize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    public static record ProdutoLookupItem(
+            Long id,
+            String nome,
+            String descricao,
+            String categoria,
+            String codigoBarras,
+            BigDecimal precoVenda,
+            BigDecimal precoPromocional,
+            Integer estoque,
+            String fabricante,
+            String unidade
+    ) {
+        static ProdutoLookupItem from(ProdutoEntity p) {
+            return new ProdutoLookupItem(
+                    p.getId(),
+                    p.getNome(),
+                    p.getDescricao(),
+                    p.getCategoria(),
+                    p.getCodigoBarras(),
+                    p.getPrecoVenda(),
+                    p.getPrecoPromocional(),
+                    p.getEstoque(),
+                    p.getFabricante(),
+                    p.getUnidade()
+            );
+        }
     }
 
     @Generated

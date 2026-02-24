@@ -48,12 +48,15 @@
       <input class="input" type="search" name="q" placeholder="Buscar por nome, email ou CPF" th:value="${param.q}"/>
       <select class="select" name="status">
         <option value="">Status</option>
-        <option value="ATIVO">Ativo</option>
-        <option value="INATIVO">Inativo</option>
+        <option value="ATIVO" th:selected="${statusSelecionado == 'ATIVO'}">Ativo</option>
+        <option value="INATIVO" th:selected="${statusSelecionado == 'INATIVO'}">Inativo</option>
       </select>
       <button class="btn">Filtrar</button>
       <a class="btn btn-ghost" th:href="@{/admin/clientes}">Limpar</a>
     </form>
+    <p class="text-muted m-0" th:if="${totalFiltrados != null}">
+      Exibindo <strong th:text="${totalFiltrados}">0</strong> resultado(s).
+    </p>
 
     <section class="card table-responsive">
       <table class="table">

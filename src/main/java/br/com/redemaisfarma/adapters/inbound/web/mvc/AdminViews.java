@@ -27,8 +27,6 @@ implements WebMvcConfigurer {
         r.addViewController("/admin/financeiro/assinaturas/detalhe").setViewName("pages/admin/financeiro/assinaturas-detalhe");
         r.addViewController("/admin/financeiro/gateways").setViewName("pages/admin/financeiro/gateways");
         r.addViewController("/admin/financeiro/pagamentos").setViewName("pages/admin/financeiro/pagamentos");
-        r.addViewController("/admin/clientes").setViewName("pages/admin/clientes/lista");
-        r.addViewController("/admin/clientes/lista").setViewName("pages/admin/clientes/lista");
         r.addViewController("/admin/marketing/notificacoes").setViewName("pages/admin/marketing/notificacoes");
         r.addViewController("/admin/produtos").setViewName("pages/admin/produtos/lista");
         r.addViewController("/admin/produtos/lista").setViewName("pages/admin/produtos/lista");

@@ -27,6 +27,27 @@
     </span>
   </p>
 
+  <div class="card p-4 stack">
+    <div class="between">
+      <h2 class="h5 m-0">Busca rapida para preenchimento</h2>
+      <small class="text-muted">Pesquise por nome, descricao ou codigo de barras.</small>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex: 1 1 auto;">
+        <label for="quickProdutoTermo">Pesquisar produto existente</label>
+        <input id="quickProdutoTermo" class="input" type="search"
+               placeholder="Ex.: dipirona 500mg ou 789..." autocomplete="off"/>
+      </div>
+      <div class="form-group" style="align-self: end;">
+        <button id="quickProdutoClear" type="button" class="btn btn-ghost">Limpar</button>
+      </div>
+    </div>
+    <p id="quickProdutoHint" class="text-muted m-0">
+      Dica: selecione um resultado para preencher automaticamente o formulario.
+    </p>
+    <div id="quickProdutoResultados" class="stack"></div>
+  </div>
+
   <div class="card p-4">
     <form class="form-grid" th:action="@{/admin/produtos}" method="post" th:object="${produto}" enctype="multipart/form-data">
       <input type="hidden" th:field="*{id}"/>
@@ -91,6 +112,7 @@
   </div>
 </main></div>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
+<script defer th:src="@{/js/pages/admin/produto-novo.js(v=${#dates.createNow().time})}" src="/js/pages/admin/produto-novo.js"></script>
 </body>
 </html>
 
