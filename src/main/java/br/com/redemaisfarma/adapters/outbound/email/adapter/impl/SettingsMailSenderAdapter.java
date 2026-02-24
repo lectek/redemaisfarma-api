@@ -2,6 +2,7 @@ package br.com.redemaisfarma.adapters.outbound.email.adapter.impl;
 
 import br.com.redemaisfarma.adapters.outbound.email.adapter.MailSenderAdapter;
 import br.com.redemaisfarma.application.core.settings.AppSettingService;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -32,6 +33,16 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
     private static final String KEY_FROM_EMAIL = "email.from_email";
     private static final String KEY_FROM_NAME = "email.from_name";
     private static final String KEY_REPLY_TO = "email.reply_to";
+    private static final String[] KEYS_ENABLED = new String[]{KEY_ENABLED, "email.ativo"};
+    private static final String[] KEYS_SMTP_HOST = new String[]{KEY_SMTP_HOST, "email.smtp.host"};
+    private static final String[] KEYS_SMTP_PORT = new String[]{KEY_SMTP_PORT, "email.smtp.port", "email.smtp.porta"};
+    private static final String[] KEYS_SMTP_USER = new String[]{KEY_SMTP_USER, "email.smtp.user", "email.smtp.usuario"};
+    private static final String[] KEYS_SMTP_PASS = new String[]{KEY_SMTP_PASS, "email.smtp.password", "email.smtp.senha"};
+    private static final String[] KEYS_SMTP_TLS = new String[]{KEY_SMTP_TLS, "email.smtp.tls", "email.smtp.starttls"};
+    private static final String[] KEYS_SMTP_SSL = new String[]{KEY_SMTP_SSL, "email.smtp.ssl"};
+    private static final String[] KEYS_FROM_EMAIL = new String[]{KEY_FROM_EMAIL, "email.from_email", "email.remetente"};
+    private static final String[] KEYS_FROM_NAME = new String[]{KEY_FROM_NAME, "email.from_name", "email.nome_remetente"};
+    private static final String[] KEYS_REPLY_TO = new String[]{KEY_REPLY_TO, "email.reply.to", "email.reply_to"};
 
     private final AppSettingService settings;
     private final Environment env;
@@ -48,13 +59,20 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
             return "noop-disabled";
         }
 
-        String host = getOrDefault(KEY_SMTP_HOST, "SPRING_MAIL_HOST", "").trim();
+        String host = getOrDefault(KEYS_SMTP_HOST, "SPRING_MAIL_HOST", "").trim();
         if (host.isBlank()) {
             throw new IllegalStateException("SMTP host nao configurado.");
         }
-        String fromEmail = getOrDefault(KEY_FROM_EMAIL, "APP_MAIL_FROM", "").trim();
+
+        String fromRaw = getOrDefault(KEYS_FROM_EMAIL, "APP_MAIL_FROM", "").trim();
+        ParsedFrom parsedFrom = parseFrom(fromRaw);
+        String fromEmail = parsedFrom.email();
         if (fromEmail.isBlank()) {
             throw new IllegalStateException("Email remetente nao configurado.");
+        }
+        String fromName = getFirstConfigured(KEYS_FROM_NAME);
+        if (fromName.isBlank()) {
+            fromName = parsedFrom.name();
         }
 
         JavaMailSenderImpl sender = buildSender(host);
@@ -63,8 +81,8 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
             MimeMessageHelper helper = new MimeMessageHelper(msg, true, StandardCharsets.UTF_8.name());
             helper.setValidateAddresses(true);
             helper.setTo(to);
-            setFrom(helper, fromEmail, getOrDefault(KEY_FROM_NAME, "APP_MAIL_FROM_NAME", "").trim());
-            String replyTo = safeTrim(settings.getOrDefault(KEY_REPLY_TO, ""));
+            setFrom(helper, fromEmail, fromName);
+            String replyTo = getFirstConfigured(KEYS_REPLY_TO);
             String replyToEnv = env.getProperty("APP_MAIL_REPLY_TO");
             if (replyToEnv != null && !replyToEnv.isBlank() && replyTo.isBlank()) {
                 replyTo = replyToEnv.trim();
@@ -90,14 +108,16 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
         JavaMailSenderImpl sender = new JavaMailSenderImpl();
         sender.setHost(host);
         sender.setPort(readPort());
-        sender.setUsername(getOrDefault(KEY_SMTP_USER, "SPRING_MAIL_USERNAME", "").trim());
-        sender.setPassword(getOrDefault(KEY_SMTP_PASS, "SPRING_MAIL_PASSWORD", "").trim());
-        sender.setJavaMailProperties(buildProps());
+        String smtpUser = getOrDefault(KEYS_SMTP_USER, "SPRING_MAIL_USERNAME", "").trim();
+        String smtpPass = getOrDefault(KEYS_SMTP_PASS, "SPRING_MAIL_PASSWORD", "").trim();
+        sender.setUsername(smtpUser);
+        sender.setPassword(smtpPass);
+        sender.setJavaMailProperties(buildProps(smtpUser, smtpPass));
         return sender;
     }
 
     private int readPort() {
-        String raw = getOrDefault(KEY_SMTP_PORT, "SPRING_MAIL_PORT", "587").trim();
+        String raw = getOrDefault(KEYS_SMTP_PORT, "SPRING_MAIL_PORT", "587").trim();
         try {
             return Integer.parseInt(raw);
         } catch (NumberFormatException ex) {
@@ -105,13 +125,11 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
         }
     }
 
-    private Properties buildProps() {
+    private Properties buildProps(String smtpUser, String smtpPass) {
         Properties props = new Properties();
-        boolean tls = getBooleanOrEnv(KEY_SMTP_TLS, "SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE", true);
-        boolean ssl = getBooleanOrEnv(KEY_SMTP_SSL, "SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE", false);
-        String user = settings.getOrDefault(KEY_SMTP_USER, "").trim();
-        String pass = settings.getOrDefault(KEY_SMTP_PASS, "").trim();
-        boolean auth = !user.isBlank() || !pass.isBlank();
+        boolean tls = getBooleanOrEnv(KEYS_SMTP_TLS, "SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE", true);
+        boolean ssl = getBooleanOrEnv(KEYS_SMTP_SSL, "SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_ENABLE", false);
+        boolean auth = !smtpUser.isBlank() || !smtpPass.isBlank();
         props.put("mail.smtp.auth", String.valueOf(auth));
         props.put("mail.smtp.starttls.enable", String.valueOf(tls));
         props.put("mail.smtp.ssl.enable", String.valueOf(ssl));
@@ -131,11 +149,15 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
     }
 
     private boolean isEnabled() {
-        return getBooleanOrEnv(KEY_ENABLED, "APP_MAIL_ENABLED", false);
+        return getBooleanOrEnv(KEYS_ENABLED, "APP_MAIL_ENABLED", false);
     }
 
-    private boolean getBooleanOrEnv(String key, String envKey, boolean defaultValue) {
-        return settings.getBoolean(key, boolEnv(envKey, defaultValue));
+    private boolean getBooleanOrEnv(String[] keys, String envKey, boolean defaultValue) {
+        String raw = getFirstConfigured(keys);
+        if (!raw.isBlank()) {
+            return parseBoolean(raw, defaultValue);
+        }
+        return boolEnv(envKey, defaultValue);
     }
 
     private boolean boolEnv(String envKey, boolean defaultValue) {
@@ -143,8 +165,7 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
         if (raw == null) {
             return defaultValue;
         }
-        String normalized = raw.trim().toLowerCase(Locale.ROOT);
-        return normalized.equals("true") || normalized.equals("1") || normalized.equals("yes") || normalized.equals("on") || normalized.equals("verdade") || normalized.equals("sim");
+        return parseBoolean(raw, defaultValue);
     }
 
     private static String safeTrim(String value) {
@@ -154,15 +175,58 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
         return value.trim();
     }
 
-    private String getOrDefault(String key, String envKey, String defaultValue) {
-        String value = settings.getOrDefault(key, "").trim();
-        if (!value.isBlank()) {
-            return value;
+    private boolean parseBoolean(String raw, boolean defaultValue) {
+        if (raw == null) {
+            return defaultValue;
         }
+        String normalized = raw.trim().toLowerCase(Locale.ROOT);
+        if (normalized.isBlank()) {
+            return defaultValue;
+        }
+        return normalized.equals("true") || normalized.equals("1") || normalized.equals("yes") || normalized.equals("on") || normalized.equals("verdade") || normalized.equals("sim");
+    }
+
+    private String getOrDefault(String[] keys, String envKey, String defaultValue) {
+        String value = getFirstConfigured(keys);
+        if (!value.isBlank()) return value;
+
         String envValue = env.getProperty(envKey);
         if (envValue != null && !envValue.isBlank()) {
             return envValue.trim();
         }
         return defaultValue;
     }
+
+    private String getFirstConfigured(String[] keys) {
+        for (String key : keys) {
+            String value = safeTrim(settings.getOrDefault(key, ""));
+            if (!value.isBlank()) {
+                return value;
+            }
+        }
+        return "";
+    }
+
+    private ParsedFrom parseFrom(String rawFrom) {
+        String raw = safeTrim(rawFrom);
+        if (raw.isBlank()) {
+            return new ParsedFrom("", "");
+        }
+        try {
+            InternetAddress[] parsed = InternetAddress.parse(raw, true);
+            if (parsed.length > 0) {
+                InternetAddress addr = parsed[0];
+                String email = safeTrim(addr.getAddress());
+                String name = safeTrim(addr.getPersonal());
+                if (!email.isBlank()) {
+                    return new ParsedFrom(email, name);
+                }
+            }
+        } catch (Exception ignored) {
+            // fallback para valor simples no formato "usuario@dominio"
+        }
+        return new ParsedFrom(raw, "");
+    }
+
+    private record ParsedFrom(String email, String name) {}
 }

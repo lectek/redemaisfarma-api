@@ -346,11 +346,15 @@
   justify-content: center;
 }
 
-.login-mascot-image {
+.login-mascot-frame {
   width: min(360px, 95%);
-  height: auto;
+  height: 430px;
+  border: 0;
+  border-radius: 20px;
   display: block;
+  background: transparent;
   filter: drop-shadow(0 20px 34px rgba(0, 0, 0, 0.45));
+  overflow: hidden;
 }
 
 .pill-friend {
@@ -648,8 +652,9 @@
     min-height: auto;
   }
 
-  .login-mascot-image {
+  .login-mascot-frame {
     width: min(340px, 90vw);
+    height: 408px;
   }
 }
 
@@ -679,7 +684,8 @@
     font-size: 0.94rem;
   }
 
-  .login-mascot-image {
+  .login-mascot-frame {
     display: none;
   }
 }
+

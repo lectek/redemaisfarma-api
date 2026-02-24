@@ -18,8 +18,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Implementação padrão do serviço de OTP usando JPA.
- * Produção: ativa apenas em profile "prod".
+ * ImplementaÃ§Ã£o padrÃ£o do serviÃ§o de OTP usando JPA.
+ * ProduÃ§Ã£o: ativa apenas em profile "prod".
  */
 @Primary
 @Service("otpServiceJpa")
@@ -89,19 +89,19 @@ public class OtpServiceJpa implements OtpServicePort {
     @Transactional
     public String verify(String deliveryId, String codeRaw) {
         OtpCodeEntity e = repo.findByDeliveryId(deliveryId)
-                .orElseThrow(() -> new OtpException("expired", "Código expirado."));
+                .orElseThrow(() -> new OtpException("expired", "CÃ³digo expirado."));
 
         Instant now = Instant.now();
         if (now.isAfter(e.getExpiresAt())) {
             e.setStatus("EXPIRED");
             repo.save(e);
-            throw new OtpException("expired", "Código expirado.");
+            throw new OtpException("expired", "CÃ³digo expirado.");
         }
 
         if (e.getAttempts() >= e.getMaxAttempts()) {
             e.setStatus("BLOCKED");
             repo.save(e);
-            throw new OtpException("too_many_attempts", "Muitas tentativas. Solicite novo código.");
+            throw new OtpException("too_many_attempts", "Muitas tentativas. Solicite novo cÃ³digo.");
         }
 
         String codeSanitized = codeRaw == null ? "" : codeRaw.replaceAll("\\D", "");
@@ -110,7 +110,7 @@ public class OtpServiceJpa implements OtpServicePort {
         if (!Objects.equals(e.getCodeHash(), actualHash)) {
             e.setAttempts(e.getAttempts() + 1);
             repo.save(e);
-            throw new OtpException("invalid", "Código incorreto.");
+            throw new OtpException("invalid", "CÃ³digo incorreto.");
         }
 
         e.setStatus("VERIFIED");
@@ -175,7 +175,7 @@ public class OtpServiceJpa implements OtpServicePort {
         return true;
     }
 
-    /* === Métodos utilitários internos === */
+    /* === MÃ©todos utilitÃ¡rios internos === */
 
     private String generateCode6() {
         StringBuilder sb = new StringBuilder(6);
@@ -228,20 +228,25 @@ public class OtpServiceJpa implements OtpServicePort {
     }
 
     private void sendOtp(Canal canal, String destino, String code) {
-        if (canal == Canal.email) {
-            String subject = "Seu código RedeMaisFarma";
-            String html = """
-                    <div style="font-family:system-ui,Segoe UI,Arial,sans-serif">
-                      <h2>Confirme seu cadastro</h2>
-                      <p>Use este código para verificar seu e-mail:</p>
-                      <p style="font-size:24px;letter-spacing:6px"><b>%s</b></p>
-                      <p>Ele expira em %d minutos.</p>
-                      <hr/>
-                      <small>Se não foi você, ignore este e-mail.</small>
-                    </div>
-                    """.formatted(code, OTP_TTL.toMinutes());
-            mailer.send(destino, subject, html, null);
+        if (canal == Canal.sms) {
+            throw new OtpException(
+                    "sms_unavailable",
+                    "Envio por SMS indisponivel no momento. Selecione E-mail para receber o codigo."
+            );
         }
+
+        String subject = "Seu codigo RedeMaisFarma";
+        String html = """
+                <div style="font-family:system-ui,Segoe UI,Arial,sans-serif">
+                  <h2>Confirme seu cadastro</h2>
+                  <p>Use este codigo para verificar seu e-mail:</p>
+                  <p style="font-size:24px;letter-spacing:6px"><b>%s</b></p>
+                  <p>Ele expira em %d minutos.</p>
+                  <hr/>
+                  <small>Se nao foi voce, ignore este e-mail.</small>
+                </div>
+                """.formatted(code, OTP_TTL.toMinutes());
+        mailer.send(destino, subject, html, null);
     }
 
     public enum Canal {

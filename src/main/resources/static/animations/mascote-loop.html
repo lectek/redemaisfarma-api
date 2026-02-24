@@ -1,0 +1,57 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mascote Loop</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    .stage {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: end center;
+      background: transparent;
+    }
+
+    .mascote {
+      width: min(360px, 96%);
+      height: auto;
+      display: block;
+      transform-origin: center bottom;
+      animation: mascoteLoop 4.2s ease-in-out infinite;
+      filter: drop-shadow(0 20px 34px rgba(0, 0, 0, 0.45));
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+
+    @keyframes mascoteLoop {
+      0%, 100% {
+        transform: translateY(0) scale(1) rotate(0deg);
+      }
+      25% {
+        transform: translateY(-8px) scale(1.01) rotate(-1deg);
+      }
+      50% {
+        transform: translateY(-14px) scale(1.02) rotate(0deg);
+      }
+      75% {
+        transform: translateY(-8px) scale(1.01) rotate(1deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <img class="mascote" src="/images/mascote-login.png" alt="Mascote animado" />
+  </div>
+</body>
+</html>

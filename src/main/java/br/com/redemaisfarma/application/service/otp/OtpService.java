@@ -64,12 +64,12 @@ public class OtpService implements OtpServicePort {
         final String code = generateCode6();
         final String deliveryId = UUID.randomUUID().toString();
 
+        sendOtp(canal, normalizedDestino, code);
+
         final OtpEntry entry = new OtpEntry(canal.name(), normalizedDestino, code, now, now.plus(OTP_TTL), 0);
         deliveries.put(deliveryId, entry);
         lastSendByKey.put(key, now);
         lastDeliveryIdByKey.put(key, deliveryId);
-
-        sendOtp(canal, normalizedDestino, code);
 
         final String demoCode = isProd() ? null : code;
         return new StartResult(deliveryId, maskDestino(canal, normalizedDestino), COOLDOWN_SEC, (int) OTP_TTL.getSeconds(), demoCode);
@@ -78,24 +78,24 @@ public class OtpService implements OtpServicePort {
     @Override
     public String verify(String deliveryId, String codeRaw) {
         final OtpEntry e = deliveries.get(deliveryId);
-        if (e == null) throw new OtpException("expired", "Código expirado.");
+        if (e == null) throw new OtpException("expired", "CÃ³digo expirado.");
 
         final Instant now = Instant.now();
         if (now.isAfter(e.expiresAt())) {
             deliveries.remove(deliveryId);
-            throw new OtpException("expired", "Código expirado.");
+            throw new OtpException("expired", "CÃ³digo expirado.");
         }
 
         if (e.attempts() >= MAX_ATTEMPTS) {
             deliveries.remove(deliveryId);
-            throw new OtpException("too_many_attempts", "Muitas tentativas. Solicite novo código.");
+            throw new OtpException("too_many_attempts", "Muitas tentativas. Solicite novo cÃ³digo.");
         }
 
         final String code = (codeRaw == null) ? "" : codeRaw.replaceAll("\\D", "");
         if (!Objects.equals(e.code(), code)) {
             deliveries.put(deliveryId, new OtpEntry(e.canal(), e.destino(), e.code(), e.createdAt(),
                     e.expiresAt(), e.attempts() + 1));
-            throw new OtpException("invalid", "Código incorreto.");
+            throw new OtpException("invalid", "CÃ³digo incorreto.");
         }
 
         deliveries.remove(deliveryId);
@@ -164,22 +164,25 @@ public class OtpService implements OtpServicePort {
     }
 
     private void sendOtp(Canal canal, String destino, String code) {
-        if (canal == Canal.email) {
-            final String subject = "Seu código RedeMaisFarma";
-            final String html = """
-                    <div style="font-family:system-ui,Segoe UI,Arial,sans-serif">
-                      <h2>Confirme seu cadastro</h2>
-                      <p>Use este código para verificar seu e-mail:</p>
-                      <p style="font-size:24px;letter-spacing:6px"><b>%s</b></p>
-                      <p>Ele expira em %d minutos.</p>
-                      <hr/><small>Se não foi você, ignore este e-mail.</small>
-                    </div>
-                    """.formatted(code, OTP_TTL.toMinutes());
-            mailer.send(destino, subject, html, null);
-            log.info("OTP email sent: to={} code=**** (masked)", destino);
-        } else {
-            log.info("OTP sms requested: to={} code=**** (masked) [NO-OP]", destino);
+        if (canal == Canal.sms) {
+            throw new OtpException(
+                    "sms_unavailable",
+                    "Envio por SMS indisponivel no momento. Selecione E-mail para receber o codigo."
+            );
         }
+
+        final String subject = "Seu codigo RedeMaisFarma";
+        final String html = """
+                <div style="font-family:system-ui,Segoe UI,Arial,sans-serif">
+                  <h2>Confirme seu cadastro</h2>
+                  <p>Use este codigo para verificar seu e-mail:</p>
+                  <p style="font-size:24px;letter-spacing:6px"><b>%s</b></p>
+                  <p>Ele expira em %d minutos.</p>
+                  <hr/><small>Se nao foi voce, ignore este e-mail.</small>
+                </div>
+                """.formatted(code, OTP_TTL.toMinutes());
+        mailer.send(destino, subject, html, null);
+        log.info("OTP email sent: to={} code=**** (masked)", destino);
     }
 
     public enum Canal { email, sms }

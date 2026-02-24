@@ -29,7 +29,7 @@
       <div class="login-layout">
         <section class="login-card" aria-labelledby="titulo-login">
           <h1 id="titulo-login" class="login-title">Entrar</h1>
-          <p class="login-subtitle">Use seus dados para acessar sua conta.</p>
+          <p class="login-subtitle">Use seu e-mail e senha para acessar sua conta.</p>
 
           <div th:if="${param.error}" class="alert alert-login alert-login--error">Credenciais invalidas.</div>
           <div th:if="${param.logout}" class="alert alert-login alert-login--info">Sessao encerrada.</div>
@@ -40,7 +40,7 @@
             <input type="hidden" name="redirect" id="redirect" th:value="${redirectDefault} ?: '/cliente/conta'"/>
 
             <div class="field">
-              <label class="visually-hidden" for="usuario">Usuario</label>
+              <label class="visually-hidden" for="usuario">E-mail</label>
               <div class="input-wrap">
                 <span class="input-icon" aria-hidden="true">
                   <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Zm2 0 6 4 6-4H6Zm12 12V9.2l-6 4-6-4V18h12Z"/></svg>
@@ -83,13 +83,18 @@
             </nav>
 
             <div class="login-links login-links--secondary" th:if="${oauth2Enabled}">
-              <a th:href="@{/oauth2/authorization/facebook}">Cadastro com Facebook</a>
+              <a href="#usuario">Conectar com E-mail</a>
+              <a th:href="@{/oauth2/authorization/facebook}">Conectar com Facebook</a>
             </div>
           </form>
         </section>
 
         <aside class="login-illustration" aria-hidden="true">
-          <img class="login-mascot-image" th:src="@{/images/mascote-login.png}" alt="Mascote SaudeMais Farma" loading="lazy" decoding="async" />
+          <iframe class="login-mascot-frame"
+                  th:src="@{/animations/mascote-loop.html}"
+                  title="Animacao do mascote"
+                  loading="lazy"
+                  tabindex="-1"></iframe>
         </aside>
       </div>
     </section>
@@ -134,3 +139,4 @@
   </script>
 </body>
 </html>
+

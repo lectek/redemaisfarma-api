@@ -39,6 +39,10 @@
 
       <section class="cadastro-panel" aria-label="Formulario de cadastro">
         <h2 class="cadastro-panel__title">Crie sua conta</h2>
+        <p class="cadastro-login-link" style="margin-top:0">
+          Ja possui conta?
+          <a th:href="@{/auth/login}">Conectar com e-mail</a>
+        </p>
 
         <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-error"
              th:each="err : ${#fields.globalErrors()}" th:text="${err}"></div>
@@ -136,7 +140,7 @@
 
           <p class="cadastro-login-link">
             Ja tem uma conta?
-            <a th:href="@{/auth/login}">Faca login</a>
+            <a th:href="@{/auth/login}">Entrar com e-mail</a>
           </p>
         </form>
       </section>
