@@ -1,4 +1,4 @@
-﻿package br.com.redemaisfarma.application.service.auth;
+package br.com.redemaisfarma.application.service.auth;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ClienteEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
