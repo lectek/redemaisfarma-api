@@ -19,7 +19,11 @@
 
     <section class="checkout-head" aria-label="Cabecalho checkout">
       <a class="checkout-brand" th:href="@{/}">
-        <img th:src="@{/images/logofarma.png}" alt="SaudeMais Farma" />
+        <img th:src="${#strings.isEmpty(brandingLogoUrl) or #strings.containsIgnoreCase(brandingLogoUrl, 'logofarma.png') or #strings.containsIgnoreCase(brandingLogoUrl, 'logo-redemaisfarma.png') or #strings.containsIgnoreCase(brandingLogoUrl, 'novalogo.webp')} ? @{/images/logonova.png} : ${brandingLogoUrl}"
+             src="/images/logonova.png"
+             alt="RedeMaisFarma"
+             loading="eager"
+             decoding="async" />
       </a>
 
       <nav class="checkout-nav" aria-label="Menu principal">
@@ -68,6 +72,10 @@
           <a th:href="@{/produtos}">Produtos</a>
           <a th:href="@{/carrinho}">Meu carrinho</a>
         </nav>
+        <form class="checkout-rail__logout" th:action="@{/logout}" method="post">
+          <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button type="submit" class="checkout-rail__logout-btn" aria-label="Sair da conta">Sair da conta</button>
+        </form>
       </aside>
 
       <section class="checkout-content">

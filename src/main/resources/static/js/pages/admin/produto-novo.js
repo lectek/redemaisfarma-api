@@ -7,6 +7,7 @@
   if (!input || !results || !hint) return;
 
   const fields = {
+    legacyId: document.getElementById("legacyId"),
     nome: document.getElementById("nome"),
     descricao: document.getElementById("descricao"),
     precoVenda: document.getElementById("precoVenda"),
@@ -77,6 +78,8 @@
   };
 
   const applySuggestion = (item) => {
+    const fromPhysicalStock = String(item?.origem || "").toUpperCase() === "ESTOQUE_FISICO";
+
     const formHasData = [
       fields.nome,
       fields.descricao,
@@ -92,10 +95,11 @@
       if (!ok) return;
     }
 
+    setText(fields.legacyId, item.legacyId);
     setText(fields.nome, item.nome);
     setText(fields.descricao, item.descricao);
-    setNumber(fields.precoVenda, item.precoVenda);
-    setNumber(fields.precoPromocional, item.precoPromocional);
+    setNumber(fields.precoVenda, fromPhysicalStock ? null : item.precoVenda);
+    setNumber(fields.precoPromocional, fromPhysicalStock ? null : item.precoPromocional);
     setNumber(fields.estoque, item.estoque);
     setSelect(fields.categoria, item.categoria);
     setText(fields.codigoBarras, item.codigoBarras);
@@ -103,6 +107,12 @@
     setText(fields.unidade, item.unidade);
     if (fields.disponivel && item.estoque != null) {
       fields.disponivel.checked = Number(item.estoque) > 0;
+    }
+
+    if (fromPhysicalStock) {
+      setHint("Dados base do estoque fisico aplicados. Preencha preco/tamanho/dosagem/ml e envie a foto.");
+      fields.precoVenda?.focus();
+      return;
     }
 
     setHint("Formulario preenchido. Revise os dados e clique em Salvar.");
@@ -120,25 +130,32 @@
     setHint(`Encontrados ${items.length} produto(s).`);
 
     const html = items.map((item) => {
+      const origem = String(item.origem || "CATALOGO").toUpperCase();
+      const origemLabel = origem === "ESTOQUE_FISICO" ? "Estoque fisico" : "Catalogo";
       const titulo = escapeHtml(item.nome || "Produto sem nome");
       const descricao = escapeHtml(item.descricao || "Sem descricao");
       const categoria = escapeHtml(item.categoria || "Sem categoria");
       const codigo = escapeHtml(item.codigoBarras || "-");
       const estoque = item.estoque == null ? "-" : escapeHtml(item.estoque);
       const preco = escapeHtml(money(item.precoVenda));
-      const id = encodeURIComponent(item.id);
+      const id = item.id == null ? "" : encodeURIComponent(item.id);
+      const hasEditLink = id !== "";
+      const badgeClass = origem === "ESTOQUE_FISICO" ? "badge badge--warning" : "badge badge--success";
+      const editAction = hasEditLink
+        ? `<a class="btn btn-ghost" href="/admin/produtos/${id}/editar">Abrir edicao</a>`
+        : `<span class="btn btn-ghost is-disabled" aria-disabled="true">Ainda nao cadastrado</span>`;
 
       return `
         <article class="card p-3">
           <div class="between">
             <strong>${titulo}</strong>
-            <small class="text-muted">${preco}</small>
+            <small class="${badgeClass}">${origemLabel}</small>
           </div>
           <p class="text-muted m-0">${descricao}</p>
-          <small class="text-muted">Categoria: ${categoria} | EAN: ${codigo} | Estoque: ${estoque}</small>
+          <small class="text-muted">Categoria: ${categoria} | EAN: ${codigo} | Estoque: ${estoque} | Preco: ${preco}</small>
           <div class="form-actions mt-2">
-            <button type="button" class="btn btn-primary" data-apply-id="${id}">Usar dados</button>
-            <a class="btn btn-ghost" href="/admin/produtos/${id}/editar">Abrir edicao</a>
+            <button type="button" class="btn btn-primary" data-apply-id="${id}" data-legacy-id="${escapeHtml(item.legacyId || "")}" data-origem="${escapeHtml(origem)}">Usar dados</button>
+            ${editAction}
           </div>
         </article>
       `;
@@ -148,8 +165,17 @@
 
     results.querySelectorAll("[data-apply-id]").forEach((button) => {
       button.addEventListener("click", () => {
-        const id = decodeURIComponent(button.getAttribute("data-apply-id"));
-        const selected = items.find((item) => String(item.id) === String(id));
+        const id = button.getAttribute("data-apply-id");
+        const legacyId = button.getAttribute("data-legacy-id");
+        const origem = button.getAttribute("data-origem");
+
+        const selected = items.find((item) => {
+          const sameCatalog = id && String(item.id) === String(id);
+          const sameLegacy = legacyId && String(item.legacyId) === String(legacyId);
+          const sameOrigin = String(item.origem || "").toUpperCase() === String(origem || "").toUpperCase();
+          return sameOrigin && (sameCatalog || sameLegacy);
+        });
+
         if (selected) applySuggestion(selected);
       });
     });

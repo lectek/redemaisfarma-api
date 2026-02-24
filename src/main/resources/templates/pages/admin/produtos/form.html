@@ -15,13 +15,20 @@
 <main class="container stack mt-4 mb-6">
   <div class="between">
     <h1 class="page-title" th:text="${produto.id} != null ? 'Editar produto' : 'Novo produto'">Produto</h1>
-    <a class="btn btn-ghost" th:href="@{/admin/produtos}">Voltar</a>
+    <div class="form-actions">
+      <form th:if="${legacySyncEnabled}" th:action="@{/admin/produtos/sincronizar-estoque}" method="post">
+        <button class="btn btn-ghost" type="submit">Sincronizar estoque fisico</button>
+      </form>
+      <a class="btn btn-ghost" th:href="@{/admin/produtos}">Voltar</a>
+    </div>
   </div>
 
   <p class="text-muted" th:if="${param.erro}">
     <span th:switch="${param.erro[0]}">
       <span th:case="'nome'">Informe o nome do produto.</span>
       <span th:case="'codigo_barras'">Codigo de barras ja cadastrado.</span>
+      <span th:case="'imagem'">Adicione a foto do produto para concluir o cadastro.</span>
+      <span th:case="'imagem_upload'">Falha no envio da foto. Verifique o arquivo (PNG/JPG/WEBP, max. 2MB).</span>
       <span th:case="'integridade'">Nao foi possivel salvar o produto. Verifique os dados.</span>
       <span th:case="*">Nao foi possivel salvar o produto.</span>
     </span>
@@ -29,12 +36,12 @@
 
   <div class="card p-4 stack">
     <div class="between">
-      <h2 class="h5 m-0">Busca rapida para preenchimento</h2>
-      <small class="text-muted">Pesquise por nome, descricao ou codigo de barras.</small>
+      <h2 class="h5 m-0">Busca rapida no catalogo e no estoque fisico</h2>
+      <small class="text-muted">Selecione o item para preencher automaticamente.</small>
     </div>
     <div class="form-row">
       <div class="form-group" style="flex: 1 1 auto;">
-        <label for="quickProdutoTermo">Pesquisar produto existente</label>
+        <label for="quickProdutoTermo">Pesquisar produto</label>
         <input id="quickProdutoTermo" class="input" type="search"
                placeholder="Ex.: dipirona 500mg ou 789..." autocomplete="off"/>
       </div>
@@ -43,7 +50,7 @@
       </div>
     </div>
     <p id="quickProdutoHint" class="text-muted m-0">
-      Dica: selecione um resultado para preencher automaticamente o formulario.
+      Dica: os itens vindos do estoque fisico preenchem dados base. Preencha preco/tamanho/dosagem/ml manualmente.
     </p>
     <div id="quickProdutoResultados" class="stack"></div>
   </div>
@@ -51,6 +58,7 @@
   <div class="card p-4">
     <form class="form-grid" th:action="@{/admin/produtos}" method="post" th:object="${produto}" enctype="multipart/form-data">
       <input type="hidden" th:field="*{id}"/>
+      <input type="hidden" th:field="*{legacyId}" id="legacyId"/>
       <div class="form-group">
         <label>Nome</label>
         <input class="input" th:field="*{nome}" required/>
@@ -61,12 +69,12 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>Preco (R$)</label>
-          <input class="input" type="number" step="0.01" th:field="*{precoVenda}" required/>
+          <label>Preco de venda (R$) - manual</label>
+          <input class="input" type="number" step="0.01" min="0" th:field="*{precoVenda}" required/>
         </div>
         <div class="form-group">
-          <label>Preco promocional (R$)</label>
-          <input class="input" type="number" step="0.01" th:field="*{precoPromocional}"/>
+          <label>Preco promocional (R$) - manual</label>
+          <input class="input" type="number" step="0.01" min="0" th:field="*{precoPromocional}"/>
         </div>
         <div class="form-group">
           <label>Estoque</label>
@@ -97,13 +105,13 @@
           <input class="input" th:field="*{fabricante}"/>
         </div>
         <div class="form-group">
-          <label>Unidade</label>
-          <input class="input" th:field="*{unidade}"/>
+          <label>Tamanho / Dosagem / ML - manual</label>
+          <input class="input" th:field="*{unidade}" placeholder="Ex.: 500mg | 20ml | 30 comprimidos"/>
         </div>
       </div>
       <div class="form-group">
-        <label>Imagem</label>
-        <input class="input" type="file" name="imagemFile" accept=".png,.jpg,.jpeg,.webp,.svg"/>
+        <label>Foto do produto (obrigatoria)</label>
+        <input class="input" type="file" name="imagemFile" accept=".png,.jpg,.jpeg,.webp" required/>
       </div>
       <div class="form-actions">
         <button class="btn btn-primary">Salvar</button>

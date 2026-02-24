@@ -24,6 +24,9 @@
         <p class="page-lead">Gerencie catalogo, estoque e imagens com foco no cliente.</p>
       </div>
       <div class="page-actions">
+        <form th:if="${legacySyncEnabled}" th:action="@{/admin/produtos/sincronizar-estoque}" method="post">
+          <button class="btn btn-ghost" type="submit">Sincronizar estoque fisico</button>
+        </form>
         <a class="btn btn-ghost" th:href="@{/admin/produtos/export.csv(q=${param.q},categoria=${param.categoria})}">Exportar CSV</a>
         <a class="btn btn-primary" th:href="@{/admin/produtos/novo}">Novo produto</a>
       </div>

@@ -22,6 +22,10 @@ public interface ProdutoRepository extends JpaRepository<ProdutoEntity, Long> {
 
     boolean existsByCodigoBarras(String codigoBarras);
 
+    Optional<ProdutoEntity> findByCodigoOriginal(Long codigoOriginal);
+
+    boolean existsByCodigoOriginal(Long codigoOriginal);
+
     Optional<ProdutoEntity> findByLegacyId(Long legacyId);
 
     boolean existsByLegacyId(Long legacyId);

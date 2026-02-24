@@ -18,7 +18,8 @@
   font-family: "Nunito Sans", var(--font-sans);
   color: var(--text-main);
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background:
     radial-gradient(circle at 14% 10%, rgba(66, 111, 255, 0.5) 0, rgba(66, 111, 255, 0) 33%),
     radial-gradient(circle at 80% 16%, rgba(255, 45, 45, 0.44) 0, rgba(255, 45, 45, 0) 37%),
@@ -60,7 +61,7 @@
 }
 
 .login-shell {
-  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -344,22 +345,47 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  isolation: isolate;
+}
+
+.login-mascot-shell {
+  position: relative;
+  width: min(360px, 95%);
+  height: 430px;
+  border-radius: 22px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 40% 18%, rgba(255, 105, 120, 0.34), rgba(255, 105, 120, 0) 42%),
+    linear-gradient(180deg, rgba(177, 14, 29, 0.9) 0%, rgba(99, 8, 18, 0.92) 44%, rgba(21, 13, 18, 0.98) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 20px 34px rgba(0, 0, 0, 0.5);
+}
+
+.login-mascot-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 56% 62% at 50% 60%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, 0.38) 80%, rgba(0, 0, 0, 0.72) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0) 58%, rgba(0, 0, 0, 0.34) 100%);
 }
 
 .login-mascot-video {
-  width: min(360px, 95%);
-  height: 430px;
+  width: 100%;
+  height: 100%;
   border: 0;
-  border-radius: 20px;
   display: block;
   object-fit: cover;
+  object-position: center;
   background: transparent;
-  /* Disfarca fundo escuro do MP4 sem alpha no layout do login */
   mix-blend-mode: screen;
-  -webkit-mask-image: radial-gradient(ellipse 66% 78% at 50% 55%, #000 56%, rgba(0, 0, 0, 0.88) 74%, transparent 100%);
-  mask-image: radial-gradient(ellipse 66% 78% at 50% 55%, #000 56%, rgba(0, 0, 0, 0.88) 74%, transparent 100%);
-  filter: drop-shadow(0 20px 34px rgba(0, 0, 0, 0.45)) saturate(1.14) contrast(1.08) brightness(1.04);
-  overflow: hidden;
+  -webkit-mask-image: radial-gradient(ellipse 63% 74% at 50% 58%, #000 54%, rgba(0, 0, 0, 0.94) 74%, transparent 100%);
+  mask-image: radial-gradient(ellipse 63% 74% at 50% 58%, #000 54%, rgba(0, 0, 0, 0.94) 74%, transparent 100%);
+  filter: saturate(1.1) contrast(1.07) brightness(1.02);
+  transform: scale(1.04);
+  transform-origin: center 58%;
   pointer-events: none;
   user-select: none;
 }
@@ -659,7 +685,7 @@
     min-height: auto;
   }
 
-  .login-mascot-video {
+  .login-mascot-shell {
     width: min(340px, 90vw);
     height: 408px;
   }
@@ -672,6 +698,12 @@
 
   .login-stage {
     gap: 10px;
+  }
+
+  .login-shell {
+    align-items: flex-start;
+    padding-top: 14px;
+    padding-bottom: 26px;
   }
 
   .login-brand .login-brand-logo {
@@ -691,8 +723,17 @@
     font-size: 0.94rem;
   }
 
-  .login-mascot-video {
-    display: none;
+  .login-illustration {
+    min-height: auto;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .login-mascot-shell {
+    display: block;
+    width: min(320px, 88vw);
+    height: 360px;
+    margin-top: 4px;
   }
 }
 

@@ -90,19 +90,21 @@
         </section>
 
         <aside class="login-illustration" aria-hidden="true">
-          <video class="login-mascot-video"
-                 autoplay
-                 loop
-                 muted
-                 playsinline
-                 preload="metadata"
-                 tabindex="-1"
-                 th:poster="@{/images/mascote-login.png}"
-                 poster="/images/mascote-login.png">
-            <source th:src="@{/animations/mascote-flow-loop.mp4}"
-                    src="/animations/mascote-flow-loop.mp4"
-                    type="video/mp4" />
-          </video>
+          <div class="login-mascot-shell">
+            <video class="login-mascot-video"
+                   autoplay
+                   loop
+                   muted
+                   playsinline
+                   preload="metadata"
+                   tabindex="-1"
+                   th:poster="@{/images/mascote-login.png}"
+                   poster="/images/mascote-login.png">
+              <source th:src="@{/animations/mascote-flow-loop.mp4}"
+                      src="/animations/mascote-flow-loop.mp4"
+                      type="video/mp4" />
+            </video>
+          </div>
         </aside>
       </div>
     </section>

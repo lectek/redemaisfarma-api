@@ -179,64 +179,13 @@
           </div>
 
           <div class="hero__visual">
-            <div class="hero-arts" aria-label="Artes da Saude Mais Farma">
-              <p class="hero-arts__label">Artes Saude Mais Farma</p>
-              <div class="hero-arts__grid">
-                <figure class="hero-art-card">
-                  <img th:src="@{/images/hero-artes/desodorante-pronto.png}"
-                       src="/images/hero-artes/desodorante-pronto.png"
-                       alt="Arte promocional de desodorante"
-                       loading="lazy" />
-                </figure>
-                <figure class="hero-art-card">
-                  <img th:src="@{/images/hero-artes/pressao-pronta.png}"
-                       src="/images/hero-artes/pressao-pronta.png"
-                       alt="Arte promocional de afericao de pressao"
-                       loading="lazy" />
-                </figure>
-                <figure class="hero-art-card">
-                  <img th:src="@{/images/hero-artes/teste-pronto.png}"
-                       src="/images/hero-artes/teste-pronto.png"
-                       alt="Arte promocional institucional"
-                       loading="lazy" />
-                </figure>
-              </div>
-            </div>
-
-            <!-- Produto principal do hero -->
-            <figure class="hero__media" aria-label="Produto principal">
-              <div class="hero-main"
-                   th:if="${vm != null and vm.produtoPrincipal != null}">
-                <a class="hero-main__media"
-                   th:href="@{'/produto/' + ${vm.produtoPrincipal.id}}">
-                  <img th:src="${vm.produtoPrincipal.imagem} ?: @{/img/produtos/placeholder-generico.png}"
-                       th:alt="${vm.produtoPrincipal.nome}"
-                       loading="lazy"
-                       onerror="this.src='/img/produtos/placeholder-generico.png'"/>
-                </a>
-                <div class="hero-main__content">
-                  <span class="hero-main__tag">Produto principal</span>
-                  <h2 class="hero-main__title" th:text="${vm.produtoPrincipal.nome}">Produto principal</h2>
-                  <p class="hero-main__price"
-                     th:text="${#numbers.formatCurrency(vm.produtoPrincipal.preco, 'pt_BR')}">R$ 0,00</p>
-                  <a class="btn btn--accent"
-                     th:href="@{'/produto/' + ${vm.produtoPrincipal.id}}">Ver produto</a>
-                </div>
-              </div>
-              <div class="hero-main hero-main--placeholder"
-                   th:if="${vm == null or vm.produtoPrincipal == null}">
-                <div class="hero-main__placeholder">
-                  <p>Produto em destaque em breve</p>
-                  <p class="muted hero-main__placeholder-text">
-                    Estamos finalizando os melhores itens para você.
-                  </p>
-                  <div class="hero-main__placeholder-bars" aria-hidden="true">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                  </div>
-                </div>
-              </div>
+            <figure class="hero-showcase" aria-label="Campanha institucional RedeMaisFarma">
+              <img class="hero-showcase__img"
+                   th:src="@{/images/hero-artes/farmaceutica-placa.png}"
+                   src="/images/hero-artes/farmaceutica-placa.png"
+                   alt="Profissional da saude segurando placa da RedeMaisFarma"
+                   loading="eager"
+                   decoding="async" />
             </figure>
           </div>
 
