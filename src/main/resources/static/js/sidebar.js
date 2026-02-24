@@ -41,17 +41,19 @@ function initSidebar(opts = {}) {
   if (autoMountToggle) autoMountSidebarToggle();
 
   // Seletores de botões
-  const toggleBtns = document.querySelectorAll(
+  const toggleBtns = Array.from(document.querySelectorAll(
     "[data-sidebar-toggle], .sidebar-toggle, .js-sidebar-toggle"
-  );
-  const compactBtns = document.querySelectorAll(
+  ));
+  const toggleBtnSet = new Set(toggleBtns);
+  const compactBtns = Array.from(document.querySelectorAll(
     "[data-sidebar-compact-toggle], .sidebar-compact-toggle"
-  );
+  )).filter((btn) => !toggleBtnSet.has(btn));
 
   // ARIA base
   const SIDEBAR_ID = sidebar.id || "app-sidebar";
   sidebar.id = SIDEBAR_ID;
-  sidebar.setAttribute("aria-hidden", "true");
+  const mqDesktop = window.matchMedia("(min-width: 1024px)");
+  sidebar.setAttribute("aria-hidden", mqDesktop.matches ? "false" : "true");
   sidebar.setAttribute("tabindex", "-1");
   toggleBtns.forEach((btn) => {
     btn.setAttribute("aria-controls", SIDEBAR_ID);
@@ -63,8 +65,10 @@ function initSidebar(opts = {}) {
   let overlay = null;
   function ensureOverlay() {
     if (overlay) return overlay;
-    overlay = document.createElement("div");
+    overlay = document.createElement("button");
+    overlay.type = "button";
     overlay.className = "sidebar-overlay";
+    overlay.setAttribute("aria-label", "Fechar menu lateral");
     Object.assign(overlay.style, {
       position: "fixed",
       inset: "0",
@@ -104,7 +108,6 @@ function initSidebar(opts = {}) {
     }
   }
 
-  const mqDesktop = window.matchMedia("(min-width: 769px)");
   const isHomePage = document.body?.dataset.page === "home";
 
   function isOpen() { return sidebar.classList.contains("is-open"); }
@@ -147,11 +150,14 @@ function close() {
 
   // Eventos
   toggleBtns.forEach((btn) => btn.addEventListener("click", toggle));
-  sidebar.addEventListener("click", (e) => {
+  document.addEventListener("click", (e) => {
     const a = e.target.closest("a[href]");
-    if (a && !mqDesktop.matches) close();
+    if (a && sidebar.contains(a) && !mqDesktop.matches) close();
   });
-  mqDesktop.addEventListener("change", (e) => { if (e.matches) close(); });
+  mqDesktop.addEventListener("change", () => {
+    syncCompactState();
+    close();
+  });
 
   // Fallback de link ativo
   highlightActiveLink(sidebar);
@@ -169,11 +175,32 @@ function close() {
     });
   };
 
-  if (localStorage.getItem(COMPACT_KEY) === "1") setCollapsed(true);
+  const getSavedCollapsed = () => {
+    try {
+      return localStorage.getItem(COMPACT_KEY) === "1";
+    } catch {
+      return false;
+    }
+  };
+  const saveCollapsed = (collapsed) => {
+    try {
+      localStorage.setItem(COMPACT_KEY, collapsed ? "1" : "0");
+    } catch {}
+  };
+  const syncCompactState = () => {
+    if (!mqDesktop.matches) {
+      setCollapsed(false);
+      return;
+    }
+    setCollapsed(getSavedCollapsed());
+  };
+
+  syncCompactState();
   function toggleCompact() {
+    if (!mqDesktop.matches) return;
     const collapsed = !sidebar.classList.contains("sidebar--collapsed");
     setCollapsed(collapsed);
-    localStorage.setItem(COMPACT_KEY, collapsed ? "1" : "0");
+    saveCollapsed(collapsed);
   }
   compactBtns.forEach((btn) => btn.addEventListener("click", toggleCompact));
 

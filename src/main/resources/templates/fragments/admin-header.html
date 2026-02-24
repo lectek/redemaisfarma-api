@@ -4,9 +4,9 @@
 
   <div class="header-inner container-fluid">
     <a th:href="@{/admin/dashboard}" class="logo" aria-label="Dashboard admin">
-      <img th:src="${#strings.isEmpty(brandingLogoUrl)} ? @{/images/logofarma.png} : ${brandingLogoUrl}" alt="RedeMaisFarma" height="40" />
+      <img th:src="${#strings.isEmpty(brandingLogoUrl) or #strings.containsIgnoreCase(brandingLogoUrl, 'logofarma.png') or #strings.containsIgnoreCase(brandingLogoUrl, 'logo-redemaisfarma.png') or #strings.containsIgnoreCase(brandingLogoUrl, 'novalogo.webp')} ? @{/images/logonova.png} : ${brandingLogoUrl}" alt="RedeMaisFarma" height="40" />
     </a>
-    <button class="sidebar-toggle sidebar-compact-toggle" type="button" data-sidebar-toggle data-sidebar-compact-toggle aria-label="Abrir o menu lateral">
+    <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Abrir o menu lateral">
       <span class="menu-icon" aria-hidden="true"></span>
     </button>
 

@@ -47,7 +47,7 @@ function cardTemplate(p) {
   const img   = imgOrPlaceholder(p?.imagem);
 
   return `
-  <article class="carousel__item" role="group" aria-roledescription="slide"
+  <article class="carousel__item" aria-roledescription="slide"
            aria-label="${escapeHtml(nome)}">
     <img loading="lazy" decoding="async" fetchpriority="low"
          src="${img}" alt="${escapeHtml(nome)}" class="carousel__img"/>
@@ -124,8 +124,8 @@ viewport.addEventListener("touchend", (e) => {
 }, { passive: true });
 
 // -------- hover / focus / keyboard --------
-viewport.addEventListener("mouseenter", stop);
-viewport.addEventListener("mouseleave", start);
+viewport.addEventListener("pointerenter", stop);
+viewport.addEventListener("pointerleave", start);
 viewport.addEventListener("focusin", stop);
 viewport.addEventListener("focusout", start);
 

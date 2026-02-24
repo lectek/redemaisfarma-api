@@ -34,6 +34,12 @@ public class EmailCampaign {
     private Instant scheduledAt;
     @Column(name = "segment_json", columnDefinition = "json")
     private String segmentJson;
+    @Column(name = "segment_detail", length = 255)
+    private String segmentDetail;
+    @Column(name = "scheduled_zone", length = 64)
+    private String scheduledZone;
+    @Column(name = "validation_status", length = 32)
+    private String validationStatus;
     @Column(name = "created_by", length = 120)
     private String createdBy;
     @CreationTimestamp
@@ -97,6 +103,30 @@ public class EmailCampaign {
 
     public void setSegmentJson(String segmentJson) {
         this.segmentJson = segmentJson;
+    }
+
+    public String getSegmentDetail() {
+        return segmentDetail;
+    }
+
+    public void setSegmentDetail(String segmentDetail) {
+        this.segmentDetail = segmentDetail;
+    }
+
+    public String getScheduledZone() {
+        return scheduledZone;
+    }
+
+    public void setScheduledZone(String scheduledZone) {
+        this.scheduledZone = scheduledZone;
+    }
+
+    public String getValidationStatus() {
+        return validationStatus;
+    }
+
+    public void setValidationStatus(String validationStatus) {
+        this.validationStatus = validationStatus;
     }
 
     public String getCreatedBy() {

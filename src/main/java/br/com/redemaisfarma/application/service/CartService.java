@@ -3,6 +3,7 @@ package br.com.redemaisfarma.application.service;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ItemPedidoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
+import br.com.redemaisfarma.application.service.validation.CartValidationService;
 import br.com.redemaisfarma.application.view.CartItemVM;
 import br.com.redemaisfarma.application.view.CartSummaryVM;
 import jakarta.servlet.http.HttpSession;
@@ -19,9 +20,11 @@ public class CartService {
     private static final String SESSION_CART = "cartItems";
 
     private final ProdutoRepository produtoRepository;
+    private final CartValidationService cartValidationService;
 
-    public CartService(ProdutoRepository produtoRepository) {
+    public CartService(ProdutoRepository produtoRepository, CartValidationService cartValidationService) {
         this.produtoRepository = produtoRepository;
+        this.cartValidationService = cartValidationService;
     }
 
     public void addItem(HttpSession session, Long produtoId, int quantidade) {
@@ -38,22 +41,27 @@ public class CartService {
         session.setAttribute(SESSION_CART, items);
     }
 
-    public CartValidationResult validateAdd(Long produtoId, int quantidade) {
-        if (produtoId == null) {
-            return new CartValidationResult(false, "Produto invalido.");
+    public CartValidationService.CartValidationResult validateAdd(HttpSession session, Long produtoId, int quantidade) {
+        List<CartValidationService.CartEntry> entries = buildEntries(session, produtoId, quantidade);
+        return cartValidationService.validate(entries);
+    }
+
+    private List<CartValidationService.CartEntry> buildEntries(HttpSession session, Long produtoId, int quantidade) {
+        Map<Long, Integer> totals = new HashMap<>();
+        for (CartSessionItem item : getSessionItems(session)) {
+            if (item.produtoId() == null) {
+                continue;
+            }
+            totals.merge(item.produtoId(), item.getQuantidade(), (existing, next) -> existing + next);
         }
-        if (quantidade <= 0) {
-            return new CartValidationResult(false, "Quantidade invalida.");
+        if (produtoId != null && quantidade > 0) {
+            totals.merge(produtoId, quantidade, (existing, next) -> existing + next);
         }
-        ProdutoEntity produto = produtoRepository.findById(produtoId).orElse(null);
-        if (produto == null) {
-            return new CartValidationResult(false, "Produto nao encontrado.");
+        List<CartValidationService.CartEntry> entries = new ArrayList<>();
+        for (Map.Entry<Long, Integer> entry : totals.entrySet()) {
+            entries.add(new CartValidationService.CartEntry(entry.getKey(), entry.getValue()));
         }
-        CartIssue issue = validateProduto(produto, quantidade);
-        if (issue.invalid) {
-            return new CartValidationResult(false, issue.message);
-        }
-        return new CartValidationResult(true, "");
+        return entries;
     }
 
     public void updateItem(HttpSession session, Long produtoId, int quantidade) {
@@ -208,9 +216,6 @@ public class CartService {
         public List<CartItemVM> getInvalidItems() {
             return invalidItems;
         }
-    }
-
-    public record CartValidationResult(boolean valid, String message) {
     }
 
     public static class CartSessionItem {

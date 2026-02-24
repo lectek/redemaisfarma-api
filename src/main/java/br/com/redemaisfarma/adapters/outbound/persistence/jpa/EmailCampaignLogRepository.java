@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmailCampaignLogRepository extends JpaRepository<EmailCampaignLog, Long> {
     List<EmailCampaignLog> findByCampaignIdOrderBySentAtDesc(Long campaignId, Pageable pageable);
+
+    List<EmailCampaignLog> findTop20ByOrderByCreatedAtDesc();
 }

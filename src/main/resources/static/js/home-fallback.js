@@ -46,15 +46,15 @@
     if (statusWrap) statusWrap.hidden = true;
 
     // ação "Adicionar"
-    grid.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-add]');
-      if (!btn) return;
-      const id = btn.getAttribute('data-add');
-      const ev = new CustomEvent('carrinho:add', { detail: { id }, bubbles: true });
-      btn.dispatchEvent(ev);
-      btn.textContent = 'Adicionado!';
-      setTimeout(() => (btn.textContent = 'Adicionar'), 1200);
-    }, { once: true });
+    grid.querySelectorAll('[data-add]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-add');
+        const ev = new CustomEvent('carrinho:add', { detail: { id }, bubbles: true });
+        btn.dispatchEvent(ev);
+        btn.textContent = 'Adicionado!';
+        setTimeout(() => (btn.textContent = 'Adicionar'), 1200);
+      });
+    });
   };
 
   const tryFetch = async (page = 1, limit = 12) => {

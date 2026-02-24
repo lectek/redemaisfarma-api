@@ -214,9 +214,13 @@
     renderCart();
   });
 
-  cartEl.addEventListener("click", (ev) => {
+  document.addEventListener("click", (ev) => {
     const target = ev.target;
-    const id = target.getAttribute("data-remove");
+    if (!cartEl) return;
+    if (!(target instanceof Element)) return;
+    const removeBtn = target.closest("[data-remove]");
+    if (!removeBtn || !cartEl.contains(removeBtn)) return;
+    const id = removeBtn.getAttribute("data-remove");
     if (!id) return;
     cart.delete(Number(id));
     renderCart();

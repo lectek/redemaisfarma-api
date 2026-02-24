@@ -29,7 +29,15 @@ dialog#otpDialog::backdrop{background:rgba(0,0,0,.45);backdrop-filter:blur(4px)}
 #otpDialog p{margin:0;color:var(--otp-muted);font-size:.95rem}
 #otpDestino{font-weight:600;color:var(--otp-text);background:color-mix(in srgb,var(--otp-primary) 10%,transparent);border:1px solid color-mix(in srgb,var(--otp-primary) 30%, var(--otp-border));padding:2px 8px;border-radius:999px}
 
-#otpDialog .otp-grid{display:grid;grid-template-columns:repeat(6,minmax(46px,1fr));gap:var(--otp-gap);margin-top:6px}
+#otpDialog .otp-grid{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(46px,1fr));
+  gap:var(--otp-gap);
+  margin-top:6px;
+  border:0;
+  padding:0;
+  min-inline-size:0;
+}
 #otpDialog .otp-grid .otp{
   text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.5px;font-size:clamp(1.15rem,2.6vw,1.5rem);
   padding:12px 0;border:1px solid var(--otp-border);border-radius:12px;background:#fff0;color:var(--otp-text);outline:0;transition:border-color .15s,box-shadow .15s,transform .06s;caret-color:transparent;

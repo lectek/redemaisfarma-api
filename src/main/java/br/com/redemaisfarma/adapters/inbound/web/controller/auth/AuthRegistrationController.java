@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import br.com.redemaisfarma.application.core.exception.CpfDuplicadoException;
 import br.com.redemaisfarma.application.core.exception.EmailDuplicadoException;
 import br.com.redemaisfarma.application.dto.request.CadastroClienteRequestDTO;
+import br.com.redemaisfarma.application.service.otp.OtpServicePort;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -29,9 +30,11 @@ import br.com.redemaisfarma.application.port.inbound.RegistrationAppService;
 public class AuthRegistrationController {
 
     private final RegistrationAppService registrationAppService;
+    private final OtpServicePort otpService;
 
-    public AuthRegistrationController(RegistrationAppService registrationAppService) {
+    public AuthRegistrationController(RegistrationAppService registrationAppService, OtpServicePort otpService) {
         this.registrationAppService = registrationAppService;
+        this.otpService = otpService;
     }
 
     @InitBinder
@@ -73,6 +76,17 @@ public class AuthRegistrationController {
             return "pages/auth/cadastro-cliente";
         }
 
+        if (!hasText(form.getOtpToken())) {
+            br.reject("otp.obrigatorio", "Confirme o codigo de verificacao antes de criar a conta.");
+            return "pages/auth/cadastro-cliente";
+        }
+
+        String otpDestino = resolveOtpDestino(form);
+        if (!hasText(otpDestino) || !otpService.consumeTokenForDestino(form.getOtpToken(), otpDestino)) {
+            br.reject("otp.invalido", "Codigo de verificacao invalido ou expirado.");
+            return "pages/auth/cadastro-cliente";
+        }
+
         try {
             registrationAppService.cadastrarNovoCliente(toRequest(form));
             return "redirect:/auth/login?from=cadastro_ok";
@@ -104,6 +118,15 @@ public class AuthRegistrationController {
         return cleaned.trim();
     }
 
+    private static String resolveOtpDestino(CadastroClienteForm form) {
+        if (form == null) return null;
+        String canal = hasText(form.getCanalOtp()) ? form.getCanalOtp().trim().toLowerCase() : "email";
+        if ("sms".equals(canal)) {
+            return normalizePhone(form.getTelefone());
+        }
+        return form.getEmail();
+    }
+
     // ==== DTO do formulário ====
     public static class CadastroClienteForm {
 
@@ -132,7 +155,7 @@ public class AuthRegistrationController {
 
         @Size(min = 8, max = 128, message = "A senha deve ter entre 8 e 128 caracteres.")
         @Pattern(
-            regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,128}$",
+            regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,128}$",
             message = "A senha precisa de maiúscula, minúscula, número e caractere especial."
         )
         private String senha;

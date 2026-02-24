@@ -2,6 +2,8 @@
 package br.com.redemaisfarma.adapters.outbound.persistence.jpa;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ItemPedidoEntity;
+import br.com.redemaisfarma.domain.enums.StatusPedido;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -10,6 +12,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ItemPedidoJpaRepository extends JpaRepository<ItemPedidoEntity, Long> {
+
+    List<ItemPedidoEntity> findByPedidoStatusAndPedidoDataBetweenAndProdutoDisponivelTrueOrderByPedidoDataDesc(
+            StatusPedido status,
+            LocalDateTime de,
+            LocalDateTime ate,
+            Pageable pageable
+    );
 
     // === Projection para Relatórios • Produtos ===
     interface ProdutoRelatorioRow {

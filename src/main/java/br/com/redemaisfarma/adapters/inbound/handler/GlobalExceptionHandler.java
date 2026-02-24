@@ -77,14 +77,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, body, headers, HttpStatus.BAD_REQUEST, request);
     }
 
-    @Override
-    protected ResponseEntity<Object> handleBindException(
-            @NonNull BindException ex,
-            @NonNull HttpHeaders headers,
-            @NonNull HttpStatusCode status,
-            @NonNull WebRequest request
-    ) {
-        Map<String, Object> body = baseBody(HttpStatus.BAD_REQUEST, "binding_failed", "Binding failed", request);
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<Object> handleBindException(BindException ex, HttpServletRequest req) {
+        Map<String, Object> body = baseBody(HttpStatus.BAD_REQUEST, "binding_failed", "Binding failed", req);
 
         Map<String, String> fields = new HashMap<>();
         ex.getBindingResult().getFieldErrors()
@@ -100,7 +95,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
         body.put("validationErrors", fields);
-        return handleExceptionInternal(ex, body, headers, HttpStatus.BAD_REQUEST, request);
+        return ResponseEntity.badRequest().body(body);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

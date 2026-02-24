@@ -58,9 +58,6 @@
 - **Legado/Importação**: conectores Firebird (perfil `firebird`), serviços de sincronização; monitorar logs em `adapters.outbound.legacy`.
 - **Qualidade/Observabilidade**: Actuator, Jacoco, SpotBugs, Checkstyle já integrados; manter `clean verify` no PR.
 
-## Próximos passos (cliente self-service)
-- Expor troca de senha/OTP e encerrar sessões em `/api/cliente/me`.
-- UI "Minha Conta" (cliente) consumindo `/api/cliente/me` e `/me/enderecos`.
 
 ## Pr�ximos 25 passos para conclus�o web
 11. Confirmar com o time de produto os crit�rios de aceita��o restantes: checkout completo, pagamentos, notifica��es e fluxos de erro esperados.
@@ -69,7 +66,6 @@
 14. Priorizar integra��es cr�ticas de backend com base no valor percebido pelo comprador e depend�ncias t�cnicas.
 15. Checar o estado atual dos mocks/testes existentes para os endpoints de checkout e criar vers�es atualizadas, se necess�rio.
 16. Gerar ou atualizar componentes UI responsivos para carrinho/checkout com estados de loading, sucesso e erro.
-17. Implementar valida��es de front-end (dados do cliente, n.� de cart�o, CPF, CEP) alinhadas ao backend e ao UX.
 18. Garantir que o cat�logo esteja atualizado antes do carrinho: cache, atualiza��o ass�ncrona ou fallback.
 19. Conectar o front ao backend oficial para frete/pagamento, cuidando da autentica��o e do token CSRF.
 20. Sincronizar estoque/pre�o ao abrir o carrinho e antes do pagamento, mostrando avisos de indisponibilidade.
@@ -98,3 +94,5 @@
 ## Observabilidade das campanhas
 - A fila de campanhas gera email_campaign.worker.processed/sent/retry/failed e pode ser monitorada via /actuator/metrics; configure alertas quando ailed > 0 ou processados pararem.
 - O formul�rio admin agora aceita filtros adicionais (categoria comprada, rec�ncia em dias, ticket m�dio) antes de enfileirar, al�m de preview/cancelamento/pause para ajustar antes do envio.
+
+

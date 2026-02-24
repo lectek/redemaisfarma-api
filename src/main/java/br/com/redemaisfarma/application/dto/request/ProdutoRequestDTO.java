@@ -63,12 +63,11 @@ implements Serializable {
     @DecimalMin(value="0.01", inclusive=true, message="{produto.preco.min}")
     @JsonProperty(value="preco")
     private @NotNull(message="{produto.preco.notNull}") @DecimalMin(value="0.01", inclusive=true, message="{produto.preco.min}") BigDecimal preco;
-    @Schema(description="URL da imagem do produto", example="https://cdn.farma/img/produto1.jpg", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message="{produto.imagem.notBlank}")
+    @Schema(description="URL da imagem do produto (obrigatória apenas quando o produto estiver ativo para venda)", example="https://cdn.farma/img/produto1.jpg", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @Size(max=200, message="{produto.imagem.size}")
-    @Pattern(regexp="^(http|https)://.*$", message="{produto.imagem.pattern}")
+    @Pattern(regexp="(^$)|(^https?://.*$)", message="{produto.imagem.pattern}")
     @JsonProperty(value="imagem")
-    private @NotBlank(message="{produto.imagem.notBlank}") @Size(max=200, message="{produto.imagem.size}") @Pattern(regexp="^(http|https)://.*$", message="{produto.imagem.pattern}") String imagem;
+    private @Size(max=200, message="{produto.imagem.size}") @Pattern(regexp="(^$)|(^https?://.*$)", message="{produto.imagem.pattern}") String imagem;
     @Schema(description="Categoria do produto", example="ANALGESICO", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{produto.categoria.notBlank}")
     @Size(max=50, message="{produto.categoria.size}")
@@ -92,9 +91,9 @@ implements Serializable {
     @Pattern(regexp="^\\d{1,4}(,\\d{1,4}){2}$", message="{produto.dimensoes.pattern}")
     @JsonProperty(value="dimensoes")
     private @Pattern(regexp="^\\d{1,4}(,\\d{1,4}){2}$", message="{produto.dimensoes.pattern}") String dimensoes;
-    @Schema(description="Produto ativo para venda", example="true")
+    @Schema(description="Produto ativo para venda (quando true exige imagem)", example="false")
     @JsonProperty(value="ativo")
-    private Boolean ativo = Boolean.TRUE;
+    private Boolean ativo = Boolean.FALSE;
     @Schema(description="ID do tenant (multi-inquilino)", example="redemaisfarma-001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message="{produto.tenantId.notBlank}")
     @JsonProperty(value="tenantId")

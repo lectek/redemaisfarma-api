@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -61,6 +62,8 @@ public class ProdutoAdminRestController {
     // ==================================================
     @PostMapping
     public ResponseEntity<ProdutoResponseDTO> create(@Valid @RequestBody ProdutoRequestDTO dto) {
+        ensureImageWhenActive(dto);
+        ensureUniqueName(dto, null);
         ProdutoEntity entity = ProdutoMapper.toEntity(toDomain(dto));
         entity.setStatus(ProdutoStatus.IMPORTADO);
         entity.setDataImportacao(LocalDateTime.now());
@@ -78,6 +81,8 @@ public class ProdutoAdminRestController {
             @PathVariable Long id,
             @Valid @RequestBody ProdutoRequestDTO dto) {
 
+        ensureImageWhenActive(dto);
+        ensureUniqueName(dto, id);
         return repo.findById(id)
                 .map(atual -> {
                     Produto src = toDomain(dto);
@@ -224,6 +229,30 @@ public class ProdutoAdminRestController {
                 : ProdutoResponseDTO.SituacaoProduto.ESGOTADO);
 
         return dto;
+    }
+
+    private void ensureImageWhenActive(ProdutoRequestDTO dto) {
+        if (Boolean.TRUE.equals(dto.getAtivo())
+                && (dto.getImagem() == null || dto.getImagem().isBlank())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Imagem obrigatória para produtos disponibilizados na web.");
+        }
+    }
+
+    private void ensureUniqueName(ProdutoRequestDTO dto, Long currentId) {
+        if (dto.getNome() == null) {
+            return;
+        }
+        String nome = dto.getNome().trim();
+        if (nome.isBlank()) {
+            return;
+        }
+        repo.findByNomeIgnoreCase(nome)
+                .filter(existing -> currentId == null || !existing.getId().equals(currentId))
+                .ifPresent(existing -> {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Produto com este nome já existe – pesquise antes de criar.");
+                });
     }
 
     private static String nvl(String v, String def) {

@@ -23,6 +23,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -32,13 +33,17 @@ public class OtpTokenFilter
 implements Filter {
     private final OtpServicePort otp;
 
-    public OtpTokenFilter(OtpServicePort otp) {
-        this.otp = otp;
+    public OtpTokenFilter(ObjectProvider<OtpServicePort> otpProvider) {
+        this.otp = otpProvider.getIfAvailable();
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest)request;
         if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
+            chain.doFilter(request, response);
+            return;
+        }
+        if (otp == null) {
             chain.doFilter(request, response);
             return;
         }
@@ -58,4 +63,3 @@ implements Filter {
         chain.doFilter(request, response);
     }
 }
-

@@ -261,7 +261,7 @@
 
   function wireModal() {
     closeBtns?.forEach(b => b.addEventListener("click", fecharModal));
-    modal?.addEventListener("click", (e) => {
+    document.addEventListener("click", (e) => {
       if (e.target === modal) fecharModal();
     });
 

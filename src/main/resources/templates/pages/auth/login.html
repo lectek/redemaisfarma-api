@@ -3,155 +3,147 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="light dark" />
-  <meta name="theme-color" content="#0ea5e9" />
+  <meta name="theme-color" content="#5f000f" />
 
   <title th:text="${title} ?: 'Entrar - RedeMaisFarma'">Entrar - RedeMaisFarma</title>
-  <meta name="description"
-        content="RedeMaisFarma: medicamentos, perfumaria e cuidados pessoais com entrega rápida e segura." />
+  <meta name="description" content="RedeMaisFarma: medicamentos, perfumaria e cuidados pessoais com entrega rapida e segura." />
 
   <link rel="canonical" href="/" />
   <link rel="icon" type="image/png" th:href="@{/images/favicon.png}" />
   <link rel="apple-touch-icon" th:href="@{/images/favicon-apple.png}" />
 
-  <meta property="og:type" content="website" />
-  <meta property="og:locale" content="pt_BR" />
-  <meta property="og:site_name" content="RedeMaisFarma" />
-  <meta property="og:title" content="RedeMaisFarma • Sua farmácia de confiança" />
-  <meta property="og:description"
-        content="Compre com segurança e receba em casa. Atendimento rápido, preços justos e ofertas!" />
-  <meta property="og:image" th:content="@{/images/og-cover.png}" />
-  <meta property="og:url" href="/" />
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="RedeMaisFarma • Sua farmácia de confiança" />
-  <meta name="twitter:description" content="Medicamentos e perfumaria com entrega rápida." />
-  <meta name="twitter:image" th:content="@{/images/og-cover.png}" />
-
   <link rel="stylesheet" th:href="@{/css/main.css(v=${#dates.createNow().time})}" />
   <link rel="stylesheet" th:href="@{/css/pages/login.css(v=${#dates.createNow().time})}" />
 </head>
 <body class="body-flex login-page">
-  <header th:replace="~{fragments/header :: header}"></header>
-
   <main id="main-content" class="login-shell" tabindex="-1">
-    <section class="login-card" aria-labelledby="titulo-login">
-      <header class="login-header">
-        <p class="login-kicker">Acesso ao sistema</p>
-        <h1 id="titulo-login" class="login-title">Entrar</h1>
-        <p class="login-subtitle">Selecione o perfil e informe suas credenciais.</p>
+    <section class="login-stage" aria-label="Area de login">
+      <header class="login-brand">
+        <img th:src="@{/images/logofarma.png}" alt="SaudeMais Farma" loading="eager" decoding="async" />
       </header>
 
-      <div th:if="${param.error}" class="alert error">Credenciais invalidas.</div>
-      <div th:if="${param.logout}" class="alert info">Sessao encerrada.</div>
+      <div class="login-layout">
+        <section class="login-card" aria-labelledby="titulo-login">
+          <h1 id="titulo-login" class="login-title">Entrar</h1>
+          <p class="login-subtitle">Use seus dados para acessar sua conta.</p>
 
-      <form id="loginForm" th:action="@{/auth/login}" method="post" class="login-form" autocomplete="on" novalidate>
-        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <div th:if="${param.error}" class="alert alert-login alert-login--error">Credenciais invalidas.</div>
+          <div th:if="${param.logout}" class="alert alert-login alert-login--info">Sessao encerrada.</div>
 
-        <div class="segmented" role="group" aria-label="Tipo de acesso">
-          <label class="segmented__option">
-            <input type="radio" name="perfil" value="cliente" checked>
-            <span>Cliente</span>
-          </label>
-          <label class="segmented__option">
-            <input type="radio" name="perfil" value="admin">
-            <span>Admin</span>
-          </label>
-        </div>
-        <input type="hidden" name="redirect" id="redirect" value="/cliente/conta"/>
+          <form id="loginForm" th:action="@{/auth/login}" method="post" class="login-form" autocomplete="on" novalidate>
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="hidden" name="perfil" id="perfilInput" value="cliente"/>
+            <input type="hidden" name="redirect" id="redirect" th:value="${redirectDefault} ?: '/cliente/conta'"/>
 
-        <div class="field">
-          <label for="usuario">E-mail / CPF / Usuario</label>
-          <div class="input-wrap">
-            <span class="input-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.4 0-8 2-8 4.5V20h16v-1.5C20 16 16.4 14 12 14Z"/></svg>
-            </span>
-            <input id="usuario" class="input" type="text" name="username" autocomplete="username"
-                   placeholder="ex.: joao@dominio.com" required autofocus/>
+            <div class="field">
+              <label class="visually-hidden" for="usuario">Usuario</label>
+              <div class="input-wrap">
+                <span class="input-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Zm2 0 6 4 6-4H6Zm12 12V9.2l-6 4-6-4V18h12Z"/></svg>
+                </span>
+                <input id="usuario" class="input" type="text" name="username" autocomplete="username"
+                       placeholder="seu@email.com" required autofocus/>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="visually-hidden" for="senha">Senha</label>
+              <div class="input-wrap">
+                <span class="input-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 1 1 12 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Zm2 0h8V8a4 4 0 1 0-8 0v2Z"/></svg>
+                </span>
+                <input id="senha" class="input" type="password" name="password"
+                       autocomplete="current-password" placeholder="Sua senha" required minlength="8" maxlength="128"/>
+                <button type="button" class="toggle-pass" id="toggleSenha"
+                        aria-pressed="false" aria-label="Mostrar senha">
+                  <svg viewBox="0 0 24 24" class="toggle-icon"><path d="M12 5c5 0 9 4.5 10 7-1 2.5-5 7-10 7S3 14.5 2 12c1-2.5 5-7 10-7Zm0 3.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <label class="remember">
+              <input id="lembrarMe" type="checkbox" name="remember-me"/>
+              <span>Lembrar de mim</span>
+            </label>
+
+            <div class="login-actions">
+              <button id="entrarBtn" type="submit" class="btn btn--primary"
+                      data-login-profile="cliente" data-redirect="/cliente/conta">Entrar</button>
+              <button id="entrarAdminBtn" type="submit" class="btn btn--admin"
+                      data-login-profile="admin" data-redirect="/admin/dashboard">Entrar como Admin</button>
+            </div>
+
+            <nav class="login-links" aria-label="Links de suporte">
+              <a th:href="@{/auth/esqueci-senha}">Esqueceu a senha?</a>
+              <a th:href="@{/auth/cliente/cadastro}">Criar conta</a>
+            </nav>
+
+            <div class="login-links login-links--secondary" th:if="${oauth2Enabled}">
+              <a th:href="@{/oauth2/authorization/facebook}">Cadastro com Facebook</a>
+            </div>
+          </form>
+        </section>
+
+        <aside class="login-illustration" aria-hidden="true">
+          <div class="pill-friend">
+            <span class="pill-friend__spark pill-friend__spark--a"></span>
+            <span class="pill-friend__spark pill-friend__spark--b"></span>
+            <span class="pill-friend__spark pill-friend__spark--c"></span>
+            <span class="pill-friend__mini-heart pill-friend__mini-heart--a"></span>
+            <span class="pill-friend__mini-heart pill-friend__mini-heart--b"></span>
+            <span class="pill-friend__mini-heart pill-friend__mini-heart--c"></span>
+            <div class="pill-friend__head"></div>
+            <div class="pill-friend__body"></div>
+            <div class="pill-friend__eye pill-friend__eye--left"></div>
+            <div class="pill-friend__eye pill-friend__eye--right"></div>
+            <div class="pill-friend__smile"></div>
+            <div class="pill-friend__hand pill-friend__hand--left"></div>
+            <div class="pill-friend__hand pill-friend__hand--right"></div>
+            <div class="pill-friend__heart"></div>
+            <div class="pill-friend__leg pill-friend__leg--left"></div>
+            <div class="pill-friend__leg pill-friend__leg--right"></div>
           </div>
-        </div>
-
-        <div class="field">
-          <label for="senha">Senha</label>
-          <div class="input-wrap">
-            <span class="input-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M6 10V8a6 6 0 1 1 12 0v2h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Zm2 0h8V8a4 4 0 1 0-8 0v2Z"/></svg>
-            </span>
-            <input id="senha" class="input" type="password" name="password"
-                   autocomplete="current-password" required minlength="8" maxlength="128"/>
-            <button type="button" class="toggle-pass" id="toggleSenha"
-                    aria-pressed="false" aria-label="Mostrar senha">
-              <svg viewBox="0 0 24 24" class="toggle-icon"><path d="M12 5c5 0 9 4.5 10 7-1 2.5-5 7-10 7S3 14.5 2 12c1-2.5 5-7 10-7Zm0 3.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></svg>
-            </button>
-          </div>
-          <small class="help">Use 8+ caracteres, com maiuscula, minuscula, numero e simbolo.</small>
-        </div>
-
-        <label class="remember">
-          <input id="lembrarMe" type="checkbox" name="remember-me"/>
-          <span>Lembrar de mim (sessao maior)</span>
-        </label>
-
-        <div class="login-actions">
-          <button id="entrarBtn" type="submit" class="btn btn--primary">Entrar</button>
-          <a th:href="@{/auth/esqueci-senha}" class="btn btn--ghost" role="button">Esqueci minha senha</a>
-        </div>
-
-        <div class="signup-divider" role="separator" aria-label="Opcoes de cadastro">
-          <span>Ou cadastre-se com</span>
-        </div>
-
-        <div class="signup-actions" aria-label="Cadastro rapido">
-          <a th:href="@{/auth/cliente/cadastro}" class="btn btn--social btn--email">
-            <span class="btn-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Zm2 0 6 4 6-4H6Zm12 12V9.2l-6 4-6-4V18h12Z"/></svg>
-            </span>
-            Cadastrar com email
-          </a>
-          <a th:href="@{/oauth2/authorization/facebook}" class="btn btn--social btn--facebook" th:if="${oauth2Enabled}">
-            <span class="btn-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M13.5 8.5V7.2c0-.8.5-1.2 1.3-1.2H16V3h-2.1C11.7 3 10.5 4.3 10.5 6.6v1.9H8V11h2.5v10H13.5V11h2.7l.4-2.5h-3.1Z"/></svg>
-            </span>
-            Cadastrar com Facebook
-          </a>
-        </div>
-
-        <nav class="login-links" aria-label="Acesso rapido">
-          <a th:href="@{/auth/cliente/cadastro}">Criar conta</a>
-          <span>|</span>
-          <a th:href="@{/auth/mudar-senha}">Mudar minha senha</a>
-        </nav>
-      </form>
+        </aside>
+      </div>
     </section>
   </main>
 
-  <footer th:replace="~{fragments/footer :: footer}"></footer>
-
-  <script defer th:src="@{/js/layout.js}"></script>
-
   <script>
-    const redirect = document.getElementById('redirect');
-    document.querySelectorAll('input[name="perfil"]').forEach(r => {
-      r.addEventListener('change', () => {
-        redirect.value = r.value === 'admin' ? '/admin/dashboard' : '/cliente/conta';
-      });
-    });
-    document.getElementById('toggleSenha')?.addEventListener('click', (ev) => {
-      const f = document.getElementById('senha');
-      const btn = ev.currentTarget;
-      const isHidden = f.type === 'password';
-      f.type = isHidden ? 'text' : 'password';
-      btn.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
-      btn.setAttribute('aria-label', isHidden ? 'Ocultar senha' : 'Mostrar senha');
-    });
+    (function () {
+      const form = document.getElementById('loginForm');
+      const redirectInput = document.getElementById('redirect');
+      const perfilInput = document.getElementById('perfilInput');
 
-    const registerLink = document.querySelector('.btn--email');
-    registerLink?.addEventListener('click', (ev) => {
-      const href = registerLink.getAttribute('href');
-      if (!href) return;
-      ev.preventDefault();
-      window.location.href = href;
-    });
+      function applySubmitTarget(button) {
+        if (!button || !redirectInput || !perfilInput) {
+          return;
+        }
+        perfilInput.value = button.dataset.loginProfile || 'cliente';
+        redirectInput.value = button.dataset.redirect || '/cliente/conta';
+      }
+
+      document.querySelectorAll('[data-login-profile]').forEach((button) => {
+        button.addEventListener('click', () => applySubmitTarget(button));
+      });
+
+      form?.addEventListener('submit', (event) => {
+        if (event.submitter?.dataset?.loginProfile) {
+          applySubmitTarget(event.submitter);
+        }
+      });
+
+      document.getElementById('toggleSenha')?.addEventListener('click', (event) => {
+        const input = document.getElementById('senha');
+        if (!input) {
+          return;
+        }
+        const button = event.currentTarget;
+        const hidden = input.type === 'password';
+        input.type = hidden ? 'text' : 'password';
+        button.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+        button.setAttribute('aria-label', hidden ? 'Ocultar senha' : 'Mostrar senha');
+      });
+    })();
   </script>
 </body>
 </html>

@@ -64,10 +64,10 @@ implements Serializable {
     @Schema(description="Senha do usu\u00e1rio", format="password", requiredMode=Schema.RequiredMode.REQUIRED, accessMode=Schema.AccessMode.WRITE_ONLY)
     @NotBlank(message="{login.senha.notBlank}")
     @Size(min=8, max=128, message="{login.senha.size}")
-    @Pattern(regexp="^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,128}$", message="{login.senha.pattern}")
+    @Pattern(regexp="^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,128}$", message="{login.senha.pattern}")
     @JsonProperty(value="senha", access=JsonProperty.Access.WRITE_ONLY)
     @JsonAlias(value={"password"})
-    private @NotBlank(message="{login.senha.notBlank}") @Size(min=8, max=128, message="{login.senha.size}") @Pattern(regexp="^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,128}$", message="{login.senha.pattern}") String senha;
+    private @NotBlank(message="{login.senha.notBlank}") @Size(min=8, max=128, message="{login.senha.size}") @Pattern(regexp="^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,128}$", message="{login.senha.pattern}") String senha;
     @Schema(description="Se deve lembrar sess\u00e3o (persistente)", example="false")
     @JsonProperty(value="lembrarMe")
     private Boolean lembrarMe = Boolean.FALSE;
@@ -290,4 +290,3 @@ implements Serializable {
         }
     }
 }
-

@@ -16,6 +16,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepo
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepository;
 import br.com.redemaisfarma.application.core.media.ImageStorageService;
 import br.com.redemaisfarma.application.service.CartService;
+import br.com.redemaisfarma.application.service.validation.CartValidationService;
 import br.com.redemaisfarma.application.service.PaymentMethodService;
 import br.com.redemaisfarma.application.view.CartItemVM;
 import br.com.redemaisfarma.application.view.CartSummaryVM;
@@ -50,7 +51,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "App - Cliente Self-service", description = "Endpoints de perfil, carrinho, checkout, pedidos, notificações e favoritos do cliente autenticado")
 @RestController
 @RequestMapping("/api/cliente/me")
 @Validated
@@ -90,6 +94,7 @@ public class ClienteSelfApiController {
         this.produtoRepository = produtoRepository;
     }
 
+    @Operation(summary = "Retorna os dados do cliente autenticado")
     @GetMapping
     public ClienteMeResponse me(Authentication auth) {
         UsuarioEntity usuario = localizarUsuario(auth)
@@ -97,6 +102,7 @@ public class ClienteSelfApiController {
         return ClienteMeResponse.from(usuario);
     }
 
+    @Operation(summary = "Atualiza os dados do cliente autenticado")
     @PutMapping
     public ClienteMeResponse atualizar(@Valid @RequestBody ClienteMeUpdateRequest req, Authentication auth) {
         UsuarioEntity usuario = localizarUsuario(auth)
@@ -119,6 +125,7 @@ public class ClienteSelfApiController {
         return ClienteMeResponse.from(usuario);
     }
 
+    @Operation(summary = "Atualiza o avatar do cliente autenticado")
     @PostMapping("/avatar")
     public ResponseEntity<?> atualizarAvatar(@RequestParam("file") MultipartFile file, Authentication auth) {
         UsuarioEntity usuario = localizarUsuario(auth)
@@ -143,6 +150,7 @@ public class ClienteSelfApiController {
         }
     }
 
+    @Operation(summary = "Lista os pedidos do cliente autenticado")
     @GetMapping("/pedidos")
     public List<PedidoResumoResponse> listarPedidos(Authentication auth) {
         ClienteIdentidade identidade = resolveIdentidade(auth);
@@ -155,6 +163,7 @@ public class ClienteSelfApiController {
                 .toList();
     }
 
+    @Operation(summary = "Detalha um pedido do cliente autenticado")
     @GetMapping("/pedidos/{id}")
     public PedidoDetalheResponse detalhe(@PathVariable Long id, Authentication auth) {
         ClienteIdentidade identidade = resolveIdentidade(auth);
@@ -166,14 +175,16 @@ public class ClienteSelfApiController {
         return PedidoDetalheResponse.from(pedido, paymentMethodService);
     }
 
+    @Operation(summary = "Retorna o resumo atual do carrinho do cliente")
     @GetMapping("/carrinho")
     public CartSummaryResponse carrinho(HttpSession session) {
         return CartSummaryResponse.from(cartService.buildSummary(session));
     }
 
+    @Operation(summary = "Adiciona um item ao carrinho")
     @PostMapping("/carrinho")
     public CartSummaryResponse adicionar(@Valid @RequestBody CartItemRequest req, HttpSession session) {
-        CartService.CartValidationResult validation = cartService.validateAdd(req.produtoId(), req.quantidade());
+        CartValidationService.CartValidationResult validation = cartService.validateAdd(session, req.produtoId(), req.quantidade());
         if (!validation.valid()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, validation.message());
         }
@@ -181,6 +192,7 @@ public class ClienteSelfApiController {
         return CartSummaryResponse.from(cartService.buildSummary(session));
     }
 
+    @Operation(summary = "Atualiza a quantidade de um item do carrinho")
     @PutMapping("/carrinho/{produtoId}")
     public CartSummaryResponse atualizar(@PathVariable Long produtoId,
                                          @Valid @RequestBody CartUpdateRequest req,
@@ -189,12 +201,14 @@ public class ClienteSelfApiController {
         return CartSummaryResponse.from(cartService.buildSummary(session));
     }
 
+    @Operation(summary = "Remove um item do carrinho")
     @DeleteMapping("/carrinho/{produtoId}")
     public CartSummaryResponse remover(@PathVariable Long produtoId, HttpSession session) {
         cartService.removeItem(session, produtoId);
         return CartSummaryResponse.from(cartService.buildSummary(session));
     }
 
+    @Operation(summary = "Retorna o resumo do checkout")
     @GetMapping("/checkout/resumo")
     public CheckoutResumoResponse resumo(HttpSession session) {
         CartSummaryVM summary = cartService.buildSummary(session);
@@ -205,6 +219,7 @@ public class ClienteSelfApiController {
         return new CheckoutResumoResponse(CartSummaryResponse.from(summary), methods);
     }
 
+    @Operation(summary = "Finaliza o pedido do carrinho")
     @PostMapping("/checkout/finalizar")
     public CheckoutFinalizarResponse finalizar(@Valid @RequestBody CheckoutFinalizarRequest req,
                                                Authentication auth,
@@ -249,6 +264,7 @@ public class ClienteSelfApiController {
         return new CheckoutFinalizarResponse(saved.getId(), label);
     }
 
+    @Operation(summary = "Lista os produtos favoritos do cliente")
     @GetMapping("/favoritos")
     public List<FavoritoResponse> favoritos(Authentication auth) {
         UsuarioEntity usuario = localizarUsuario(auth)
@@ -259,6 +275,7 @@ public class ClienteSelfApiController {
                 .toList();
     }
 
+    @Operation(summary = "Marca um produto como favorito")
     @PostMapping("/favoritos")
     public FavoritoResponse adicionarFavorito(@Valid @RequestBody FavoritoRequest req, Authentication auth) {
         UsuarioEntity usuario = localizarUsuario(auth)
@@ -275,6 +292,7 @@ public class ClienteSelfApiController {
         return FavoritoResponse.from(saved);
     }
 
+    @Operation(summary = "Remove um favorito do cliente")
     @DeleteMapping("/favoritos/{produtoId}")
     public ResponseEntity<?> removerFavorito(@PathVariable Long produtoId, Authentication auth) {
         UsuarioEntity usuario = localizarUsuario(auth)
@@ -283,6 +301,7 @@ public class ClienteSelfApiController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Lista notificações do cliente")
     @GetMapping("/notificacoes")
     public NotificacoesResponse notificacoes(Authentication auth) {
         UsuarioEntity usuario = localizarUsuario(auth)
@@ -295,6 +314,7 @@ public class ClienteSelfApiController {
         );
     }
 
+    @Operation(summary = "Marca notificações como lidas")
     @PostMapping("/notificacoes/lidas")
     public ResponseEntity<?> marcarLidas(@Valid @RequestBody NotificacaoLidasRequest req, Authentication auth) {
         UsuarioEntity usuario = localizarUsuario(auth)

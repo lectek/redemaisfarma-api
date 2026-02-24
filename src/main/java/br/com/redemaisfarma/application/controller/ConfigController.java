@@ -16,8 +16,6 @@ import br.com.redemaisfarma.application.config.AppConfigProperties;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,8 +30,7 @@ public class ConfigController {
     private final List<ConfigItem> baseItems = new ArrayList<ConfigItem>();
     private LocalDateTime lastRefreshTime;
 
-    @Autowired
-    public ConfigController(AppConfigProperties appConfig, Environment environment, MessageSource messages) {
+    public ConfigController(AppConfigProperties appConfig, Environment environment) {
         this.appConfig = appConfig;
         this.environment = environment;
         this.buildBaseItems();
@@ -73,4 +70,3 @@ public class ConfigController {
         }
     }
 }
-

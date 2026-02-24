@@ -83,10 +83,20 @@ public class MySqlDataSourceConfig {
         validateExpectedDatabase(parsed.database());
         logResolvedConfiguration(parsed, resolved.envKey());
 
+        String resolvedUsername = parsed.username();
+        if (isBlank(resolvedUsername)) {
+            resolvedUsername = trimEnv("SPRING_DATASOURCE_USERNAME");
+        }
+
+        String resolvedPassword = parsed.password();
+        if (resolvedPassword == null) {
+            resolvedPassword = trimEnv("SPRING_DATASOURCE_PASSWORD");
+        }
+
         HikariConfig cfg = new HikariConfig();
         cfg.setJdbcUrl(parsed.jdbcUrl());
-        cfg.setUsername(parsed.username());
-        cfg.setPassword(parsed.password());
+        cfg.setUsername(resolvedUsername);
+        cfg.setPassword(resolvedPassword);
         cfg.setDriverClassName("com.mysql.cj.jdbc.Driver");
 
         // Startup-friendly defaults for Railway.
@@ -163,13 +173,19 @@ public class MySqlDataSourceConfig {
         }
 
         if (!prodProfile) {
+            String springDatasourceUrl = trimEnv("SPRING_DATASOURCE_URL");
+            if (!isBlank(springDatasourceUrl)) {
+                return new ResolvedDatabaseUrl("SPRING_DATASOURCE_URL", springDatasourceUrl);
+            }
+
             String mysqlUrl = trimEnv("MYSQL_URL");
             if (!isBlank(mysqlUrl)) {
                 return new ResolvedDatabaseUrl("MYSQL_URL", mysqlUrl);
             }
         }
 
-        throw new IllegalStateException("Nenhuma das variaveis RAILWAY_MYSQL_URL ou DATABASE_URL foi definida. Configure o Railway/MySQL corretamente.");
+        throw new IllegalStateException("Nenhuma URL de banco foi definida. Em producao use RAILWAY_MYSQL_URL, DATABASE_URL"
+                + " ou MYSQL_PRIVATE_URL; em dev use SPRING_DATASOURCE_URL ou MYSQL_URL.");
     }
 
     private ResolvedDatabaseUrl resolveRailwayUrl() {
@@ -368,11 +384,14 @@ public class MySqlDataSourceConfig {
 
     private void logStartupDiagnostics() {
         boolean prodProfile = isProdProfileActive();
+        boolean springDatasourceUrlReported = !prodProfile && hasEnvValue("SPRING_DATASOURCE_URL");
         boolean mysqlUrlReported = !prodProfile && hasEnvValue("MYSQL_URL");
-        LOGGER.info("Env presence MYSQL_URL={}, RAILWAY_MYSQL_URL={}, DATABASE_URL={}",
+        LOGGER.info("Env presence SPRING_DATASOURCE_URL={}, MYSQL_URL={}, RAILWAY_MYSQL_URL={}, DATABASE_URL={}, MYSQL_PRIVATE_URL={}",
+                springDatasourceUrlReported,
                 mysqlUrlReported,
                 hasEnvValue("RAILWAY_MYSQL_URL"),
-                hasEnvValue("DATABASE_URL"));
+                hasEnvValue("DATABASE_URL"),
+                hasEnvValue("MYSQL_PRIVATE_URL"));
         String commit = null;
         if (gitProperties != null) {
             commit = gitProperties.getShortCommitId();

@@ -21,7 +21,14 @@ const setAlert = (msg = "", type = "error") => {
   const a = byId("alert");
   if (!a) return;
   a.textContent = msg || "";
-  a.className = msg ? `alert ${type}` : "alert";
+  if (!msg) {
+    a.className = "alert";
+    a.hidden = true;
+    return;
+  }
+  // components/alerts.css uses alert-info|alert-warning|alert-error
+  a.className = `alert alert-${type}`;
+  a.hidden = false;
 };
 
 // Lê CSRF das metas OU do cookie XSRF-TOKEN e decide o header
@@ -34,7 +41,7 @@ const getCsrf = () => {
   const metaHdr = document.querySelector('meta[name="_csrf_header"]')?.content || "";
   const cookieTok = readCookie("XSRF-TOKEN"); // padrão do Spring Security
   const header = metaHdr || "X-XSRF-TOKEN";
-  const token  = metaTok || cookieTok || "";
+  const token  = cookieTok || metaTok || "";
   return { header, token };
 };
 
@@ -79,6 +86,12 @@ const otpInputs       = () => Array.from(otpDialog?.querySelectorAll(".otp") || 
 const otpDeliveryIdInput = byId("otpDeliveryId");
 const otpTokenInput      = byId("otpToken");
 
+// Keeps the UI deterministic when Thymeleaf renders no checked radio initially.
+const defaultCanal = byId("canalOtp1");
+if (!document.querySelector('input[name="canalOtp"]:checked') && defaultCanal) {
+  defaultCanal.checked = true;
+}
+
 // -------- Mensagens --------
 const MSG = {
   nome: "Informe seu nome completo.",
@@ -98,24 +111,16 @@ const MSG = {
 // -------- Validações --------
 const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v).trim());
 const onlyDigits = (v) => String(v || "").replace(/\D/g, "");
-const isCpf = (v) => {
-  const s = onlyDigits(v);
-  if (s.length !== 11 || /^(\d)\1{10}$/.test(s)) return false;
-  const calc = (base) => {
-    let sum = 0;
-    for (let i = 0; i < base; i++) sum += parseInt(s[i], 10) * (base + 1 - i);
-    const mod = (sum * 10) % 11;
-    return mod === 10 ? 0 : mod;
-  };
-  const d1 = calc(9);
-  const d2 = calc(10);
-  return d1 === parseInt(s[9], 10) && d2 === parseInt(s[10], 10);
-};
+// Matches backend validation: 11 digits (with or without mask on input).
+const isCpf = (v) => /^\d{11}$/.test(onlyDigits(v));
 const isPhone = (v) => {
-  const d = onlyDigits(v);
-  return d.length >= 10 && d.length <= 11;
+  const raw = String(v || "").trim();
+  if (!raw) return true;
+  // Same accepted charset/length as backend (@Pattern in CadastroClienteForm).
+  return /^[+()\d\s-]{8,20}$/.test(raw);
 };
-const senhaOk = (v) => new RegExp(senha.pattern).test(v);
+const SENHA_REGEX = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,128}$/;
+const senhaOk = (v) => SENHA_REGEX.test(v);
 
 // Canal/Destino
 const canalSelecionado = () =>
@@ -164,12 +169,19 @@ function trapFocus(e) {
 
 // Eventos dos inputs OTP (digitação, backspace, colagem)
 if (otpDialog) {
-  otpDialog.addEventListener("keydown", (e) => {
+  document.addEventListener("keydown", (e) => {
+    if (!otpDialog.open) return;
+    const target = e.target;
+    if (!(target instanceof Element) || !otpDialog.contains(target)) return;
     if (e.key === "Escape") {
       otpDialog?.close?.();
       return;
     }
     trapFocus(e);
+    if (!(target instanceof HTMLInputElement) || !target.classList.contains("otp")) return;
+    if (e.key === "Backspace" && !target.value && target.previousElementSibling instanceof HTMLInputElement) {
+      target.previousElementSibling.focus();
+    }
   });
 
   otpDialog.addEventListener("input", (e) => {
@@ -190,14 +202,6 @@ if (otpDialog) {
   });
 
   // backspace para voltar
-  otpDialog.addEventListener("keydown", (e) => {
-    const el = e.target;
-    if (!(el instanceof HTMLInputElement) || !el.classList.contains("otp")) return;
-    if (e.key === "Backspace" && !el.value && el.previousElementSibling instanceof HTMLInputElement) {
-      el.previousElementSibling.focus();
-    }
-  });
-
   // Colagem: distribui os dígitos entre os 6 campos
   otpDialog.addEventListener("paste", (e) => {
     const target = e.target;
@@ -284,7 +288,8 @@ if (form) {
     if (!isEmail(email?.value)) { setFieldError(email, MSG.email); ok = false; } else setFieldError(email);
     if (!isCpf(cpf?.value)) { setFieldError(cpf, MSG.cpf); ok = false; } else setFieldError(cpf);
 
-    if (canal === "SMS") {
+    const telefoneInformado = Boolean(telefone?.value?.trim());
+    if (canal === "SMS" || telefoneInformado) {
       if (!isPhone(telefone?.value)) { setFieldError(telefone, MSG.telefone); ok = false; }
       else setFieldError(telefone);
     } else {
@@ -296,7 +301,13 @@ if (form) {
 
     if (confirmar?.value !== senha?.value) { setFieldError(confirmar, MSG.confirmar); ok = false; } else setFieldError(confirmar);
 
-    if (!ok) return;
+    if (!ok) {
+      setAlert("Revise os campos destacados para continuar.", "error");
+      const firstInvalid = [nome, email, cpf, telefone, senha, confirmar]
+        .find((el) => el?.getAttribute("aria-invalid") === "true");
+      firstInvalid?.focus();
+      return;
+    }
 
     // 3) Dispara OTP
     try {
@@ -341,12 +352,6 @@ if (form) {
       if (otpDeliveryIdInput) otpDeliveryIdInput.value = deliveryId || "";
       if (otpDestinoEl) otpDestinoEl.textContent = maskedDestino;
       if (cooldownSec != null) resendCooldown = Number(cooldownSec) || 60;
-
-      const autoCode = pick(data, "demoCode", "demo_code");
-      if (autoCode && /^\d{6}$/.test(autoCode)) {
-        await handleAutoOtp(autoCode);
-        return;
-      }
 
       // abre modal OTP (ou prompt fallback)
       clearOtp();
@@ -424,15 +429,6 @@ async function confirmarOtpEContinuar(code) {
   }
 }
 
-async function handleAutoOtp(code) {
-  if (otpDialog?.open) {
-    otpDialog.close();
-  }
-  startCooldown();
-  setAlert(MSG.otpEnviado, "info");
-  await confirmarOtpEContinuar(code);
-}
-
 // Clique no confirmar do modal
 if (otpConfirmBtn) {
   otpConfirmBtn.addEventListener("click", async (e) => {
@@ -448,7 +444,10 @@ if (otpConfirmBtn) {
 
 // Auto-submit quando completar 6 dígitos (enter também confirma)
 if (otpDialog) {
-  otpDialog.addEventListener("keyup", async (e) => {
+  document.addEventListener("keyup", async (e) => {
+    const target = e.target;
+    if (!otpDialog.open) return;
+    if (!(target instanceof Element) || !otpDialog.contains(target)) return;
     const code = collectOtpCode();
     if (code.length === 6 && (e.key === "Enter" || e.key === "NumpadEnter")) {
       await confirmarOtpEContinuar(code);
@@ -538,12 +537,25 @@ async function criarConta(verificationToken) {
       body: formData
     });
 
-    const data = await safeParse(resp);
-
     if (resp.redirected) {
       window.location.href = resp.url;
       return;
     }
+
+    const contentType = (resp.headers.get("content-type") || "").toLowerCase();
+    if (contentType.includes("text/html")) {
+      const html = await resp.text();
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      const firstGlobal = doc.querySelector(".alert-error");
+      const firstField = doc.querySelector(".error-message");
+      const msg = (firstGlobal?.textContent || firstField?.textContent || "").trim()
+        || "Nao foi possivel concluir o cadastro agora.";
+      setAlert(msg, "error");
+      setLoading(false, "", "Criar conta");
+      return;
+    }
+
+    const data = await safeParse(resp);
 
     if (!resp.ok) {
       if (typeof data === "object") {

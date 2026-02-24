@@ -112,6 +112,12 @@
                 <label for="homeHeroTexto">Titulo do destaque</label>
                 <input id="homeHeroTexto" class="input" th:field="*{homeHeroTexto}" placeholder="Promocoes do dia"/>
               </div>
+              <div class="form-group">
+                <label for="homeHeroVideoUrl">Loop em vídeo (URL)</label>
+                <input id="homeHeroVideoUrl" class="input" type="url" th:field="*{homeHeroVideoUrl}"
+                       placeholder="https://.../hero-loop.webm"/>
+                <span class="form-hint">Suporta WebM/MP4 com canal alfa; o vídeo será reproduzido automaticamente sem áudio.</span>
+              </div>
             </div>
             <div class="media-preview media-preview--geral">
               <div class="preview-block">

@@ -13,7 +13,7 @@
         Informe o e-mail cadastrado e enviaremos um link seguro para redefinir sua senha.
       </p>
 
-      <div id="alert" class="alert" role="status" aria-live="polite"></div>
+      <output id="alert" class="alert" aria-live="polite"></output>
 
       <form id="esqueciSenhaForm"
             th:action="@{/auth/esqueci-senha}"
@@ -51,14 +51,15 @@
       <h2 id="otpTitle">Verificar seu código</h2>
       <p id="otpDesc">Enviamos um código para <strong id="otpDestino"></strong>. Digite abaixo:</p>
 
-      <div class="otp-grid" role="group" aria-label="Código de 6 dígitos">
+      <fieldset class="otp-grid">
+        <legend class="visually-hidden">Codigo de 6 digitos</legend>
         <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 1" />
         <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 2" />
         <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 3" />
         <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 4" />
         <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 5" />
         <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 6" />
-      </div>
+      </fieldset>
 
       <p id="otpError" class="error-message" aria-live="polite"></p>
 

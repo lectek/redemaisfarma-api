@@ -1,68 +1,110 @@
-package br.com.redemaisfarma.application.service.auth;
+﻿package br.com.redemaisfarma.application.service.auth;
 
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.ClienteEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.jpa.UsuarioJpaRepository;
+import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteRepository;
 import br.com.redemaisfarma.application.core.exception.CpfDuplicadoException;
 import br.com.redemaisfarma.application.core.exception.EmailDuplicadoException;
 import br.com.redemaisfarma.application.dto.request.CadastroClienteRequestDTO;
 import br.com.redemaisfarma.application.port.inbound.RegistrationAppService;
-import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
-import br.com.redemaisfarma.adapters.outbound.persistence.jpa.UsuarioJpaRepository;
 import br.com.redemaisfarma.domain.user.Role;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
+import java.util.Objects;
+
 @Service
 public class RegistrationAppServiceImpl implements RegistrationAppService {
 
     private final UsuarioJpaRepository usuarioRepo;
+    private final ClienteRepository clienteRepo;
     private final PasswordEncoder encoder;
 
-    public RegistrationAppServiceImpl(UsuarioJpaRepository usuarioRepo, PasswordEncoder encoder) {
+    public RegistrationAppServiceImpl(UsuarioJpaRepository usuarioRepo,
+                                      ClienteRepository clienteRepo,
+                                      PasswordEncoder encoder) {
         this.usuarioRepo = usuarioRepo;
+        this.clienteRepo = clienteRepo;
         this.encoder = encoder;
     }
 
     @Override
     @Transactional
     public void cadastrarNovoCliente(CadastroClienteRequestDTO request) {
-        final String email = safe(request.getEmail());
-        final String cpf   = normalizeCpf(request.getCpf());
-        final String nome  = safe(request.getNome());
-        final String raw   = safe(request.getSenha());
+        final String email = normalizeEmail(request.getEmail());
+        final String cpf = normalizeCpf(request.getCpf());
+        final String nome = safe(request.getNome());
+        final String raw = safe(request.getSenha());
+        final String telefone = safe(request.getTelefone());
 
-        // --- unicidade ---
+        // user uniqueness
         if (usuarioRepo.existsByEmail(email)) {
             throw new EmailDuplicadoException();
         }
-        // usa a query flexível existente para checar CPF
         if (usuarioRepo.findByEmailOrCpf(cpf).isPresent()) {
             throw new CpfDuplicadoException();
         }
 
-        // --- montar entidade ---
         UsuarioEntity u = new UsuarioEntity();
         u.setEmail(email);
         u.setCpf(cpf);
         u.setNome(nome);
+        u.setTelefone(telefone);
 
-        // senha obrigatória (sua entidade tem @NotBlank)
         if (raw == null || raw.isBlank()) {
-            throw new IllegalArgumentException("Senha obrigatória.");
+            throw new IllegalArgumentException("Senha obrigatoria.");
         }
-        u.setSenha(encoder.encode(raw));
+        String encodedPassword = encoder.encode(raw);
+        u.setSenha(encodedPassword);
 
-        // role padrão
         u.addRole(Role.of("ROLE_CLIENTE"));
-
         usuarioRepo.save(u);
+
+        syncClienteCadastro(request, email, cpf, nome, telefone, encodedPassword);
     }
 
-    // helpers
-    private static String safe(String v) { return v == null ? null : v.trim(); }
+    private static String safe(String v) {
+        return v == null ? null : v.trim();
+    }
+
+    private static String normalizeEmail(String value) {
+        String cleaned = safe(value);
+        return cleaned == null ? null : cleaned.toLowerCase(Locale.ROOT);
+    }
 
     private static String normalizeCpf(String value) {
-        if (value == null) return null;
+        if (value == null) {
+            return null;
+        }
         String digits = value.replaceAll("\\D", "");
         return digits.isBlank() ? null : digits;
+    }
+
+    private void syncClienteCadastro(CadastroClienteRequestDTO request,
+                                     String email,
+                                     String cpf,
+                                     String nome,
+                                     String telefone,
+                                     String encodedPassword) {
+        var byEmail = clienteRepo.findByEmailIgnoreCase(email);
+        var byCpf = clienteRepo.findByCpf(cpf);
+
+        if (byEmail.isPresent() && byCpf.isPresent()
+                && !Objects.equals(byEmail.get().getId(), byCpf.get().getId())) {
+            throw new IllegalStateException("Cadastro inconsistente para email/cpf.");
+        }
+
+        ClienteEntity cliente = byEmail.or(() -> byCpf).orElseGet(ClienteEntity::new);
+        cliente.setNome(nome);
+        cliente.setEmail(email);
+        cliente.setCpf(cpf);
+        cliente.setTelefone(telefone);
+        cliente.setDataDeNascimento(request.getDataDeNascimento());
+        cliente.setAtivo(true);
+        cliente.setSenha(encodedPassword);
+        clienteRepo.save(cliente);
     }
 }

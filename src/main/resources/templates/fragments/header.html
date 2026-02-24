@@ -7,12 +7,12 @@
     <!-- Logo / Marca -->
     <a th:href="@{/}" class="logo-link" aria-label="Página inicial">
       <img class="brand-logo"
-           th:src="${#strings.isEmpty(brandingLogoUrl)} ? @{/images/logofarma.png} : ${brandingLogoUrl}"
-           th:classappend="${brandingLogoSize != null} ? ' brand-logo--' + brandingLogoSize : ' brand-logo--medium'"
+           th:src="${#strings.isEmpty(brandingLogoUrl) or #strings.containsIgnoreCase(brandingLogoUrl, 'logofarma.png') or #strings.containsIgnoreCase(brandingLogoUrl, 'logo-redemaisfarma.png') or #strings.containsIgnoreCase(brandingLogoUrl, 'novalogo.webp')} ? @{/images/logonova.png} : ${brandingLogoUrl}"
+           th:classappend="${brandingLogoSize != null ? ' brand-logo--' + brandingLogoSize : ' brand-logo--medium'}"
            th:attr="data-logo-size=${brandingLogoSize != null ? brandingLogoSize : 'medium'}"
            alt="RedeMaisFarma" />
     </a>
-    <button class="sidebar-toggle sidebar-compact-toggle" type="button" data-sidebar-toggle data-sidebar-compact-toggle aria-label="Abrir o menu lateral">
+    <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Abrir o menu lateral">
       <span class="menu-icon" aria-hidden="true"></span>
     </button>
 
@@ -44,5 +44,5 @@
   </div>
 
   <!-- backdrop do menu mobile (você já tem CSS pronto pra isso) -->
-  <div class="nav-backdrop" aria-hidden="true"></div>
+  <button type="button" class="nav-backdrop" aria-label="Fechar menu"></button>
 </header>

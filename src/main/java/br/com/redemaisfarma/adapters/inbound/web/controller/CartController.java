@@ -1,6 +1,7 @@
 package br.com.redemaisfarma.adapters.inbound.web.controller;
 
 import br.com.redemaisfarma.application.service.CartService;
+import br.com.redemaisfarma.application.service.validation.CartValidationService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -26,7 +27,7 @@ public class CartController {
             @RequestParam(value = "quantidade", defaultValue = "1") @Min(1) int quantidade,
             RedirectAttributes ra,
             HttpSession session) {
-        CartService.CartValidationResult validation = cartService.validateAdd(produtoId, quantidade);
+        CartValidationService.CartValidationResult validation = cartService.validateAdd(session, produtoId, quantidade);
         if (!validation.valid()) {
             ra.addFlashAttribute("error", validation.message());
             return "redirect:/carrinho";

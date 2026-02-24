@@ -18,11 +18,12 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!nav.getAttribute("aria-label")) nav.setAttribute("aria-label", "Menu principal");
 
   // Injeta backdrop se não existir
-  let backdrop = document.querySelector(".nav-backdrop");
+  let backdrop = document.querySelector("button.nav-backdrop");
   if (!backdrop) {
-    backdrop = document.createElement("div");
+    backdrop = document.createElement("button");
+    backdrop.type = "button";
     backdrop.className = "nav-backdrop";
-    backdrop.setAttribute("aria-hidden", "true");
+    backdrop.setAttribute("aria-label", "Fechar menu");
     document.body.appendChild(backdrop);
   }
 

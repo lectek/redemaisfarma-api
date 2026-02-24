@@ -101,12 +101,16 @@ otpDialog?.addEventListener('input', (e) => {
     if (el.value && el.nextElementSibling) el.nextElementSibling.focus();
   }
 });
-otpDialog?.addEventListener('keydown', (e) => {
-  if (e.key === 'Backspace') {
-    const el = e.target;
-    if (el instanceof HTMLInputElement && el.classList.contains('otp') && !el.value && el.previousElementSibling) {
-      el.previousElementSibling.focus();
-    }
+document.addEventListener('keydown', (e) => {
+  if (!otpDialog?.open) return;
+  const target = e.target;
+  if (!(target instanceof Element) || !otpDialog.contains(target)) return;
+  if (e.key === 'Backspace' &&
+      target instanceof HTMLInputElement &&
+      target.classList.contains('otp') &&
+      !target.value &&
+      target.previousElementSibling) {
+    target.previousElementSibling.focus();
   }
 });
 

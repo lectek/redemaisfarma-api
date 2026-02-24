@@ -14,7 +14,7 @@
   <nav class="navbar" role="navigation" aria-label="Principal">
     <div class="left">
       <a th:href="@{/}" class="logo-link" aria-label="Voltar A Pagina inicial">
-        <img th:src="${#strings.isEmpty(brandingLogoUrl)} ? @{/images/logo-redemaisfarma.png} : ${brandingLogoUrl}" alt="Logo RedeMaisFarma" class="logo"
+        <img th:src="${#strings.isEmpty(brandingLogoUrl) or #strings.containsIgnoreCase(brandingLogoUrl, 'logofarma.png') or #strings.containsIgnoreCase(brandingLogoUrl, 'logo-redemaisfarma.png') or #strings.containsIgnoreCase(brandingLogoUrl, 'novalogo.webp')} ? @{/images/logonova.png} : ${brandingLogoUrl}" alt="Logo RedeMaisFarma" class="logo"
              onerror="this.replaceWith(Object.assign(document.createElement('strong'),{textContent:'RedeMaisFarma'}))"/>
       </a>
 

@@ -23,11 +23,11 @@ function initNewsletter() {
   // status preferencial: #newsletter-status; senão cria um
   let statusEl = document.getElementById("newsletter-status");
   if (!statusEl) {
-    statusEl = document.createElement("p");
+    statusEl = document.createElement("output");
     statusEl.id = "newsletter-status";
     statusEl.className = "newsletter-status";
-    statusEl.setAttribute("role", "status");
     statusEl.setAttribute("aria-live", "polite");
+    statusEl.setAttribute("aria-atomic", "true");
     form.appendChild(statusEl);
   }
 
@@ -99,7 +99,8 @@ function initNewsletter() {
 
   function showMessage(message, type) {
     statusEl.textContent = message;
-    statusEl.setAttribute("role", type === "error" ? "alert" : "status");
+    statusEl.setAttribute("aria-live", type === "error" ? "assertive" : "polite");
+    statusEl.setAttribute("aria-atomic", "true");
     statusEl.classList.remove("is-error", "is-success", "is-info");
     if (type === "error") statusEl.classList.add("is-error");
     else if (type === "success") statusEl.classList.add("is-success");
@@ -111,7 +112,10 @@ function initNewsletter() {
    🌐 Idiomas (chips)
    ============================== */
 function initLangChips() {
-  const chips = document.querySelectorAll(".lang-selector .chip, .lang-selector .btn-outline");
+  const chips = document.querySelectorAll(
+    ".lang-selector button.chip[data-lang], .lang-selector a.chip[data-lang], " +
+    ".lang-selector button.btn-outline[data-lang], .lang-selector a.btn-outline[data-lang]"
+  );
   if (!chips.length) return;
 
   const KEY = "site_lang";
@@ -121,7 +125,8 @@ function initLangChips() {
     const val = chip.dataset.lang;
     if (saved && saved === val) chip.classList.add("active");
 
-    chip.addEventListener("click", () => {
+    chip.addEventListener("click", (e) => {
+      if (chip.tagName === "A") e.preventDefault();
       chips.forEach((c) => c.classList.remove("active"));
       chip.classList.add("active");
       localStorage.setItem(KEY, val);

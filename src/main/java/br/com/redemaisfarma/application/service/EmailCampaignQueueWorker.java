@@ -8,6 +8,8 @@ import br.com.redemaisfarma.adapters.outbound.persistence.jpa.EmailCampaignQueue
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.EmailCampaignRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -33,12 +35,17 @@ public class EmailCampaignQueueWorker {
     private final EmailCampaignLogRepository logRepository;
     private final MailService mailService;
     private final ObjectMapper objectMapper;
+    private final Counter processedCounter;
+    private final Counter sentCounter;
+    private final Counter failedCounter;
+    private final Counter retryCounter;
 
     public EmailCampaignQueueWorker(
             EmailCampaignQueueRepository queueRepository,
             EmailCampaignRepository campaignRepository,
             EmailCampaignLogRepository logRepository,
             MailService mailService,
+            MeterRegistry meterRegistry,
             ObjectMapper objectMapper
     ) {
         this.queueRepository = queueRepository;
@@ -46,6 +53,18 @@ public class EmailCampaignQueueWorker {
         this.logRepository = logRepository;
         this.mailService = mailService;
         this.objectMapper = objectMapper;
+        this.processedCounter = Counter.builder("email_campaign.worker.processed")
+                .description("Total de registros processados pelo worker de campanhas")
+                .register(meterRegistry);
+        this.sentCounter = Counter.builder("email_campaign.worker.sent")
+                .description("Emails enviados com sucesso pelo worker")
+                .register(meterRegistry);
+        this.failedCounter = Counter.builder("email_campaign.worker.failed")
+                .description("Falhas definitivas do worker de campanhas")
+                .register(meterRegistry);
+        this.retryCounter = Counter.builder("email_campaign.worker.retry")
+                .description("Reenfileiramentos realizados após falha")
+                .register(meterRegistry);
     }
 
     @Scheduled(fixedDelayString = "${email.campaign.worker.fixed-delay-ms:60000}")
@@ -67,6 +86,7 @@ public class EmailCampaignQueueWorker {
     }
 
     private void processItem(EmailCampaignQueue item) {
+        processedCounter.increment();
         item.setStatus(STATUS_SENDING);
         queueRepository.save(item);
 
@@ -90,6 +110,7 @@ public class EmailCampaignQueueWorker {
             item.setStatus(STATUS_SENT);
             queueRepository.save(item);
             logRepository.save(buildLog(item, campaign.getId(), STATUS_SENT, null, null));
+            sentCounter.increment();
         } catch (Exception ex) {
             String error = ex.getMessage() == null ? "Falha ao enviar email." : ex.getMessage();
             markFailed(item, error);
@@ -107,8 +128,10 @@ public class EmailCampaignQueueWorker {
         if (attempts >= maxAttempts) {
             item.setStatus(STATUS_FAILED);
             queueRepository.save(item);
+            failedCounter.increment();
             return;
         }
+        retryCounter.increment();
         item.setStatus(STATUS_PENDING);
         item.setScheduledAt(nextRetry(attempts));
         queueRepository.save(item);

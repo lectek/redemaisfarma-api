@@ -31,11 +31,12 @@ function initAccessibleNav() {
   navMenu.setAttribute("aria-label", navMenu.getAttribute("aria-label") || "Menu principal");
 
   // Injeta backdrop se não existir
-  let backdrop = document.querySelector(".nav-backdrop");
+  let backdrop = document.querySelector("button.nav-backdrop");
   if (!backdrop) {
-    backdrop = document.createElement("div");
+    backdrop = document.createElement("button");
+    backdrop.type = "button";
     backdrop.className = "nav-backdrop";
-    backdrop.setAttribute("aria-hidden", "true");
+    backdrop.setAttribute("aria-label", "Fechar menu");
     document.body.appendChild(backdrop);
   }
 
@@ -74,9 +75,9 @@ function initAccessibleNav() {
   backdrop.addEventListener("click", closeNav);
 
   // Fecha ao clicar em links do menu
-  navMenu.addEventListener("click", (e) => {
+  document.addEventListener("click", (e) => {
     const a = e.target.closest("a[href]");
-    if (a) closeNav();
+    if (a && navMenu.contains(a)) closeNav();
   });
 
   // Teclado: ESC fecha e Tab trapa foco

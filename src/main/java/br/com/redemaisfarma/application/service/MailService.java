@@ -45,12 +45,22 @@ public class MailService {
     }
 
     public void sendTemplate(String to, String subject, String template, Map<String, Object> model, @Nullable List<String> bcc) {
-        Context ctx = new Context();
-        if (model != null) {
-            model.forEach((arg_0, arg_1) -> ctx.setVariable(arg_0, arg_1));
-        }
+        Context ctx = buildContext(model);
         String html = this.templateEngine.process(template, (IContext)ctx);
         this.sendHtml(to, subject, html, bcc);
+    }
+
+    public String renderTemplate(String template, Map<String, Object> model) {
+        Context ctx = buildContext(model);
+        return this.templateEngine.process(template, (IContext)ctx);
+    }
+
+    private Context buildContext(Map<String, Object> model) {
+        Context ctx = new Context();
+        if (model != null) {
+            model.forEach(ctx::setVariable);
+        }
+        return ctx;
     }
 
     @Generated
@@ -59,4 +69,3 @@ public class MailService {
         this.templateEngine = templateEngine;
     }
 }
-

@@ -40,6 +40,7 @@ public class AdminConfiguracoesGeralController {
     private static final String KEY_FAVICON_URL = "branding.favicon_url";
     private static final String KEY_HOME_HERO_IMAGEM_URL = "branding.home_hero_url";
     private static final String KEY_HOME_HERO_TEXTO = "branding.home_hero_texto";
+    private static final String KEY_HOME_HERO_VIDEO_URL = "branding.home_hero_video_url";
     private static final String KEY_EMAIL = "contato.email";
     private static final String KEY_TELEFONE = "contato.telefone";
     private static final String KEY_WHATSAPP = "contato.whatsapp";
@@ -102,6 +103,7 @@ public class AdminConfiguracoesGeralController {
             KEY_FAVICON_URL,
             KEY_HOME_HERO_IMAGEM_URL,
             KEY_HOME_HERO_TEXTO,
+            KEY_HOME_HERO_VIDEO_URL,
             KEY_EMAIL,
             KEY_TELEFONE,
             KEY_WHATSAPP,
@@ -205,6 +207,7 @@ public class AdminConfiguracoesGeralController {
             settings.upsert(KEY_FAVICON_URL, nullSafe(cfg.getFaviconUrl()), "Favicon");
             settings.upsert(KEY_HOME_HERO_IMAGEM_URL, nullSafe(cfg.getHomeHeroImagemUrl()), "Imagem principal da home");
             settings.upsert(KEY_HOME_HERO_TEXTO, nullSafe(cfg.getHomeHeroTexto()), "Texto do destaque");
+            settings.upsert(KEY_HOME_HERO_VIDEO_URL, nullSafe(cfg.getHomeHeroVideoUrl()), "Vídeo principal da home");
         }
         if (saveAll || "contato".equals(section)) {
             settings.upsert(KEY_EMAIL, nullSafe(cfg.getEmail()), "Email principal");
@@ -264,6 +267,7 @@ public class AdminConfiguracoesGeralController {
         form.setFaviconUrl(firstValue(cfg, KEY_FAVICON_URL, LEGACY_FAVICON_URL));
         form.setHomeHeroImagemUrl(firstValue(cfg, KEY_HOME_HERO_IMAGEM_URL, LEGACY_HOME_HERO_IMAGEM_URL));
         form.setHomeHeroTexto(firstValue(cfg, KEY_HOME_HERO_TEXTO, LEGACY_HOME_HERO_TEXTO));
+        form.setHomeHeroVideoUrl(settings.getOrDefault(KEY_HOME_HERO_VIDEO_URL, ""));
         form.setEmail(firstValue(cfg, KEY_EMAIL, LEGACY_EMAIL));
         form.setTelefone(firstValue(cfg, KEY_TELEFONE, LEGACY_TELEFONE));
         form.setWhatsapp(firstValue(cfg, KEY_WHATSAPP, LEGACY_WHATSAPP));
@@ -346,6 +350,7 @@ public class AdminConfiguracoesGeralController {
         private String faviconUrl;
         private String homeHeroImagemUrl;
         private String homeHeroTexto;
+        private String homeHeroVideoUrl;
         private String email;
         private String telefone;
         private String whatsapp;
@@ -441,6 +446,14 @@ public class AdminConfiguracoesGeralController {
 
         public void setHomeHeroTexto(String homeHeroTexto) {
             this.homeHeroTexto = homeHeroTexto;
+        }
+
+        public String getHomeHeroVideoUrl() {
+            return homeHeroVideoUrl;
+        }
+
+        public void setHomeHeroVideoUrl(String homeHeroVideoUrl) {
+            this.homeHeroVideoUrl = homeHeroVideoUrl;
         }
 
         public String getEmail() {

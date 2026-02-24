@@ -26,6 +26,7 @@ services:
       --max-connections=120
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Rede_Mais_Farma25@}
+      MYSQL_ROOT_HOST: ${MYSQL_ROOT_HOST:-%}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-redemaisfarma}
       MYSQL_USER: ${MYSQL_USER:-app_user}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-Rede_Mais_Farma25@}
@@ -135,9 +136,9 @@ services:
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "false"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "false"
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED: "false"
-      SPRING_MAIL_PROPERTIES_MAIL_DEBUG: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_DEBUG: "false"
 
-      APP_WEB_BASE_URL: "${APP_WEB_BASE_URL:-http://localhost:18080}"
+      APP_WEB_BASE_URL: "${APP_WEB_BASE_URL:-http://localhost:18090}"
 
       INTEGRATIONS_CLIENTE_BASE_URL: "http://cliente-mock:8080"
       INTEGRATIONS_CLIENTE_BASEURL: "http://cliente-mock:8080"
@@ -163,10 +164,10 @@ services:
       SPRING_JACKSON_TIME_ZONE: "${TZ:-America/Sao_Paulo}"
 
     ports:
-      - "${HOST_APP_PORT:-18080}:8080"
+      - "${APP_HTTP_PORT:-18090}:8080"
     healthcheck:
-      # Usa curl (já presente na sua imagem final)
-      test: ["CMD-SHELL","curl -fsS http://127.0.0.1:8080/actuator/health | grep -q '\"status\":\"UP\"'"]
+      # Usa liveness para evitar dependências externas no healthcheck do container.
+      test: ["CMD-SHELL","curl -fsS http://127.0.0.1:8080/actuator/health/liveness | grep -q '\"status\":\"UP\"'"]
       interval: 10s
       timeout: 5s
       retries: 20

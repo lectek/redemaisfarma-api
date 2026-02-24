@@ -33,6 +33,8 @@ public interface ProdutoJpaRepository extends JpaRepository<ProdutoEntity, Long>
 
     List<ProdutoEntity> findByLegacyIdIn(Collection<Long> var1);
 
+    Optional<ProdutoEntity> findByNomeIgnoreCase(String var1);
+
     Page<ProdutoEntity> findByDescricaoContainingIgnoreCaseOrCodigoBarrasContainingIgnoreCase(String var1, String var2, Pageable var3);
 
     Page<ProdutoEntity> findByDisponivelTrue(Pageable var1);

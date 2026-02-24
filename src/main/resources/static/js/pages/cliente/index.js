@@ -107,12 +107,7 @@
     }
     container.appendChild(frag);
 
-    // permite clicar no skeleton para ir à lista completa
-    container.addEventListener("click", onSkeletonClick);
-    function onSkeletonClick() { window.location.href = URLS.produtosPage; }
-
     return () => {
-      container.removeEventListener("click", onSkeletonClick);
       container.querySelectorAll(".skeleton").forEach(el => el.remove());
     };
   }

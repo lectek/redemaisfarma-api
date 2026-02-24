@@ -7,7 +7,6 @@ import br.com.redemaisfarma.application.service.ProdutoAdminService;
 import lombok.Generated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,7 +30,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Profile("!test")
 @Controller
 @RequestMapping("/admin/produtos")
 public class ProdutoAdminPageController {

@@ -28,7 +28,7 @@
   const ensureAlert = () => {
     let box = document.getElementById('alert');
     if (!box) {
-      box = document.createElement('div');
+      box = document.createElement('output');
       box.id = 'alert';
       box.className = 'alert';
       const title = document.querySelector('.title, .form-title, h1');
@@ -41,7 +41,13 @@
     const box = ensureAlert();
     box.textContent = msg || '';
     box.className = msg ? `alert ${type || 'error'}` : 'alert';
-    if (msg) box.setAttribute('role', type === 'success' ? 'status' : 'alert');
+    if (msg) {
+      box.setAttribute('aria-live', type === 'success' ? 'polite' : 'assertive');
+      box.setAttribute('aria-atomic', 'true');
+    } else {
+      box.removeAttribute('aria-live');
+      box.removeAttribute('aria-atomic');
+    }
   };
 
   const findOrMakeErrBelow = (input) => {
