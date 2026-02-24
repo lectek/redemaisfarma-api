@@ -352,9 +352,13 @@
   border: 0;
   border-radius: 20px;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
   background: transparent;
-  filter: drop-shadow(0 20px 34px rgba(0, 0, 0, 0.45));
+  /* Disfarca fundo escuro do MP4 sem alpha no layout do login */
+  mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(ellipse 66% 78% at 50% 55%, #000 56%, rgba(0, 0, 0, 0.88) 74%, transparent 100%);
+  mask-image: radial-gradient(ellipse 66% 78% at 50% 55%, #000 56%, rgba(0, 0, 0, 0.88) 74%, transparent 100%);
+  filter: drop-shadow(0 20px 34px rgba(0, 0, 0, 0.45)) saturate(1.14) contrast(1.08) brightness(1.04);
   overflow: hidden;
   pointer-events: none;
   user-select: none;
