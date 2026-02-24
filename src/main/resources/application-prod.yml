@@ -53,7 +53,15 @@ spring:
         jdbc:
           time_zone: UTC
 
-  flyway:\n    enabled: true\n    table: flyway_schema_history\n    locations: classpath:db/migration,classpath:db/migration-mysql,classpath:db/migration/PROD\n    url: \n    user: \n    password: \n\n  kafka:
+  flyway:
+    enabled: true
+    table: flyway_schema_history
+    locations: classpath:db/migration,classpath:db/migration-mysql,classpath:db/migration/PROD
+    url: ${SPRING_FLYWAY_URL:${SPRING_DATASOURCE_URL:}}
+    user: ${SPRING_FLYWAY_USER:${SPRING_DATASOURCE_USERNAME:}}
+    password: ${SPRING_FLYWAY_PASSWORD:${SPRING_DATASOURCE_PASSWORD:}}
+
+  kafka:
     enabled: false
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:}
     listener:
@@ -135,6 +143,15 @@ app:
     css-url: ${APP_MAIL_CSS_URL:}
     send-timeout-ms: ${APP_MAIL_SEND_TIMEOUT_MS:10000}
     noop: ${APP_MAIL_NOOP:false}
+  sms:
+    enabled: ${APP_SMS_ENABLED:false}
+    provider: ${APP_SMS_PROVIDER:twilio}
+    from: ${APP_SMS_FROM:}
+    default-country-code: ${APP_SMS_DEFAULT_COUNTRY_CODE:55}
+    twilio:
+      account-sid: ${APP_SMS_TWILIO_ACCOUNT_SID:${TWILIO_ACCOUNT_SID:}}
+      auth-token: ${APP_SMS_TWILIO_AUTH_TOKEN:${TWILIO_AUTH_TOKEN:}}
+      messaging-service-sid: ${APP_SMS_TWILIO_MESSAGING_SERVICE_SID:${TWILIO_MESSAGING_SERVICE_SID:}}
   kafka:
     groups:
       pedidos: ${APP_KAFKA_GROUP_PEDIDOS:pedidos-consumer}

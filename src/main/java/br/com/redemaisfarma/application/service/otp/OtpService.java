@@ -1,6 +1,7 @@
 package br.com.redemaisfarma.application.service.otp;
 
 import br.com.redemaisfarma.adapters.outbound.email.adapter.MailSenderAdapter;
+import br.com.redemaisfarma.adapters.outbound.sms.adapter.SmsSenderAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -31,10 +32,12 @@ public class OtpService implements OtpServicePort {
     private final Map<String, String> lastDeliveryIdByKey = new ConcurrentHashMap<>();
 
     private final MailSenderAdapter mailer;
+    private final SmsSenderAdapter smsSender;
     private final Environment env;
 
-    public OtpService(MailSenderAdapter mailer, Environment env) {
+    public OtpService(MailSenderAdapter mailer, SmsSenderAdapter smsSender, Environment env) {
         this.mailer = mailer;
+        this.smsSender = smsSender;
         this.env = env;
     }
 
@@ -165,12 +168,14 @@ public class OtpService implements OtpServicePort {
 
     private void sendOtp(Canal canal, String destino, String code) {
         if (canal == Canal.sms) {
-            throw new OtpException(
-                    "sms_unavailable",
-                    "Envio por SMS indisponivel no momento. Selecione E-mail para receber o codigo."
-            );
+            sendSms(destino, code);
+            return;
         }
 
+        sendEmail(destino, code);
+    }
+
+    private void sendEmail(String destino, String code) {
         final String subject = "Seu codigo RedeMaisFarma";
         final String html = """
                 <div style="font-family:system-ui,Segoe UI,Arial,sans-serif">
@@ -181,8 +186,34 @@ public class OtpService implements OtpServicePort {
                   <hr/><small>Se nao foi voce, ignore este e-mail.</small>
                 </div>
                 """.formatted(code, OTP_TTL.toMinutes());
-        mailer.send(destino, subject, html, null);
-        log.info("OTP email sent: to={} code=**** (masked)", destino);
+        try {
+            String messageId = mailer.send(destino, subject, html, null);
+            if (messageId == null || messageId.startsWith("noop")) {
+                throw new IllegalStateException("Email delivery adapter is disabled.");
+            }
+            log.info("OTP email sent: to={} messageId={}", maskDestino(Canal.email, destino), messageId);
+        } catch (Exception ex) {
+            log.error("OTP email send failed: to={}", maskDestino(Canal.email, destino), ex);
+            throw new OtpException("email_unavailable", "Nao foi possivel enviar o codigo por E-mail agora. Tente novamente.");
+        }
+    }
+
+    private void sendSms(String destino, String code) {
+        String message = "RedeMaisFarma: seu codigo de verificacao e " + code
+                + ". Valido por " + OTP_TTL.toMinutes() + " minutos.";
+        try {
+            String providerId = smsSender.send(destino, message);
+            if (providerId == null || providerId.isBlank()) {
+                throw new IllegalStateException("SMS delivery provider returned empty id.");
+            }
+            log.info("OTP sms sent: to={} providerId={}", maskDestino(Canal.sms, destino), providerId);
+        } catch (Exception ex) {
+            log.error("OTP sms send failed: to={}", maskDestino(Canal.sms, destino), ex);
+            throw new OtpException(
+                    "sms_unavailable",
+                    "Nao foi possivel enviar o codigo por SMS agora. Tente novamente ou selecione E-mail."
+            );
+        }
     }
 
     public enum Canal { email, sms }

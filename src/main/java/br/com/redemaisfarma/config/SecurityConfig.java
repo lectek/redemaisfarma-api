@@ -48,6 +48,7 @@ public class SecurityConfig {
                     "/css/**",
                     "/js/**",
                     "/images/**",
+                    "/animations/**",
                     "/media/**",
                     "/img/**",
                     "/webjars/**",

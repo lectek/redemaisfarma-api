@@ -143,6 +143,15 @@ app:
   mail:
     enabled: ${APP_MAIL_ENABLED:false}
     from: ${APP_MAIL_FROM:no-reply@local.redemaisfarma}
+  sms:
+    enabled: ${APP_SMS_ENABLED:false}
+    provider: ${APP_SMS_PROVIDER:twilio}
+    from: ${APP_SMS_FROM:}
+    default-country-code: ${APP_SMS_DEFAULT_COUNTRY_CODE:55}
+    twilio:
+      account-sid: ${APP_SMS_TWILIO_ACCOUNT_SID:${TWILIO_ACCOUNT_SID:}}
+      auth-token: ${APP_SMS_TWILIO_AUTH_TOKEN:${TWILIO_AUTH_TOKEN:}}
+      messaging-service-sid: ${APP_SMS_TWILIO_MESSAGING_SERVICE_SID:${TWILIO_MESSAGING_SERVICE_SID:}}
   kafka:
     groups:
       pedidos: ${APP_KAFKA_GROUP_PEDIDOS:pedidos-consumer}

@@ -76,7 +76,7 @@ public class SecurityMvcConfig {
             .authorizeHttpRequests(auth -> {
                 // recursos estáticos
                 auth.requestMatchers(
-                        "/assets/**", "/css/**", "/js/**", "/images/**", "/media/**",
+                        "/assets/**", "/css/**", "/js/**", "/images/**", "/animations/**", "/media/**",
                         "/webjars/**", "/static/**", "/favicon.ico",
                         "/index.html", "/robots.txt"
                 ).permitAll();

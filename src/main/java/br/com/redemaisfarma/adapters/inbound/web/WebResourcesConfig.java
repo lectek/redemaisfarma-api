@@ -19,6 +19,7 @@ implements WebMvcConfigurer {
         registry.addResourceHandler(new String[]{"/css/**"}).addResourceLocations(new String[]{"classpath:/static/css/"});
         registry.addResourceHandler(new String[]{"/js/**"}).addResourceLocations(new String[]{"classpath:/static/js/"});
         registry.addResourceHandler(new String[]{"/images/**"}).addResourceLocations(new String[]{"classpath:/static/images/"});
+        registry.addResourceHandler(new String[]{"/animations/**"}).addResourceLocations(new String[]{"classpath:/static/animations/"});
         registry.addResourceHandler(new String[]{"/media/**"}).addResourceLocations(new String[]{"file:media/"});
         registry.addResourceHandler(new String[]{"/webjars/**"}).addResourceLocations(new String[]{"classpath:/META-INF/resources/webjars/"});
         registry.addResourceHandler(new String[]{"/favicon.ico"}).addResourceLocations(new String[]{"classpath:/static/favicon.ico"});
