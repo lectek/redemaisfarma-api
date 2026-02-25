@@ -9,7 +9,7 @@
   <link rel="stylesheet" th:href="@{/css/main.css}" />
 </head>
 
-<body class="body-flex">
+<body class="body-flex cart-page">
 
   <!-- Cabecalho -->
   <header th:replace="~{fragments/header :: header}"></header>
@@ -18,7 +18,7 @@
     <aside th:replace="~{fragments/sidebar :: sidebar('carrinho')}"></aside>
 
     <!-- Conteudo do carrinho -->
-    <main id="main-content" class="container mt-4 mb-4">
+    <main id="main-content" class="container mt-2 mb-2">
       <h1 class="mb-2 text-lg">Carrinho de Medicamentos</h1>
       <section th:replace="~{fragments/flash :: flash}"></section>
       <div class="alert alert-warning" th:if="${cartHasInvalidItems}">
@@ -55,8 +55,15 @@
             </div>
           </div>
 
-          <div class="card p-4 text-center text-muted" th:if="${cartEmpty}">
-            Seu carrinho esta vazio. Volte ao catalogo para adicionar produtos.
+          <div class="card cart-empty-state p-4 text-center text-muted" th:if="${cartEmpty}">
+            <img class="cart-empty-state__mascot"
+                 th:src="@{/images/mascote-login.png}"
+                 src="/images/mascote-login.png"
+                 alt="Mascote RedeMaisFarma"
+                 loading="lazy"
+                 decoding="async" />
+            <p>Seu carrinho esta vazio. Volte ao catalogo para adicionar produtos.</p>
+            <a class="btn btn-ghost" th:href="@{/produtos}">Ver produtos</a>
           </div>
         </div>
 
@@ -81,6 +88,15 @@
 
           <a th:if="${!cartEmpty}" th:href="@{/checkout}" class="btn btn--primary">Finalizar Compra</a>
           <span th:if="${cartEmpty}" class="text-sm text-muted">Adicione itens para continuar.</span>
+
+          <figure class="cart-mascot" aria-hidden="true">
+            <img th:src="@{/images/mascote-login.png}"
+                 src="/images/mascote-login.png"
+                 alt=""
+                 loading="lazy"
+                 decoding="async" />
+            <figcaption>Seu pedido com carinho e seguranca.</figcaption>
+          </figure>
         </aside>
       </div>
     </main>

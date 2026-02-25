@@ -55,6 +55,28 @@
     <div id="quickProdutoResultados" class="stack"></div>
   </div>
 
+  <div class="card p-4 stack">
+    <div class="between">
+      <h2 class="h5 m-0">Produtos nao prontos para venda (estoque fisico)</h2>
+      <small class="text-muted">Clique em Usar dados para preencher o formulario.</small>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex: 1 1 auto;">
+        <label for="pendingProdutoTermo">Filtrar lista</label>
+        <input id="pendingProdutoTermo" class="input" type="search"
+               placeholder="Ex.: dipirona, codigo interno, EAN..." autocomplete="off"/>
+      </div>
+      <div class="form-group" style="align-self: end;">
+        <button id="pendingProdutoBuscar" type="button" class="btn btn-ghost">Buscar</button>
+      </div>
+    </div>
+    <p id="pendingProdutoHint" class="text-muted m-0">Carregando lista de pendentes...</p>
+    <div id="pendingProdutoResultados" class="stack"></div>
+    <div class="form-actions">
+      <button id="pendingProdutoLoadMore" type="button" class="btn btn-ghost" style="display:none;">Carregar mais</button>
+    </div>
+  </div>
+
   <div class="card p-4">
     <form class="form-grid" th:action="@{/admin/produtos}" method="post" th:object="${produto}" enctype="multipart/form-data">
       <input type="hidden" th:field="*{id}"/>

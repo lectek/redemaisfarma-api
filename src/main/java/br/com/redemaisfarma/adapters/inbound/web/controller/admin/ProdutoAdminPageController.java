@@ -7,6 +7,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCategoriaRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import br.com.redemaisfarma.application.core.media.ImageStorageService;
+import br.com.redemaisfarma.application.service.EstoqueFisicoCsvService;
 import br.com.redemaisfarma.application.service.ProdutoAdminService;
 import br.com.redemaisfarma.application.service.SincronizacaoCatalogoService;
 import lombok.Generated;
@@ -53,6 +54,7 @@ public class ProdutoAdminPageController {
     private final ProdutoRepository produtoRepository;
     private final ProdutoCategoriaRepository categoriaRepository;
     private final ImageStorageService imageStorageService;
+    private final EstoqueFisicoCsvService estoqueFisicoCsvService;
     private final ObjectProvider<ProdutoLegacyRepository> legacyRepositoryProvider;
     private final ObjectProvider<SincronizacaoCatalogoService> catalogSyncProvider;
 
@@ -275,6 +277,57 @@ public class ProdutoAdminPageController {
                 .toList();
     }
 
+    @GetMapping(value = "/nao-prontos", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ProdutoLookupPage listarNaoProntos(
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size
+    ) {
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.max(1, Math.min(size, 40));
+
+        List<EstoqueFisicoCsvService.EstoqueItem> base = this.estoqueFisicoCsvService.search(q);
+        if (base.isEmpty()) {
+            return new ProdutoLookupPage(List.of(), safePage, safeSize, 0, false);
+        }
+
+        List<ProdutoEntity> catalogo = this.produtoRepository.findAll();
+        LinkedHashMap<Long, ProdutoEntity> byLegacy = new LinkedHashMap<>();
+        LinkedHashMap<String, ProdutoEntity> byBarcode = new LinkedHashMap<>();
+        for (ProdutoEntity produto : catalogo) {
+            if (produto == null) {
+                continue;
+            }
+            if (produto.getLegacyId() != null) {
+                byLegacy.putIfAbsent(produto.getLegacyId(), produto);
+            }
+            String barcode = this.normalizeBarcode(produto.getCodigoBarras());
+            if (!barcode.isBlank()) {
+                byBarcode.putIfAbsent(barcode, produto);
+            }
+        }
+
+        List<ProdutoLookupItem> naoProntos = new ArrayList<>();
+        for (EstoqueFisicoCsvService.EstoqueItem stock : base) {
+            ProdutoEntity existente = this.findFirstMatch(stock, byLegacy, byBarcode);
+            if (this.isReadyForSale(existente)) {
+                continue;
+            }
+            naoProntos.add(this.buildPendingFromStock(stock, existente));
+        }
+
+        int from = safePage * safeSize;
+        if (from >= naoProntos.size()) {
+            return new ProdutoLookupPage(List.of(), safePage, safeSize, naoProntos.size(), false);
+        }
+        int to = Math.min(from + safeSize, naoProntos.size());
+        List<ProdutoLookupItem> content = naoProntos.subList(from, to);
+        boolean hasNext = to < naoProntos.size();
+
+        return new ProdutoLookupPage(content, safePage, safeSize, naoProntos.size(), hasNext);
+    }
+
     @PostMapping("/sincronizar-estoque")
     public String sincronizarEstoqueFisico(RedirectAttributes ra) {
         SincronizacaoCatalogoService syncService = this.catalogSyncProvider.getIfAvailable();
@@ -327,6 +380,72 @@ public class ProdutoAdminPageController {
 
     private boolean isPositivePrice(BigDecimal value) {
         return value != null && value.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    private boolean isReadyForSale(ProdutoEntity produto) {
+        if (produto == null) {
+            return false;
+        }
+        return produto.getStatus() == ProdutoStatus.PUBLICADO
+                && Boolean.TRUE.equals(produto.getDisponivel())
+                && this.isPositivePrice(produto.getPrecoVenda())
+                && StringUtils.hasText(produto.getImagem())
+                && produto.getEstoque() != null
+                && produto.getEstoque() > 0;
+    }
+
+    private ProdutoEntity findFirstMatch(
+            EstoqueFisicoCsvService.EstoqueItem stock,
+            LinkedHashMap<Long, ProdutoEntity> byLegacy,
+            LinkedHashMap<String, ProdutoEntity> byBarcode
+    ) {
+        if (stock.legacyId() != null) {
+            ProdutoEntity byLegacyId = byLegacy.get(stock.legacyId());
+            if (byLegacyId != null) {
+                return byLegacyId;
+            }
+        }
+        if (StringUtils.hasText(stock.codigoBarras())) {
+            ProdutoEntity byBar = byBarcode.get(this.normalizeBarcode(stock.codigoBarras()));
+            if (byBar != null) {
+                return byBar;
+            }
+        }
+        return null;
+    }
+
+    private ProdutoLookupItem buildPendingFromStock(EstoqueFisicoCsvService.EstoqueItem stock, ProdutoEntity existente) {
+        if (existente != null) {
+            return new ProdutoLookupItem(
+                    existente.getId(),
+                    existente.getLegacyId() != null ? existente.getLegacyId() : stock.legacyId(),
+                    "CATALOGO_PENDENTE",
+                    StringUtils.hasText(existente.getNome()) ? existente.getNome() : stock.nome(),
+                    StringUtils.hasText(existente.getDescricao()) ? existente.getDescricao() : stock.nome(),
+                    StringUtils.hasText(existente.getCategoria()) ? existente.getCategoria() : "Estoque fisico",
+                    StringUtils.hasText(existente.getCodigoBarras()) ? existente.getCodigoBarras() : stock.codigoBarras(),
+                    existente.getPrecoVenda(),
+                    existente.getPrecoPromocional(),
+                    existente.getEstoque() != null ? existente.getEstoque() : stock.estoque(),
+                    StringUtils.hasText(existente.getFabricante()) ? existente.getFabricante() : stock.fabricante(),
+                    existente.getUnidade()
+            );
+        }
+
+        return new ProdutoLookupItem(
+                null,
+                stock.legacyId(),
+                "ESTOQUE_FISICO",
+                stock.nome(),
+                stock.nome(),
+                "Estoque fisico",
+                stock.codigoBarras(),
+                null,
+                null,
+                stock.estoque(),
+                stock.fabricante(),
+                ""
+        );
     }
 
     private List<ProdutoLegacyEntity> buscarNoEstoqueFisico(
@@ -422,17 +541,28 @@ public class ProdutoAdminPageController {
         }
     }
 
+    public static record ProdutoLookupPage(
+            List<ProdutoLookupItem> items,
+            int page,
+            int size,
+            int total,
+            boolean hasNext
+    ) {
+    }
+
     @Generated
     public ProdutoAdminPageController(ProdutoAdminService adminService,
                                       ProdutoRepository produtoRepository,
                                       ProdutoCategoriaRepository categoriaRepository,
                                       ImageStorageService imageStorageService,
+                                      EstoqueFisicoCsvService estoqueFisicoCsvService,
                                       ObjectProvider<ProdutoLegacyRepository> legacyRepositoryProvider,
                                       ObjectProvider<SincronizacaoCatalogoService> catalogSyncProvider) {
         this.adminService = adminService;
         this.produtoRepository = produtoRepository;
         this.categoriaRepository = categoriaRepository;
         this.imageStorageService = imageStorageService;
+        this.estoqueFisicoCsvService = estoqueFisicoCsvService;
         this.legacyRepositoryProvider = legacyRepositoryProvider;
         this.catalogSyncProvider = catalogSyncProvider;
     }

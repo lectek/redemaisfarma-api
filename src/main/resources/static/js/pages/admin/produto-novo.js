@@ -3,6 +3,11 @@
   const clearBtn = document.getElementById("quickProdutoClear");
   const hint = document.getElementById("quickProdutoHint");
   const results = document.getElementById("quickProdutoResultados");
+  const pendingInput = document.getElementById("pendingProdutoTermo");
+  const pendingBuscarBtn = document.getElementById("pendingProdutoBuscar");
+  const pendingHint = document.getElementById("pendingProdutoHint");
+  const pendingResults = document.getElementById("pendingProdutoResultados");
+  const pendingLoadMoreBtn = document.getElementById("pendingProdutoLoadMore");
 
   if (!input || !results || !hint) return;
 
@@ -22,9 +27,24 @@
 
   let debounceId = null;
   let requestId = 0;
+  let pendingPage = 0;
+  let pendingHasNext = false;
+  let pendingItems = [];
+  let pendingLoading = false;
+  let pendingQuery = "";
 
   const setHint = (message) => {
     hint.textContent = message;
+  };
+
+  const setPendingHint = (message) => {
+    if (!pendingHint) return;
+    pendingHint.textContent = message;
+  };
+
+  const setHints = (message) => {
+    setHint(message);
+    setPendingHint(message);
   };
 
   const money = (value) => {
@@ -110,28 +130,22 @@
     }
 
     if (fromPhysicalStock) {
-      setHint("Dados base do estoque fisico aplicados. Preencha preco/tamanho/dosagem/ml e envie a foto.");
+      setHints("Dados base do estoque fisico aplicados. Preencha preco/tamanho/dosagem/ml e envie a foto.");
       fields.precoVenda?.focus();
       return;
     }
 
-    setHint("Formulario preenchido. Revise os dados e clique em Salvar.");
+    setHints("Formulario preenchido. Revise os dados e clique em Salvar.");
     fields.precoVenda?.focus();
   };
 
-  const renderResults = (items) => {
-    clearResults();
-
-    if (!Array.isArray(items) || items.length === 0) {
-      setHint("Nenhum produto encontrado. Continue com cadastro manual.");
-      return;
-    }
-
-    setHint(`Encontrados ${items.length} produto(s).`);
-
-    const html = items.map((item) => {
+  const renderCards = (items, offset = 0) => {
+    return items.map((item, idx) => {
+      const pointer = offset + idx;
       const origem = String(item.origem || "CATALOGO").toUpperCase();
-      const origemLabel = origem === "ESTOQUE_FISICO" ? "Estoque fisico" : "Catalogo";
+      const origemLabel = origem === "ESTOQUE_FISICO"
+        ? "Estoque fisico"
+        : (origem === "CATALOGO_PENDENTE" ? "Catalogo pendente" : "Catalogo");
       const titulo = escapeHtml(item.nome || "Produto sem nome");
       const descricao = escapeHtml(item.descricao || "Sem descricao");
       const categoria = escapeHtml(item.categoria || "Sem categoria");
@@ -154,31 +168,58 @@
           <p class="text-muted m-0">${descricao}</p>
           <small class="text-muted">Categoria: ${categoria} | EAN: ${codigo} | Estoque: ${estoque} | Preco: ${preco}</small>
           <div class="form-actions mt-2">
-            <button type="button" class="btn btn-primary" data-apply-id="${id}" data-legacy-id="${escapeHtml(item.legacyId || "")}" data-origem="${escapeHtml(origem)}">Usar dados</button>
+            <button type="button" class="btn btn-primary" data-apply-index="${pointer}">Usar dados</button>
             ${editAction}
           </div>
         </article>
       `;
     }).join("");
+  };
 
-    results.innerHTML = html;
-
-    results.querySelectorAll("[data-apply-id]").forEach((button) => {
+  const bindApplyButtons = (container, source) => {
+    container.querySelectorAll("[data-apply-index]").forEach((button) => {
       button.addEventListener("click", () => {
-        const id = button.getAttribute("data-apply-id");
-        const legacyId = button.getAttribute("data-legacy-id");
-        const origem = button.getAttribute("data-origem");
-
-        const selected = items.find((item) => {
-          const sameCatalog = id && String(item.id) === String(id);
-          const sameLegacy = legacyId && String(item.legacyId) === String(legacyId);
-          const sameOrigin = String(item.origem || "").toUpperCase() === String(origem || "").toUpperCase();
-          return sameOrigin && (sameCatalog || sameLegacy);
-        });
-
+        const raw = button.getAttribute("data-apply-index");
+        const idx = Number(raw);
+        if (!Number.isInteger(idx) || idx < 0) return;
+        const selected = source[idx];
         if (selected) applySuggestion(selected);
       });
     });
+  };
+
+  const renderResults = (items) => {
+    clearResults();
+
+    if (!Array.isArray(items) || items.length === 0) {
+      setHint("Nenhum produto encontrado. Continue com cadastro manual.");
+      return;
+    }
+
+    setHint(`Encontrados ${items.length} produto(s).`);
+    results.innerHTML = renderCards(items, 0);
+    bindApplyButtons(results, items);
+  };
+
+  const renderPendingResults = () => {
+    if (!pendingResults) return;
+
+    pendingResults.innerHTML = "";
+    if (!pendingItems.length) {
+      pendingResults.innerHTML = `
+        <article class="card p-3">
+          <p class="text-muted m-0">Nenhum produto pendente encontrado para esse filtro.</p>
+        </article>
+      `;
+      if (pendingLoadMoreBtn) pendingLoadMoreBtn.style.display = "none";
+      return;
+    }
+
+    pendingResults.innerHTML = renderCards(pendingItems, 0);
+    bindApplyButtons(pendingResults, pendingItems);
+    if (pendingLoadMoreBtn) {
+      pendingLoadMoreBtn.style.display = pendingHasNext ? "" : "none";
+    }
   };
 
   const search = async (query) => {
@@ -220,6 +261,53 @@
     }
   };
 
+  const carregarPendentes = async (reset) => {
+    if (!pendingResults || pendingLoading) return;
+
+    const nextPage = reset ? 0 : pendingPage;
+    if (!reset && !pendingHasNext) return;
+
+    pendingLoading = true;
+    setPendingHint(reset ? "Carregando pendentes..." : "Carregando mais pendentes...");
+    if (pendingLoadMoreBtn) pendingLoadMoreBtn.disabled = true;
+
+    try {
+      const resp = await fetch(
+        `/admin/produtos/nao-prontos?q=${encodeURIComponent(pendingQuery)}&page=${nextPage}&size=12`,
+        {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          credentials: "same-origin"
+        }
+      );
+
+      if (!resp.ok) {
+        setPendingHint("Nao foi possivel carregar pendentes agora.");
+        return;
+      }
+
+      const payload = await resp.json();
+      const items = Array.isArray(payload?.items) ? payload.items : [];
+      const total = Number(payload?.total) || 0;
+
+      if (reset) {
+        pendingItems = items;
+      } else {
+        pendingItems = pendingItems.concat(items);
+      }
+
+      pendingHasNext = Boolean(payload?.hasNext);
+      pendingPage = nextPage + 1;
+      renderPendingResults();
+      setPendingHint(`Mostrando ${pendingItems.length} de ${total} pendente(s).`);
+    } catch (_error) {
+      setPendingHint("Falha de rede ao carregar pendentes.");
+    } finally {
+      pendingLoading = false;
+      if (pendingLoadMoreBtn) pendingLoadMoreBtn.disabled = false;
+    }
+  };
+
   input.addEventListener("input", () => {
     clearTimeout(debounceId);
     const query = String(input.value || "").trim();
@@ -240,4 +328,30 @@
     setHint("Digite pelo menos 2 caracteres para pesquisar.");
     input.focus();
   });
+
+  pendingBuscarBtn?.addEventListener("click", () => {
+    pendingQuery = String(pendingInput?.value || "").trim();
+    pendingPage = 0;
+    pendingHasNext = false;
+    pendingItems = [];
+    carregarPendentes(true);
+  });
+
+  pendingInput?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    pendingQuery = String(pendingInput?.value || "").trim();
+    pendingPage = 0;
+    pendingHasNext = false;
+    pendingItems = [];
+    carregarPendentes(true);
+  });
+
+  pendingLoadMoreBtn?.addEventListener("click", () => {
+    carregarPendentes(false);
+  });
+
+  if (pendingResults) {
+    carregarPendentes(true);
+  }
 })();

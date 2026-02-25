@@ -19,31 +19,28 @@
     <nav id="primary-nav" class="primary-nav primary-nav--desktop" aria-label="Menu principal">
       <ul class="nav-list">
         <li><a th:href="@{/}"             class="menu-button" data-section="">Início</a></li>
-        <li><a th:href="@{/produtos}"     class="menu-button" data-section="produtos">Produtos</a></li>
-        <li><a th:href="@{/sobre}"        class="menu-button" data-section="sobre">Sobre nós</a></li>
-        <li><a th:href="@{/ofertas}"      class="menu-button" data-section="ofertas">Ofertas</a></li>
-        <li><a th:href="@{/contato}"      class="menu-button" data-section="contato">Contato</a></li>
-        <li><a th:href="@{/checkout}"     class="menu-button" data-section="checkout">Checkout</a></li>
-
-        <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
-          <a th:href="@{/admin/painel}"    class="menu-button" data-section="admin/painel">Painel</a>
+        <li>
+          <a th:href="${headerUserAuthenticated} ? @{/cliente/conta} : @{/auth/login}"
+             class="menu-button"
+             data-section="cliente/conta">Minha conta</a>
         </li>
-        <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
-          <a th:href="@{/admin/produtos}"  class="menu-button" data-section="admin/produtos">Produtos</a>
-        </li>
-        <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
-          <a th:href="@{/admin/pedidos}"   class="menu-button" data-section="admin/pedidos">Pedidos</a>
-        </li>
-        <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
-          <a th:href="@{/admin/clientes}"  class="menu-button" data-section="admin/clientes">Clientes</a>
+        <li>
+          <a th:href="@{/carrinho}"
+             class="menu-button menu-button--icon menu-button--cart"
+             data-section="carrinho"
+             aria-label="Meu carrinho"
+             title="Meu carrinho">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M6 6h15l-1.4 7.2a2 2 0 0 1-2 1.6H9.2L8.6 18h10.9v2H8.1a1.8 1.8 0 0 1-1.8-2.2L8 9H5V7h2l.5-2.2H3V3h5.2L9 6Zm3.3 16a1.6 1.6 0 1 1 0-3.2 1.6 1.6 0 0 1 0 3.2Zm7 0a1.6 1.6 0 1 1 0-3.2 1.6 1.6 0 0 1 0 3.2Z"/>
+            </svg>
+          </a>
         </li>
       </ul>
     </nav>
 
-    <a th:if="${headerUserAuthenticated}"
-       th:href="@{/cliente/conta}"
+    <a th:href="${headerUserAuthenticated} ? @{/cliente/conta} : @{/auth/login}"
        class="header-account"
-       aria-label="Abrir minha conta">
+       th:attr="aria-label=${headerUserAuthenticated} ? 'Abrir minha conta' : 'Entrar na conta'">
       <span class="header-account__avatar" aria-hidden="true">
         <img th:if="${headerUserAvatarUrl != null and !#strings.isEmpty(headerUserAvatarUrl)}"
              th:src="${headerUserAvatarUrl}"
@@ -53,8 +50,6 @@
         <span th:if="${headerUserAvatarUrl == null or #strings.isEmpty(headerUserAvatarUrl)}"
               th:text="${headerUserInitial != null and !#strings.isEmpty(headerUserInitial) ? headerUserInitial : 'U'}">U</span>
       </span>
-      <span class="header-account__name"
-            th:text="${headerUserName != null and !#strings.isEmpty(headerUserName) ? headerUserName : 'Minha conta'}">Minha conta</span>
     </a>
   </div>
 

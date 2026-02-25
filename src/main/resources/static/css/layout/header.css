@@ -359,6 +359,51 @@ html.sidebar-compact .sidebar__link span{
   box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35);
 }
 
+.site-header .menu-button--icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-header .menu-button--icon svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.site-header .primary-nav .nav-list {
+  gap: 0.35rem;
+}
+
+.site-header .header-account {
+  margin-left: 0.35rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.site-header .header-account:hover,
+.site-header .header-account:focus-visible {
+  background: transparent;
+  border: 0;
+  transform: none;
+}
+
+.site-header .header-account__avatar {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+}
+
+.site-header .header-account__name {
+  display: none !important;
+}
+
 .sidebar-toggle {
   display: none;
   align-items: center;
