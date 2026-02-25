@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component;
 public class AppProps {
     private static final String DEFAULT_WHATSAPP_NUMBER = "5583988853265";
     private static final String DEFAULT_WHATSAPP_DISPLAY = "(83) 98885-3265";
-    private static final String DEFAULT_INSTAGRAM_HANDLE = "@saudemaisfarma";
+    private static final String DEFAULT_INSTAGRAM_HANDLE = "@saudemaisfarmaa";
+    private static final String LEGACY_INSTAGRAM_USERNAME = "saudemaisfarma";
     private static final String DEFAULT_FACEBOOK_URL = "https://facebook.com/saudemaisfarma";
     private static final String DEFAULT_ADDRESS_STREET = "Rua Prefeito Luiz A. M. Coutinho, 310 - Loja 102";
     private static final String DEFAULT_ADDRESS_BAIRRO = "Mangabeira";
@@ -175,6 +176,34 @@ public class AppProps {
         return last.startsWith("@") ? last.substring(1) : last;
     }
 
+    private static boolean isLegacyInstagramValue(String value) {
+        String normalized = nonBlank(value).toLowerCase();
+        if (normalized.isBlank()) {
+            return false;
+        }
+        normalized = normalized.replaceFirst("^https?://", "");
+        if (normalized.startsWith("www.")) {
+            normalized = normalized.substring(4);
+        }
+        if (normalized.startsWith("instagram.com/")) {
+            normalized = normalized.substring("instagram.com/".length());
+        }
+        normalized = normalized.replaceAll("^@+", "");
+        int query = normalized.indexOf('?');
+        if (query >= 0) {
+            normalized = normalized.substring(0, query);
+        }
+        int hash = normalized.indexOf('#');
+        if (hash >= 0) {
+            normalized = normalized.substring(0, hash);
+        }
+        int slash = normalized.indexOf('/');
+        if (slash >= 0) {
+            normalized = normalized.substring(0, slash);
+        }
+        return LEGACY_INSTAGRAM_USERNAME.equals(normalized);
+    }
+
     public String getInstagramDisplay() {
         String raw = resolveInstagramRaw();
         if (raw.isBlank()) {
@@ -182,6 +211,9 @@ public class AppProps {
         }
 
         String value = raw.trim();
+        if (isLegacyInstagramValue(value)) {
+            return DEFAULT_INSTAGRAM_HANDLE;
+        }
         if (value.startsWith("@")) {
             return value;
         }
@@ -203,6 +235,9 @@ public class AppProps {
         }
 
         String value = raw.trim();
+        if (isLegacyInstagramValue(value)) {
+            return "https://instagram.com/" + DEFAULT_INSTAGRAM_HANDLE.substring(1);
+        }
         if (value.startsWith("http://") || value.startsWith("https://")) {
             return value;
         }

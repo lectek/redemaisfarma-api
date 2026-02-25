@@ -39,6 +39,28 @@ h1{font-size:2rem} h2{font-size:1.5rem} h3{font-size:1.25rem}
   color:var(--color-neutral-5);
 }
 .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+.skip-link{
+  position:absolute;
+  left:-9999px;
+  top:auto;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+}
+.skip-link:focus,
+.skip-link:focus-visible{
+  left:1rem;
+  top:1rem;
+  width:auto;
+  height:auto;
+  padding:.55rem .8rem;
+  border-radius:10px;
+  background:#0f172a;
+  color:#fff;
+  text-decoration:none;
+  z-index:9999;
+  box-shadow:0 0 0 3px rgba(42,125,225,.3);
+}
 @media (max-width: 768px){
   html{font-size:15px}
   body{
