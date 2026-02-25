@@ -3,6 +3,7 @@ package br.com.redemaisfarma.adapters.outbound.persistence.repository;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.PedidoEntity;
 import br.com.redemaisfarma.domain.enums.StatusPedido;
+import br.com.redemaisfarma.domain.enums.TipoPagamento;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -63,6 +64,12 @@ public interface PedidoRepository extends JpaRepository<PedidoEntity, Long> {
         BigDecimal getTotal();
     }
 
+    interface PagamentoResumoRow {
+        TipoPagamento getTipoPagamento();
+        Long getQtd();
+        BigDecimal getTotal();
+    }
+
     @Query("""
         select year(p.createdAt) as ano,
                month(p.createdAt) as mes,
@@ -75,6 +82,20 @@ public interface PedidoRepository extends JpaRepository<PedidoEntity, Long> {
          order by year(p.createdAt), month(p.createdAt)
     """)
     List<VendasRelatorioRowMes> listarResumoVendasPorMes(LocalDateTime de, LocalDateTime ate);
+
+    @Query("""
+        select p.tipoPagamento as tipoPagamento,
+               count(p) as qtd,
+               coalesce(sum(coalesce(p.total, 0)), 0) as total
+          from PedidoEntity p
+         where p.data >= :de
+           and p.data < :ate
+           and p.status in :statuses
+         group by p.tipoPagamento
+    """)
+    List<PagamentoResumoRow> listarResumoPagamentoPorPeriodo(@Param("de") LocalDateTime de,
+                                                             @Param("ate") LocalDateTime ate,
+                                                             @Param("statuses") List<StatusPedido> statuses);
 
     @Query("""
            select p

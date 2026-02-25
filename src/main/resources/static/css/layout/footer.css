@@ -1,180 +1,268 @@
-/* =========================================================
-   🔻 Footer Minimal – variante enxuta + hotfixes
-   - usa as mesmas tokens já definidas no :root
-   - blinda tamanho dos ícones SVG
-   - evita herdar min-height 44px dos links/botões
-   ========================================================= */
-
-/* Garante que o footer minimal sempre apareça */
-.site-footer.site-footer--minimal{
-  display: block !important;
+/* Footer showcase aligned to provided visual reference */
+.site-footer.site-footer--showcase {
+  display: block;
   width: 100%;
-  background: var(--color-footer-bg, #031016);
   margin-top: auto;
-}
-
-/* Esconde grid tradicional quando usar o minimal */
-.site-footer--minimal .footer-grid { 
-  display: none !important; 
-}
-
-/* Barra minimal: linha com 3 itens */
-.site-footer--minimal .minimal{
-  display:flex !important;
-  flex-wrap:wrap !important;
-  gap: var(--spacing-sm) !important;
-  align-items:center !important;
-  justify-content:center !important;
-  max-width: var(--max-width);
-  margin-inline:auto;
-  padding: var(--spacing-md) var(--spacing-sm);
-}
-
-/* Item clicável (Instagram, WhatsApp, Endereço) */
-.site-footer--minimal .contact-item{
-  display:inline-flex !important;
-  align-items:center !important;
-  gap: var(--spacing-sm) !important;
-  padding: 8px 12px !important;
-  border:1px solid var(--color-footer-border) !important;
-  border-radius: 999px !important;
-  color: var(--color-footer-link) !important;
-  text-decoration:none !important;
-
-  /* NÃO herdar min-height global */
-  min-height: unset !important;
-  line-height: 1.2;
+  padding: 1.8rem 0 1.3rem;
   background: transparent;
 }
-.site-footer--minimal .contact-item:hover,
-.site-footer--minimal .contact-item:focus-visible{
-  color: var(--color-footer-hover) !important;
-  border-color: var(--color-footer-accent) !important;
-  outline: 2px solid var(--color-footer-accent);
-  outline-offset: 3px;
+
+.site-footer--showcase .footer-showcase {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 1.35rem 1.6rem 1rem;
+  color: #f4f8ff;
+  background:
+    radial-gradient(55rem 20rem at 12% 8%, rgba(64, 130, 255, 0.36), transparent 65%),
+    radial-gradient(50rem 22rem at 90% 8%, rgba(255, 80, 105, 0.45), transparent 60%),
+    linear-gradient(96deg, #0d2f89 0%, #213b95 35%, #5d2c87 58%, #9f1b4f 76%, #bc1f36 100%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 14px 34px rgba(3, 14, 46, 0.32);
 }
 
-/* 🔒 Hotfix: tamanho dos SVGs (evita “ícone gigante”) */
-.site-footer--minimal svg{
-  width: 18px !important;
-  height: 18px !important;
-  min-width: 18px !important;
-  min-height: 18px !important;
-  max-width: 18px !important;
-  max-height: 18px !important;
-  display: inline-block !important;
-  flex: 0 0 18px !important;
-  vertical-align: middle;
-}
-.site-footer--minimal svg, 
-.site-footer--minimal svg *{
-  fill: currentColor !important;
-  stroke: none !important;
+.site-footer--showcase .footer-showcase::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 16% 20%, rgba(255, 255, 255, 0.2) 0 1px, transparent 2px),
+    radial-gradient(circle at 42% 8%, rgba(255, 255, 255, 0.14) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 28%, rgba(255, 255, 255, 0.14) 0 1px, transparent 2px),
+    radial-gradient(circle at 90% 14%, rgba(255, 255, 255, 0.16) 0 1px, transparent 2px);
+  opacity: 0.45;
 }
 
-/* Se houver pseudo-elementos decorativos globais, desativa-os aqui */
-.site-footer--minimal::before,
-.site-footer--minimal::after,
-.site-footer--minimal .minimal::before,
-.site-footer--minimal .minimal::after{
-  content: none !important;
-  background: none !important;
-}
-
-/* Créditos enxutos */
-.site-footer--minimal .credits{
-  border-top: 1px solid var(--color-footer-border);
-  color: var(--color-footer-muted);
-  text-align:center;
-  padding: var(--spacing-sm) var(--spacing-md);
-}
-
-/* Ajuste tipográfico do <small> nos créditos */
-.site-footer--minimal .credits small{
-  font-size: .95rem;             /* legível mas discreto */
-  letter-spacing: .1px;
-  display: inline-flex;
-  flex-wrap: wrap;
+.site-footer--showcase .footer-showcase__top {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(170px, 240px) minmax(260px, 1fr) auto;
   align-items: center;
-  gap: .35rem;
-  line-height: 1.3;
+  gap: 1.1rem;
 }
 
-/* Link de crédito (lektec.tech) dentro dos créditos */
-.site-footer--minimal .credits .credit-link{
-  display:inline-flex;
-  align-items:center;
-  gap:.35rem;
-  font-weight: var(--font-weight-semibold, 600);
-  color: var(--color-footer-link);
-  text-decoration: none;
-  min-height: unset; /* não herdar min-height global */
-  line-height: 1.2;
+.site-footer--showcase .footer-showcase__brand {
+  display: flex;
+  align-items: center;
 }
-.site-footer--minimal .credits .credit-link:hover{
-  color: var(--color-footer-hover);
+
+.site-footer--showcase .footer-showcase__logo {
+  width: min(100%, 220px);
+  max-height: 90px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 14px rgba(7, 12, 40, 0.45));
+}
+
+.site-footer--showcase .footer-showcase__help h2 {
+  margin: 0;
+  color: #f8fbff;
+  font-size: clamp(1.35rem, 1.9vw, 1.75rem);
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.site-footer--showcase .footer-showcase__help p {
+  margin: 0.35rem 0 0;
+  color: rgba(247, 251, 255, 0.92);
+  font-size: clamp(0.95rem, 1.2vw, 1.05rem);
+  max-width: 42ch;
+}
+
+.site-footer--showcase .footer-showcase__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 0.72rem 1.55rem;
+  border-radius: 999px;
+  border: 2px solid rgba(90, 214, 255, 0.75);
+  background: linear-gradient(180deg, #2aa6ff 0%, #1e6ae8 100%);
+  color: #eef7ff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.98rem;
+  letter-spacing: 0.01em;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.38),
+    0 8px 20px rgba(8, 22, 78, 0.34);
+}
+
+.site-footer--showcase .footer-showcase__cta:hover,
+.site-footer--showcase .footer-showcase__cta:focus-visible {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+.site-footer--showcase .footer-showcase__line {
+  position: relative;
+  z-index: 1;
+  height: 3px;
+  margin: 0.92rem 0 0.72rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(86, 141, 255, 0.2), rgba(255, 106, 86, 0.95), rgba(255, 87, 52, 0.86));
+  box-shadow: 0 0 12px rgba(255, 100, 76, 0.4);
+}
+
+.site-footer--showcase .footer-showcase__bottom {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.site-footer--showcase .footer-showcase__contacts {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.site-footer--showcase .footer-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 0;
+  color: #f4f8ff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: clamp(0.95rem, 1.1vw, 1.01rem);
+  opacity: 0.96;
+}
+
+.site-footer--showcase .footer-contact svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  flex: 0 0 20px;
+}
+
+.site-footer--showcase .footer-contact:hover,
+.site-footer--showcase .footer-contact:focus-visible {
+  color: #ffffff;
+  opacity: 1;
   text-decoration: underline;
 }
-.site-footer--minimal .credits .credit-link:focus-visible{
-  outline: 2px solid var(--color-footer-accent);
-  outline-offset: 3px;
-  border-radius: .4rem;
+
+.site-footer--showcase .footer-showcase__social {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
 }
 
-/* Pontinho separador antes do crédito (opcional) */
-.site-footer--minimal .credits .credit-sep::before{
-  content: "•";
-  margin: 0 .5ch;
-  color: var(--color-footer-border);
+.site-footer--showcase .footer-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  text-decoration: none;
 }
 
-/* Botão “voltar ao topo” (se estiver presente) */
-.btn-to-top{
-  position: fixed; 
-  right: 16px; 
-  bottom: 16px; 
+.site-footer--showcase .footer-social-link svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.site-footer--showcase .footer-social-link:hover,
+.site-footer--showcase .footer-social-link:focus-visible {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.site-footer--showcase .footer-showcase__credits {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.6rem;
+  text-align: center;
+  color: rgba(239, 245, 255, 0.88);
+}
+
+.site-footer--showcase .footer-showcase__credits small {
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.site-footer--showcase .credit-link {
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.site-footer--showcase .credit-link:hover,
+.site-footer--showcase .credit-link:focus-visible {
+  text-decoration: underline;
+}
+
+.site-footer--showcase .btn-to-top {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
   z-index: 900;
-  width: 44px; 
-  height: 44px; 
-  border-radius: 999px; 
-  border: 0; 
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 0;
   cursor: pointer;
-  background: var(--color-footer-accent); 
-  color: #06281d; 
-  font-weight: var(--font-weight-bold);
-  box-shadow: 0 8px 22px rgba(0,0,0,.25);
-}
-.btn-to-top:hover{ 
-  filter: brightness(1.05); 
+  background: #1e6ae8;
+  color: #eef4ff;
+  font-weight: 700;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
 }
 
-@media (max-width: 768px) {
-  .btn-to-top{
-    right: calc(env(safe-area-inset-right, 0px) + 1rem);
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 1.3rem);
-    width: 48px;
-    height: 48px;
+.site-footer--showcase .btn-to-top:hover {
+  filter: brightness(1.08);
+}
+
+@media (max-width: 1100px) {
+  .site-footer--showcase .footer-showcase__top {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .site-footer--showcase .footer-showcase__brand {
+    justify-content: center;
+  }
+
+  .site-footer--showcase .footer-showcase__help p {
+    margin-inline: auto;
+  }
+
+  .site-footer--showcase .footer-showcase__bottom {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .site-footer--showcase .footer-showcase__contacts {
+    justify-content: center;
+    gap: 0.8rem 1.1rem;
   }
 }
 
-/* Responsividade suave */
-@media (max-width: 480px){
-  .site-footer--minimal .minimal{
-    gap: var(--spacing-xs, 6px) !important;
-    padding: var(--spacing-sm) var(--spacing-xs, 6px);
+@media (max-width: 640px) {
+  .site-footer.site-footer--showcase {
+    padding: 1.3rem 0 1rem;
   }
-  .site-footer--minimal .contact-item{
-    padding: 8px 10px !important;
-  }
-  .site-footer--minimal .credits small{
-    font-size: .9rem;
-  }
-}
 
-/* Dark mode opcional (se usar prefers-color-scheme) */
-@media (prefers-color-scheme: dark){
-  .site-footer--minimal .credits{
-    color: var(--color-footer-muted, #9CA3AF);
-    border-top-color: var(--color-footer-border, #374151);
+  .site-footer--showcase .footer-showcase {
+    padding: 1.1rem 1rem 0.9rem;
+    border-radius: 10px;
+  }
+
+  .site-footer--showcase .footer-contact {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .site-footer--showcase .footer-showcase__credits small {
+    font-size: 0.86rem;
   }
 }

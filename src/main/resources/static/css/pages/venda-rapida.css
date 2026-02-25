@@ -98,6 +98,39 @@
   margin-top: .75rem;
   color: var(--layout-muted);
 }
+.pdv-cash-grid {
+  display: grid;
+  gap: .5rem;
+}
+.pdv-cash-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .75rem;
+  padding: .4rem 0;
+  border-bottom: 1px solid var(--layout-border);
+}
+.pdv-cash-row:last-child {
+  border-bottom: 0;
+}
+.pdv-cash-row strong {
+  font-size: 1rem;
+}
+.pdv-cash-row--strong {
+  margin-top: .5rem;
+}
+#pdv-caixa-diferenca.is-positive {
+  color: #0369a1;
+}
+#pdv-caixa-diferenca.is-negative {
+  color: #b91c1c;
+}
+#pdv-caixa-diferenca.is-neutral {
+  color: var(--layout-fg);
+}
+.pdv-cash-periodo {
+  margin-top: .5rem;
+}
 @media (max-width: 1024px) {
   .pdv-layout { grid-template-columns: 1fr; }
   .pdv-search { grid-template-columns: 1fr; }

@@ -431,6 +431,20 @@
   margin-top: auto;
 }
 
+.sidebar__logout-form {
+  margin: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.sidebar__logout-button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
 
 
 

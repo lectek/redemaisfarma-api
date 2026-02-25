@@ -112,15 +112,6 @@
       height: auto;
       display: block;
     }
-    footer {
-      display: block !important;
-      background-color: #0f172a;
-      color: #fff;
-      padding: 2rem 1rem;
-      text-align: center;
-      position: relative;
-      z-index: 0;
-    }
     .skip-link {
       position: absolute;
       left: -999px;
@@ -152,7 +143,7 @@
     <main id="conteudo-home" role="main" tabindex="-1" aria-label="Conteúdo principal">
 
     <!-- HERO • headline + busca + provas sociais -->
-    <section class="section hero hero--xl" aria-labelledby="hero-title"
+    <section class="section hero hero--xl hero--clean" aria-labelledby="hero-title"
              th:with="heroImageUrl=${brandingHomeHeroImageUrl} ?: @{/images/absorventepronto.png},
                       heroVideoUrl=${brandingHomeHeroVideoUrl},
                       heroVideoPoster=${brandingHomeHeroVideoPoster}"
@@ -166,23 +157,15 @@
               Cuidar da sua saúde ficou simples.
             </h1>
             <p class="hero-sub">
-              Medicamentos, perfumaria e cuidados pessoais com
-              <strong>entrega rápida</strong> e <strong>preço justo</strong>.
+              Medicamentos, perfumaria e cuidados pessoais com entrega rapida e preco justo.
             </p>
-
-            <ul class="hero-benefits" aria-label="Diferenciais da RedeMaisFarma">
-              <li>Entrega no mesmo dia*</li>
-              <li>Pagamento seguro</li>
-              <li>Atendimento humanizado</li>
-            </ul>
-            <p class="muted hero-note">*Consulte disponibilidade para o seu CEP.</p>
           </div>
 
           <div class="hero__visual">
             <figure class="hero-showcase" aria-label="Campanha institucional RedeMaisFarma">
               <img class="hero-showcase__img"
-                   th:src="@{/images/hero-artes/farmaceutica-placa.png}"
-                   src="/images/hero-artes/farmaceutica-placa.png"
+                   th:src="@{/images/hero-artes/farmaceutica-placa-clean.png}"
+                   src="/images/hero-artes/farmaceutica-placa-clean.png"
                    alt="Profissional da saude segurando placa da RedeMaisFarma"
                    loading="eager"
                    decoding="async" />

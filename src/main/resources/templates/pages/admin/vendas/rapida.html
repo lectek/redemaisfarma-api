@@ -138,6 +138,64 @@
             <div id="pdv-status" class="pdv-status" aria-live="polite"></div>
           </div>
         </div>
+
+        <div class="card pdv-card pdv-cash-card">
+          <div class="pdv-card__header">
+            <h2>Controle de caixa</h2>
+            <button id="pdv-caixa-refresh" class="btn btn--ghost btn--sm" type="button">Atualizar</button>
+          </div>
+          <div class="pdv-card__body">
+            <div class="pdv-cash-grid">
+              <div class="pdv-cash-row">
+                <span>Entrou em dinheiro</span>
+                <strong id="pdv-caixa-dinheiro">R$ 0,00</strong>
+              </div>
+              <div class="pdv-cash-row">
+                <span>Entrou em PIX</span>
+                <strong id="pdv-caixa-pix">R$ 0,00</strong>
+              </div>
+              <div class="pdv-cash-row">
+                <span>Entrou em cartao</span>
+                <strong id="pdv-caixa-cartao">R$ 0,00</strong>
+              </div>
+              <div class="pdv-cash-row">
+                <span>Total vendido</span>
+                <strong id="pdv-caixa-total-vendido">R$ 0,00</strong>
+              </div>
+            </div>
+
+            <div class="pdv-section">
+              <h3>Conferencia do dinheiro</h3>
+              <div class="pdv-field">
+                <label for="pdv-caixa-abertura">Saldo inicial do caixa</label>
+                <input id="pdv-caixa-abertura" class="input" type="number" min="0" step="0.01" placeholder="0,00" />
+              </div>
+              <div class="pdv-field">
+                <label for="pdv-caixa-suprimento">Suprimentos (+)</label>
+                <input id="pdv-caixa-suprimento" class="input" type="number" min="0" step="0.01" placeholder="0,00" />
+              </div>
+              <div class="pdv-field">
+                <label for="pdv-caixa-sangria">Sangrias (-)</label>
+                <input id="pdv-caixa-sangria" class="input" type="number" min="0" step="0.01" placeholder="0,00" />
+              </div>
+              <div class="pdv-field">
+                <label for="pdv-caixa-contado">Dinheiro contado agora</label>
+                <input id="pdv-caixa-contado" class="input" type="number" min="0" step="0.01" placeholder="0,00" />
+              </div>
+
+              <div class="pdv-cash-row pdv-cash-row--strong">
+                <span>Dinheiro esperado no caixa</span>
+                <strong id="pdv-caixa-esperado">R$ 0,00</strong>
+              </div>
+              <div class="pdv-cash-row pdv-cash-row--strong">
+                <span>Diferenca (contado - esperado)</span>
+                <strong id="pdv-caixa-diferenca">R$ 0,00</strong>
+              </div>
+
+              <p id="pdv-caixa-periodo" class="pdv-cash-periodo muted">Resumo de hoje.</p>
+            </div>
+          </div>
+        </div>
       </aside>
     </section>
   </main>

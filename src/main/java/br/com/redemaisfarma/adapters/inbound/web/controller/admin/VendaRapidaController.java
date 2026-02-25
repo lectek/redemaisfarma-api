@@ -17,6 +17,7 @@ import br.com.redemaisfarma.adapters.inbound.web.dto.ProdutoBuscaDTO;
 import br.com.redemaisfarma.adapters.inbound.web.dto.VendaRapidaFinalizarRequestDTO;
 import br.com.redemaisfarma.adapters.inbound.web.dto.VendaRapidaFinalizarResponseDTO;
 import br.com.redemaisfarma.application.service.CaixaVendaRapidaService;
+import br.com.redemaisfarma.application.service.CaixaResumoService;
 import br.com.redemaisfarma.application.service.VendaRapidaService;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.PedidoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteRepository;
@@ -32,9 +33,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Profile(value={"!test"})
@@ -43,6 +46,7 @@ import java.util.List;
 public class VendaRapidaController {
     private final VendaRapidaService vendaRapida;
     private final CaixaVendaRapidaService caixaService;
+    private final CaixaResumoService caixaResumoService;
     private final PedidoRepository pedidoRepo;
     private final ClienteRepository clienteRepo;
 
@@ -76,6 +80,15 @@ public class VendaRapidaController {
         return caixaService.finalizar(request);
     }
 
+    @GetMapping("/caixa/resumo")
+    @ResponseBody
+    public CaixaResumoService.CaixaResumo resumoCaixa(
+            @RequestParam(value = "dia", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dia
+    ) {
+        return caixaResumoService.resumoDia(dia);
+    }
+
     @GetMapping("/rapida/recibo/{id}")
     public String recibo(@PathVariable Long id, Model model) {
         PedidoEntity pedido = pedidoRepo.buscarDetalheAdmin(id)
@@ -100,10 +113,12 @@ public class VendaRapidaController {
     @Generated
     public VendaRapidaController(VendaRapidaService vendaRapida,
                                  CaixaVendaRapidaService caixaService,
+                                 CaixaResumoService caixaResumoService,
                                  PedidoRepository pedidoRepo,
                                  ClienteRepository clienteRepo) {
         this.vendaRapida = vendaRapida;
         this.caixaService = caixaService;
+        this.caixaResumoService = caixaResumoService;
         this.pedidoRepo = pedidoRepo;
         this.clienteRepo = clienteRepo;
     }
