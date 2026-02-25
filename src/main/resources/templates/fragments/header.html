@@ -17,30 +17,45 @@
     </button>
 
     <nav id="primary-nav" class="primary-nav primary-nav--desktop" aria-label="Menu principal">
-      <div>
-        <ul class="nav-list">
-          <li><a th:href="@{/}"             class="menu-button" data-section="">Início</a></li>
-          <li><a th:href="@{/produtos}"     class="menu-button" data-section="produtos">Produtos</a></li>
-          <li><a th:href="@{/sobre}"        class="menu-button" data-section="sobre">Sobre nós</a></li>
-          <li><a th:href="@{/ofertas}"      class="menu-button" data-section="ofertas">Ofertas</a></li>
-          <li><a th:href="@{/contato}"      class="menu-button" data-section="contato">Contato</a></li>
-          <li><a th:href="@{/checkout}"     class="menu-button" data-section="checkout">Checkout</a></li>
+      <ul class="nav-list">
+        <li><a th:href="@{/}"             class="menu-button" data-section="">Início</a></li>
+        <li><a th:href="@{/produtos}"     class="menu-button" data-section="produtos">Produtos</a></li>
+        <li><a th:href="@{/sobre}"        class="menu-button" data-section="sobre">Sobre nós</a></li>
+        <li><a th:href="@{/ofertas}"      class="menu-button" data-section="ofertas">Ofertas</a></li>
+        <li><a th:href="@{/contato}"      class="menu-button" data-section="contato">Contato</a></li>
+        <li><a th:href="@{/checkout}"     class="menu-button" data-section="checkout">Checkout</a></li>
 
-          <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
-            <a th:href="@{/admin/painel}"    class="menu-button" data-section="admin/painel">Painel</a>
-          </li>
-          <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
-            <a th:href="@{/admin/produtos}"  class="menu-button" data-section="admin/produtos">Produtos</a>
-          </li>
-          <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
-            <a th:href="@{/admin/pedidos}"   class="menu-button" data-section="admin/pedidos">Pedidos</a>
-          </li>
-          <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
-            <a th:href="@{/admin/clientes}"  class="menu-button" data-section="admin/clientes">Clientes</a>
-          </li>
-        </ul>
-      </div>
+        <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
+          <a th:href="@{/admin/painel}"    class="menu-button" data-section="admin/painel">Painel</a>
+        </li>
+        <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
+          <a th:href="@{/admin/produtos}"  class="menu-button" data-section="admin/produtos">Produtos</a>
+        </li>
+        <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
+          <a th:href="@{/admin/pedidos}"   class="menu-button" data-section="admin/pedidos">Pedidos</a>
+        </li>
+        <li th:if="${#authorization != null and #authorization.expression('hasRole(''DEV'') or hasRole(''ADMIN'')')}">
+          <a th:href="@{/admin/clientes}"  class="menu-button" data-section="admin/clientes">Clientes</a>
+        </li>
+      </ul>
     </nav>
+
+    <a th:if="${headerUserAuthenticated}"
+       th:href="@{/cliente/conta}"
+       class="header-account"
+       aria-label="Abrir minha conta">
+      <span class="header-account__avatar" aria-hidden="true">
+        <img th:if="${headerUserAvatarUrl != null and !#strings.isEmpty(headerUserAvatarUrl)}"
+             th:src="${headerUserAvatarUrl}"
+             alt=""
+             loading="lazy"
+             decoding="async" />
+        <span th:if="${headerUserAvatarUrl == null or #strings.isEmpty(headerUserAvatarUrl)}"
+              th:text="${headerUserInitial != null and !#strings.isEmpty(headerUserInitial) ? headerUserInitial : 'U'}">U</span>
+      </span>
+      <span class="header-account__name"
+            th:text="${headerUserName != null and !#strings.isEmpty(headerUserName) ? headerUserName : 'Minha conta'}">Minha conta</span>
+    </a>
   </div>
 
   <!-- backdrop do menu mobile (você já tem CSS pronto pra isso) -->

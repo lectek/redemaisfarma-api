@@ -228,6 +228,17 @@ public class ProdutoAdminPageController {
                 .map(ProdutoLookupItem::from)
                 .forEach(itens::add);
 
+        // Mantem a busca util mesmo quando o termo nao casa com nenhum nome.
+        // Nesse caso, sugere itens recentes do catalogo para selecao rapida.
+        if (itens.isEmpty()) {
+            Pageable sugestoesPage = PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.DESC, "id"));
+            this.produtoRepository.findAll(sugestoesPage)
+                    .getContent()
+                    .stream()
+                    .map(ProdutoLookupItem::from)
+                    .forEach(itens::add);
+        }
+
         if (itens.size() < safeLimit) {
             ProdutoLegacyRepository legacyRepository = this.legacyRepositoryProvider.getIfAvailable();
             if (legacyRepository != null) {

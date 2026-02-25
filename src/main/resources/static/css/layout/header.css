@@ -261,6 +261,7 @@ html.sidebar-compact .sidebar__link span{
   align-items: center;
   gap: 0.5rem;
   margin-left: auto;
+  min-width: 0;
 }
 
 .primary-nav .nav-list {
@@ -274,6 +275,61 @@ html.sidebar-compact .sidebar__link span{
 
 .primary-nav .nav-list li {
   display: inline-flex;
+}
+
+.site-header .header-account {
+  margin-left: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.62rem;
+  text-decoration: none;
+  color: var(--header-link-color);
+  padding: 0.34rem 0.46rem 0.34rem 0.34rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--header-border) 75%, transparent);
+  background: color-mix(in oklab, var(--header-bg) 90%, #0f172a 10%);
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  min-width: 0;
+}
+
+.site-header .header-account:hover,
+.site-header .header-account:focus-visible {
+  background: var(--header-link-hover-bg);
+  border-color: color-mix(in oklab, var(--header-link-color) 25%, transparent);
+  transform: translateY(-1px);
+}
+
+.site-header .header-account__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+  border: 2px solid color-mix(in oklab, #ffffff 70%, transparent);
+  box-shadow: 0 4px 10px rgba(14, 50, 126, 0.25);
+  flex: 0 0 36px;
+}
+
+.site-header .header-account__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.site-header .header-account__name {
+  max-width: 12rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 700;
+  font-size: 0.94rem;
 }
 
 .site-header .menu-button {
@@ -344,11 +400,24 @@ html.sidebar-compact .sidebar__link span{
     margin-left: 0;
     display: inline-flex;
   }
+
+  .site-header .header-account {
+    margin-left: auto;
+    padding-right: 0.34rem;
+  }
+
+  .site-header .header-account__name {
+    display: none;
+  }
 }
 
 @media (max-width: 1023.98px) {
   .sidebar-toggle {
     display: inline-flex;
+  }
+
+  .site-header .header-account__name {
+    display: none;
   }
 }
 

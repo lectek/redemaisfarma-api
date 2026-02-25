@@ -1,5 +1,7 @@
 package br.com.redemaisfarma.adapters.inbound.web.advice;
 
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepository;
 import br.com.redemaisfarma.application.core.settings.AppSettingService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -34,10 +36,12 @@ public class BrandingModelAdvice {
 
     private final AppSettingService settings;
     private final ResourceLoader resourceLoader;
+    private final UsuarioRepository usuarios;
 
-    public BrandingModelAdvice(AppSettingService settings, ResourceLoader resourceLoader) {
+    public BrandingModelAdvice(AppSettingService settings, ResourceLoader resourceLoader, UsuarioRepository usuarios) {
         this.settings = settings;
         this.resourceLoader = resourceLoader;
+        this.usuarios = usuarios;
     }
 
     @ModelAttribute
@@ -88,9 +92,37 @@ public class BrandingModelAdvice {
         model.addAttribute("brandingHeroPublic", true);
         model.addAttribute("brandingHeroFallbackUsed", fallbackInUse);
         model.addAttribute("brandingHeroFallbackAvailable", fallbackAvailable);
+        addHeaderUser(request, model);
 
         log.debug("Hero available publicly (logged-out) {} (fallbackUsed={}, fileExists={}, heroSetting={})",
                 heroUrl, fallbackInUse, fallbackAvailable, heroSetting);
+    }
+
+    private void addHeaderUser(HttpServletRequest request, Model model) {
+        String identity = request != null && request.getUserPrincipal() != null
+                ? nonBlank(request.getUserPrincipal().getName())
+                : "";
+        if (identity.isBlank()) {
+            model.addAttribute("headerUserAuthenticated", false);
+            model.addAttribute("headerUserName", "");
+            model.addAttribute("headerUserAvatarUrl", "");
+            model.addAttribute("headerUserInitial", "U");
+            return;
+        }
+
+        model.addAttribute("headerUserAuthenticated", true);
+        UsuarioEntity usuario = usuarios.findByEmailOrCpf(identity).orElse(null);
+        if (usuario != null) {
+            String displayName = firstNonBlank(usuario.getNome(), usuario.getEmail(), identity);
+            model.addAttribute("headerUserName", displayName);
+            model.addAttribute("headerUserAvatarUrl", nonBlank(usuario.getAvatarUrl()));
+            model.addAttribute("headerUserInitial", firstLetter(displayName));
+            return;
+        }
+
+        model.addAttribute("headerUserName", identity);
+        model.addAttribute("headerUserAvatarUrl", "");
+        model.addAttribute("headerUserInitial", firstLetter(identity));
     }
 
     private static boolean shouldSkipBranding(String uri) {
@@ -153,6 +185,18 @@ public class BrandingModelAdvice {
             return fallback;
         }
         return defaultValue;
+    }
+
+    private static String nonBlank(String value) {
+        return value == null ? "" : value.trim();
+    }
+
+    private static String firstLetter(String value) {
+        String normalized = nonBlank(value);
+        if (normalized.isBlank()) {
+            return "U";
+        }
+        return normalized.substring(0, 1).toUpperCase();
     }
 
     private static String parseLogoSize(String raw) {
