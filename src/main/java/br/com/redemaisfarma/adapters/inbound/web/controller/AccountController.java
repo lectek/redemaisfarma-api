@@ -16,7 +16,9 @@
  */
 package br.com.redemaisfarma.adapters.inbound.web.controller;
 
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.CustomerEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.jpa.CustomerRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepository;
 import br.com.redemaisfarma.application.core.account.UserAccountService;
 import br.com.redemaisfarma.application.core.media.ImageStorageService;
@@ -29,6 +31,8 @@ import java.io.IOException;
 import java.util.Optional;
 import org.springframework.data.util.Pair;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -46,13 +50,16 @@ public class AccountController {
     private static final long AVATAR_MAX_BYTES = 2L * 1024L * 1024L;
     private final UserAccountService accountService;
     private final UsuarioRepository usuarioRepository;
+    private final CustomerRepository customerRepository;
     private final ImageStorageService imageStorageService;
 
     public AccountController(UserAccountService accountService,
                              UsuarioRepository usuarioRepository,
+                             CustomerRepository customerRepository,
                              ImageStorageService imageStorageService) {
         this.accountService = accountService;
         this.usuarioRepository = usuarioRepository;
+        this.customerRepository = customerRepository;
         this.imageStorageService = imageStorageService;
     }
 
@@ -68,9 +75,15 @@ public class AccountController {
     @GetMapping(value={"/conta"})
     public String conta(Model model, Authentication auth) {
         model.addAttribute("active", (Object)"conta");
-        localizarUsuario(auth).ifPresent(usuario -> {
+        UsuarioEntity usuario = localizarUsuario(auth).orElse(null);
+        if (usuario != null) {
             model.addAttribute("avatarUrl", usuario.getAvatarUrl());
             model.addAttribute("avatarNome", usuario.getNome());
+            return "pages/cliente/conta";
+        }
+        localizarCustomer(auth).ifPresent(customer -> {
+            model.addAttribute("avatarUrl", customer.getAvatarUrl());
+            model.addAttribute("avatarNome", customer.getNome());
         });
         return "pages/cliente/conta";
     }
@@ -79,9 +92,13 @@ public class AccountController {
     public String dados(Model model, Authentication auth) {
         model.addAttribute("active", (Object)"dados");
         UsuarioEntity usuario = localizarUsuario(auth).orElse(null);
+        CustomerEntity customer = localizarCustomer(auth).orElse(null);
         if (usuario != null) {
             model.addAttribute("avatarUrl", usuario.getAvatarUrl());
             model.addAttribute("avatarNome", usuario.getNome());
+        } else if (customer != null) {
+            model.addAttribute("avatarUrl", customer.getAvatarUrl());
+            model.addAttribute("avatarNome", customer.getNome());
         }
         if (!model.containsAttribute("form")) {
             ClienteDadosForm form = new ClienteDadosForm();
@@ -91,6 +108,9 @@ public class AccountController {
                 form.setCpf(usuario.getCpf());
                 form.setTelefone(usuario.getTelefone());
                 form.setEndereco(usuario.getEndereco());
+            } else if (customer != null) {
+                form.setNome(customer.getNome());
+                form.setEmail(customer.getEmail());
             }
             model.addAttribute("form", (Object)form);
         }
@@ -159,7 +179,8 @@ public class AccountController {
                                   Authentication auth,
                                   RedirectAttributes ra) {
         Optional<UsuarioEntity> usuarioOpt = localizarUsuario(auth);
-        if (usuarioOpt.isEmpty()) {
+        Optional<CustomerEntity> customerOpt = localizarCustomer(auth);
+        if (usuarioOpt.isEmpty() && customerOpt.isEmpty()) {
             ra.addFlashAttribute("errorMessage", (Object)"Usu\u00e1rio n\u00e3o encontrado.");
             return "redirect:/cliente/dados";
         }
@@ -177,11 +198,18 @@ public class AccountController {
             return "redirect:/cliente/dados";
         }
 
-        UsuarioEntity usuario = usuarioOpt.get();
+        Long ownerId = usuarioOpt.map(UsuarioEntity::getId)
+                .orElseGet(() -> customerOpt.map(CustomerEntity::getId).orElse(null));
         try {
-            String url = imageStorageService.saveUserAvatar(usuario.getId(), file);
-            usuario.setAvatarUrl(url);
-            usuarioRepository.save(usuario);
+            String url = imageStorageService.saveUserAvatar(ownerId, file);
+            usuarioOpt.ifPresent(usuario -> {
+                usuario.setAvatarUrl(url);
+                usuarioRepository.save(usuario);
+            });
+            customerOpt.ifPresent(customer -> {
+                customer.setAvatarUrl(url);
+                customerRepository.save(customer);
+            });
             ra.addFlashAttribute("infoMessage", (Object)"Foto atualizada com sucesso.");
         } catch (IOException ex) {
             ra.addFlashAttribute("errorMessage", (Object)ex.getMessage());
@@ -196,8 +224,26 @@ public class AccountController {
     }
 
     private Optional<UsuarioEntity> localizarUsuario(Authentication auth) {
-        if (auth == null || auth.getName() == null) return Optional.empty();
-        return usuarioRepository.findByEmailOrCpf(auth.getName());
+        if (auth == null || auth.getName() == null) {
+            return Optional.empty();
+        }
+        Optional<UsuarioEntity> byIdentity = usuarioRepository.findByEmailOrCpf(auth.getName());
+        if (byIdentity.isPresent()) {
+            return byIdentity;
+        }
+        String email = extrairEmail(auth);
+        if (email == null || email.isBlank()) {
+            return Optional.empty();
+        }
+        return usuarioRepository.findByEmailIgnoreCase(email);
+    }
+
+    private Optional<CustomerEntity> localizarCustomer(Authentication auth) {
+        String email = extrairEmail(auth);
+        if (email == null || email.isBlank()) {
+            return Optional.empty();
+        }
+        return customerRepository.findByEmail(email);
     }
 
     private String normalizarEmail(String email) {
@@ -214,6 +260,27 @@ public class AccountController {
         if (endereco == null) return null;
         String trimmed = endereco.trim();
         return trimmed.isBlank() ? null : trimmed;
+    }
+
+    private String extrairEmail(Authentication auth) {
+        if (auth == null) {
+            return null;
+        }
+        if (auth.getName() != null && auth.getName().contains("@")) {
+            return normalizarEmail(auth.getName());
+        }
+        Object principal = auth.getPrincipal();
+        if (principal instanceof UserDetails userDetails) {
+            String username = userDetails.getUsername();
+            return username != null && username.contains("@") ? normalizarEmail(username) : null;
+        }
+        if (principal instanceof OAuth2User oauth2User) {
+            Object email = oauth2User.getAttributes().get("email");
+            if (email != null && !email.toString().isBlank()) {
+                return normalizarEmail(email.toString());
+            }
+        }
+        return null;
     }
 
     public static class ClienteDadosForm {

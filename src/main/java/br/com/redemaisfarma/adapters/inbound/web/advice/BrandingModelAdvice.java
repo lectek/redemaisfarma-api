@@ -1,13 +1,19 @@
 package br.com.redemaisfarma.adapters.inbound.web.advice;
 
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.CustomerEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.jpa.CustomerRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepository;
 import br.com.redemaisfarma.application.core.settings.AppSettingService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.security.Principal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -37,11 +43,16 @@ public class BrandingModelAdvice {
     private final AppSettingService settings;
     private final ResourceLoader resourceLoader;
     private final UsuarioRepository usuarios;
+    private final CustomerRepository customers;
 
-    public BrandingModelAdvice(AppSettingService settings, ResourceLoader resourceLoader, UsuarioRepository usuarios) {
+    public BrandingModelAdvice(AppSettingService settings,
+                               ResourceLoader resourceLoader,
+                               UsuarioRepository usuarios,
+                               CustomerRepository customers) {
         this.settings = settings;
         this.resourceLoader = resourceLoader;
         this.usuarios = usuarios;
+        this.customers = customers;
     }
 
     @ModelAttribute
@@ -102,6 +113,7 @@ public class BrandingModelAdvice {
         String identity = request != null && request.getUserPrincipal() != null
                 ? nonBlank(request.getUserPrincipal().getName())
                 : "";
+        String authEmail = extractEmail(request);
         if (identity.isBlank()) {
             model.addAttribute("headerUserAuthenticated", false);
             model.addAttribute("headerUserName", "");
@@ -112,6 +124,9 @@ public class BrandingModelAdvice {
 
         model.addAttribute("headerUserAuthenticated", true);
         UsuarioEntity usuario = usuarios.findByEmailOrCpf(identity).orElse(null);
+        if (usuario == null && !authEmail.isBlank()) {
+            usuario = usuarios.findByEmailIgnoreCase(authEmail).orElse(null);
+        }
         if (usuario != null) {
             String displayName = firstNonBlank(usuario.getNome(), usuario.getEmail(), identity);
             model.addAttribute("headerUserName", displayName);
@@ -120,9 +135,52 @@ public class BrandingModelAdvice {
             return;
         }
 
+        String customerEmail = !authEmail.isBlank() ? authEmail : (identity.contains("@") ? identity.toLowerCase() : "");
+        if (!customerEmail.isBlank()) {
+            CustomerEntity customer = customers.findByEmail(customerEmail).orElse(null);
+            if (customer != null) {
+                String displayName = firstNonBlank(customer.getNome(), customer.getEmail(), customerEmail);
+                model.addAttribute("headerUserName", displayName);
+                model.addAttribute("headerUserAvatarUrl", nonBlank(customer.getAvatarUrl()));
+                model.addAttribute("headerUserInitial", firstLetter(displayName));
+                return;
+            }
+        }
+
         model.addAttribute("headerUserName", identity);
         model.addAttribute("headerUserAvatarUrl", "");
         model.addAttribute("headerUserInitial", firstLetter(identity));
+    }
+
+    private String extractEmail(HttpServletRequest request) {
+        if (request == null) {
+            return "";
+        }
+        Principal principal = request.getUserPrincipal();
+        if (principal == null) {
+            return "";
+        }
+        String name = nonBlank(principal.getName());
+        if (name.contains("@")) {
+            return name.toLowerCase();
+        }
+        if (principal instanceof Authentication authentication) {
+            Object authPrincipal = authentication.getPrincipal();
+            if (authPrincipal instanceof UserDetails userDetails) {
+                String username = nonBlank(userDetails.getUsername());
+                if (username.contains("@")) {
+                    return username.toLowerCase();
+                }
+            }
+            if (authPrincipal instanceof OAuth2User oauth2User) {
+                Object email = oauth2User.getAttributes().get("email");
+                String emailText = email == null ? "" : nonBlank(email.toString());
+                if (emailText.contains("@")) {
+                    return emailText.toLowerCase();
+                }
+            }
+        }
+        return "";
     }
 
     private static boolean shouldSkipBranding(String uri) {
