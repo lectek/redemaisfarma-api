@@ -25,6 +25,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCate
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -76,6 +77,19 @@ class ProdutoAdminPageControllerTest {
     @Test
     void formRedirectsToNovo() throws Exception {
         mockMvc.perform(get("/admin/produtos/form"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/produtos/novo"));
+    }
+
+    @Test
+    void naoProntosTodosPageReturnsOk() throws Exception {
+        mockMvc.perform(get("/admin/produtos/nao-prontos/todos"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void importarEstoqueFisicoRedirectsToNovo() throws Exception {
+        mockMvc.perform(post("/admin/produtos/importar-estoque-fisico"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/produtos/novo"));
     }

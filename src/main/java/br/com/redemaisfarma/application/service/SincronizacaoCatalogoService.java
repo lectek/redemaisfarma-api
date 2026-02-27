@@ -2,6 +2,7 @@ package br.com.redemaisfarma.application.service;
 
 import br.com.redemaisfarma.adapters.outbound.legacy.entity.ProdutoLegacyEntity;
 import br.com.redemaisfarma.adapters.outbound.legacy.repository.ProdutoLegacyRepository;
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.MetodoLeituraCodigoBarras;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import jakarta.persistence.EntityManager;
@@ -110,6 +111,7 @@ public class SincronizacaoCatalogoService {
                     novo.setNome(chooseFirstNonBlank(legacy.getNome(), legacy.getApresentacao()));
                     novo.setDescricao(legacy.getApresentacao());
                     novo.setCodigoBarras(cb);
+                    novo.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.LEGADO);
 
                     // preços/estoque
                     novo.setPrecoVenda(precoEfetivo(legacy));
@@ -137,6 +139,7 @@ public class SincronizacaoCatalogoService {
                         destino.setNome(chooseFirstNonBlank(legacy.getNome(), legacy.getApresentacao()));
                         destino.setDescricao(legacy.getApresentacao());
                         destino.setCodigoBarras(cb);
+                        destino.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.LEGADO);
                         destino.setPrecoVenda(precoEfetivo(legacy));
                         destino.setPrecoPromocional(legacy.getPrecoPromocao());
 

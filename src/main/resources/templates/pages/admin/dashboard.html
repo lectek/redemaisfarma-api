@@ -65,14 +65,14 @@
         <h2 class="card-title">Pedidos por status</h2>
 
         <div style="position:relative;height:320px">
-          <canvas id="Grafico-vendas-dia" width="600" height="240"
+          <canvas id="grafico-vendas-dia" width="600" height="240"
                   aria-label="DistribuiAAo de pedidos por status" role="img"></canvas>
         </div>
 
         <!-- Injeta dados do controller -->
         <script th:inline="javascript">
           /*<![CDATA[*/
-          window.RMF_ChaRT_STATUS = {
+          window.RMF_CHART_STATUS = {
             labels: /*[[${chartStatusLabels}]]*/ [],
             data:   /*[[${chartStatusData}]]*/ []
           };
@@ -144,7 +144,7 @@
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" defer></script>
 <!-- JS do dashboard -->
-<script defer th:src="@{/js/admin-dashboard.js}"></script>
+<script defer th:src="@{/js/pages/admin/admin-dashboard.js}"></script>
 </body>
 </html>
 

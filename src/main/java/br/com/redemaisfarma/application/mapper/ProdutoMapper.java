@@ -6,6 +6,7 @@ package br.com.redemaisfarma.application.mapper;
 import br.com.redemaisfarma.adapters.outbound.legacy.entity.ProdutoLegacyEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.domain.Produto;
+import br.com.redemaisfarma.domain.support.BarcodeNormalizer;
 import br.com.redemaisfarma.domain.support.ProdutoHashUtil;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -129,11 +130,7 @@ public class ProdutoMapper {
     }
 
     private static String normalizeBarcode(String s) {
-        if (s == null) {
-            return null;
-        }
-        String digits = s.replaceAll("\\D", "");
-        return digits.isEmpty() ? null : digits;
+        return BarcodeNormalizer.normalizeOrNull(s);
     }
 
     private static BigDecimal toBig(Number n) {
@@ -158,4 +155,3 @@ public class ProdutoMapper {
         return Math.max(0, x);
     }
 }
-

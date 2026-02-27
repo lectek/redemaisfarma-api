@@ -4,6 +4,7 @@ import br.com.redemaisfarma.domain.service.EstoqueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,8 +22,14 @@ public class EstoqueServiceImpl implements EstoqueService {
     @Override
     @Transactional(readOnly = true)
     public boolean temDisponivel(Long produtoId, int quantidade) {
+        if (produtoId == null) {
+            return false;
+        }
+        if (quantidade <= 0) {
+            return true;
+        }
         Integer saldo = jdbc.query(
-                "SELECT prod_saldo FROM produtos WHERE produto_id = ?",
+                "SELECT estoque FROM produto WHERE id = ?",
                 ps -> ps.setLong(1, produtoId),
                 rs -> rs.next() ? rs.getInt(1) : null
         );
@@ -37,24 +44,31 @@ public class EstoqueServiceImpl implements EstoqueService {
     @Override
     @Transactional
     public void baixar(Long produtoId, int quantidade, String motivo) {
+        if (produtoId == null) {
+            throw new IllegalArgumentException("Produto invalido para baixa de estoque.");
+        }
+        if (quantidade <= 0) {
+            throw new IllegalArgumentException("Quantidade deve ser maior que zero.");
+        }
         int updated = jdbc.update(
-                "UPDATE produtos SET prod_saldo = prod_saldo - ? " +
-                        "WHERE produto_id = ? AND prod_saldo >= ?",
+                "UPDATE produto SET estoque = estoque - ? " +
+                        "WHERE id = ? AND estoque >= ?",
                 quantidade, produtoId, quantidade
         );
         if (updated == 0) {
             throw new IllegalStateException("Estoque insuficiente para produto " + produtoId + " (qtd=" + quantidade + ")");
         }
-        jdbc.update(
-                "INSERT INTO movimento_estoque (produto_id, quantidade, tipo, motivo) VALUES (?, ?, 'SAIDA', ?)",
-                produtoId, quantidade, motivo
-        );
+        registrarMovimento(produtoId, quantidade, "SAIDA", motivo);
         if (log.isDebugEnabled()) {
             log.debug("Estoque.baixar OK produtoId={} quantidade={} motivo={}", produtoId, quantidade, motivo);
         }
     }
 
+    @Transactional
     public void ajustarSaldo(Long produtoId, int delta) {
+        if (produtoId == null) {
+            throw new IllegalArgumentException("Produto invalido para ajuste de estoque.");
+        }
         if (delta == 0) return;
 
         String tipo = delta < 0 ? "SAIDA" : "ENTRADA";
@@ -63,12 +77,12 @@ public class EstoqueServiceImpl implements EstoqueService {
         int updated;
         if (delta < 0) {
             updated = jdbc.update(
-                    "UPDATE produtos SET prod_saldo = prod_saldo - ? WHERE produto_id = ? AND prod_saldo >= ?",
+                    "UPDATE produto SET estoque = estoque - ? WHERE id = ? AND estoque >= ?",
                     abs, produtoId, abs
             );
         } else {
             updated = jdbc.update(
-                    "UPDATE produtos SET prod_saldo = prod_saldo + ? WHERE produto_id = ?",
+                    "UPDATE produto SET estoque = estoque + ? WHERE id = ?",
                     abs, produtoId
             );
         }
@@ -77,13 +91,32 @@ public class EstoqueServiceImpl implements EstoqueService {
             throw new IllegalStateException("Ajuste de saldo falhou para produto " + produtoId + " (delta=" + delta + ")");
         }
 
-        jdbc.update(
-                "INSERT INTO movimento_estoque (produto_id, quantidade, tipo, motivo) VALUES (?, ?, ?, ?)",
-                produtoId, abs, tipo, "AJUSTE"
-        );
+        registrarMovimento(produtoId, abs, tipo, "AJUSTE");
 
         if (log.isDebugEnabled()) {
             log.debug("Estoque.ajustarSaldo OK produtoId={} delta={}", produtoId, delta);
+        }
+    }
+
+    private void registrarMovimento(Long produtoId, int quantidade, String tipo, String motivo) {
+        try {
+            jdbc.update(
+                    "INSERT INTO movimento_estoque (produto_id, quantidade, tipo, motivo) VALUES (?, ?, ?, ?)",
+                    produtoId, quantidade, tipo, motivo
+            );
+        } catch (DataAccessException exWithMotivo) {
+            try {
+                jdbc.update(
+                        "INSERT INTO movimento_estoque (produto_id, quantidade, tipo) VALUES (?, ?, ?)",
+                        produtoId, quantidade, tipo
+                );
+            } catch (DataAccessException exWithoutMotivo) {
+                log.error(
+                        "Falha ao registrar movimento_estoque produtoId={} quantidade={} tipo={}. " +
+                                "A venda foi mantida, mas sem trilha de movimento.",
+                        produtoId, quantidade, tipo, exWithoutMotivo
+                );
+            }
         }
     }
 }

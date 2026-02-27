@@ -7,6 +7,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.jpa.UsuarioJpaReposito
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.otp.OtpCodeEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.otp.OtpCodeRepository;
 import br.com.redemaisfarma.domain.user.Role;
+import br.com.redemaisfarma.domain.user.RoleRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +19,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +32,7 @@ public class DevProvisioningService {
     private final OtpCodeRepository otpRepo;
     private final EmailDeliveryRepository emailDeliveryRepo;
     private final UsuarioJpaRepository usuarioRepo;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder encoder;
     private final ObjectMapper objectMapper;
 
@@ -40,6 +43,7 @@ public class DevProvisioningService {
             OtpCodeRepository otpRepo,
             EmailDeliveryRepository emailDeliveryRepo,
             UsuarioJpaRepository usuarioRepo,
+            RoleRepository roleRepository,
             PasswordEncoder encoder,
             ObjectMapper objectMapper,
             @Value("${app.web.base-url:${APP_WEB_BASE_URL:http://localhost:8080}}") String baseUrl
@@ -47,6 +51,7 @@ public class DevProvisioningService {
         this.otpRepo = otpRepo;
         this.emailDeliveryRepo = emailDeliveryRepo;
         this.usuarioRepo = usuarioRepo;
+        this.roleRepository = roleRepository;
         this.encoder = encoder;
         this.objectMapper = objectMapper;
         this.baseUrl = baseUrl;
@@ -147,8 +152,18 @@ public class DevProvisioningService {
             user.setSenha(encoder.encode(UUID.randomUUID().toString()));
         }
 
-        user.addRole(Role.of("ROLE_DEVELOPER"));
+        user.addRole(resolveDeveloperRole());
         usuarioRepo.save(user);
+    }
+
+    private Role resolveDeveloperRole() {
+        return List.of("ROLE_DEVELOPER", "DEVELOPER", "ROLE_DEV", "DEV")
+                .stream()
+                .map(roleRepository::findByNome)
+                .flatMap(Optional::stream)
+                .findFirst()
+                .orElseThrow(() ->
+                        new IllegalStateException("Nenhuma role de desenvolvedor encontrada na tabela roles."));
     }
 
     private static String randomCode6() {

@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.security.core.Authentication;
@@ -47,12 +48,12 @@ public class BrandingModelAdvice {
 
     public BrandingModelAdvice(AppSettingService settings,
                                ResourceLoader resourceLoader,
-                               UsuarioRepository usuarios,
-                               CustomerRepository customers) {
+                               ObjectProvider<UsuarioRepository> usuariosProvider,
+                               ObjectProvider<CustomerRepository> customersProvider) {
         this.settings = settings;
         this.resourceLoader = resourceLoader;
-        this.usuarios = usuarios;
-        this.customers = customers;
+        this.usuarios = usuariosProvider.getIfAvailable();
+        this.customers = customersProvider.getIfAvailable();
     }
 
     @ModelAttribute
@@ -123,9 +124,12 @@ public class BrandingModelAdvice {
         }
 
         model.addAttribute("headerUserAuthenticated", true);
-        UsuarioEntity usuario = usuarios.findByEmailOrCpf(identity).orElse(null);
-        if (usuario == null && !authEmail.isBlank()) {
-            usuario = usuarios.findByEmailIgnoreCase(authEmail).orElse(null);
+        UsuarioEntity usuario = null;
+        if (usuarios != null) {
+            usuario = usuarios.findByEmailOrCpf(identity).orElse(null);
+            if (usuario == null && !authEmail.isBlank()) {
+                usuario = usuarios.findByEmailIgnoreCase(authEmail).orElse(null);
+            }
         }
         if (usuario != null) {
             String displayName = firstNonBlank(usuario.getNome(), usuario.getEmail(), identity);
@@ -136,7 +140,7 @@ public class BrandingModelAdvice {
         }
 
         String customerEmail = !authEmail.isBlank() ? authEmail : (identity.contains("@") ? identity.toLowerCase() : "");
-        if (!customerEmail.isBlank()) {
+        if (!customerEmail.isBlank() && customers != null) {
             CustomerEntity customer = customers.findByEmail(customerEmail).orElse(null);
             if (customer != null) {
                 String displayName = firstNonBlank(customer.getNome(), customer.getEmail(), customerEmail);

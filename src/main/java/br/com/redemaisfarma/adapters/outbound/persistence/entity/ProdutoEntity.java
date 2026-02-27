@@ -59,6 +59,9 @@ public class ProdutoEntity {
     private String categoria;
     @Column(name="codigo_barras")
     private String codigoBarras;
+    @Enumerated(value=EnumType.STRING)
+    @Column(name="metodo_leitura_codigo_barras", length=32)
+    private MetodoLeituraCodigoBarras metodoLeituraCodigoBarras;
     @Column(name="codigo_original")
     private Long codigoOriginal;
     @Column(name="unidade")
@@ -119,6 +122,9 @@ public class ProdutoEntity {
         }
         if (this.status == null) {
             this.status = ProdutoStatus.IMPORTADO;
+        }
+        if (this.metodoLeituraCodigoBarras == null) {
+            this.metodoLeituraCodigoBarras = MetodoLeituraCodigoBarras.DESCONHECIDO;
         }
         this.garantirHashLegado();
     }
@@ -234,6 +240,14 @@ public class ProdutoEntity {
 
     public void setCodigoBarras(String codigoBarras) {
         this.codigoBarras = codigoBarras;
+    }
+
+    public MetodoLeituraCodigoBarras getMetodoLeituraCodigoBarras() {
+        return this.metodoLeituraCodigoBarras;
+    }
+
+    public void setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras metodoLeituraCodigoBarras) {
+        this.metodoLeituraCodigoBarras = metodoLeituraCodigoBarras;
     }
 
     public Long getCodigoOriginal() {
@@ -419,4 +433,3 @@ public class ProdutoEntity {
         return Objects.hash(this.id);
     }
 }
-

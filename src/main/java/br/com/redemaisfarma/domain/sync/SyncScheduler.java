@@ -3,6 +3,7 @@ package br.com.redemaisfarma.domain.sync;
 
 import br.com.redemaisfarma.adapters.outbound.legacy.dto.LegacyProdutoDTO;
 import br.com.redemaisfarma.adapters.outbound.legacy.port.LegacyProdutoPort;
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.MetodoLeituraCodigoBarras;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import org.slf4j.Logger;
@@ -73,6 +74,7 @@ public class SyncScheduler {
                 p.setNome(r.nome());
                 p.setDescricao(r.apresentacao());
                 p.setCodigoBarras(r.ean());
+                p.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.LEGADO);
                 p.setPrecoVenda(r.precoVenda());
                 p.setPrecoPromocional(zeroToNull(r.precoPromocional()));
                 p.setEstoque(Math.max(0, r.estoque()));

@@ -15,8 +15,9 @@
     const title = item.titulo ?? item.nome ?? item.descricao ?? 'Produto';
     const img   = item.imagemUrl ?? item.imagem ?? '/img/placeholder.png';
     const preco = item.precoPromocional ?? item.precoVenda ?? item.preco ?? 0;
-    const id    = item.id ?? item.codigo ?? title;
-    const link  = item.link ?? (item.id ? `/produtos/${item.id}` : '#');
+    const entityId = item.entityId ?? item.id;
+    const id    = entityId ?? item.codigo ?? title;
+    const link  = item.link ?? (entityId ? `/produtos/${entityId}` : '#');
     return { id, title, img, preco, link };
   };
 
@@ -59,7 +60,7 @@
 
   const tryFetch = async (page = 1, limit = 12) => {
     try {
-      const res = await fetch(`/api/home/destaques?page=${page}&limit=${limit}`, {
+      const res = await fetch(`/api/public/produtos/destaques?limit=${limit}`, {
         headers: { 'Accept': 'application/json' },
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);

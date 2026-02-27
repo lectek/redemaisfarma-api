@@ -1,6 +1,7 @@
 package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.MetodoLeituraCodigoBarras;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.ProdutoJpaRepository;
 import br.com.redemaisfarma.application.dto.request.AdminProdutoRequestDTO;
@@ -65,6 +66,7 @@ public class ProdutoAdminRestController {
         ensureImageWhenActive(dto);
         ensureUniqueName(dto, null);
         ProdutoEntity entity = ProdutoMapper.toEntity(toDomain(dto));
+        entity.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.API);
         entity.setStatus(ProdutoStatus.IMPORTADO);
         entity.setDataImportacao(LocalDateTime.now());
         ProdutoEntity salvo = repo.save(entity);
@@ -87,6 +89,9 @@ public class ProdutoAdminRestController {
                 .map(atual -> {
                     Produto src = toDomain(dto);
                     ProdutoMapper.updateEntity(atual, src);
+                    if (dto.getCodigoBarras() != null && !dto.getCodigoBarras().isBlank()) {
+                        atual.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.API);
+                    }
                     atual.setUpdatedAt(LocalDateTime.now());
                     ProdutoEntity salvo = repo.save(atual);
                     return ResponseEntity.ok(toResponse(salvo));

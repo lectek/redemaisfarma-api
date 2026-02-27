@@ -3,13 +3,16 @@ package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 import br.com.redemaisfarma.adapters.outbound.legacy.entity.ProdutoLegacyEntity;
 import br.com.redemaisfarma.adapters.outbound.legacy.repository.ProdutoLegacyRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.MetodoLeituraCodigoBarras;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCategoriaRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import br.com.redemaisfarma.application.core.media.ImageStorageService;
 import br.com.redemaisfarma.application.service.EstoqueFisicoCsvService;
+import br.com.redemaisfarma.application.service.EstoqueFisicoImportService;
 import br.com.redemaisfarma.application.service.ProdutoAdminService;
 import br.com.redemaisfarma.application.service.SincronizacaoCatalogoService;
+import br.com.redemaisfarma.domain.support.BarcodeNormalizer;
 import lombok.Generated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,13 +58,14 @@ public class ProdutoAdminPageController {
     private final ProdutoCategoriaRepository categoriaRepository;
     private final ImageStorageService imageStorageService;
     private final EstoqueFisicoCsvService estoqueFisicoCsvService;
+    private final ObjectProvider<EstoqueFisicoImportService> estoqueImportServiceProvider;
     private final ObjectProvider<ProdutoLegacyRepository> legacyRepositoryProvider;
     private final ObjectProvider<SincronizacaoCatalogoService> catalogSyncProvider;
 
     @GetMapping
     public String list(
-            @RequestParam(required = false) String q,
-            @RequestParam(required = false) String categoria,
+            @RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "categoria", required = false) String categoria,
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
             Model model
     ) {
@@ -77,9 +81,9 @@ public class ProdutoAdminPageController {
 
     @GetMapping(value = "/export.csv", produces = "text/csv")
     public ResponseEntity<StreamingResponseBody> export(
-            @RequestParam(required = false) String q,
-            @RequestParam(required = false) String categoria,
-            @RequestParam(defaultValue = "2000") int limit
+            @RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "categoria", required = false) String categoria,
+            @RequestParam(name = "limit", defaultValue = "2000") int limit
     ) {
         int safeLimit = Math.max(1, Math.min(limit, 50_000));
         String ts = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"));
@@ -159,6 +163,9 @@ public class ProdutoAdminPageController {
         if (produto.getDataCadastro() == null) {
             produto.setDataCadastro(LocalDate.now());
         }
+        if (produto.getMetodoLeituraCodigoBarras() == null) {
+            produto.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.MANUAL);
+        }
         produto.setImagem(null);
         produto.setStatus(ProdutoStatus.IMPORTADO);
         produto.setPublicadoEm(null);
@@ -201,7 +208,7 @@ public class ProdutoAdminPageController {
     @ResponseBody
     public List<ProdutoLookupItem> buscaRapida(
             @RequestParam("q") String q,
-            @RequestParam(defaultValue = "8") int limit
+            @RequestParam(name = "limit", defaultValue = "8") int limit
     ) {
         String termo = this.normalize(q);
         if (termo.isBlank()) {
@@ -268,42 +275,13 @@ public class ProdutoAdminPageController {
     @GetMapping(value = "/nao-prontos", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ProdutoLookupPage listarNaoProntos(
-            @RequestParam(required = false) String q,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size
+            @RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "12") int size
     ) {
         int safePage = Math.max(page, 0);
         int safeSize = Math.max(1, Math.min(size, 40));
-
-        List<EstoqueFisicoCsvService.EstoqueItem> base = this.estoqueFisicoCsvService.search(q);
-        if (base.isEmpty()) {
-            return new ProdutoLookupPage(List.of(), safePage, safeSize, 0, false);
-        }
-
-        List<ProdutoEntity> catalogo = this.produtoRepository.findAll();
-        LinkedHashMap<Long, ProdutoEntity> byLegacy = new LinkedHashMap<>();
-        LinkedHashMap<String, ProdutoEntity> byBarcode = new LinkedHashMap<>();
-        for (ProdutoEntity produto : catalogo) {
-            if (produto == null) {
-                continue;
-            }
-            if (produto.getLegacyId() != null) {
-                byLegacy.putIfAbsent(produto.getLegacyId(), produto);
-            }
-            String barcode = this.normalizeBarcode(produto.getCodigoBarras());
-            if (!barcode.isBlank()) {
-                byBarcode.putIfAbsent(barcode, produto);
-            }
-        }
-
-        List<ProdutoLookupItem> naoProntos = new ArrayList<>();
-        for (EstoqueFisicoCsvService.EstoqueItem stock : base) {
-            ProdutoEntity existente = this.findFirstMatch(stock, byLegacy, byBarcode);
-            if (this.isReadyForSale(existente)) {
-                continue;
-            }
-            naoProntos.add(this.buildPendingFromStock(stock, existente));
-        }
+        List<ProdutoLookupItem> naoProntos = this.resolveNaoProntos(q);
 
         int from = safePage * safeSize;
         if (from >= naoProntos.size()) {
@@ -314,6 +292,15 @@ public class ProdutoAdminPageController {
         boolean hasNext = to < naoProntos.size();
 
         return new ProdutoLookupPage(content, safePage, safeSize, naoProntos.size(), hasNext);
+    }
+
+    @GetMapping("/nao-prontos/todos")
+    public String listarNaoProntosTodos(@RequestParam(name = "q", required = false) String q, Model model) {
+        List<ProdutoLookupItem> naoProntos = this.resolveNaoProntos(q);
+        model.addAttribute("pendingItems", naoProntos);
+        model.addAttribute("pendingTotal", naoProntos.size());
+        model.addAttribute("q", q == null ? "" : q.trim());
+        return "pages/admin/produtos/nao-prontos-todos";
     }
 
     @PostMapping("/sincronizar-estoque")
@@ -339,13 +326,36 @@ public class ProdutoAdminPageController {
         return "redirect:/admin/produtos";
     }
 
+    @PostMapping("/importar-estoque-fisico")
+    public String importarEstoqueFisico(RedirectAttributes ra) {
+        EstoqueFisicoImportService importService = this.estoqueImportServiceProvider.getIfAvailable();
+        if (importService == null) {
+            ra.addFlashAttribute("warning", "Importacao CSV indisponivel no ambiente atual.");
+            return "redirect:/admin/produtos/novo";
+        }
+
+        try {
+            EstoqueFisicoImportService.ImportacaoResumo resumo = importService.importarTodosComoNaoDisponiveis();
+            ra.addFlashAttribute("success",
+                    "Importacao concluida: lidos " + resumo.lidos()
+                            + ", inseridos " + resumo.inseridos()
+                            + ", atualizados " + resumo.atualizados()
+                            + ", ignorados " + resumo.ignorados()
+                            + ", erros " + resumo.erros() + ".");
+        } catch (Exception ex) {
+            log.error("[admin-produto] falha ao importar estoque fisico CSV", ex);
+            ra.addFlashAttribute("error", "Falha ao importar estoque fisico. Verifique o arquivo CSV.");
+        }
+        return "redirect:/admin/produtos/novo";
+    }
+
     @GetMapping("/form")
     public String redirectFormToNovo() {
         return "redirect:/admin/produtos/novo";
     }
 
     @GetMapping("/{id}/editar")
-    public String editarProdutoPage(@PathVariable Long id, Model model) {
+    public String editarProdutoPage(@PathVariable("id") Long id, Model model) {
         model.addAttribute("produtoId", id);
         this.produtoRepository.findById(id).ifPresent(produto -> model.addAttribute("produto", produto));
         model.addAttribute("categorias", this.resolveCategorias());
@@ -365,7 +375,7 @@ public class ProdutoAdminPageController {
     }
 
     private String normalizeBarcode(String value) {
-        return this.normalize(value).replaceAll("\\D+", "");
+        return BarcodeNormalizer.normalize(value);
     }
 
     private boolean isPositivePrice(BigDecimal value) {
@@ -402,6 +412,39 @@ public class ProdutoAdminPageController {
             }
         }
         return null;
+    }
+
+    private List<ProdutoLookupItem> resolveNaoProntos(String q) {
+        List<EstoqueFisicoCsvService.EstoqueItem> base = this.estoqueFisicoCsvService.search(q);
+        if (base == null || base.isEmpty()) {
+            return List.of();
+        }
+
+        List<ProdutoEntity> catalogo = this.produtoRepository.findAll();
+        LinkedHashMap<Long, ProdutoEntity> byLegacy = new LinkedHashMap<>();
+        LinkedHashMap<String, ProdutoEntity> byBarcode = new LinkedHashMap<>();
+        for (ProdutoEntity produto : catalogo) {
+            if (produto == null) {
+                continue;
+            }
+            if (produto.getLegacyId() != null) {
+                byLegacy.putIfAbsent(produto.getLegacyId(), produto);
+            }
+            String barcode = this.normalizeBarcode(produto.getCodigoBarras());
+            if (!barcode.isBlank()) {
+                byBarcode.putIfAbsent(barcode, produto);
+            }
+        }
+
+        List<ProdutoLookupItem> naoProntos = new ArrayList<>();
+        for (EstoqueFisicoCsvService.EstoqueItem stock : base) {
+            ProdutoEntity existente = this.findFirstMatch(stock, byLegacy, byBarcode);
+            if (this.isReadyForSale(existente)) {
+                continue;
+            }
+            naoProntos.add(this.buildPendingFromStock(stock, existente));
+        }
+        return naoProntos;
     }
 
     private ProdutoLookupItem buildPendingFromStock(EstoqueFisicoCsvService.EstoqueItem stock, ProdutoEntity existente) {
@@ -546,6 +589,7 @@ public class ProdutoAdminPageController {
                                       ProdutoCategoriaRepository categoriaRepository,
                                       ImageStorageService imageStorageService,
                                       EstoqueFisicoCsvService estoqueFisicoCsvService,
+                                      ObjectProvider<EstoqueFisicoImportService> estoqueImportServiceProvider,
                                       ObjectProvider<ProdutoLegacyRepository> legacyRepositoryProvider,
                                       ObjectProvider<SincronizacaoCatalogoService> catalogSyncProvider) {
         this.adminService = adminService;
@@ -553,6 +597,7 @@ public class ProdutoAdminPageController {
         this.categoriaRepository = categoriaRepository;
         this.imageStorageService = imageStorageService;
         this.estoqueFisicoCsvService = estoqueFisicoCsvService;
+        this.estoqueImportServiceProvider = estoqueImportServiceProvider;
         this.legacyRepositoryProvider = legacyRepositoryProvider;
         this.catalogSyncProvider = catalogSyncProvider;
     }

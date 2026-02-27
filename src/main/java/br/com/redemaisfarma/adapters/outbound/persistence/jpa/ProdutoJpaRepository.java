@@ -89,6 +89,22 @@ public interface ProdutoJpaRepository extends JpaRepository<ProdutoEntity, Long>
            """)
     List<String> findDistinctCategorias();
 
+    @Query("""
+           SELECT p FROM ProdutoEntity p
+            WHERE p.disponivel = true
+              AND p.estoque > 0
+              AND p.precoVenda > 0
+              AND (p.publicadoEm IS NULL OR p.publicadoEm <= CURRENT_TIMESTAMP)
+              AND (p.despublicadoEm IS NULL OR p.despublicadoEm > CURRENT_TIMESTAMP)
+              AND (
+                :q IS NULL
+                OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :q, '%'))
+                OR LOWER(p.descricao) LIKE LOWER(CONCAT('%', :q, '%'))
+                OR p.codigoBarras LIKE CONCAT('%', :q, '%')
+              )
+           """)
+    Page<ProdutoEntity> searchPublicPage(@Param("q") String q, Pageable pageable);
+
     default Page<ProdutoEntity> searchPage(String q, Pageable pageable) {
         if (q == null || q.isBlank()) {
             return this.findAll(pageable);

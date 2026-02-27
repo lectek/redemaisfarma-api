@@ -60,6 +60,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Validated
 public class ClienteSelfApiController {
     private static final long AVATAR_MAX_BYTES = 2L * 1024L * 1024L;
+    private static final String DESCONHECIDO = "DESCONHECIDO";
 
     private final UsuarioRepository usuarioRepository;
     private final PedidoRepository pedidoRepository;
@@ -388,7 +389,7 @@ public class ClienteSelfApiController {
     }
 
     private String normalizeCpf(String value) {
-        return value == null ? "" : value.replaceAll("[^0-9]", "");
+        return value == null ? "" : value.replaceAll("\\D", "");
     }
 
     private String normalizarTelefone(String telefone) {
@@ -568,7 +569,7 @@ public class ClienteSelfApiController {
                     p.getId(),
                     p.getData(),
                     p.getTotal(),
-                    p.getStatus() != null ? p.getStatus().name() : "DESCONHECIDO",
+                    p.getStatus() != null ? p.getStatus().name() : DESCONHECIDO,
                     resolveMetodoLabel(p, paymentMethodService)
             );
         }
@@ -603,7 +604,7 @@ public class ClienteSelfApiController {
                     p.getId(),
                     p.getData(),
                     p.getTotal(),
-                    p.getStatus() != null ? p.getStatus().name() : "DESCONHECIDO",
+                    p.getStatus() != null ? p.getStatus().name() : DESCONHECIDO,
                     resolveMetodoLabel(p, paymentMethodService),
                     itens
             );
@@ -614,6 +615,6 @@ public class ClienteSelfApiController {
         if (p.getMetodoPagamento() != null && !p.getMetodoPagamento().isBlank()) {
             return paymentMethodService.resolveLabel(p.getMetodoPagamento());
         }
-        return p.getTipoPagamento() != null ? p.getTipoPagamento().name() : "DESCONHECIDO";
+        return p.getTipoPagamento() != null ? p.getTipoPagamento().name() : DESCONHECIDO;
     }
 }

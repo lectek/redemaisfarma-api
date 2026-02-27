@@ -25,7 +25,7 @@ const imgOrPlaceholder = (url) => {
 };
 
 // rota de produto (ajuste se for /produto/{id})
-const produtoHref = (p) => `/produto/${encodeURIComponent(p.id ?? p.entityId ?? '')}`;
+const produtoHref = (p) => `/produto/${encodeURIComponent(p.entityId ?? p.id ?? '')}`;
 
 function escapeHtml(s){
   return String(s ?? '').replace(/[&<>"']/g, m => ({

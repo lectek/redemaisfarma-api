@@ -75,7 +75,7 @@ public class ProdutosPublicApi {
         Sort safeSort = buildSafeSort(sort, dir);
         Pageable pageable = PageRequest.of(page, size, safeSort);
 
-        Page<ProdutoEntity> entities = repo.searchPage(term, pageable);
+        Page<ProdutoEntity> entities = repo.searchPublicPage(term, pageable);
         Page<ProdutoResponseDTO> body = entities.map(ProdutoRestMapper::toResponse);
 
         return ResponseEntity.ok()
@@ -157,7 +157,12 @@ public class ProdutosPublicApi {
         if (!SORT_WHITELIST.contains(candidate)) {
             candidate = "nome";
         }
-        Sort s = Sort.by(candidate);
+        String entityField = switch (candidate) {
+            case "preco" -> "precoVenda";
+            case "dataAtualizacao" -> "updatedAt";
+            default -> "nome";
+        };
+        Sort s = Sort.by(entityField);
         return "desc".equalsIgnoreCase(dir) ? s.descending() : s.ascending();
     }
 }

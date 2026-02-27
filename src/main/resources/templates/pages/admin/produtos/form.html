@@ -19,6 +19,9 @@
       <form th:if="${legacySyncEnabled}" th:action="@{/admin/produtos/sincronizar-estoque}" method="post">
         <button class="btn btn-ghost" type="submit">Sincronizar estoque fisico</button>
       </form>
+      <form th:action="@{/admin/produtos/importar-estoque-fisico}" method="post">
+        <button class="btn btn-ghost" type="submit">Importar CSV como nao disponivel</button>
+      </form>
       <a class="btn btn-ghost" th:href="@{/admin/produtos}">Voltar</a>
     </div>
   </div>
@@ -74,6 +77,7 @@
     <div id="pendingProdutoResultados" class="stack"></div>
     <div class="form-actions">
       <button id="pendingProdutoLoadMore" type="button" class="btn btn-ghost" style="display:none;">Carregar mais</button>
+      <a id="pendingProdutoShowAll" class="btn btn-ghost" th:href="@{/admin/produtos/nao-prontos/todos}">Mostrar todos</a>
     </div>
   </div>
 
@@ -81,6 +85,7 @@
     <form class="form-grid" th:action="@{/admin/produtos}" method="post" th:object="${produto}" enctype="multipart/form-data">
       <input type="hidden" th:field="*{id}"/>
       <input type="hidden" th:field="*{legacyId}" id="legacyId"/>
+      <input type="hidden" th:field="*{metodoLeituraCodigoBarras}" id="metodoLeituraCodigoBarras" value="MANUAL"/>
       <div class="form-group">
         <label>Nome</label>
         <input class="input" th:field="*{nome}" required/>

@@ -20,6 +20,7 @@
     estoque: document.getElementById("estoque"),
     categoria: document.getElementById("categoria"),
     codigoBarras: document.getElementById("codigoBarras"),
+    metodoLeituraCodigoBarras: document.getElementById("metodoLeituraCodigoBarras"),
     fabricante: document.getElementById("fabricante"),
     unidade: document.getElementById("unidade"),
     disponivel: document.getElementById("disponivel")
@@ -98,7 +99,8 @@
   };
 
   const applySuggestion = (item) => {
-    const fromPhysicalStock = String(item?.origem || "").toUpperCase() === "ESTOQUE_FISICO";
+    const origem = String(item?.origem || "").toUpperCase();
+    const fromPhysicalStock = origem === "ESTOQUE_FISICO" || origem === "CATALOGO_PENDENTE";
 
     const formHasData = [
       fields.nome,
@@ -123,6 +125,10 @@
     setNumber(fields.estoque, item.estoque);
     setSelect(fields.categoria, item.categoria);
     setText(fields.codigoBarras, item.codigoBarras);
+    setText(
+      fields.metodoLeituraCodigoBarras,
+      fromPhysicalStock ? "CSV_ESTOQUE" : "MANUAL"
+    );
     setText(fields.fabricante, item.fabricante);
     setText(fields.unidade, item.unidade);
     if (fields.disponivel && item.estoque != null) {

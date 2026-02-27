@@ -7,6 +7,7 @@
 package br.com.redemaisfarma.adapters.outbound.legacy.mapper;
 
 import br.com.redemaisfarma.adapters.outbound.legacy.entity.ProdutoLegacyEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.MetodoLeituraCodigoBarras;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -30,6 +31,7 @@ public class ProdutoLegacyManualMapper {
         e.setDescricao(desc);
         String cb = ProdutoLegacyManualMapper.normalizeEan(legacy.getCodigoBarras());
         e.setCodigoBarras(ProdutoLegacyManualMapper.clampLen(cb, 50));
+        e.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.LEGADO);
         BigDecimal pv = ProdutoLegacyManualMapper.coalesce(legacy.getPrecoVenda(), legacy.getPrecoPromocao());
         pv = ProdutoLegacyManualMapper.ensureMin(ProdutoLegacyManualMapper.scale2(pv), new BigDecimal("0.01"));
         e.setPrecoVenda(pv);
@@ -111,4 +113,3 @@ public class ProdutoLegacyManualMapper {
         return digits.isEmpty() ? null : digits;
     }
 }
-

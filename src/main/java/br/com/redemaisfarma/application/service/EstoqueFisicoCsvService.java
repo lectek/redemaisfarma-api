@@ -1,5 +1,6 @@
 package br.com.redemaisfarma.application.service;
 
+import br.com.redemaisfarma.domain.support.BarcodeNormalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -222,22 +223,7 @@ public class EstoqueFisicoCsvService {
     }
 
     private static String normalizeBarcode(String value) {
-        String raw = normalize(value);
-        if (raw.isBlank()) {
-            return "";
-        }
-
-        String cleaned = raw.replace(" ", "");
-        if (cleaned.contains("E") || cleaned.contains("e")) {
-            try {
-                String decimalNotation = cleaned.replace(".", "").replace(",", ".");
-                String plain = new BigDecimal(decimalNotation).toPlainString();
-                return plain.replaceAll("\\D+", "");
-            } catch (Exception ex) {
-                // fallback para limpeza simples
-            }
-        }
-        return cleaned.replaceAll("\\D+", "");
+        return BarcodeNormalizer.normalize(value);
     }
 
     public record EstoqueItem(

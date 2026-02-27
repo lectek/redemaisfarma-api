@@ -2,6 +2,7 @@
 package br.com.redemaisfarma.domain.sync;
 
 import br.com.redemaisfarma.adapters.outbound.firebird.FirebirdProdutoDao;
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.MetodoLeituraCodigoBarras;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
@@ -94,7 +95,12 @@ public class ImportProdutosService {
 
             if (p.getId() == null) {
                 p.setCodigoBarras(ean);
+                p.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.LEGADO);
                 p.setDataCadastro(LocalDate.now());
+            }
+
+            if (p.getMetodoLeituraCodigoBarras() == null) {
+                p.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.LEGADO);
             }
 
             p.setLegacyId(fb.produtoId() != null ? fb.produtoId().longValue() : null);

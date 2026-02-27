@@ -1,3 +1,5 @@
+const API_BASE = "/api/admin/produtos";
+
 document.addEventListener("DOMContentLoaded", () => {
   carregarProdutos();
 
@@ -11,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
       imagem: document.getElementById("imagem").value
     };
 
-    const response = await fetch("/api/produtos", {
+    const response = await fetch(API_BASE, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(produto)
@@ -31,8 +33,9 @@ async function carregarProdutos() {
   const container = document.getElementById("lista-produtos");
   container.innerHTML = "<p>Carregando...</p>";
 
-  const response = await fetch("/api/produtos");
-  const produtos = await response.json();
+  const response = await fetch(API_BASE);
+  const data = await response.json();
+  const produtos = Array.isArray(data) ? data : (data.content || []);
 
   container.innerHTML = produtos.map(prod => `
     <div class="card">

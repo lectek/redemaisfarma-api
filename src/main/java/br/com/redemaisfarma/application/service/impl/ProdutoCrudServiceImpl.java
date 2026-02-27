@@ -14,6 +14,7 @@
 package br.com.redemaisfarma.application.service.impl;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.MetodoLeituraCodigoBarras;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import br.com.redemaisfarma.application.dto.request.CadastroProdutoRequestDTO;
@@ -78,6 +79,7 @@ implements ProdutoService {
         }
         if (produto.getCodigoBarras() != null) {
             entity.setCodigoBarras(produto.getCodigoBarras());
+            entity.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.MANUAL);
         }
         if (produto.getPrecoVenda() != null) {
             entity.setPrecoVenda(produto.getPrecoVenda());
@@ -159,6 +161,9 @@ implements ProdutoService {
         e.setNome(d.getNome());
         e.setDescricao(d.getDescricao());
         e.setCodigoBarras(d.getCodigoBarras());
+        if (d.getCodigoBarras() != null && !d.getCodigoBarras().isBlank()) {
+            e.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.MANUAL);
+        }
         e.setPrecoVenda(d.getPrecoVenda());
         e.setCategoria(d.getCategoria());
         e.setEstoque(d.getEstoque());
@@ -182,4 +187,3 @@ implements ProdutoService {
         this.repository = repository;
     }
 }
-

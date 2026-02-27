@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Produtos nao prontos - Admin</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+</head>
+<body class="body-flex admin-page">
+<header th:replace="~{fragments/admin-header :: adminHeader}"></header>
+
+<div class="layout layout--with-sidebar">
+  <aside th:replace="~{fragments/admin-sidebar :: adminSidebar('produtos')}"></aside>
+
+  <main id="main-content" class="container stack mt-4 mb-6">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Produtos nao prontos para venda</h1>
+        <p class="page-lead">Visao completa dos itens do estoque fisico que ainda precisam de ajuste para venda online.</p>
+      </div>
+      <div class="page-actions">
+        <a class="btn btn-ghost" th:href="@{/admin/produtos/novo}">Voltar ao cadastro</a>
+        <a class="btn btn-primary" th:href="@{/admin/produtos}">Ver catalogo completo</a>
+      </div>
+    </div>
+
+    <form class="filter-bar card p-16 mb-4" th:action="@{/admin/produtos/nao-prontos/todos}" method="get">
+      <input class="input" name="q" type="search" placeholder="Filtrar por nome, EAN ou codigo interno" th:value="${q}" />
+      <button class="btn" type="submit">Buscar</button>
+      <a class="btn btn-ghost" th:href="@{/admin/produtos/nao-prontos/todos}">Limpar</a>
+    </form>
+
+    <section class="stat-grid">
+      <article class="stat-card">
+        <span class="stat-label">Total de produtos nao prontos</span>
+        <span class="stat-value" th:text="${pendingTotal}">0</span>
+        <span class="stat-hint">Itens listados nesta pagina</span>
+      </article>
+    </section>
+
+    <section class="card table-responsive">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Categoria</th>
+          <th>Codigo de barras</th>
+          <th>Estoque</th>
+          <th>Origem</th>
+          <th>Acoes</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${pendingItems}">
+          <td th:text="${item.nome}">Produto</td>
+          <td th:text="${item.categoria}">Categoria</td>
+          <td th:text="${item.codigoBarras} ?: '-'">-</td>
+          <td th:text="${item.estoque} ?: 0">0</td>
+          <td>
+            <span th:if="${item.origem == 'ESTOQUE_FISICO'}" class="badge badge--warning">Estoque fisico</span>
+            <span th:if="${item.origem == 'CATALOGO_PENDENTE'}" class="badge badge--success">Catalogo pendente</span>
+            <span th:if="${item.origem != 'ESTOQUE_FISICO' and item.origem != 'CATALOGO_PENDENTE'}" class="badge">Catalogo</span>
+          </td>
+          <td class="table-actions">
+            <a th:if="${item.id != null}" class="btn btn-ghost" th:href="@{|/admin/produtos/${item.id}/editar|}">Abrir edicao</a>
+            <span th:if="${item.id == null}" class="badge badge--warning">Nao cadastrado no catalogo</span>
+          </td>
+        </tr>
+
+        <tr th:if="${#lists.isEmpty(pendingItems)}">
+          <td colspan="6" class="text-center text-muted">Nenhum produto nao pronto encontrado para o filtro informado.</td>
+        </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</div>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

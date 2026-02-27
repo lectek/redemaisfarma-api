@@ -129,14 +129,14 @@ public class SecurityMvcConfig {
                 auth.requestMatchers(HttpMethod.POST, "/clientes").permitAll();
                 auth.requestMatchers(HttpMethod.POST, "/login", "/auth/login").permitAll();
 
-                // (REMOVIDOS TODOS OS MATCHERS /admin E SUBROTAS)
                 // área do cliente permanece protegida por ROLE_CLIENTE
                 auth.requestMatchers("/cliente", "/cliente/**")
                         .hasAnyRole("CLIENTE", "DEVELOPER", "DEV", "ADMIN", "USER");
 
                 // qualquer outra rota exige autenticação
                 auth.requestMatchers("/admin/vendas/rapida", "/admin/vendas/rapida/**")
-                        .hasAnyRole("CAIXA", "DEV", "DEVELOPER");
+                        .hasAnyRole("ADMIN", "CAIXA", "DEV", "DEVELOPER");
+                auth.requestMatchers("/admin/**").hasRole("ADMIN");
 
                 auth.anyRequest().authenticated();
             })

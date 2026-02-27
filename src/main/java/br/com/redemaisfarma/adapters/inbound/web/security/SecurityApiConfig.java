@@ -75,6 +75,7 @@ public class SecurityApiConfig {
 
                 auth.requestMatchers("/api/dev/provision/verify").permitAll();
                 auth.requestMatchers(HttpMethod.GET, "/api/public/**", "/api/produtos/**").permitAll();
+                auth.requestMatchers(HttpMethod.POST, "/api/public/produtos/*/stock/subscribe").permitAll();
                 auth.requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll();
 
                 auth.requestMatchers("/api/admin/**").hasRole("ADMIN");

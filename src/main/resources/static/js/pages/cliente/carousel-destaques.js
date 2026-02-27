@@ -1,4 +1,5 @@
 // src/main/resources/static/js/components/carousel-destaques.js
+(() => {
 const API = "/api/public/produtos/destaques?limit=10";
 
 // se o backend mandar vm.destaque -> window.__DESTAQUES
@@ -33,7 +34,7 @@ const imgOrPlaceholder = (url) => {
 };
 
 // id público: nossa API retorna UUID; manter fallback se vier numérico
-const produtoHref = (p) => `/produtos/${encodeURIComponent(p.id ?? p.entityId ?? "")}`;
+const produtoHref = (p) => `/produtos/${encodeURIComponent(p.entityId ?? p.id ?? "")}`;
 
 function escapeHtml(s){
   return String(s ?? "").replace(/[&<>"']/g, m => ({
@@ -161,4 +162,5 @@ document.addEventListener("visibilitychange", () => {
   }
   render();
   start();
+})();
 })();

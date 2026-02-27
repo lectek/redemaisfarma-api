@@ -9,6 +9,8 @@
   <!-- CSS global com cache-busting -->
   <link rel="stylesheet"
         th:href="@{/css/main.css(v=${#dates.createNow().time})}"/>
+  <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}"/>
+  <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body class="body-flex">
 <header th:replace="~{fragments/header :: header}"></header>
