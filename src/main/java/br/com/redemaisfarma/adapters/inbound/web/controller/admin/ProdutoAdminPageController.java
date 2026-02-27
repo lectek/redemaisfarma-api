@@ -8,7 +8,6 @@ import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCategoriaRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import br.com.redemaisfarma.application.core.media.ImageStorageService;
-import br.com.redemaisfarma.application.service.EstoqueFisicoCsvService;
 import br.com.redemaisfarma.application.service.EstoqueFisicoImportService;
 import br.com.redemaisfarma.application.service.ProdutoAdminService;
 import br.com.redemaisfarma.application.service.SincronizacaoCatalogoService;
@@ -52,12 +51,13 @@ import java.util.Optional;
 public class ProdutoAdminPageController {
 
     private static final Logger log = LoggerFactory.getLogger(ProdutoAdminPageController.class);
+    private static final String CATEGORIA_ESTOQUE_FISICO = "Estoque fisico";
+    private static final int MAX_PENDING_ALL_LIMIT = 200_000;
 
     private final ProdutoAdminService adminService;
     private final ProdutoRepository produtoRepository;
     private final ProdutoCategoriaRepository categoriaRepository;
     private final ImageStorageService imageStorageService;
-    private final EstoqueFisicoCsvService estoqueFisicoCsvService;
     private final ObjectProvider<EstoqueFisicoImportService> estoqueImportServiceProvider;
     private final ObjectProvider<ProdutoLegacyRepository> legacyRepositoryProvider;
     private final ObjectProvider<SincronizacaoCatalogoService> catalogSyncProvider;
@@ -279,24 +279,26 @@ public class ProdutoAdminPageController {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "12") int size
     ) {
+        String termo = this.normalizeQuery(q);
         int safePage = Math.max(page, 0);
         int safeSize = Math.max(1, Math.min(size, 40));
-        List<ProdutoLookupItem> naoProntos = this.resolveNaoProntos(q);
+        Page<ProdutoEntity> result = this.produtoRepository.searchNaoDisponiveisByCategoria(
+                termo,
+                CATEGORIA_ESTOQUE_FISICO,
+                PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.ASC, "id"))
+        );
 
-        int from = safePage * safeSize;
-        if (from >= naoProntos.size()) {
-            return new ProdutoLookupPage(List.of(), safePage, safeSize, naoProntos.size(), false);
-        }
-        int to = Math.min(from + safeSize, naoProntos.size());
-        List<ProdutoLookupItem> content = naoProntos.subList(from, to);
-        boolean hasNext = to < naoProntos.size();
+        List<ProdutoLookupItem> content = result.getContent().stream()
+                .map(this::buildPendingFromDatabase)
+                .toList();
+        int total = (int) Math.min(result.getTotalElements(), Integer.MAX_VALUE);
 
-        return new ProdutoLookupPage(content, safePage, safeSize, naoProntos.size(), hasNext);
+        return new ProdutoLookupPage(content, safePage, safeSize, total, result.hasNext());
     }
 
     @GetMapping("/nao-prontos/todos")
     public String listarNaoProntosTodos(@RequestParam(name = "q", required = false) String q, Model model) {
-        List<ProdutoLookupItem> naoProntos = this.resolveNaoProntos(q);
+        List<ProdutoLookupItem> naoProntos = this.resolveNaoProntosFromDatabase(q, MAX_PENDING_ALL_LIMIT);
         model.addAttribute("pendingItems", naoProntos);
         model.addAttribute("pendingTotal", naoProntos.size());
         model.addAttribute("q", q == null ? "" : q.trim());
@@ -378,106 +380,61 @@ public class ProdutoAdminPageController {
         return BarcodeNormalizer.normalize(value);
     }
 
-    private boolean isPositivePrice(BigDecimal value) {
-        return value != null && value.compareTo(BigDecimal.ZERO) > 0;
+    private String normalizeQuery(String value) {
+        String termo = this.normalize(value);
+        return termo.isBlank() ? null : termo;
     }
 
-    private boolean isReadyForSale(ProdutoEntity produto) {
-        if (produto == null) {
-            return false;
-        }
-        return produto.getStatus() == ProdutoStatus.PUBLICADO
-                && Boolean.TRUE.equals(produto.getDisponivel())
-                && this.isPositivePrice(produto.getPrecoVenda())
-                && StringUtils.hasText(produto.getImagem())
-                && produto.getEstoque() != null
-                && produto.getEstoque() > 0;
-    }
+    private List<ProdutoLookupItem> resolveNaoProntosFromDatabase(String q, int limit) {
+        String termo = this.normalizeQuery(q);
+        int safeLimit = Math.max(1, Math.min(limit, MAX_PENDING_ALL_LIMIT));
+        List<ProdutoLookupItem> itens = new ArrayList<>(Math.min(safeLimit, 2_000));
+        int page = 0;
 
-    private ProdutoEntity findFirstMatch(
-            EstoqueFisicoCsvService.EstoqueItem stock,
-            LinkedHashMap<Long, ProdutoEntity> byLegacy,
-            LinkedHashMap<String, ProdutoEntity> byBarcode
-    ) {
-        if (stock.legacyId() != null) {
-            ProdutoEntity byLegacyId = byLegacy.get(stock.legacyId());
-            if (byLegacyId != null) {
-                return byLegacyId;
-            }
-        }
-        if (StringUtils.hasText(stock.codigoBarras())) {
-            ProdutoEntity byBar = byBarcode.get(this.normalizeBarcode(stock.codigoBarras()));
-            if (byBar != null) {
-                return byBar;
-            }
-        }
-        return null;
-    }
-
-    private List<ProdutoLookupItem> resolveNaoProntos(String q) {
-        List<EstoqueFisicoCsvService.EstoqueItem> base = this.estoqueFisicoCsvService.search(q);
-        if (base == null || base.isEmpty()) {
-            return List.of();
-        }
-
-        List<ProdutoEntity> catalogo = this.produtoRepository.findAll();
-        LinkedHashMap<Long, ProdutoEntity> byLegacy = new LinkedHashMap<>();
-        LinkedHashMap<String, ProdutoEntity> byBarcode = new LinkedHashMap<>();
-        for (ProdutoEntity produto : catalogo) {
-            if (produto == null) {
-                continue;
-            }
-            if (produto.getLegacyId() != null) {
-                byLegacy.putIfAbsent(produto.getLegacyId(), produto);
-            }
-            String barcode = this.normalizeBarcode(produto.getCodigoBarras());
-            if (!barcode.isBlank()) {
-                byBarcode.putIfAbsent(barcode, produto);
-            }
-        }
-
-        List<ProdutoLookupItem> naoProntos = new ArrayList<>();
-        for (EstoqueFisicoCsvService.EstoqueItem stock : base) {
-            ProdutoEntity existente = this.findFirstMatch(stock, byLegacy, byBarcode);
-            if (this.isReadyForSale(existente)) {
-                continue;
-            }
-            naoProntos.add(this.buildPendingFromStock(stock, existente));
-        }
-        return naoProntos;
-    }
-
-    private ProdutoLookupItem buildPendingFromStock(EstoqueFisicoCsvService.EstoqueItem stock, ProdutoEntity existente) {
-        if (existente != null) {
-            return new ProdutoLookupItem(
-                    existente.getId(),
-                    existente.getLegacyId() != null ? existente.getLegacyId() : stock.legacyId(),
-                    "CATALOGO_PENDENTE",
-                    StringUtils.hasText(existente.getNome()) ? existente.getNome() : stock.nome(),
-                    StringUtils.hasText(existente.getDescricao()) ? existente.getDescricao() : stock.nome(),
-                    StringUtils.hasText(existente.getCategoria()) ? existente.getCategoria() : "Estoque fisico",
-                    StringUtils.hasText(existente.getCodigoBarras()) ? existente.getCodigoBarras() : stock.codigoBarras(),
-                    existente.getPrecoVenda(),
-                    existente.getPrecoPromocional(),
-                    existente.getEstoque() != null ? existente.getEstoque() : stock.estoque(),
-                    StringUtils.hasText(existente.getFabricante()) ? existente.getFabricante() : stock.fabricante(),
-                    existente.getUnidade()
+        while (itens.size() < safeLimit) {
+            int pageSize = Math.min(1000, safeLimit - itens.size());
+            Page<ProdutoEntity> result = this.produtoRepository.searchNaoDisponiveisByCategoria(
+                    termo,
+                    CATEGORIA_ESTOQUE_FISICO,
+                    PageRequest.of(page, pageSize, Sort.by(Sort.Direction.ASC, "id"))
             );
+            if (result.isEmpty()) {
+                break;
+            }
+
+            for (ProdutoEntity entity : result.getContent()) {
+                if (entity == null) {
+                    continue;
+                }
+                if (itens.size() >= safeLimit) {
+                    break;
+                }
+                itens.add(this.buildPendingFromDatabase(entity));
+            }
+
+            if (!result.hasNext()) {
+                break;
+            }
+            page++;
         }
 
+        return itens;
+    }
+
+    private ProdutoLookupItem buildPendingFromDatabase(ProdutoEntity produto) {
         return new ProdutoLookupItem(
-                null,
-                stock.legacyId(),
-                "ESTOQUE_FISICO",
-                stock.nome(),
-                stock.nome(),
-                "Estoque fisico",
-                stock.codigoBarras(),
-                null,
-                null,
-                stock.estoque(),
-                stock.fabricante(),
-                ""
+                produto.getId(),
+                produto.getLegacyId(),
+                "CATALOGO_PENDENTE",
+                produto.getNome(),
+                StringUtils.hasText(produto.getDescricao()) ? produto.getDescricao() : produto.getNome(),
+                StringUtils.hasText(produto.getCategoria()) ? produto.getCategoria() : CATEGORIA_ESTOQUE_FISICO,
+                produto.getCodigoBarras(),
+                produto.getPrecoVenda(),
+                produto.getPrecoPromocional(),
+                produto.getEstoque(),
+                produto.getFabricante(),
+                produto.getUnidade()
         );
     }
 
@@ -588,7 +545,6 @@ public class ProdutoAdminPageController {
                                       ProdutoRepository produtoRepository,
                                       ProdutoCategoriaRepository categoriaRepository,
                                       ImageStorageService imageStorageService,
-                                      EstoqueFisicoCsvService estoqueFisicoCsvService,
                                       ObjectProvider<EstoqueFisicoImportService> estoqueImportServiceProvider,
                                       ObjectProvider<ProdutoLegacyRepository> legacyRepositoryProvider,
                                       ObjectProvider<SincronizacaoCatalogoService> catalogSyncProvider) {
@@ -596,7 +552,6 @@ public class ProdutoAdminPageController {
         this.produtoRepository = produtoRepository;
         this.categoriaRepository = categoriaRepository;
         this.imageStorageService = imageStorageService;
-        this.estoqueFisicoCsvService = estoqueFisicoCsvService;
         this.estoqueImportServiceProvider = estoqueImportServiceProvider;
         this.legacyRepositoryProvider = legacyRepositoryProvider;
         this.catalogSyncProvider = catalogSyncProvider;
