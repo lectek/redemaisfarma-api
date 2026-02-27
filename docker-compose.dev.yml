@@ -142,6 +142,7 @@ services:
 
       INTEGRATIONS_CLIENTE_BASE_URL: "http://cliente-mock:8080"
       INTEGRATIONS_CLIENTE_BASEURL: "http://cliente-mock:8080"
+      ESTOQUE_FISICO_CSV_PATH: "/data/Estoque Fisico.csv"
 
       LOG_PATH: "/tmp"
       ACCESS_FILE: "access.log"
@@ -175,6 +176,8 @@ services:
     networks: [backend-net]
     volumes:
       - app_logs_dev:/opt/app/logs
+      - "./Estoque Fisico.csv:/app/Estoque Fisico.csv:ro"
+      - "./Estoque Fisico.csv:/data/Estoque Fisico.csv:ro"
     # deploy.resources é ignorado fora do Swarm; manter comentado
     # deploy:
     #   resources:

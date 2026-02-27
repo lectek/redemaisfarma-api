@@ -3,6 +3,7 @@ package br.com.redemaisfarma.application.service;
 import br.com.redemaisfarma.domain.support.BarcodeNormalizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -21,10 +22,16 @@ import java.util.Locale;
 public class EstoqueFisicoCsvService {
 
     private static final Logger log = LoggerFactory.getLogger(EstoqueFisicoCsvService.class);
-    private static final Path CSV_PATH = Paths.get("Estoque Fisico.csv");
+    private final Path csvPath;
 
     private volatile long cachedLastModified = Long.MIN_VALUE;
     private volatile List<EstoqueItem> cachedItems = List.of();
+
+    public EstoqueFisicoCsvService(
+            @Value("${estoque-fisico.csv.path:Estoque Fisico.csv}") String csvPath
+    ) {
+        this.csvPath = Paths.get(csvPath);
+    }
 
     public List<EstoqueItem> search(String query) {
         List<EstoqueItem> source = this.loadCached();
@@ -38,16 +45,16 @@ public class EstoqueFisicoCsvService {
     }
 
     private List<EstoqueItem> loadCached() {
-        long lastModified = this.resolveLastModified(CSV_PATH);
+        long lastModified = this.resolveLastModified(this.csvPath);
         if (lastModified == this.cachedLastModified) {
             return this.cachedItems;
         }
         synchronized (this) {
-            long current = this.resolveLastModified(CSV_PATH);
+            long current = this.resolveLastModified(this.csvPath);
             if (current == this.cachedLastModified) {
                 return this.cachedItems;
             }
-            List<EstoqueItem> parsed = this.parseCsv(CSV_PATH);
+            List<EstoqueItem> parsed = this.parseCsv(this.csvPath);
             this.cachedItems = parsed;
             this.cachedLastModified = current;
             log.info("[estoque-csv] cache atualizado: {} itens", parsed.size());
