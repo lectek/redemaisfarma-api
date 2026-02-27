@@ -1,7 +1,9 @@
 package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
+import br.com.redemaisfarma.application.core.media.ImageStorageService;
 import br.com.redemaisfarma.application.core.settings.AppSettingService;
+import br.com.redemaisfarma.application.service.EstoqueFisicoCsvService;
 import br.com.redemaisfarma.application.service.ProdutoAdminService;
 import br.com.redemaisfarma.application.service.otp.OtpServicePort;
 import org.junit.jupiter.api.AfterEach;
@@ -47,6 +49,12 @@ class ProdutoAdminPageControllerTest {
 
     @MockBean
     private OtpServicePort otpServicePort;
+
+    @MockBean
+    private ImageStorageService imageStorageService;
+
+    @MockBean
+    private EstoqueFisicoCsvService estoqueFisicoCsvService;
 
     @MockBean
     private ThymeleafViewResolver thymeleafViewResolver;

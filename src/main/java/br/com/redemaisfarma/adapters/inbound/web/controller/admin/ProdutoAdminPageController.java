@@ -181,23 +181,11 @@ public class ProdutoAdminPageController {
             return "redirect:/admin/produtos/novo?erro=imagem_upload";
         }
 
-        boolean publicavel = Boolean.TRUE.equals(salvo.getDisponivel())
-                && this.isPositivePrice(salvo.getPrecoVenda())
-                && (salvo.getEstoque() != null && salvo.getEstoque() > 0)
-                && StringUtils.hasText(salvo.getImagem());
-
-        if (publicavel) {
-            salvo.setStatus(ProdutoStatus.PUBLICADO);
-            if (salvo.getPublicadoEm() == null) {
-                salvo.setPublicadoEm(LocalDateTime.now());
-            }
-        } else {
-            salvo.setStatus(ProdutoStatus.IMPORTADO);
-            salvo.setPublicadoEm(null);
-        }
+        salvo.setStatus(ProdutoStatus.IMPORTADO);
+        salvo.setPublicadoEm(null);
         produtoRepository.save(salvo);
 
-        ra.addFlashAttribute("success", "Produto criado com sucesso.");
+        ra.addFlashAttribute("success", "Produto criado em IMPORTADO. Valide e publique na edicao.");
         return "redirect:/admin/produtos/" + salvo.getId() + "/editar";
     }
 
@@ -359,6 +347,8 @@ public class ProdutoAdminPageController {
     @GetMapping("/{id}/editar")
     public String editarProdutoPage(@PathVariable Long id, Model model) {
         model.addAttribute("produtoId", id);
+        this.produtoRepository.findById(id).ifPresent(produto -> model.addAttribute("produto", produto));
+        model.addAttribute("categorias", this.resolveCategorias());
         return "pages/admin/produtos/editar";
     }
 

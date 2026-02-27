@@ -37,11 +37,14 @@ const $categoria = $('#categoria');
 const $estoque = $('#estoque');
 const $codigoBarras = $('#codigoBarras');
 const $disponivel = $('#disponivel');
+const $validador = $('#validador');
 
 const $status = $('#status');
 const $btnSalvar = $('#btn-salvar');
 const $btnGerarIA = $('#btn-gerar-ia');
 const $btnUploadImagem = $('#btn-upload-imagem');
+const $btnValidar = $('#btn-validar');
+const $btnPublicar = $('#btn-publicar');
 
 async function carregarProdutoSeNecessario() {
   // Se já veio do SSR, não precisa. Mantemos apenas como fallback
@@ -163,10 +166,61 @@ async function gerarIA() {
   }
 }
 
+function validadorAtual() {
+  const nome = ($validador?.value || '').trim();
+  return nome || 'admin-web';
+}
+
+function setFluxoButtonsDisabled(disabled) {
+  if ($btnValidar) $btnValidar.disabled = disabled;
+  if ($btnPublicar) $btnPublicar.disabled = disabled;
+}
+
+async function moverFluxo(acao) {
+  const id = $id?.value;
+  if (!id) return toast('Produto ainda nao salvo.', 'err');
+
+  const validador = encodeURIComponent(validadorAtual());
+  const endpoint = `/api/admin/produtos/${id}/${acao}?validador=${validador}`;
+  const acaoLabel = acao === 'validar' ? 'validando' : 'publicando';
+
+  setFluxoButtonsDisabled(true);
+  $status.textContent = `Fluxo: ${acaoLabel}...`;
+
+  try {
+    const r = await fetch(endpoint, withCsrf({ method: 'POST', credentials: 'same-origin' }));
+    if (!r.ok) throw new Error(await r.text());
+
+    if (acao === 'validar') {
+      $status.textContent = 'Fluxo: produto VALIDADO.';
+      toast('Produto validado!', 'ok');
+    } else {
+      $status.textContent = 'Fluxo: produto PUBLICADO.';
+      toast('Produto publicado!', 'ok');
+    }
+  } catch (e) {
+    console.error(e);
+    $status.textContent = `Erro ao ${acao}.`;
+    toast(`Falha ao ${acao} produto`, 'err');
+  } finally {
+    setFluxoButtonsDisabled(false);
+  }
+}
+
+async function validar() {
+  await moverFluxo('validar');
+}
+
+async function publicar() {
+  await moverFluxo('publicar');
+}
+
 // Listeners
 $btnSalvar?.addEventListener('click', salvar);
 $btnUploadImagem?.addEventListener('click', uploadImagem);
 $btnGerarIA?.addEventListener('click', gerarIA);
+$btnValidar?.addEventListener('click', validar);
+$btnPublicar?.addEventListener('click', publicar);
 
 // bootstrap
 carregarProdutoSeNecessario();

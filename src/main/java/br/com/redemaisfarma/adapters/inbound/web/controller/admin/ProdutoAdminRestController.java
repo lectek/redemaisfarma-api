@@ -3,7 +3,7 @@ package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.ProdutoJpaRepository;
-import br.com.redemaisfarma.application.dto.request.ProdutoRequestDTO;
+import br.com.redemaisfarma.application.dto.request.AdminProdutoRequestDTO;
 import br.com.redemaisfarma.application.dto.response.ProdutoResponseDTO;
 import br.com.redemaisfarma.application.core.media.ImageStorageService;
 import br.com.redemaisfarma.application.mapper.ProdutoMapper;
@@ -41,7 +41,7 @@ public class ProdutoAdminRestController {
     // ==================================================
     @GetMapping
     public Page<ProdutoResponseDTO> list(
-            @RequestParam(required = false) String q,
+            @RequestParam(name = "q", required = false) String q,
             Pageable pageable) {
         return repo.searchPage(q, pageable).map(this::toResponse);
     }
@@ -50,7 +50,7 @@ public class ProdutoAdminRestController {
     // 2. OBTÉM PRODUTO POR ID
     // ==================================================
     @GetMapping("/{id}")
-    public ResponseEntity<ProdutoResponseDTO> get(@PathVariable Long id) {
+    public ResponseEntity<ProdutoResponseDTO> get(@PathVariable("id") Long id) {
         return repo.findById(id)
                 .map(this::toResponse)
                 .map(ResponseEntity::ok)
@@ -61,7 +61,7 @@ public class ProdutoAdminRestController {
     // 3. CRIA NOVO PRODUTO
     // ==================================================
     @PostMapping
-    public ResponseEntity<ProdutoResponseDTO> create(@Valid @RequestBody ProdutoRequestDTO dto) {
+    public ResponseEntity<ProdutoResponseDTO> create(@Valid @RequestBody AdminProdutoRequestDTO dto) {
         ensureImageWhenActive(dto);
         ensureUniqueName(dto, null);
         ProdutoEntity entity = ProdutoMapper.toEntity(toDomain(dto));
@@ -78,8 +78,8 @@ public class ProdutoAdminRestController {
     // ==================================================
     @PutMapping("/{id}")
     public ResponseEntity<ProdutoResponseDTO> update(
-            @PathVariable Long id,
-            @Valid @RequestBody ProdutoRequestDTO dto) {
+            @PathVariable("id") Long id,
+            @Valid @RequestBody AdminProdutoRequestDTO dto) {
 
         ensureImageWhenActive(dto);
         ensureUniqueName(dto, id);
@@ -98,7 +98,7 @@ public class ProdutoAdminRestController {
     // 5. EXCLUI PRODUTO
     // ==================================================
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         if (!repo.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -111,7 +111,7 @@ public class ProdutoAdminRestController {
     // ==================================================
     @PostMapping(value = "/{id}/imagem", consumes = "multipart/form-data")
     public ResponseEntity<String> uploadImage(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestParam("file") MultipartFile file) {
 
         return repo.findById(id)
@@ -138,11 +138,15 @@ public class ProdutoAdminRestController {
     // ==================================================
     @PostMapping("/{id}/validar")
     public ResponseEntity<ProdutoResponseDTO> validar(
-            @PathVariable Long id,
-            @RequestParam String validador) {
+            @PathVariable("id") Long id,
+            @RequestParam("validador") String validador) {
 
         return repo.findById(id)
                 .map(entity -> {
+                    if (entity.getStatus() == ProdutoStatus.PUBLICADO) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                "Produto publicado nao pode voltar para VALIDADO.");
+                    }
                     entity.setStatus(ProdutoStatus.VALIDADO);
                     entity.setValidador(validador);
                     entity.setUpdatedAt(LocalDateTime.now());
@@ -156,11 +160,15 @@ public class ProdutoAdminRestController {
     // ==================================================
     @PostMapping("/{id}/publicar")
     public ResponseEntity<ProdutoResponseDTO> publicar(
-            @PathVariable Long id,
-            @RequestParam String validador) {
+            @PathVariable("id") Long id,
+            @RequestParam("validador") String validador) {
 
         return repo.findById(id)
                 .map(entity -> {
+                    if (entity.getStatus() != ProdutoStatus.VALIDADO) {
+                        throw new ResponseStatusException(HttpStatus.CONFLICT,
+                                "Produto deve estar VALIDADO antes de PUBLICAR.");
+                    }
                     entity.setStatus(ProdutoStatus.PUBLICADO);
                     entity.setValidador(validador);
                     entity.setPublicadoEm(LocalDateTime.now());
@@ -173,7 +181,7 @@ public class ProdutoAdminRestController {
     // ==================================================
     // CONVERSORES AUXILIARES
     // ==================================================
-    private Produto toDomain(ProdutoRequestDTO dto) {
+    private Produto toDomain(AdminProdutoRequestDTO dto) {
         Produto d = new Produto();
         d.setId(null);
         d.setNome(dto.getNome());
@@ -199,6 +207,7 @@ public class ProdutoAdminRestController {
                 ? UUID.nameUUIDFromBytes(("produto:" + e.getId()).getBytes())
                 : UUID.randomUUID();
 
+        dto.setEntityId(e.getId());
         dto.setId(publicId);
         dto.setNome(nvl(e.getNome(), "Produto"));
         dto.setDescricao(nvl(e.getDescricao(), ""));
@@ -222,6 +231,7 @@ public class ProdutoAdminRestController {
         boolean ativo = Boolean.TRUE.equals(e.getDisponivel())
                 && e.getPrecoVenda() != null
                 && e.getPrecoVenda().signum() > 0
+                && e.getEstoque() != null
                 && e.getEstoque() > 0;
 
         dto.setSituacao(ativo
@@ -231,7 +241,7 @@ public class ProdutoAdminRestController {
         return dto;
     }
 
-    private void ensureImageWhenActive(ProdutoRequestDTO dto) {
+    private void ensureImageWhenActive(AdminProdutoRequestDTO dto) {
         if (Boolean.TRUE.equals(dto.getAtivo())
                 && (dto.getImagem() == null || dto.getImagem().isBlank())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -239,7 +249,7 @@ public class ProdutoAdminRestController {
         }
     }
 
-    private void ensureUniqueName(ProdutoRequestDTO dto, Long currentId) {
+    private void ensureUniqueName(AdminProdutoRequestDTO dto, Long currentId) {
         if (dto.getNome() == null) {
             return;
         }

@@ -86,6 +86,17 @@ class ProdutoAdminRestControllerTest {
     }
 
     @Test
+    void getProductHandlesNullEstoqueWithoutError() throws Exception {
+        sampleEntity.setEstoque(null);
+        sampleEntity.setDisponivel(true);
+        when(repo.findById(1L)).thenReturn(Optional.of(sampleEntity));
+
+        mockMvc.perform(get("/api/admin/produtos/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.situacao").value("ESGOTADO"));
+    }
+
+    @Test
     void createProductReturnsCreated() throws Exception {
         when(repo.save(any())).thenReturn(sampleEntity);
         ProdutoRequestDTO request = buildRequest();
@@ -186,6 +197,7 @@ class ProdutoAdminRestControllerTest {
 
     @Test
     void validateProductSetsStatus() throws Exception {
+        sampleEntity.setStatus(ProdutoStatus.IMPORTADO);
         when(repo.findById(1L)).thenReturn(Optional.of(sampleEntity));
         when(repo.save(any())).thenReturn(sampleEntity);
 
@@ -200,6 +212,7 @@ class ProdutoAdminRestControllerTest {
 
     @Test
     void publicarProductSetsStatusAndPublished() throws Exception {
+        sampleEntity.setStatus(ProdutoStatus.VALIDADO);
         when(repo.findById(1L)).thenReturn(Optional.of(sampleEntity));
         when(repo.save(any())).thenReturn(sampleEntity);
 
@@ -211,6 +224,28 @@ class ProdutoAdminRestControllerTest {
         assertThat(captor.getValue().getStatus()).isEqualTo(ProdutoStatus.PUBLICADO);
         assertThat(captor.getValue().getValidador()).isEqualTo("qa");
         assertThat(captor.getValue().getPublicadoEm()).isNotNull();
+    }
+
+    @Test
+    void validateProductReturnsConflictWhenAlreadyPublished() throws Exception {
+        sampleEntity.setStatus(ProdutoStatus.PUBLICADO);
+        when(repo.findById(1L)).thenReturn(Optional.of(sampleEntity));
+
+        mockMvc.perform(post("/api/admin/produtos/1/validar").param("validador", "qa"))
+                .andExpect(status().isConflict());
+
+        verify(repo, never()).save(any());
+    }
+
+    @Test
+    void publicarProductReturnsConflictWhenNotValidated() throws Exception {
+        sampleEntity.setStatus(ProdutoStatus.IMPORTADO);
+        when(repo.findById(1L)).thenReturn(Optional.of(sampleEntity));
+
+        mockMvc.perform(post("/api/admin/produtos/1/publicar").param("validador", "qa"))
+                .andExpect(status().isConflict());
+
+        verify(repo, never()).save(any());
     }
 
     private ProdutoEntity buildEntity(Long id) {

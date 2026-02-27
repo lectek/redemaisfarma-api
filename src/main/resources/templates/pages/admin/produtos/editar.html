@@ -93,6 +93,18 @@
         </button>
       </div>
 
+      <div class="form-row gap-2 md:col-span-2">
+        <label class="stack" style="min-width: 220px;">
+          <span>Validador</span>
+          <input class="input" id="validador" type="text" placeholder="ex: admin-web" />
+        </label>
+        <div class="row gap-2" style="align-items: end;">
+          <button id="btn-validar" class="btn btn-ghost" type="button">Validar</button>
+          <button id="btn-publicar" class="btn btn-primary" type="button">Publicar</button>
+        </div>
+      </div>
+      <small class="muted md:col-span-2">Fluxo: IMPORTADO -&gt; VALIDADO -&gt; PUBLICADO.</small>
+
       <div class="md:col-span-2 between mt-2">
         <div class="row gap-2">
           <button id="btn-salvar" class="btn btn-primary" type="button">Salvar</button>
@@ -107,7 +119,7 @@
 
 <div id="toast"></div>
 
-<script th:src="@{/js/pages/produto-editar.js}"></script>
+<script th:src="@{/js/pages/admin/produto-editar.js}"></script>
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
