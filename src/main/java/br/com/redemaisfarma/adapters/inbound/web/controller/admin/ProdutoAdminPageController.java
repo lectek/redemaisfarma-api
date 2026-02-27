@@ -301,6 +301,92 @@ public class ProdutoAdminPageController {
         return "pages/admin/produtos/nao-prontos-todos";
     }
 
+    @PostMapping("/nao-prontos/publicar-aptos")
+    public String publicarNaoProntosAptosEmLote(
+            @RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "validador", required = false) String validador,
+            RedirectAttributes ra
+    ) {
+        List<ProdutoLookupItem> pendentes = this.resolveNaoProntosFromDatabase(q, MAX_PENDING_ALL_LIMIT);
+        if (pendentes.isEmpty()) {
+            ra.addFlashAttribute("info", "Nenhum produto pendente encontrado para o filtro informado.");
+            return this.redirectNaoProntosTodos(q);
+        }
+
+        List<Long> ids = pendentes.stream()
+                .map(ProdutoLookupItem::id)
+                .filter(id -> id != null)
+                .distinct()
+                .toList();
+
+        if (ids.isEmpty()) {
+            ra.addFlashAttribute("warning", "Nenhum item do filtro possui cadastro no catalogo para publicacao.");
+            return this.redirectNaoProntosTodos(q);
+        }
+
+        List<ProdutoEntity> entidades = this.produtoRepository.findAllById(ids);
+        if (entidades.isEmpty()) {
+            ra.addFlashAttribute("warning", "Nao foi possivel localizar os produtos pendentes no catalogo.");
+            return this.redirectNaoProntosTodos(q);
+        }
+
+        String responsavel = StringUtils.hasText(validador) ? validador.trim() : "admin-lote";
+        LocalDateTime now = LocalDateTime.now();
+
+        int bloqueados = 0;
+        int semImagem = 0;
+        int semPreco = 0;
+        int semEstoque = 0;
+        List<ProdutoEntity> paraPublicar = new ArrayList<>();
+
+        for (ProdutoEntity entity : entidades) {
+            boolean pronto = true;
+
+            if (!this.temImagem(entity)) {
+                semImagem++;
+                pronto = false;
+            }
+            if (!this.temPrecoPositivo(entity)) {
+                semPreco++;
+                pronto = false;
+            }
+            if (!this.temEstoquePositivo(entity)) {
+                semEstoque++;
+                pronto = false;
+            }
+
+            if (!pronto) {
+                bloqueados++;
+                continue;
+            }
+
+            entity.setDisponivel(Boolean.TRUE);
+            entity.setStatus(ProdutoStatus.PUBLICADO);
+            entity.setValidador(responsavel);
+            entity.setPublicadoEm(now);
+            entity.setDespublicadoEm(null);
+            entity.setUpdatedAt(now);
+            paraPublicar.add(entity);
+        }
+
+        if (!paraPublicar.isEmpty()) {
+            this.produtoRepository.saveAll(paraPublicar);
+            ra.addFlashAttribute("success",
+                    "Publicacao em lote concluida: " + paraPublicar.size() + " produto(s) publicado(s).");
+        } else {
+            ra.addFlashAttribute("warning",
+                    "Nenhum produto apto para publicar. Corrija imagem, preco e estoque dos pendentes.");
+        }
+
+        if (bloqueados > 0) {
+            ra.addFlashAttribute("info",
+                    "Bloqueios encontrados em " + bloqueados + " item(ns): sem imagem " + semImagem
+                            + ", sem preco " + semPreco + ", sem estoque " + semEstoque + ".");
+        }
+
+        return this.redirectNaoProntosTodos(q);
+    }
+
     @PostMapping("/sincronizar-estoque")
     public String sincronizarEstoqueFisico(RedirectAttributes ra) {
         SincronizacaoCatalogoService syncService = this.catalogSyncProvider.getIfAvailable();
@@ -379,6 +465,31 @@ public class ProdutoAdminPageController {
     private String normalizeQuery(String value) {
         String termo = this.normalize(value);
         return termo.isBlank() ? null : termo;
+    }
+
+    private String redirectNaoProntosTodos(String q) {
+        String termo = this.normalize(q);
+        if (termo.isBlank()) {
+            return "redirect:/admin/produtos/nao-prontos/todos";
+        }
+        String encoded = URLEncoder.encode(termo, StandardCharsets.UTF_8);
+        return "redirect:/admin/produtos/nao-prontos/todos?q=" + encoded;
+    }
+
+    private boolean temImagem(ProdutoEntity entity) {
+        return entity != null && StringUtils.hasText(entity.getImagem());
+    }
+
+    private boolean temPrecoPositivo(ProdutoEntity entity) {
+        return entity != null
+                && entity.getPrecoVenda() != null
+                && entity.getPrecoVenda().compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    private boolean temEstoquePositivo(ProdutoEntity entity) {
+        return entity != null
+                && entity.getEstoque() != null
+                && entity.getEstoque() > 0;
     }
 
     private List<ProdutoLookupItem> resolveNaoProntosFromDatabase(String q, int limit) {
@@ -562,5 +673,4 @@ public class ProdutoAdminPageController {
         this.catalogSyncProvider = catalogSyncProvider;
     }
 }
-
 

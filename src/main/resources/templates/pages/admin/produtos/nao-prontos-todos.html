@@ -19,10 +19,17 @@
         <p class="page-lead">Visao completa dos itens do estoque fisico que ainda precisam de ajuste para venda online.</p>
       </div>
       <div class="page-actions">
+        <form th:action="@{/admin/produtos/nao-prontos/publicar-aptos}" method="post">
+          <input type="hidden" name="q" th:value="${q}" />
+          <input type="hidden" name="validador" value="admin-lote" />
+          <button class="btn btn-primary" type="submit">Publicar aptos em lote</button>
+        </form>
         <a class="btn btn-ghost" th:href="@{/admin/produtos/novo}">Voltar ao cadastro</a>
         <a class="btn btn-primary" th:href="@{/admin/produtos}">Ver catalogo completo</a>
       </div>
     </div>
+
+    <section th:replace="~{fragments/flash :: flash}"></section>
 
     <form class="filter-bar card p-16 mb-4" th:action="@{/admin/produtos/nao-prontos/todos}" method="get">
       <input class="input" name="q" type="search" placeholder="Filtrar por nome, EAN ou codigo interno" th:value="${q}" />

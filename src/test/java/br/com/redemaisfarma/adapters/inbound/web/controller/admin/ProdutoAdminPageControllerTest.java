@@ -2,6 +2,7 @@ package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.application.core.media.ImageStorageService;
 import br.com.redemaisfarma.application.core.settings.AppSettingService;
 import br.com.redemaisfarma.application.service.ProdutoAdminService;
@@ -18,7 +19,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import java.math.BigDecimal;
 import java.util.List;
+import org.mockito.ArgumentCaptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,9 +29,11 @@ import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCategoriaRepository;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -210,5 +215,59 @@ class ProdutoAdminPageControllerTest {
         mockMvc.perform(post("/admin/produtos/importar-estoque-fisico"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/produtos/novo"));
+    }
+
+    @Test
+    void publicarAptosEmLotePublicaSomenteProdutosComDadosMinimos() throws Exception {
+        ProdutoEntity apto = new ProdutoEntity();
+        apto.setId(1L);
+        apto.setNome("Produto apto");
+        apto.setPrecoVenda(BigDecimal.valueOf(11.90));
+        apto.setEstoque(7);
+        apto.setImagem("https://cdn.exemplo.com/p1.png");
+        apto.setDisponivel(false);
+        apto.setStatus(ProdutoStatus.IMPORTADO);
+
+        ProdutoEntity bloqueado = new ProdutoEntity();
+        bloqueado.setId(2L);
+        bloqueado.setNome("Produto sem imagem");
+        bloqueado.setPrecoVenda(BigDecimal.valueOf(9.90));
+        bloqueado.setEstoque(10);
+        bloqueado.setImagem(null);
+        bloqueado.setDisponivel(false);
+        bloqueado.setStatus(ProdutoStatus.IMPORTADO);
+
+        Page<ProdutoEntity> page = new PageImpl<>(List.of(apto, bloqueado), PageRequest.of(0, 1000), 2);
+        when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
+                .thenReturn(page);
+        when(produtoRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(apto, bloqueado));
+
+        mockMvc.perform(post("/admin/produtos/nao-prontos/publicar-aptos"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/produtos/nao-prontos/todos"));
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<ProdutoEntity>> captor = ArgumentCaptor.forClass((Class) List.class);
+        verify(produtoRepository).saveAll(captor.capture());
+
+        List<ProdutoEntity> publicados = captor.getValue();
+        assertThat(publicados).hasSize(1);
+        ProdutoEntity publicado = publicados.get(0);
+        assertThat(publicado.getId()).isEqualTo(1L);
+        assertThat(publicado.getStatus()).isEqualTo(ProdutoStatus.PUBLICADO);
+        assertThat(publicado.getDisponivel()).isTrue();
+        assertThat(publicado.getPublicadoEm()).isNotNull();
+    }
+
+    @Test
+    void publicarAptosEmLoteNaoSalvaQuandoNaoHaPendentes() throws Exception {
+        when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
+                .thenReturn(Page.empty());
+
+        mockMvc.perform(post("/admin/produtos/nao-prontos/publicar-aptos"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/produtos/nao-prontos/todos"));
+
+        verify(produtoRepository, never()).saveAll(any());
     }
 }

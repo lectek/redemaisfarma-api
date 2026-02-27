@@ -105,6 +105,17 @@ public interface ProdutoJpaRepository extends JpaRepository<ProdutoEntity, Long>
            """)
     Page<ProdutoEntity> searchPublicPage(@Param("q") String q, Pageable pageable);
 
+    @Query("""
+           SELECT p FROM ProdutoEntity p
+            WHERE p.id = :id
+              AND p.disponivel = true
+              AND p.estoque > 0
+              AND p.precoVenda > 0
+              AND (p.publicadoEm IS NULL OR p.publicadoEm <= CURRENT_TIMESTAMP)
+              AND (p.despublicadoEm IS NULL OR p.despublicadoEm > CURRENT_TIMESTAMP)
+           """)
+    Optional<ProdutoEntity> findPublicById(@Param("id") Long id);
+
     default Page<ProdutoEntity> searchPage(String q, Pageable pageable) {
         if (q == null || q.isBlank()) {
             return this.findAll(pageable);

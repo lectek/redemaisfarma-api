@@ -143,8 +143,8 @@ public class ProdutosPublicApi {
         }
     )
     public ResponseEntity<ProdutoResponseDTO> obter(@PathVariable("id") Long id) {
-        ProdutoEntity produto = repo.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
+        ProdutoEntity produto = repo.findPublicById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado ou indisponível"));
 
         return ResponseEntity.ok(ProdutoRestMapper.toResponse(produto));
     }
