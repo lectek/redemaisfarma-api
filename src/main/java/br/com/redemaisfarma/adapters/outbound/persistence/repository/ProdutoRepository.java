@@ -28,6 +28,8 @@ public interface ProdutoRepository extends JpaRepository<ProdutoEntity, Long> {
 
     Optional<ProdutoEntity> findByLegacyId(Long legacyId);
 
+    List<ProdutoEntity> findAllByLegacyIdOrderByIdAsc(Long legacyId);
+
     boolean existsByLegacyId(Long legacyId);
 
     List<ProdutoEntity> findAllByCategoria(String categoria);
@@ -147,6 +149,23 @@ public interface ProdutoRepository extends JpaRepository<ProdutoEntity, Long> {
     Page<ProdutoEntity> searchPublicPageByCategoria(@Param("q") String q,
                                                     @Param("cat") String categoria,
                                                     Pageable pageable);
+
+    @Query("""
+            SELECT p FROM ProdutoEntity p
+            WHERE LOWER(TRIM(p.categoria)) = LOWER(TRIM(:cat))
+              AND p.disponivel = false
+              AND (
+                :q IS NULL
+                OR LOWER(p.descricao) LIKE LOWER(CONCAT('%', :q, '%'))
+                OR LOWER(p.nome)      LIKE LOWER(CONCAT('%', :q, '%'))
+                OR p.codigoBarras     LIKE CONCAT('%', :q, '%')
+                OR CONCAT('', p.legacyId) LIKE CONCAT('%', :q, '%')
+              )
+            ORDER BY p.id ASC
+            """)
+    Page<ProdutoEntity> searchNaoDisponiveisByCategoria(@Param("q") String q,
+                                                        @Param("cat") String categoria,
+                                                        Pageable pageable);
 
     /* ===================== DEFAULT METHODS (tipadas) ===================== */
 

@@ -60,7 +60,8 @@ public class EstoqueFisicoImportService {
                 boolean novo = entity.getId() == null;
                 Snapshot before = novo ? null : Snapshot.from(entity);
 
-                this.applyCsvData(entity, item);
+                String resolvedBarcode = this.resolveBarcodeForEntity(entity, item, cacheBarcode);
+                this.applyCsvData(entity, item, resolvedBarcode);
                 Snapshot after = Snapshot.from(entity);
 
                 if (!novo && Objects.equals(before, after)) {
@@ -97,9 +98,12 @@ public class EstoqueFisicoImportService {
         Long legacyId = item.legacyId();
         String barcode = BarcodeNormalizer.normalize(item.codigoBarras());
 
-        ProdutoEntity byLegacy = this.resolveByLegacyId(legacyId, barcode, cacheLegacy, cacheBarcode);
-        if (byLegacy != null) {
-            return byLegacy;
+        if (legacyId != null) {
+            ProdutoEntity byLegacy = this.resolveByLegacyId(legacyId, cacheLegacy, cacheBarcode);
+            if (byLegacy != null) {
+                return byLegacy;
+            }
+            return new ProdutoEntity();
         }
 
         ProdutoEntity byBarcode = this.resolveByBarcode(barcode, legacyId, cacheLegacy, cacheBarcode);
@@ -110,9 +114,37 @@ public class EstoqueFisicoImportService {
         return new ProdutoEntity();
     }
 
+    private String resolveBarcodeForEntity(
+            ProdutoEntity target,
+            EstoqueFisicoCsvService.EstoqueItem item,
+            Map<String, ProdutoEntity> cacheBarcode
+    ) {
+        String barcode = BarcodeNormalizer.normalize(item.codigoBarras());
+        if (barcode.isBlank()) {
+            return "";
+        }
+
+        ProdutoEntity owner = cacheBarcode.get(barcode);
+        if (owner == null) {
+            owner = this.produtoRepository.findByCodigoBarras(barcode).orElse(null);
+            if (owner != null) {
+                cacheBarcode.put(barcode, owner);
+            }
+        }
+
+        if (owner == null) {
+            return barcode;
+        }
+        if (target.getId() != null && owner.getId() != null && target.getId().equals(owner.getId())) {
+            return barcode;
+        }
+
+        // Evita violar a constraint unique de codigo_barras quando o mesmo codigo ja pertence a outro produto.
+        return "";
+    }
+
     private ProdutoEntity resolveByLegacyId(
             Long legacyId,
-            String barcode,
             Map<Long, ProdutoEntity> cacheLegacy,
             Map<String, ProdutoEntity> cacheBarcode
     ) {
@@ -125,14 +157,16 @@ public class EstoqueFisicoImportService {
             return cached;
         }
 
-        ProdutoEntity found = this.produtoRepository.findByLegacyId(legacyId).orElse(null);
+        List<ProdutoEntity> foundList = this.produtoRepository.findAllByLegacyIdOrderByIdAsc(legacyId);
+        ProdutoEntity found = foundList.isEmpty() ? null : foundList.getFirst();
         if (found == null) {
             return null;
         }
 
         cacheLegacy.put(legacyId, found);
-        if (!barcode.isBlank()) {
-            cacheBarcode.putIfAbsent(barcode, found);
+        String foundBarcode = BarcodeNormalizer.normalize(found.getCodigoBarras());
+        if (!foundBarcode.isBlank()) {
+            cacheBarcode.putIfAbsent(foundBarcode, found);
         }
         return found;
     }
@@ -164,8 +198,7 @@ public class EstoqueFisicoImportService {
         return found;
     }
 
-    private void applyCsvData(ProdutoEntity entity, EstoqueFisicoCsvService.EstoqueItem item) {
-        String barcode = BarcodeNormalizer.normalize(item.codigoBarras());
+    private void applyCsvData(ProdutoEntity entity, EstoqueFisicoCsvService.EstoqueItem item, String resolvedBarcode) {
         Long legacyId = item.legacyId();
         String nome = truncate(defaultText(item.nome(), "Produto do estoque fisico"), 255);
         String descricao = truncate(defaultText(item.nome(), "Produto do estoque fisico"), 1000);
@@ -176,7 +209,7 @@ public class EstoqueFisicoImportService {
         Integer estoque = item.estoque() == null ? 0 : Math.max(0, item.estoque());
 
         entity.setLegacyId(legacyId);
-        entity.setCodigoBarras(barcode.isBlank() ? null : truncate(barcode, 64));
+        entity.setCodigoBarras(resolvedBarcode.isBlank() ? null : truncate(resolvedBarcode, 64));
         entity.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.CSV_ESTOQUE);
         entity.setNome(nome);
         entity.setDescricao(descricao);

@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
-@Profile(value={"default", "docker", "dev"})
+@Profile(value={"default", "docker", "dev", "prod"})
 public class InMemoryFinanceiroAdminService
 implements FinanceiroAdminService {
     private final Map<Long, AssinaturaView> db = new LinkedHashMap<Long, AssinaturaView>();
@@ -41,4 +41,3 @@ implements FinanceiroAdminService {
         return Optional.ofNullable(this.db.get(id));
     }
 }
-
