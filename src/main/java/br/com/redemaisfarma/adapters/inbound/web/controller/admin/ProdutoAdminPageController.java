@@ -282,11 +282,7 @@ public class ProdutoAdminPageController {
         String termo = this.normalizeQuery(q);
         int safePage = Math.max(page, 0);
         int safeSize = Math.max(1, Math.min(size, 40));
-        Page<ProdutoEntity> result = this.produtoRepository.searchNaoDisponiveisByCategoria(
-                termo,
-                CATEGORIA_ESTOQUE_FISICO,
-                PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.ASC, "id"))
-        );
+        Page<ProdutoEntity> result = this.fetchNaoProntosPage(termo, safePage, safeSize);
 
         List<ProdutoLookupItem> content = result.getContent().stream()
                 .map(this::buildPendingFromDatabase)
@@ -393,11 +389,7 @@ public class ProdutoAdminPageController {
 
         while (itens.size() < safeLimit) {
             int pageSize = Math.min(1000, safeLimit - itens.size());
-            Page<ProdutoEntity> result = this.produtoRepository.searchNaoDisponiveisByCategoria(
-                    termo,
-                    CATEGORIA_ESTOQUE_FISICO,
-                    PageRequest.of(page, pageSize, Sort.by(Sort.Direction.ASC, "id"))
-            );
+            Page<ProdutoEntity> result = this.fetchNaoProntosPage(termo, page, pageSize);
             if (result.isEmpty()) {
                 break;
             }
@@ -419,6 +411,19 @@ public class ProdutoAdminPageController {
         }
 
         return itens;
+    }
+
+    private Page<ProdutoEntity> fetchNaoProntosPage(String termo, int page, int size) {
+        PageRequest req = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
+        Page<ProdutoEntity> byCategoria = this.produtoRepository.searchNaoDisponiveisByCategoria(
+                termo,
+                CATEGORIA_ESTOQUE_FISICO,
+                req
+        );
+        if (byCategoria.hasContent()) {
+            return byCategoria;
+        }
+        return this.produtoRepository.searchNaoDisponiveis(termo, req);
     }
 
     private ProdutoLookupItem buildPendingFromDatabase(ProdutoEntity produto) {
@@ -557,6 +562,5 @@ public class ProdutoAdminPageController {
         this.catalogSyncProvider = catalogSyncProvider;
     }
 }
-
 
 

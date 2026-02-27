@@ -74,6 +74,8 @@ class ProdutoAdminPageControllerTest {
                 .thenReturn(new MappingJackson2JsonView());
         when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
                 .thenReturn(Page.empty());
+        when(produtoRepository.searchNaoDisponiveis(any(), any(Pageable.class)))
+                .thenReturn(Page.empty());
     }
 
     @AfterEach
@@ -163,6 +165,29 @@ class ProdutoAdminPageControllerTest {
                 .andExpect(jsonPath("$.total").value(2))
                 .andExpect(jsonPath("$.size").value(1))
                 .andExpect(jsonPath("$.hasNext").value(true));
+    }
+
+    @Test
+    void naoProntosEndpointUsaFallbackQuandoCategoriaNaoRetornaItens() throws Exception {
+        ProdutoEntity produto = new ProdutoEntity();
+        produto.setId(33L);
+        produto.setNome("Ibuprofeno");
+        produto.setCategoria("Estoque Físico");
+        produto.setEstoque(2);
+
+        when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
+                .thenReturn(Page.empty());
+        when(produtoRepository.searchNaoDisponiveis(any(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(produto), PageRequest.of(0, 12), 1));
+
+        mockMvc.perform(get("/admin/produtos/nao-prontos")
+                        .param("q", "ibu")
+                        .param("page", "0")
+                        .param("size", "12"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.items[0].id").value(33))
+                .andExpect(jsonPath("$.items[0].nome").value("Ibuprofeno"));
     }
 
     @Test

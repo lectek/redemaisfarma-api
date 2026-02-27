@@ -167,6 +167,20 @@ public interface ProdutoRepository extends JpaRepository<ProdutoEntity, Long> {
                                                         @Param("cat") String categoria,
                                                         Pageable pageable);
 
+    @Query("""
+            SELECT p FROM ProdutoEntity p
+            WHERE p.disponivel = false
+              AND (
+                :q IS NULL
+                OR LOWER(p.descricao) LIKE LOWER(CONCAT('%', :q, '%'))
+                OR LOWER(p.nome)      LIKE LOWER(CONCAT('%', :q, '%'))
+                OR p.codigoBarras     LIKE CONCAT('%', :q, '%')
+                OR CONCAT('', p.legacyId) LIKE CONCAT('%', :q, '%')
+              )
+            ORDER BY p.id ASC
+            """)
+    Page<ProdutoEntity> searchNaoDisponiveis(@Param("q") String q, Pageable pageable);
+
     /* ===================== DEFAULT METHODS (tipadas) ===================== */
 
     default Page<ProdutoEntity> searchPage(String q, Pageable pageable) {
