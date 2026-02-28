@@ -8,6 +8,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCategoriaRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import br.com.redemaisfarma.application.core.media.ImageStorageService;
+import br.com.redemaisfarma.application.service.EstoqueFisicoCsvService;
 import br.com.redemaisfarma.application.service.EstoqueFisicoImportService;
 import br.com.redemaisfarma.application.service.ProdutoAdminService;
 import br.com.redemaisfarma.application.service.SincronizacaoCatalogoService;
@@ -42,9 +43,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/admin/produtos")
@@ -58,6 +62,7 @@ public class ProdutoAdminPageController {
     private final ProdutoRepository produtoRepository;
     private final ProdutoCategoriaRepository categoriaRepository;
     private final ImageStorageService imageStorageService;
+    private final ObjectProvider<EstoqueFisicoCsvService> estoqueFisicoCsvServiceProvider;
     private final ObjectProvider<EstoqueFisicoImportService> estoqueImportServiceProvider;
     private final ObjectProvider<ProdutoLegacyRepository> legacyRepositoryProvider;
     private final ObjectProvider<SincronizacaoCatalogoService> catalogSyncProvider;
@@ -282,14 +287,8 @@ public class ProdutoAdminPageController {
         String termo = this.normalizeQuery(q);
         int safePage = Math.max(page, 0);
         int safeSize = Math.max(1, Math.min(size, 40));
-        Page<ProdutoEntity> result = this.fetchNaoProntosPage(termo, safePage, safeSize);
-
-        List<ProdutoLookupItem> content = result.getContent().stream()
-                .map(this::buildPendingFromDatabase)
-                .toList();
-        int total = (int) Math.min(result.getTotalElements(), Integer.MAX_VALUE);
-
-        return new ProdutoLookupPage(content, safePage, safeSize, total, result.hasNext());
+        NaoProntosSlice slice = this.fetchNaoProntosSlice(termo, safePage, safeSize);
+        return new ProdutoLookupPage(slice.items(), safePage, safeSize, slice.total(), slice.hasNext());
     }
 
     @GetMapping("/nao-prontos/todos")
@@ -496,6 +495,7 @@ public class ProdutoAdminPageController {
         String termo = this.normalizeQuery(q);
         int safeLimit = Math.max(1, Math.min(limit, MAX_PENDING_ALL_LIMIT));
         List<ProdutoLookupItem> itens = new ArrayList<>(Math.min(safeLimit, 2_000));
+        Set<String> seen = new HashSet<>();
         int page = 0;
 
         while (itens.size() < safeLimit) {
@@ -505,6 +505,7 @@ public class ProdutoAdminPageController {
                 break;
             }
 
+            int addedOnPage = 0;
             for (ProdutoEntity entity : result.getContent()) {
                 if (entity == null) {
                     continue;
@@ -512,16 +513,40 @@ public class ProdutoAdminPageController {
                 if (itens.size() >= safeLimit) {
                     break;
                 }
-                itens.add(this.buildPendingFromDatabase(entity));
+                ProdutoLookupItem mapped = this.buildPendingFromDatabase(entity);
+                String key = this.pendingUniqueKey(mapped);
+                if (!seen.add(key)) {
+                    continue;
+                }
+                itens.add(mapped);
+                addedOnPage++;
             }
 
             if (!result.hasNext()) {
                 break;
             }
+            if (addedOnPage == 0) {
+                break;
+            }
             page++;
         }
 
-        return itens;
+        return this.mergeNaoProntosWithCsv(termo, itens, safeLimit);
+    }
+
+    private NaoProntosSlice fetchNaoProntosSlice(String termo, int page, int size) {
+        List<ProdutoLookupItem> allItems = this.resolveNaoProntosFromDatabase(termo, MAX_PENDING_ALL_LIMIT);
+        if (allItems.isEmpty()) {
+            return new NaoProntosSlice(List.of(), 0, false);
+        }
+
+        int from = page * size;
+        if (from >= allItems.size()) {
+            return new NaoProntosSlice(List.of(), allItems.size(), false);
+        }
+        int to = Math.min(from + size, allItems.size());
+        List<ProdutoLookupItem> content = allItems.subList(from, to);
+        return new NaoProntosSlice(content, allItems.size(), to < allItems.size());
     }
 
     private Page<ProdutoEntity> fetchNaoProntosPage(String termo, int page, int size) {
@@ -552,6 +577,123 @@ public class ProdutoAdminPageController {
                 produto.getFabricante(),
                 produto.getUnidade()
         );
+    }
+
+    private List<ProdutoLookupItem> resolveNaoProntosFromCsv(String termo, int limit) {
+        EstoqueFisicoCsvService csvService = this.estoqueFisicoCsvServiceProvider.getIfAvailable();
+        if (csvService == null) {
+            return List.of();
+        }
+
+        int safeLimit = Math.max(1, limit);
+        List<EstoqueFisicoCsvService.EstoqueItem> csvItems = csvService.search(termo == null ? "" : termo);
+        if (csvItems.isEmpty()) {
+            return List.of();
+        }
+
+        List<ProdutoLookupItem> mapped = new ArrayList<>(Math.min(csvItems.size(), safeLimit));
+        for (EstoqueFisicoCsvService.EstoqueItem csvItem : csvItems) {
+            if (mapped.size() >= safeLimit) {
+                break;
+            }
+            mapped.add(this.buildPendingFromCsv(csvItem));
+        }
+        return mapped;
+    }
+
+    private List<ProdutoLookupItem> mergeNaoProntosWithCsv(String termo,
+                                                           List<ProdutoLookupItem> bancoItens,
+                                                           int limit) {
+        int safeLimit = Math.max(1, limit);
+        if (bancoItens.size() >= safeLimit) {
+            return bancoItens;
+        }
+
+        EstoqueFisicoCsvService csvService = this.estoqueFisicoCsvServiceProvider.getIfAvailable();
+        if (csvService == null) {
+            return bancoItens;
+        }
+
+        List<EstoqueFisicoCsvService.EstoqueItem> csvItems = csvService.search(termo == null ? "" : termo);
+        if (csvItems.isEmpty()) {
+            return bancoItens;
+        }
+
+        List<ProdutoLookupItem> merged = new ArrayList<>(Math.min(safeLimit, bancoItens.size() + csvItems.size()));
+        merged.addAll(bancoItens);
+
+        Set<Long> legacyIds = new HashSet<>();
+        Set<String> barcodes = new HashSet<>();
+        for (ProdutoLookupItem item : bancoItens) {
+            if (item == null) {
+                continue;
+            }
+            if (item.legacyId() != null) {
+                legacyIds.add(item.legacyId());
+            }
+            String normalizedBarcode = this.normalizeBarcode(item.codigoBarras());
+            if (StringUtils.hasText(normalizedBarcode)) {
+                barcodes.add(normalizedBarcode);
+            }
+        }
+
+        for (EstoqueFisicoCsvService.EstoqueItem csvItem : csvItems) {
+            if (merged.size() >= safeLimit || csvItem == null) {
+                break;
+            }
+
+            Long csvLegacyId = csvItem.legacyId();
+            String csvBarcode = this.normalizeBarcode(csvItem.codigoBarras());
+            boolean duplicateByLegacy = csvLegacyId != null && legacyIds.contains(csvLegacyId);
+            boolean duplicateByBarcode = StringUtils.hasText(csvBarcode) && barcodes.contains(csvBarcode);
+            if (duplicateByLegacy || duplicateByBarcode) {
+                continue;
+            }
+
+            merged.add(this.buildPendingFromCsv(csvItem));
+            if (csvLegacyId != null) {
+                legacyIds.add(csvLegacyId);
+            }
+            if (StringUtils.hasText(csvBarcode)) {
+                barcodes.add(csvBarcode);
+            }
+        }
+
+        return merged;
+    }
+
+    private ProdutoLookupItem buildPendingFromCsv(EstoqueFisicoCsvService.EstoqueItem csvItem) {
+        String nome = StringUtils.hasText(csvItem.nome()) ? csvItem.nome() : "Produto do estoque fisico";
+        Integer estoque = csvItem.estoque() == null ? 0 : Math.max(0, csvItem.estoque());
+
+        return new ProdutoLookupItem(
+                null,
+                csvItem.legacyId(),
+                "ESTOQUE_FISICO",
+                nome,
+                nome,
+                CATEGORIA_ESTOQUE_FISICO,
+                csvItem.codigoBarras(),
+                csvItem.precoVenda(),
+                null,
+                estoque,
+                csvItem.fabricante(),
+                null
+        );
+    }
+
+    private String pendingUniqueKey(ProdutoLookupItem item) {
+        if (item.id() != null) {
+            return "ID:" + item.id();
+        }
+        if (item.legacyId() != null) {
+            return "L:" + item.legacyId();
+        }
+        String normalizedBarcode = this.normalizeBarcode(item.codigoBarras());
+        if (StringUtils.hasText(normalizedBarcode)) {
+            return "B:" + normalizedBarcode;
+        }
+        return "N:" + this.normalize(item.nome()).toLowerCase(Locale.ROOT);
     }
 
     private List<ProdutoLegacyEntity> buscarNoEstoqueFisico(
@@ -656,11 +798,19 @@ public class ProdutoAdminPageController {
     ) {
     }
 
+    private record NaoProntosSlice(
+            List<ProdutoLookupItem> items,
+            int total,
+            boolean hasNext
+    ) {
+    }
+
     @Generated
     public ProdutoAdminPageController(ProdutoAdminService adminService,
                                       ProdutoRepository produtoRepository,
                                       ProdutoCategoriaRepository categoriaRepository,
                                       ImageStorageService imageStorageService,
+                                      ObjectProvider<EstoqueFisicoCsvService> estoqueFisicoCsvServiceProvider,
                                       ObjectProvider<EstoqueFisicoImportService> estoqueImportServiceProvider,
                                       ObjectProvider<ProdutoLegacyRepository> legacyRepositoryProvider,
                                       ObjectProvider<SincronizacaoCatalogoService> catalogSyncProvider) {
@@ -668,9 +818,9 @@ public class ProdutoAdminPageController {
         this.produtoRepository = produtoRepository;
         this.categoriaRepository = categoriaRepository;
         this.imageStorageService = imageStorageService;
+        this.estoqueFisicoCsvServiceProvider = estoqueFisicoCsvServiceProvider;
         this.estoqueImportServiceProvider = estoqueImportServiceProvider;
         this.legacyRepositoryProvider = legacyRepositoryProvider;
         this.catalogSyncProvider = catalogSyncProvider;
     }
 }
-

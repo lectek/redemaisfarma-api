@@ -5,6 +5,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.application.core.media.ImageStorageService;
 import br.com.redemaisfarma.application.core.settings.AppSettingService;
+import br.com.redemaisfarma.application.service.EstoqueFisicoCsvService;
 import br.com.redemaisfarma.application.service.ProdutoAdminService;
 import br.com.redemaisfarma.application.service.otp.OtpServicePort;
 import org.junit.jupiter.api.AfterEach;
@@ -68,6 +69,9 @@ class ProdutoAdminPageControllerTest {
     private ImageStorageService imageStorageService;
 
     @MockBean
+    private EstoqueFisicoCsvService estoqueFisicoCsvService;
+
+    @MockBean
     private ThymeleafViewResolver thymeleafViewResolver;
 
     @BeforeEach
@@ -81,6 +85,7 @@ class ProdutoAdminPageControllerTest {
                 .thenReturn(Page.empty());
         when(produtoRepository.searchNaoDisponiveis(any(), any(Pageable.class)))
                 .thenReturn(Page.empty());
+        when(estoqueFisicoCsvService.search(any())).thenReturn(List.of());
     }
 
     @AfterEach
@@ -152,15 +157,22 @@ class ProdutoAdminPageControllerTest {
 
     @Test
     void naoProntosEndpointRetornaPaginacaoDoBanco() throws Exception {
-        ProdutoEntity produto = new ProdutoEntity();
-        produto.setId(11L);
-        produto.setNome("Nimesulida");
-        produto.setCategoria("Estoque fisico");
-        produto.setEstoque(3);
+        ProdutoEntity produto1 = new ProdutoEntity();
+        produto1.setId(11L);
+        produto1.setNome("Nimesulida");
+        produto1.setCategoria("Estoque fisico");
+        produto1.setEstoque(3);
 
-        Page<ProdutoEntity> page = new PageImpl<>(List.of(produto), PageRequest.of(0, 1), 2);
+        ProdutoEntity produto2 = new ProdutoEntity();
+        produto2.setId(12L);
+        produto2.setNome("Nimesulida Gotas");
+        produto2.setCategoria("Estoque fisico");
+        produto2.setEstoque(2);
+
+        Page<ProdutoEntity> page1 = new PageImpl<>(List.of(produto1), PageRequest.of(0, 1), 2);
+        Page<ProdutoEntity> page2 = new PageImpl<>(List.of(produto2), PageRequest.of(1, 1), 2);
         when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
-                .thenReturn(page);
+                .thenReturn(page1, page2);
 
         mockMvc.perform(get("/admin/produtos/nao-prontos")
                         .param("q", "nim")
@@ -193,6 +205,138 @@ class ProdutoAdminPageControllerTest {
                 .andExpect(jsonPath("$.total").value(1))
                 .andExpect(jsonPath("$.items[0].id").value(33))
                 .andExpect(jsonPath("$.items[0].nome").value("Ibuprofeno"));
+    }
+
+    @Test
+    void naoProntosEndpointCombinaBancoComCsv() throws Exception {
+        ProdutoEntity doBanco = new ProdutoEntity();
+        doBanco.setId(44L);
+        doBanco.setLegacyId(440L);
+        doBanco.setNome("Omeprazol");
+        doBanco.setCategoria("Estoque fisico");
+        doBanco.setCodigoBarras("7891231231231");
+        doBanco.setEstoque(4);
+
+        Page<ProdutoEntity> page = new PageImpl<>(List.of(doBanco), PageRequest.of(0, 12), 1);
+        when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
+                .thenReturn(page);
+
+        EstoqueFisicoCsvService.EstoqueItem novoDoCsv = new EstoqueFisicoCsvService.EstoqueItem(
+                445L,
+                "7898887776665",
+                "Ranitidina",
+                "Lab Q",
+                9,
+                BigDecimal.valueOf(20.00),
+                BigDecimal.valueOf(18.50),
+                "ranitidina 445 7898887776665 lab q"
+        );
+        when(estoqueFisicoCsvService.search(eq("ome"))).thenReturn(List.of(novoDoCsv));
+
+        mockMvc.perform(get("/admin/produtos/nao-prontos")
+                        .param("q", "ome")
+                        .param("page", "0")
+                        .param("size", "12"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(2))
+                .andExpect(jsonPath("$.items[0].id").value(44))
+                .andExpect(jsonPath("$.items[1].origem").value("ESTOQUE_FISICO"))
+                .andExpect(jsonPath("$.items[1].legacyId").value(445))
+                .andExpect(jsonPath("$.items[1].nome").value("Ranitidina"));
+    }
+
+    @Test
+    void naoProntosTodosPageUsaFallbackDoCsvQuandoBancoVazio() throws Exception {
+        EstoqueFisicoCsvService.EstoqueItem csvItem = new EstoqueFisicoCsvService.EstoqueItem(
+                500L,
+                "7890009991110",
+                "Loratadina",
+                "Neo Quimica",
+                6,
+                BigDecimal.valueOf(19.90),
+                BigDecimal.valueOf(17.90),
+                "loratadina 500 7890009991110 neo quimica"
+        );
+        when(estoqueFisicoCsvService.search(eq("lorat"))).thenReturn(List.of(csvItem));
+
+        mockMvc.perform(get("/admin/produtos/nao-prontos/todos").param("q", "lorat"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pendingTotal").value(1))
+                .andExpect(jsonPath("$.pendingItems[0].id").doesNotExist())
+                .andExpect(jsonPath("$.pendingItems[0].origem").value("ESTOQUE_FISICO"))
+                .andExpect(jsonPath("$.pendingItems[0].legacyId").value(500))
+                .andExpect(jsonPath("$.pendingItems[0].nome").value("Loratadina"));
+    }
+
+    @Test
+    void naoProntosEndpointUsaFallbackDoCsvQuandoBancoVazio() throws Exception {
+        EstoqueFisicoCsvService.EstoqueItem csvItem = new EstoqueFisicoCsvService.EstoqueItem(
+                801L,
+                "7891112223334",
+                "Vitamina C",
+                "Lab X",
+                14,
+                BigDecimal.valueOf(25.00),
+                BigDecimal.valueOf(21.50),
+                "vitamina c 801 7891112223334 lab x"
+        );
+        when(estoqueFisicoCsvService.search(eq("vit"))).thenReturn(List.of(csvItem));
+
+        mockMvc.perform(get("/admin/produtos/nao-prontos")
+                        .param("q", "vit")
+                        .param("page", "0")
+                        .param("size", "12"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.items[0].origem").value("ESTOQUE_FISICO"))
+                .andExpect(jsonPath("$.items[0].legacyId").value(801))
+                .andExpect(jsonPath("$.items[0].nome").value("Vitamina C"));
+    }
+
+    @Test
+    void naoProntosTodosPageCombinaBancoComCsvSemDuplicar() throws Exception {
+        ProdutoEntity doBanco = new ProdutoEntity();
+        doBanco.setId(77L);
+        doBanco.setLegacyId(700L);
+        doBanco.setNome("Amoxicilina");
+        doBanco.setDescricao("Amoxicilina 500mg");
+        doBanco.setCategoria("Estoque fisico");
+        doBanco.setCodigoBarras("7890007770001");
+        doBanco.setEstoque(5);
+
+        Page<ProdutoEntity> page = new PageImpl<>(List.of(doBanco), PageRequest.of(0, 1000), 1);
+        when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
+                .thenReturn(page);
+
+        EstoqueFisicoCsvService.EstoqueItem duplicadoPorLegacy = new EstoqueFisicoCsvService.EstoqueItem(
+                700L,
+                "7890007770001",
+                "Amoxicilina duplicada",
+                "Lab Y",
+                9,
+                BigDecimal.valueOf(14.90),
+                BigDecimal.valueOf(12.90),
+                "amoxi 700 7890007770001"
+        );
+        EstoqueFisicoCsvService.EstoqueItem novoDoCsv = new EstoqueFisicoCsvService.EstoqueItem(
+                999L,
+                "7899991112223",
+                "Cetirizina",
+                "Lab Z",
+                8,
+                BigDecimal.valueOf(22.00),
+                BigDecimal.valueOf(19.90),
+                "cetirizina 999 7899991112223"
+        );
+        when(estoqueFisicoCsvService.search(eq("amoxi"))).thenReturn(List.of(duplicadoPorLegacy, novoDoCsv));
+
+        mockMvc.perform(get("/admin/produtos/nao-prontos/todos").param("q", "amoxi"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pendingTotal").value(2))
+                .andExpect(jsonPath("$.pendingItems[0].id").value(77))
+                .andExpect(jsonPath("$.pendingItems[1].origem").value("ESTOQUE_FISICO"))
+                .andExpect(jsonPath("$.pendingItems[1].legacyId").value(999))
+                .andExpect(jsonPath("$.pendingItems[1].nome").value("Cetirizina"));
     }
 
     @Test
