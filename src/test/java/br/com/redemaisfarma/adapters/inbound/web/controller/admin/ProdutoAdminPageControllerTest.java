@@ -130,6 +130,34 @@ class ProdutoAdminPageControllerTest {
     }
 
     @Test
+    void naoProntosTodosQuandoFiltroNaoEncontraNadaVoltaParaListaCompleta() throws Exception {
+        ProdutoEntity produto = new ProdutoEntity();
+        produto.setId(91L);
+        produto.setNome("Pantoprazol");
+        produto.setCategoria("Estoque fisico");
+        produto.setEstoque(6);
+
+        when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
+                .thenAnswer(invocation -> {
+                    String q = invocation.getArgument(0, String.class);
+                    Pageable pageable = invocation.getArgument(2, Pageable.class);
+                    if ("zzz".equals(q)) {
+                        return Page.empty(pageable);
+                    }
+                    if (q == null) {
+                        return new PageImpl<>(List.of(produto), pageable, 1);
+                    }
+                    return Page.empty(pageable);
+                });
+
+        mockMvc.perform(get("/admin/produtos/nao-prontos/todos").param("q", "zzz"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pendingTotal").value(1))
+                .andExpect(jsonPath("$.pendingItems[0].id").value(91))
+                .andExpect(jsonPath("$.pendingItems[0].nome").value("Pantoprazol"));
+    }
+
+    @Test
     void naoProntosEndpointRetornaItensDoBanco() throws Exception {
         ProdutoEntity produto = new ProdutoEntity();
         produto.setId(10L);

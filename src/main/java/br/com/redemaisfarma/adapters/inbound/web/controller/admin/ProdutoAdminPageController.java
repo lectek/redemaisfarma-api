@@ -293,7 +293,7 @@ public class ProdutoAdminPageController {
 
     @GetMapping("/nao-prontos/todos")
     public String listarNaoProntosTodos(@RequestParam(name = "q", required = false) String q, Model model) {
-        List<ProdutoLookupItem> naoProntos = this.resolveNaoProntosFromDatabase(q, MAX_PENDING_ALL_LIMIT);
+        List<ProdutoLookupItem> naoProntos = this.resolveNaoProntosFromDatabase(q, MAX_PENDING_ALL_LIMIT, true);
         model.addAttribute("pendingItems", naoProntos);
         model.addAttribute("pendingTotal", naoProntos.size());
         model.addAttribute("q", q == null ? "" : q.trim());
@@ -306,7 +306,7 @@ public class ProdutoAdminPageController {
             @RequestParam(name = "validador", required = false) String validador,
             RedirectAttributes ra
     ) {
-        List<ProdutoLookupItem> pendentes = this.resolveNaoProntosFromDatabase(q, MAX_PENDING_ALL_LIMIT);
+        List<ProdutoLookupItem> pendentes = this.resolveNaoProntosFromDatabase(q, MAX_PENDING_ALL_LIMIT, false);
         if (pendentes.isEmpty()) {
             ra.addFlashAttribute("info", "Nenhum produto pendente encontrado para o filtro informado.");
             return this.redirectNaoProntosTodos(q);
@@ -492,6 +492,10 @@ public class ProdutoAdminPageController {
     }
 
     private List<ProdutoLookupItem> resolveNaoProntosFromDatabase(String q, int limit) {
+        return this.resolveNaoProntosFromDatabase(q, limit, true);
+    }
+
+    private List<ProdutoLookupItem> resolveNaoProntosFromDatabase(String q, int limit, boolean fallbackToAllWhenEmpty) {
         String termo = this.normalizeQuery(q);
         int safeLimit = Math.max(1, Math.min(limit, MAX_PENDING_ALL_LIMIT));
         List<ProdutoLookupItem> itens = new ArrayList<>(Math.min(safeLimit, 2_000));
@@ -531,7 +535,11 @@ public class ProdutoAdminPageController {
             page++;
         }
 
-        return this.mergeNaoProntosWithCsv(termo, itens, safeLimit);
+        List<ProdutoLookupItem> merged = this.mergeNaoProntosWithCsv(termo, itens, safeLimit);
+        if (fallbackToAllWhenEmpty && merged.isEmpty() && StringUtils.hasText(termo)) {
+            return this.resolveNaoProntosFromDatabase(null, safeLimit, false);
+        }
+        return merged;
     }
 
     private NaoProntosSlice fetchNaoProntosSlice(String termo, int page, int size) {
