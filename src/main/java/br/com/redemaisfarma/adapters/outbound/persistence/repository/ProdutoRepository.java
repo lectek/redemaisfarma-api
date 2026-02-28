@@ -153,7 +153,21 @@ public interface ProdutoRepository extends JpaRepository<ProdutoEntity, Long> {
     @Query("""
             SELECT p FROM ProdutoEntity p
             WHERE LOWER(TRIM(p.categoria)) = LOWER(TRIM(:cat))
-              AND p.disponivel = false
+              AND (
+                p.disponivel IS NULL
+                OR p.disponivel = false
+                OR p.estoque IS NULL
+                OR p.estoque <= 0
+                OR p.precoVenda IS NULL
+                OR p.precoVenda <= 0
+                OR p.imagem IS NULL
+                OR TRIM(p.imagem) = ''
+                OR p.status IS NULL
+                OR p.status <> br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus.PUBLICADO
+                OR p.publicadoEm IS NULL
+                OR p.publicadoEm > CURRENT_TIMESTAMP
+                OR (p.despublicadoEm IS NOT NULL AND p.despublicadoEm <= CURRENT_TIMESTAMP)
+              )
               AND (
                 :q IS NULL
                 OR LOWER(p.descricao) LIKE LOWER(CONCAT('%', :q, '%'))
@@ -169,7 +183,21 @@ public interface ProdutoRepository extends JpaRepository<ProdutoEntity, Long> {
 
     @Query("""
             SELECT p FROM ProdutoEntity p
-            WHERE p.disponivel = false
+            WHERE (
+                p.disponivel IS NULL
+                OR p.disponivel = false
+                OR p.estoque IS NULL
+                OR p.estoque <= 0
+                OR p.precoVenda IS NULL
+                OR p.precoVenda <= 0
+                OR p.imagem IS NULL
+                OR TRIM(p.imagem) = ''
+                OR p.status IS NULL
+                OR p.status <> br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus.PUBLICADO
+                OR p.publicadoEm IS NULL
+                OR p.publicadoEm > CURRENT_TIMESTAMP
+                OR (p.despublicadoEm IS NOT NULL AND p.despublicadoEm <= CURRENT_TIMESTAMP)
+              )
               AND (
                 :q IS NULL
                 OR LOWER(p.descricao) LIKE LOWER(CONCAT('%', :q, '%'))
