@@ -293,7 +293,7 @@ public class ProdutoAdminPageController {
 
     @GetMapping("/nao-prontos/todos")
     public String listarNaoProntosTodos(@RequestParam(name = "q", required = false) String q, Model model) {
-        List<ProdutoLookupItem> naoProntos = this.resolveNaoProntosFromDatabase(q, MAX_PENDING_ALL_LIMIT, true);
+        List<ProdutoLookupItem> naoProntos = this.resolveCatalogoFromDatabase(q, MAX_PENDING_ALL_LIMIT, true);
         model.addAttribute("pendingItems", naoProntos);
         model.addAttribute("pendingTotal", naoProntos.size());
         model.addAttribute("q", q == null ? "" : q.trim());
@@ -555,6 +555,59 @@ public class ProdutoAdminPageController {
         int to = Math.min(from + size, allItems.size());
         List<ProdutoLookupItem> content = allItems.subList(from, to);
         return new NaoProntosSlice(content, allItems.size(), to < allItems.size());
+    }
+
+    private List<ProdutoLookupItem> resolveCatalogoFromDatabase(String q, int limit, boolean fallbackToAllWhenEmpty) {
+        String termo = this.normalizeQuery(q);
+        int safeLimit = Math.max(1, Math.min(limit, MAX_PENDING_ALL_LIMIT));
+        List<ProdutoLookupItem> itens = new ArrayList<>(Math.min(safeLimit, 2_000));
+        Set<String> seen = new HashSet<>();
+        int page = 0;
+
+        while (itens.size() < safeLimit) {
+            int pageSize = Math.min(1000, safeLimit - itens.size());
+            Page<ProdutoEntity> result = this.fetchCatalogoPage(termo, page, pageSize);
+            if (result.isEmpty()) {
+                break;
+            }
+
+            int addedOnPage = 0;
+            for (ProdutoEntity entity : result.getContent()) {
+                if (entity == null) {
+                    continue;
+                }
+                if (itens.size() >= safeLimit) {
+                    break;
+                }
+
+                ProdutoLookupItem mapped = ProdutoLookupItem.from(entity);
+                String key = this.pendingUniqueKey(mapped);
+                if (!seen.add(key)) {
+                    continue;
+                }
+                itens.add(mapped);
+                addedOnPage++;
+            }
+
+            if (!result.hasNext()) {
+                break;
+            }
+            if (addedOnPage == 0) {
+                break;
+            }
+            page++;
+        }
+
+        List<ProdutoLookupItem> merged = this.mergeNaoProntosWithCsv(termo, itens, safeLimit);
+        if (fallbackToAllWhenEmpty && merged.isEmpty() && StringUtils.hasText(termo)) {
+            return this.resolveCatalogoFromDatabase(null, safeLimit, false);
+        }
+        return merged;
+    }
+
+    private Page<ProdutoEntity> fetchCatalogoPage(String termo, int page, int size) {
+        PageRequest req = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id"));
+        return this.produtoRepository.searchPageByCategoria(termo, null, req);
     }
 
     private Page<ProdutoEntity> fetchNaoProntosPage(String termo, int page, int size) {

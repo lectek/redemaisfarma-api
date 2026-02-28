@@ -81,6 +81,8 @@ class ProdutoAdminPageControllerTest {
                         List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
         when(thymeleafViewResolver.resolveViewName(any(), any()))
                 .thenReturn(new MappingJackson2JsonView());
+        when(produtoRepository.searchPageByCategoria(any(), any(), any(Pageable.class)))
+                .thenReturn(Page.empty());
         when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
                 .thenReturn(Page.empty());
         when(produtoRepository.searchNaoDisponiveis(any(), any(Pageable.class)))
@@ -118,14 +120,14 @@ class ProdutoAdminPageControllerTest {
         produto.setEstoque(5);
 
         Page<ProdutoEntity> page = new PageImpl<>(List.of(produto), PageRequest.of(0, 1000), 1);
-        when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
+        when(produtoRepository.searchPageByCategoria(any(), any(), any(Pageable.class)))
                 .thenReturn(page);
 
         mockMvc.perform(get("/admin/produtos/nao-prontos/todos").param("q", "amoxi"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pendingTotal").value(1))
                 .andExpect(jsonPath("$.pendingItems[0].id").value(77))
-                .andExpect(jsonPath("$.pendingItems[0].origem").value("CATALOGO_PENDENTE"))
+                .andExpect(jsonPath("$.pendingItems[0].origem").value("CATALOGO"))
                 .andExpect(jsonPath("$.pendingItems[0].nome").value("Amoxicilina"));
     }
 
@@ -137,7 +139,7 @@ class ProdutoAdminPageControllerTest {
         produto.setCategoria("Estoque fisico");
         produto.setEstoque(6);
 
-        when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
+        when(produtoRepository.searchPageByCategoria(any(), any(), any(Pageable.class)))
                 .thenAnswer(invocation -> {
                     String q = invocation.getArgument(0, String.class);
                     Pageable pageable = invocation.getArgument(2, Pageable.class);
@@ -333,7 +335,7 @@ class ProdutoAdminPageControllerTest {
         doBanco.setEstoque(5);
 
         Page<ProdutoEntity> page = new PageImpl<>(List.of(doBanco), PageRequest.of(0, 1000), 1);
-        when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
+        when(produtoRepository.searchPageByCategoria(any(), any(), any(Pageable.class)))
                 .thenReturn(page);
 
         EstoqueFisicoCsvService.EstoqueItem duplicadoPorLegacy = new EstoqueFisicoCsvService.EstoqueItem(
