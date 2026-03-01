@@ -33,6 +33,7 @@
 
     <form class="filter-bar card p-16 mb-4" th:action="@{/admin/produtos/nao-prontos/todos}" method="get">
       <input class="input" name="q" type="search" placeholder="Filtrar por nome, EAN ou codigo interno" th:value="${q}" />
+      <input type="hidden" name="size" th:value="${pageSize} ?: 100" />
       <button class="btn" type="submit">Buscar</button>
       <a class="btn btn-ghost" th:href="@{/admin/produtos/nao-prontos/todos}">Limpar</a>
     </form>
@@ -41,7 +42,7 @@
       <article class="stat-card">
         <span class="stat-label">Total de produtos nao prontos</span>
         <span class="stat-value" th:text="${pendingTotal}">0</span>
-        <span class="stat-hint">Itens listados nesta pagina</span>
+        <span class="stat-hint">Itens listados nesta pagina: <span th:text="${listedCount}">0</span></span>
       </article>
     </section>
 
@@ -80,6 +81,20 @@
         </tbody>
       </table>
     </section>
+
+    <nav class="pagination mt-4" th:if="${totalPages > 1}" aria-label="Paginacao">
+      <a class="btn" th:if="${hasPrev}"
+         th:href="@{/admin/produtos/nao-prontos/todos(q=${q},page=${pageNumber-1},size=${pageSize})}">Anterior</a>
+      <button class="btn" type="button" th:unless="${hasPrev}" disabled>Anterior</button>
+
+      <span class="muted">
+        Pagina <span th:text="${pageNumber+1}">1</span> de <span th:text="${totalPages}">1</span>
+      </span>
+
+      <a class="btn" th:if="${hasNext}"
+         th:href="@{/admin/produtos/nao-prontos/todos(q=${q},page=${pageNumber+1},size=${pageSize})}">Proxima</a>
+      <button class="btn" type="button" th:unless="${hasNext}" disabled>Proxima</button>
+    </nav>
   </main>
 </div>
 

@@ -292,10 +292,21 @@ public class ProdutoAdminPageController {
     }
 
     @GetMapping("/nao-prontos/todos")
-    public String listarNaoProntosTodos(@RequestParam(name = "q", required = false) String q, Model model) {
-        List<ProdutoLookupItem> naoProntos = this.resolveCatalogoFromDatabase(q, MAX_PENDING_ALL_LIMIT, true);
-        model.addAttribute("pendingItems", naoProntos);
-        model.addAttribute("pendingTotal", naoProntos.size());
+    public String listarNaoProntosTodos(
+            @RequestParam(name = "q", required = false) String q,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "100") int size,
+            Model model
+    ) {
+        CatalogoSlice slice = this.fetchCatalogoSlice(q, page, size);
+        model.addAttribute("pendingItems", slice.items());
+        model.addAttribute("pendingTotal", slice.total());
+        model.addAttribute("listedCount", slice.items().size());
+        model.addAttribute("pageNumber", slice.page());
+        model.addAttribute("pageSize", slice.size());
+        model.addAttribute("totalPages", slice.totalPages());
+        model.addAttribute("hasPrev", slice.hasPrev());
+        model.addAttribute("hasNext", slice.hasNext());
         model.addAttribute("q", q == null ? "" : q.trim());
         return "pages/admin/produtos/nao-prontos-todos";
     }
@@ -557,52 +568,32 @@ public class ProdutoAdminPageController {
         return new NaoProntosSlice(content, allItems.size(), to < allItems.size());
     }
 
-    private List<ProdutoLookupItem> resolveCatalogoFromDatabase(String q, int limit, boolean fallbackToAllWhenEmpty) {
+    private CatalogoSlice fetchCatalogoSlice(String q, int page, int size) {
         String termo = this.normalizeQuery(q);
-        int safeLimit = Math.max(1, Math.min(limit, MAX_PENDING_ALL_LIMIT));
-        List<ProdutoLookupItem> itens = new ArrayList<>(Math.min(safeLimit, 2_000));
-        Set<String> seen = new HashSet<>();
-        int page = 0;
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.max(10, Math.min(size, 200));
+        Page<ProdutoEntity> result = this.fetchCatalogoPage(termo, safePage, safeSize);
 
-        while (itens.size() < safeLimit) {
-            int pageSize = Math.min(1000, safeLimit - itens.size());
-            Page<ProdutoEntity> result = this.fetchCatalogoPage(termo, page, pageSize);
-            if (result.isEmpty()) {
-                break;
-            }
-
-            int addedOnPage = 0;
-            for (ProdutoEntity entity : result.getContent()) {
-                if (entity == null) {
-                    continue;
-                }
-                if (itens.size() >= safeLimit) {
-                    break;
-                }
-
-                ProdutoLookupItem mapped = ProdutoLookupItem.from(entity);
-                String key = this.pendingUniqueKey(mapped);
-                if (!seen.add(key)) {
-                    continue;
-                }
-                itens.add(mapped);
-                addedOnPage++;
-            }
-
-            if (!result.hasNext()) {
-                break;
-            }
-            if (addedOnPage == 0) {
-                break;
-            }
-            page++;
+        // Mantem a listagem util para o admin mesmo quando o filtro nao retorna itens.
+        // Nesse caso exibe a primeira pagina do catalogo completo.
+        if (StringUtils.hasText(termo) && result.getTotalElements() == 0L) {
+            result = this.fetchCatalogoPage(null, 0, safeSize);
         }
 
-        List<ProdutoLookupItem> merged = this.mergeNaoProntosWithCsv(termo, itens, safeLimit);
-        if (fallbackToAllWhenEmpty && merged.isEmpty() && StringUtils.hasText(termo)) {
-            return this.resolveCatalogoFromDatabase(null, safeLimit, false);
-        }
-        return merged;
+        List<ProdutoLookupItem> items = result.getContent()
+                .stream()
+                .map(ProdutoLookupItem::from)
+                .toList();
+
+        return new CatalogoSlice(
+                items,
+                result.getTotalElements(),
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalPages(),
+                result.hasPrevious(),
+                result.hasNext()
+        );
     }
 
     private Page<ProdutoEntity> fetchCatalogoPage(String termo, int page, int size) {
@@ -862,6 +853,17 @@ public class ProdutoAdminPageController {
     private record NaoProntosSlice(
             List<ProdutoLookupItem> items,
             int total,
+            boolean hasNext
+    ) {
+    }
+
+    private record CatalogoSlice(
+            List<ProdutoLookupItem> items,
+            long total,
+            int page,
+            int size,
+            int totalPages,
+            boolean hasPrev,
             boolean hasNext
     ) {
     }

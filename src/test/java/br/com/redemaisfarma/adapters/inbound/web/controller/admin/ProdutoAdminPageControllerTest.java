@@ -276,26 +276,11 @@ class ProdutoAdminPageControllerTest {
     }
 
     @Test
-    void naoProntosTodosPageUsaFallbackDoCsvQuandoBancoVazio() throws Exception {
-        EstoqueFisicoCsvService.EstoqueItem csvItem = new EstoqueFisicoCsvService.EstoqueItem(
-                500L,
-                "7890009991110",
-                "Loratadina",
-                "Neo Quimica",
-                6,
-                BigDecimal.valueOf(19.90),
-                BigDecimal.valueOf(17.90),
-                "loratadina 500 7890009991110 neo quimica"
-        );
-        when(estoqueFisicoCsvService.search(eq("lorat"))).thenReturn(List.of(csvItem));
-
+    void naoProntosTodosPageRetornaVazioQuandoCatalogoNaoTemItens() throws Exception {
         mockMvc.perform(get("/admin/produtos/nao-prontos/todos").param("q", "lorat"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.pendingTotal").value(1))
-                .andExpect(jsonPath("$.pendingItems[0].id").doesNotExist())
-                .andExpect(jsonPath("$.pendingItems[0].origem").value("ESTOQUE_FISICO"))
-                .andExpect(jsonPath("$.pendingItems[0].legacyId").value(500))
-                .andExpect(jsonPath("$.pendingItems[0].nome").value("Loratadina"));
+                .andExpect(jsonPath("$.pendingTotal").value(0))
+                .andExpect(jsonPath("$.listedCount").value(0));
     }
 
     @Test
@@ -324,7 +309,7 @@ class ProdutoAdminPageControllerTest {
     }
 
     @Test
-    void naoProntosTodosPageCombinaBancoComCsvSemDuplicar() throws Exception {
+    void naoProntosTodosPageUsaApenasCatalogoComPaginacao() throws Exception {
         ProdutoEntity doBanco = new ProdutoEntity();
         doBanco.setId(77L);
         doBanco.setLegacyId(700L);
@@ -334,39 +319,24 @@ class ProdutoAdminPageControllerTest {
         doBanco.setCodigoBarras("7890007770001");
         doBanco.setEstoque(5);
 
-        Page<ProdutoEntity> page = new PageImpl<>(List.of(doBanco), PageRequest.of(0, 1000), 1);
+        Page<ProdutoEntity> page = new PageImpl<>(List.of(doBanco), PageRequest.of(1, 10), 21);
         when(produtoRepository.searchPageByCategoria(any(), any(), any(Pageable.class)))
                 .thenReturn(page);
 
-        EstoqueFisicoCsvService.EstoqueItem duplicadoPorLegacy = new EstoqueFisicoCsvService.EstoqueItem(
-                700L,
-                "7890007770001",
-                "Amoxicilina duplicada",
-                "Lab Y",
-                9,
-                BigDecimal.valueOf(14.90),
-                BigDecimal.valueOf(12.90),
-                "amoxi 700 7890007770001"
-        );
-        EstoqueFisicoCsvService.EstoqueItem novoDoCsv = new EstoqueFisicoCsvService.EstoqueItem(
-                999L,
-                "7899991112223",
-                "Cetirizina",
-                "Lab Z",
-                8,
-                BigDecimal.valueOf(22.00),
-                BigDecimal.valueOf(19.90),
-                "cetirizina 999 7899991112223"
-        );
-        when(estoqueFisicoCsvService.search(eq("amoxi"))).thenReturn(List.of(duplicadoPorLegacy, novoDoCsv));
-
-        mockMvc.perform(get("/admin/produtos/nao-prontos/todos").param("q", "amoxi"))
+        mockMvc.perform(get("/admin/produtos/nao-prontos/todos")
+                        .param("q", "amoxi")
+                        .param("page", "1")
+                        .param("size", "1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.pendingTotal").value(2))
+                .andExpect(jsonPath("$.pendingTotal").value(21))
+                .andExpect(jsonPath("$.listedCount").value(1))
+                .andExpect(jsonPath("$.pageNumber").value(1))
+                .andExpect(jsonPath("$.pageSize").value(10))
+                .andExpect(jsonPath("$.totalPages").value(3))
+                .andExpect(jsonPath("$.hasPrev").value(true))
+                .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpect(jsonPath("$.pendingItems[0].id").value(77))
-                .andExpect(jsonPath("$.pendingItems[1].origem").value("ESTOQUE_FISICO"))
-                .andExpect(jsonPath("$.pendingItems[1].legacyId").value(999))
-                .andExpect(jsonPath("$.pendingItems[1].nome").value("Cetirizina"));
+                .andExpect(jsonPath("$.pendingItems[0].origem").value("CATALOGO"));
     }
 
     @Test
