@@ -33,9 +33,13 @@
 
     <form class="filter-bar card p-16 mb-4" th:action="@{/admin/produtos/nao-prontos/todos}" method="get">
       <input class="input" name="q" type="search" placeholder="Filtrar por nome, EAN ou codigo interno" th:value="${q}" />
-      <input type="hidden" name="size" th:value="${pageSize} ?: 100" />
+      <select class="select" name="size" aria-label="Itens por pagina">
+        <option value="50" th:selected="${pageSize == 50}">50 por pagina</option>
+        <option value="100" th:selected="${pageSize == 100}">100 por pagina</option>
+        <option value="200" th:selected="${pageSize == 200}">200 por pagina</option>
+      </select>
       <button class="btn" type="submit">Buscar</button>
-      <a class="btn btn-ghost" th:href="@{/admin/produtos/nao-prontos/todos}">Limpar</a>
+      <a class="btn btn-ghost" th:href="@{/admin/produtos/nao-prontos/todos(size=${pageSize})}">Limpar</a>
     </form>
 
     <section class="stat-grid">
