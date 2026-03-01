@@ -25,6 +25,14 @@ function toast(msg, type = 'ok') {
   setTimeout(() => el.remove(), 3500);
 }
 
+function normalizeErrorMessage(raw, fallback) {
+  const text = String(raw || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text || fallback;
+}
+
 const $ = (s) => document.querySelector(s);
 
 const $id = $('#id');
@@ -99,13 +107,16 @@ async function salvar() {
       credentials: 'same-origin'
     }));
 
-    if (!r.ok) throw new Error(await r.text());
+    if (!r.ok) {
+      const raw = await r.text();
+      throw new Error(normalizeErrorMessage(raw, `Falha ao salvar (HTTP ${r.status})`));
+    }
     $status.textContent = 'Salvo com sucesso.';
     toast('Produto salvo!', 'ok');
   } catch (e) {
     console.error(e);
     $status.textContent = 'Erro ao salvar.';
-    toast('Erro ao salvar produto', 'err');
+    toast(e?.message || 'Erro ao salvar produto', 'err');
   } finally {
     $btnSalvar.disabled = false;
   }
@@ -131,7 +142,10 @@ async function uploadImagem() {
       credentials: 'same-origin'
     }));
 
-    if (!r.ok) throw new Error(await r.text());
+    if (!r.ok) {
+      const raw = await r.text();
+      throw new Error(normalizeErrorMessage(raw, `Falha no upload (HTTP ${r.status})`));
+    }
     const url = (await r.text())?.trim();
     if (url) $imagem.value = url;
     $status.textContent = 'Imagem enviada.';
@@ -139,7 +153,7 @@ async function uploadImagem() {
   } catch (e) {
     console.error(e);
     $status.textContent = 'Erro ao enviar imagem.';
-    toast('Falha ao enviar imagem', 'err');
+    toast(e?.message || 'Falha ao enviar imagem', 'err');
   } finally {
     $btnUploadImagem.disabled = false;
   }
@@ -189,7 +203,10 @@ async function moverFluxo(acao) {
 
   try {
     const r = await fetch(endpoint, withCsrf({ method: 'POST', credentials: 'same-origin' }));
-    if (!r.ok) throw new Error(await r.text());
+    if (!r.ok) {
+      const raw = await r.text();
+      throw new Error(normalizeErrorMessage(raw, `Falha no fluxo (HTTP ${r.status})`));
+    }
 
     if (acao === 'validar') {
       $status.textContent = 'Fluxo: produto VALIDADO.';
@@ -201,7 +218,7 @@ async function moverFluxo(acao) {
   } catch (e) {
     console.error(e);
     $status.textContent = `Erro ao ${acao}.`;
-    toast(`Falha ao ${acao} produto`, 'err');
+    toast(e?.message || `Falha ao ${acao} produto`, 'err');
   } finally {
     setFluxoButtonsDisabled(false);
   }
