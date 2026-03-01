@@ -42,8 +42,8 @@
       </article>
       <article class="stat-card">
         <span class="stat-label">Estoque baixo</span>
-        <span class="stat-value" th:text="${#lists.size(produtos.?[estoque != null and estoque <= 5])}">0</span>
-        <span class="stat-hint">Ate 5 unidades</span>
+        <span class="stat-value" th:text="${alertaEstoqueBaixoTotal}">0</span>
+        <span class="stat-hint">Ate <span th:text="${alertaEstoqueLimite}">10</span> unidades</span>
       </article>
       <article class="stat-card">
         <span class="stat-label">Sem imagem</span>
@@ -55,6 +55,39 @@
         <span class="stat-value" th:text="${#lists.size(produtos.?[disponivel == true])}">0</span>
         <span class="stat-hint">Visiveis no site</span>
       </article>
+    </section>
+
+    <section class="card p-16 mb-4 stack">
+      <div class="between">
+        <div>
+          <h2 class="h5 m-0">Alerta de estoque baixo</h2>
+          <p class="text-muted m-0">
+            Quando houver produtos abaixo do limite, a API de notificacoes gera aviso para usuarios admin.
+          </p>
+        </div>
+        <span class="badge badge--success" th:if="${alertaEstoqueAtivo}">Ativo</span>
+        <span class="badge badge--warning" th:if="${!alertaEstoqueAtivo}">Desativado</span>
+      </div>
+      <form class="form-row" th:action="@{/admin/produtos/alerta-estoque}" method="post">
+        <input type="hidden" name="redirect" value="/admin/produtos"/>
+        <div class="form-group">
+          <label for="alertaEstoqueLimitePage">Limite para alerta</label>
+          <input id="alertaEstoqueLimitePage"
+                 class="input"
+                 type="number"
+                 name="limite"
+                 min="1"
+                 max="100000"
+                 th:value="${alertaEstoqueLimite}"
+                 required/>
+        </div>
+        <div class="form-group" style="align-self:end">
+          <button class="btn btn-ghost" type="submit">Salvar limite</button>
+        </div>
+      </form>
+      <p class="text-muted m-0">
+        Produtos em alerta agora: <strong th:text="${alertaEstoqueBaixoTotal}">0</strong>.
+      </p>
     </section>
 
     <form class="filter-bar card p-16 mb-4" th:action="@{/admin/produtos}" method="get">

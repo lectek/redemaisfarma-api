@@ -26,6 +26,8 @@
     </div>
   </div>
 
+  <section th:replace="~{fragments/flash :: flash}"></section>
+
   <p class="text-muted" th:if="${param.erro}">
     <span th:switch="${param.erro[0]}">
       <span th:case="'nome'">Informe o nome do produto.</span>
@@ -36,6 +38,35 @@
       <span th:case="*">Nao foi possivel salvar o produto.</span>
     </span>
   </p>
+
+  <div class="card p-4 stack">
+    <div class="between">
+      <h2 class="h5 m-0">Alerta de estoque baixo</h2>
+      <span class="badge badge--success" th:if="${alertaEstoqueAtivo}">Ativo</span>
+      <span class="badge badge--warning" th:if="${!alertaEstoqueAtivo}">Desativado</span>
+    </div>
+    <p class="text-muted m-0">
+      Produtos em alerta agora: <strong th:text="${alertaEstoqueBaixoTotal}">0</strong>
+      (estoque ate <strong th:text="${alertaEstoqueLimite}">10</strong> unidades).
+    </p>
+    <form class="form-row" th:action="@{/admin/produtos/alerta-estoque}" method="post">
+      <input type="hidden" name="redirect" value="/admin/produtos/novo"/>
+      <div class="form-group">
+        <label for="alertaEstoqueLimiteNovo">Limite de alerta</label>
+        <input id="alertaEstoqueLimiteNovo"
+               class="input"
+               type="number"
+               name="limite"
+               min="1"
+               max="100000"
+               th:value="${alertaEstoqueLimite}"
+               required/>
+      </div>
+      <div class="form-group" style="align-self:end">
+        <button class="btn btn-ghost" type="submit">Salvar limite</button>
+      </div>
+    </form>
+  </div>
 
   <div class="card p-4 stack">
     <div class="between">

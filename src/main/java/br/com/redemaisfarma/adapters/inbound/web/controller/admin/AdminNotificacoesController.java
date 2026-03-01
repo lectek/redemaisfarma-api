@@ -5,6 +5,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteNotificacaoRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepository;
+import br.com.redemaisfarma.application.core.settings.AppSettingService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -12,6 +13,7 @@ import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -26,16 +28,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Validated
 public class AdminNotificacoesController {
 
+    private static final String KEY_ALERTA_ESTOQUE_ENABLED = "app.estoque.alerta.enabled";
+    private static final String KEY_ALERTA_ESTOQUE_LIMITE = "app.estoque.alerta.limite";
+    private static final int DEFAULT_ALERTA_ESTOQUE_LIMITE = 10;
+
     private final ClienteNotificacaoRepository notificacaoRepository;
     private final UsuarioRepository usuarioRepository;
     private final ProdutoRepository produtoRepository;
+    private final AppSettingService appSettingService;
 
     public AdminNotificacoesController(ClienteNotificacaoRepository notificacaoRepository,
                                        UsuarioRepository usuarioRepository,
-                                       ProdutoRepository produtoRepository) {
+                                       ProdutoRepository produtoRepository,
+                                       AppSettingService appSettingService) {
         this.notificacaoRepository = notificacaoRepository;
         this.usuarioRepository = usuarioRepository;
         this.produtoRepository = produtoRepository;
+        this.appSettingService = appSettingService;
     }
 
     @GetMapping
@@ -98,12 +107,22 @@ public class AdminNotificacoesController {
 
     @PostMapping("/api/enviar/estoque-baixo")
     public ResponseEntity<?> enviarEstoqueBaixo() {
-        int limite = 10;
+        if (!this.appSettingService.getBoolean(KEY_ALERTA_ESTOQUE_ENABLED, true)) {
+            return ResponseEntity.noContent().build();
+        }
+
+        int limite = Math.max(1, this.appSettingService.getInt(KEY_ALERTA_ESTOQUE_LIMITE, DEFAULT_ALERTA_ESTOQUE_LIMITE));
         int qtdBaixo = produtoRepository.findComEstoqueBaixo(limite).size();
         if (qtdBaixo <= 0) {
             return ResponseEntity.noContent().build();
         }
-        List<UsuarioEntity> usuarios = usuarioRepository.findAll();
+        List<UsuarioEntity> usuarios = usuarioRepository.findAll().stream()
+                .filter(this::isAdminUser)
+                .toList();
+        if (usuarios.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         List<ClienteNotificacaoEntity> criadas = new ArrayList<>();
         String titulo = "Estoque baixo";
         String mensagem = qtdBaixo + " produtos com estoque em " + limite + " unidades ou menos.";
@@ -119,6 +138,14 @@ public class AdminNotificacoesController {
             notificacaoRepository.saveAll(criadas);
         }
         return ResponseEntity.ok().build();
+    }
+
+    private boolean isAdminUser(UsuarioEntity usuario) {
+        if (usuario == null) {
+            return false;
+        }
+        Set<String> roles = usuario.getRoleNames();
+        return roles.contains("ADMIN") || roles.contains("ROLE_ADMIN");
     }
 
     public record AdminNotificacaoRequest(

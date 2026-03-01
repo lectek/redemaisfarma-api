@@ -8,6 +8,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCategoriaRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import br.com.redemaisfarma.application.core.media.ImageStorageService;
+import br.com.redemaisfarma.application.core.settings.AppSettingService;
 import br.com.redemaisfarma.application.service.EstoqueFisicoCsvService;
 import br.com.redemaisfarma.application.service.EstoqueFisicoImportService;
 import br.com.redemaisfarma.application.service.ProdutoAdminService;
@@ -57,11 +58,15 @@ public class ProdutoAdminPageController {
     private static final Logger log = LoggerFactory.getLogger(ProdutoAdminPageController.class);
     private static final String CATEGORIA_ESTOQUE_FISICO = "Estoque fisico";
     private static final int MAX_PENDING_ALL_LIMIT = 200_000;
+    private static final String KEY_ALERTA_ESTOQUE_ENABLED = "app.estoque.alerta.enabled";
+    private static final String KEY_ALERTA_ESTOQUE_LIMITE = "app.estoque.alerta.limite";
+    private static final int DEFAULT_ALERTA_ESTOQUE_LIMITE = 10;
 
     private final ProdutoAdminService adminService;
     private final ProdutoRepository produtoRepository;
     private final ProdutoCategoriaRepository categoriaRepository;
     private final ImageStorageService imageStorageService;
+    private final AppSettingService appSettingService;
     private final ObjectProvider<EstoqueFisicoCsvService> estoqueFisicoCsvServiceProvider;
     private final ObjectProvider<EstoqueFisicoImportService> estoqueImportServiceProvider;
     private final ObjectProvider<ProdutoLegacyRepository> legacyRepositoryProvider;
@@ -81,6 +86,7 @@ public class ProdutoAdminPageController {
         model.addAttribute("categoria", categoria == null ? "" : categoria);
         model.addAttribute("categorias", this.resolveCategorias());
         model.addAttribute("legacySyncEnabled", this.catalogSyncProvider.getIfAvailable() != null);
+        this.populateEstoqueAlerta(model);
         return "pages/admin/produtos/lista";
     }
 
@@ -206,7 +212,24 @@ public class ProdutoAdminPageController {
         model.addAttribute("produto", new ProdutoEntity());
         model.addAttribute("categorias", this.resolveCategorias());
         model.addAttribute("legacySyncEnabled", this.catalogSyncProvider.getIfAvailable() != null);
+        this.populateEstoqueAlerta(model);
         return "pages/admin/produtos/form";
+    }
+
+    @PostMapping("/alerta-estoque")
+    public String atualizarAlertaEstoque(@RequestParam(name = "limite", required = false) Integer limite,
+                                         @RequestParam(name = "redirect", required = false) String redirect,
+                                         RedirectAttributes ra) {
+        int safeLimit = limite == null
+                ? DEFAULT_ALERTA_ESTOQUE_LIMITE
+                : Math.max(1, Math.min(limite, 100_000));
+        this.appSettingService.upsert(
+                KEY_ALERTA_ESTOQUE_LIMITE,
+                String.valueOf(safeLimit),
+                "Limite de estoque baixo para aviso ao admin"
+        );
+        ra.addFlashAttribute("success", "Limite de alerta de estoque atualizado para " + safeLimit + ".");
+        return "redirect:" + this.resolveRedirectPath(redirect);
     }
 
     @GetMapping(value = "/busca-rapida", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -453,6 +476,7 @@ public class ProdutoAdminPageController {
         model.addAttribute("produtoId", id);
         this.produtoRepository.findById(id).ifPresent(produto -> model.addAttribute("produto", produto));
         model.addAttribute("categorias", this.resolveCategorias());
+        this.populateEstoqueAlerta(model);
         return "pages/admin/produtos/editar";
     }
 
@@ -475,6 +499,27 @@ public class ProdutoAdminPageController {
     private String normalizeQuery(String value) {
         String termo = this.normalize(value);
         return termo.isBlank() ? null : termo;
+    }
+
+    private void populateEstoqueAlerta(Model model) {
+        boolean alertaAtivo = this.appSettingService.getBoolean(KEY_ALERTA_ESTOQUE_ENABLED, true);
+        int limite = Math.max(1, this.appSettingService.getInt(KEY_ALERTA_ESTOQUE_LIMITE, DEFAULT_ALERTA_ESTOQUE_LIMITE));
+        int qtdBaixo = this.produtoRepository.findComEstoqueBaixo(limite).size();
+
+        model.addAttribute("alertaEstoqueAtivo", alertaAtivo);
+        model.addAttribute("alertaEstoqueLimite", limite);
+        model.addAttribute("alertaEstoqueBaixoTotal", qtdBaixo);
+    }
+
+    private String resolveRedirectPath(String redirect) {
+        String path = this.normalize(redirect);
+        if (!StringUtils.hasText(path)) {
+            return "/admin/produtos";
+        }
+        if (!path.startsWith("/admin/produtos")) {
+            return "/admin/produtos";
+        }
+        return path;
     }
 
     private String redirectNaoProntosTodos(String q) {
@@ -873,6 +918,7 @@ public class ProdutoAdminPageController {
                                       ProdutoRepository produtoRepository,
                                       ProdutoCategoriaRepository categoriaRepository,
                                       ImageStorageService imageStorageService,
+                                      AppSettingService appSettingService,
                                       ObjectProvider<EstoqueFisicoCsvService> estoqueFisicoCsvServiceProvider,
                                       ObjectProvider<EstoqueFisicoImportService> estoqueImportServiceProvider,
                                       ObjectProvider<ProdutoLegacyRepository> legacyRepositoryProvider,
@@ -881,6 +927,7 @@ public class ProdutoAdminPageController {
         this.produtoRepository = produtoRepository;
         this.categoriaRepository = categoriaRepository;
         this.imageStorageService = imageStorageService;
+        this.appSettingService = appSettingService;
         this.estoqueFisicoCsvServiceProvider = estoqueFisicoCsvServiceProvider;
         this.estoqueImportServiceProvider = estoqueImportServiceProvider;
         this.legacyRepositoryProvider = legacyRepositoryProvider;

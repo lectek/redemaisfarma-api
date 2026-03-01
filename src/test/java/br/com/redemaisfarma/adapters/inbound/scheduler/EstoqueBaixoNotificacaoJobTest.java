@@ -2,12 +2,14 @@ package br.com.redemaisfarma.adapters.inbound.scheduler;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ClienteNotificacaoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
+import br.com.redemaisfarma.domain.user.Role;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteNotificacaoRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepository;
 import br.com.redemaisfarma.application.core.settings.AppSettingService;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import java.util.List;
+import java.util.Set;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -83,6 +85,7 @@ class EstoqueBaixoNotificacaoJobTest {
         UsuarioEntity usuario = new UsuarioEntity();
         usuario.setId(1L);
         usuario.setEmail("user@example.com");
+        usuario.setRoles(Set.of(Role.of("ADMIN")));
         when(usuarioRepository.findAll()).thenReturn(List.of(usuario));
 
         job.executar();

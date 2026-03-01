@@ -9,6 +9,7 @@ import br.com.redemaisfarma.application.core.settings.AppSettingService;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -55,7 +56,9 @@ public class EstoqueBaixoNotificacaoJob {
             return;
         }
 
-        List<UsuarioEntity> usuarios = usuarioRepository.findAll();
+        List<UsuarioEntity> usuarios = usuarioRepository.findAll().stream()
+                .filter(this::isAdminUser)
+                .toList();
         if (usuarios.isEmpty()) {
             return;
         }
@@ -73,5 +76,13 @@ public class EstoqueBaixoNotificacaoJob {
         }
         notificacaoRepository.saveAll(criadas);
         settings.upsert(KEY_LAST_RUN, String.valueOf(now), "Timestamp ultimo alerta de estoque");
+    }
+
+    private boolean isAdminUser(UsuarioEntity usuario) {
+        if (usuario == null) {
+            return false;
+        }
+        Set<String> roles = usuario.getRoleNames();
+        return roles.contains("ADMIN") || roles.contains("ROLE_ADMIN");
     }
 }
