@@ -184,40 +184,23 @@
           <p class="muted">Encontre rápido o que precisa</p>
         </header>
 
-        <ul class="quick-cats__grid">
-          <li>
-            <a th:href="@{/produtos(categoria='MEDICAMENTOS')}"
-               href="/produtos?categoria=MEDICAMENTOS"
-               class="cat-card" aria-label="Medicamentos">
-              <span aria-hidden="true">Rx</span>
-              <span>Medicamentos</span>
-            </a>
-          </li>
-          <li>
-            <a th:href="@{/produtos(categoria='VITAMINAS')}"
-               href="/produtos?categoria=VITAMINAS"
-               class="cat-card" aria-label="Vitaminas e Suplementos">
-              <span aria-hidden="true">Vit</span>
-              <span>Vitaminas</span>
-            </a>
-          </li>
-          <li>
-            <a th:href="@{/produtos(categoria='SAUDE')}"
-               href="/produtos?categoria=SAUDE"
-               class="cat-card" aria-label="Cuidados com a Saúde">
-              <span aria-hidden="true">Sa</span>
-              <span>Saúde</span>
-            </a>
-          </li>
-          <li>
-            <a th:href="@{/produtos(categoria='PESSOAIS')}"
-               href="/produtos?categoria=PESSOAIS"
-               class="cat-card" aria-label="Cuidados Pessoais">
-              <span aria-hidden="true">PC</span>
-              <span>Pessoais</span>
+        <ul class="quick-cats__grid"
+            th:if="${homeCategorias != null and !#lists.isEmpty(homeCategorias)}">
+          <li th:each="categoria : ${homeCategorias}">
+            <a th:href="@{/produtos(q='',cat=${categoria})}"
+               class="cat-card"
+               th:attr="aria-label=${'Categoria ' + categoria}">
+              <span aria-hidden="true"
+                    th:text="${#strings.toUpperCase(#strings.substring(categoria, 0, 1))}">C</span>
+              <span th:text="${categoria}">Categoria</span>
             </a>
           </li>
         </ul>
+
+        <p class="muted"
+           th:if="${homeCategorias == null or #lists.isEmpty(homeCategorias)}">
+          Categorias em breve.
+        </p>
       </div>
     </section>
 

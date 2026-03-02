@@ -1,5 +1,6 @@
 package br.com.redemaisfarma.application.controller;
 
+import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCategoriaRepository;
 import br.com.redemaisfarma.application.service.PaymentMethodService;
 import br.com.redemaisfarma.application.service.CartService;
 import br.com.redemaisfarma.application.view.HomePageVM;
@@ -42,6 +43,7 @@ public class HomeController {
     private final HomepageCatalogFacade facade;
     private final PaymentMethodService paymentMethodService;
     private final CartService cartService;
+    private final ProdutoCategoriaRepository categoriaRepository;
 
     /**
      * Construtor com injeção de dependência da facade.
@@ -54,10 +56,14 @@ public class HomeController {
      *   um objeto HomepageCatalogFacade pronto para ser usado nas rotas.
      */
     @Generated
-    public HomeController(HomepageCatalogFacade facade, PaymentMethodService paymentMethodService, CartService cartService) {
+    public HomeController(HomepageCatalogFacade facade,
+                          PaymentMethodService paymentMethodService,
+                          CartService cartService,
+                          ProdutoCategoriaRepository categoriaRepository) {
         this.facade = facade;
         this.paymentMethodService = paymentMethodService;
         this.cartService = cartService;
+        this.categoriaRepository = categoriaRepository;
     }
 
     /**
@@ -120,6 +126,7 @@ public class HomeController {
 
         // Flag usada no template para saber se mostra o módulo de boas-vindas
         model.addAttribute("showWelcome", isOnboarding(onboarding));
+        model.addAttribute("homeCategorias", this.resolveHomeCategorias());
 
         // Usado pelo layout (ex.: para marcar o menu "Home" ativo)
         model.addAttribute("page", "home");
@@ -275,6 +282,23 @@ public class HomeController {
         return "1".equals(v)
                 || "true".equalsIgnoreCase(v)
                 || "yes".equalsIgnoreCase(v);
+    }
+
+    private List<String> resolveHomeCategorias() {
+        final List<String> categorias = categoriaRepository.findAllNomes();
+        if (categorias == null || categorias.isEmpty()) {
+            return List.of();
+        }
+        return categorias.stream()
+                .map(this::normalizeCategoria)
+                .filter(nome -> !nome.isBlank())
+                .distinct()
+                .limit(8)
+                .toList();
+    }
+
+    private String normalizeCategoria(final String value) {
+        return value == null ? "" : value.trim();
     }
 
 }
