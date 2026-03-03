@@ -434,6 +434,7 @@ public class ProdutoAdminPageController {
     }
 
     @PostMapping("/sincronizar-estoque")
+    @SuppressWarnings("java:S3516")
     public String sincronizarEstoqueFisico(RedirectAttributes ra) {
         SincronizacaoCatalogoService syncService = this.catalogSyncProvider.getIfAvailable();
         if (syncService == null) {
@@ -457,6 +458,7 @@ public class ProdutoAdminPageController {
     }
 
     @PostMapping("/importar-estoque-fisico")
+    @SuppressWarnings("java:S3516")
     public String importarEstoqueFisico(RedirectAttributes ra) {
         EstoqueFisicoImportService importService = this.estoqueImportServiceProvider.getIfAvailable();
         if (importService == null) {
