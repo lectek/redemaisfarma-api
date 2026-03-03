@@ -53,8 +53,8 @@ USER appuser
 # Memory and encoding
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Dfile.encoding=UTF-8"
 
-# Enable ANSI logs and profiles via env
-ENV SPRING_OPTS="--spring.output.ansi.enabled=ALWAYS --spring.profiles.active=${SPRING_PROFILES_ACTIVE}"
+# Keep runtime profile resolution dynamic via SPRING_PROFILES_ACTIVE.
+ENV SPRING_OPTS="--spring.output.ansi.enabled=ALWAYS"
 
 EXPOSE 8080
 

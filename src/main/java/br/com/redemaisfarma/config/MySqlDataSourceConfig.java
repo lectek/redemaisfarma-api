@@ -177,16 +177,20 @@ public class MySqlDataSourceConfig {
             return railwayUrl;
         }
 
-        if (!prodProfile) {
-            String springDatasourceUrl = trimEnv("SPRING_DATASOURCE_URL");
-            if (!isBlank(springDatasourceUrl)) {
-                return new ResolvedDatabaseUrl("SPRING_DATASOURCE_URL", springDatasourceUrl);
+        String springDatasourceUrl = trimEnv("SPRING_DATASOURCE_URL");
+        if (!isBlank(springDatasourceUrl)) {
+            if (prodProfile) {
+                LOGGER.warn("Usando SPRING_DATASOURCE_URL em profile prod por ausencia de RAILWAY_MYSQL_URL/DATABASE_URL/MYSQL_PRIVATE_URL.");
             }
+            return new ResolvedDatabaseUrl("SPRING_DATASOURCE_URL", springDatasourceUrl);
+        }
 
-            String mysqlUrl = trimEnv("MYSQL_URL");
-            if (!isBlank(mysqlUrl)) {
-                return new ResolvedDatabaseUrl("MYSQL_URL", mysqlUrl);
+        String mysqlUrl = trimEnv("MYSQL_URL");
+        if (!isBlank(mysqlUrl)) {
+            if (prodProfile) {
+                LOGGER.warn("Usando MYSQL_URL em profile prod por ausencia de RAILWAY_MYSQL_URL/DATABASE_URL/MYSQL_PRIVATE_URL.");
             }
+            return new ResolvedDatabaseUrl("MYSQL_URL", mysqlUrl);
         }
 
         throw new IllegalStateException("Nenhuma URL de banco foi definida. Em producao use RAILWAY_MYSQL_URL, DATABASE_URL"
@@ -389,11 +393,10 @@ public class MySqlDataSourceConfig {
 
     private void logStartupDiagnostics() {
         boolean prodProfile = isProdProfileActive();
-        boolean springDatasourceUrlReported = !prodProfile && hasEnvValue("SPRING_DATASOURCE_URL");
-        boolean mysqlUrlReported = !prodProfile && hasEnvValue("MYSQL_URL");
-        LOGGER.info("Env presence SPRING_DATASOURCE_URL={}, MYSQL_URL={}, RAILWAY_MYSQL_URL={}, DATABASE_URL={}, MYSQL_PRIVATE_URL={}",
-                springDatasourceUrlReported,
-                mysqlUrlReported,
+        LOGGER.info("Env presence prodProfile={}, SPRING_DATASOURCE_URL={}, MYSQL_URL={}, RAILWAY_MYSQL_URL={}, DATABASE_URL={}, MYSQL_PRIVATE_URL={}",
+                prodProfile,
+                hasEnvValue("SPRING_DATASOURCE_URL"),
+                hasEnvValue("MYSQL_URL"),
                 hasEnvValue("RAILWAY_MYSQL_URL"),
                 hasEnvValue("DATABASE_URL"),
                 hasEnvValue("MYSQL_PRIVATE_URL"));
