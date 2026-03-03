@@ -2,9 +2,21 @@ package br.com.redemaisfarma.adapters.outbound.email.adapter.impl;
 
 import br.com.redemaisfarma.adapters.outbound.email.adapter.MailSenderAdapter;
 import br.com.redemaisfarma.application.core.settings.AppSettingService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.net.UnknownHostException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -22,6 +34,9 @@ import org.springframework.stereotype.Component;
 @Primary
 public class SettingsMailSenderAdapter implements MailSenderAdapter {
     private static final Logger log = LoggerFactory.getLogger(SettingsMailSenderAdapter.class);
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final String PROVIDER_BREVO = "brevo";
+    private static final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
     private static final String KEY_ENABLED = "email.enabled";
     private static final String KEY_SMTP_HOST = "email.smtp_host";
@@ -33,6 +48,9 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
     private static final String KEY_FROM_EMAIL = "email.from_email";
     private static final String KEY_FROM_NAME = "email.from_name";
     private static final String KEY_REPLY_TO = "email.reply_to";
+    private static final String KEY_API_PROVIDER = "email.api_provider";
+    private static final String KEY_API_KEY = "email.api_key";
+    private static final String KEY_API_BASE_URL = "email.api_base_url";
     private static final String[] KEYS_ENABLED = new String[]{KEY_ENABLED, "email.ativo"};
     private static final String[] KEYS_SMTP_HOST = new String[]{KEY_SMTP_HOST, "email.smtp.host"};
     private static final String[] KEYS_SMTP_PORT = new String[]{KEY_SMTP_PORT, "email.smtp.port", "email.smtp.porta"};
@@ -43,6 +61,12 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
     private static final String[] KEYS_FROM_EMAIL = new String[]{KEY_FROM_EMAIL, "email.from_email", "email.remetente"};
     private static final String[] KEYS_FROM_NAME = new String[]{KEY_FROM_NAME, "email.from_name", "email.nome_remetente"};
     private static final String[] KEYS_REPLY_TO = new String[]{KEY_REPLY_TO, "email.reply.to", "email.reply_to"};
+    private static final String[] KEYS_API_PROVIDER =
+            new String[]{KEY_API_PROVIDER, "email.api.provider", "email.provider"};
+    private static final String[] KEYS_API_KEY =
+            new String[]{KEY_API_KEY, "email.api.key", "email.brevo.api_key"};
+    private static final String[] KEYS_API_BASE_URL =
+            new String[]{KEY_API_BASE_URL, "email.api.base_url", "email.brevo.base_url"};
     private static final String[] ENV_MAIL_ENABLED = new String[]{"APP_MAIL_ENABLED", "MAIL_ENABLED"};
     private static final String[] ENV_SMTP_HOST = new String[]{"SPRING_MAIL_HOST", "MAIL_HOST"};
     private static final String[] ENV_SMTP_PORT = new String[]{"SPRING_MAIL_PORT", "MAIL_PORT"};
@@ -53,6 +77,12 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
     private static final String[] ENV_FROM = new String[]{"APP_MAIL_FROM", "MAIL_FROM", "SPRING_MAIL_USERNAME"};
     private static final String[] ENV_FROM_NAME = new String[]{"APP_MAIL_FROM_NAME", "MAIL_FROM_NAME"};
     private static final String[] ENV_REPLY_TO = new String[]{"APP_MAIL_REPLY_TO", "MAIL_REPLY_TO"};
+    private static final String[] ENV_API_PROVIDER =
+            new String[]{"APP_MAIL_API_PROVIDER", "MAIL_API_PROVIDER", "EMAIL_API_PROVIDER"};
+    private static final String[] ENV_API_KEY =
+            new String[]{"APP_MAIL_API_KEY", "MAIL_API_KEY", "BREVO_API_KEY", "APP_BREVO_API_KEY"};
+    private static final String[] ENV_API_BASE_URL =
+            new String[]{"APP_MAIL_API_BASE_URL", "MAIL_API_BASE_URL", "BREVO_API_BASE_URL"};
 
     private final AppSettingService settings;
     private final Environment env;
@@ -69,11 +99,213 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
             return "noop-disabled";
         }
 
+        MailIdentity identity = resolveIdentity();
+        MailApiConfig apiConfig = resolveApiConfig();
         String host = getOrDefault(KEYS_SMTP_HOST, ENV_SMTP_HOST, "").trim();
         if (host.isBlank()) {
+            if (apiConfig.configured()) {
+                return sendViaApi(apiConfig, to, subject, htmlBody, bcc, identity);
+            }
             throw new IllegalStateException("SMTP host nao configurado.");
         }
 
+        try {
+            return sendViaSmtp(host, to, subject, htmlBody, bcc, identity);
+        } catch (Exception ex) {
+            if (apiConfig.configured() && isConnectivityFailure(ex)) {
+                log.warn("[mail] SMTP indisponivel; tentando fallback API. '{}' -> {}", subject, to);
+                return sendViaApi(apiConfig, to, subject, htmlBody, bcc, identity);
+            }
+            log.error("[mail] falha ao enviar '{}'", subject, ex);
+            throw new RuntimeException("Falha ao enviar e-mail", ex);
+        }
+    }
+
+    private String sendViaSmtp(
+            String host,
+            String to,
+            String subject,
+            String htmlBody,
+            @Nullable List<String> bcc,
+            MailIdentity identity
+    ) throws Exception {
+        JavaMailSenderImpl sender = buildSender(host);
+        MimeMessage msg = sender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(msg, true, StandardCharsets.UTF_8.name());
+        helper.setValidateAddresses(true);
+        helper.setTo(to);
+        setFrom(helper, identity.fromEmail(), identity.fromName());
+        if (!identity.replyTo().isBlank()) {
+            helper.setReplyTo(identity.replyTo());
+        }
+        helper.setSubject(subject);
+        helper.setText(htmlBody, true);
+        msg.setSentDate(new Date());
+        if (bcc != null && !bcc.isEmpty()) {
+            helper.setBcc(bcc.toArray(new String[0]));
+        }
+        sender.send(msg);
+        return msg.getMessageID() != null ? msg.getMessageID() : "<none>";
+    }
+
+    private String sendViaApi(
+            MailApiConfig apiConfig,
+            String to,
+            String subject,
+            String htmlBody,
+            @Nullable List<String> bcc,
+            MailIdentity identity
+    ) {
+        if (!PROVIDER_BREVO.equals(apiConfig.provider())) {
+            throw new IllegalStateException("Provedor de email API nao suportado: " + apiConfig.provider());
+        }
+        try {
+            String body = buildBrevoPayload(to, subject, htmlBody, bcc, identity);
+            HttpRequest request = HttpRequest.newBuilder(URI.create(apiConfig.baseUrl()))
+                    .timeout(Duration.ofSeconds(15))
+                    .header("accept", "application/json")
+                    .header("content-type", "application/json")
+                    .header("api-key", apiConfig.apiKey())
+                    .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
+                    .build();
+
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(10))
+                    .build();
+            HttpResponse<String> response = client.send(
+                    request,
+                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+            );
+            int status = response.statusCode();
+            if (status >= 200 && status < 300) {
+                String messageId = extractMessageId(response.body());
+                if (!messageId.isBlank()) {
+                    return messageId;
+                }
+                return "mail-api-" + status;
+            }
+            throw new IllegalStateException(
+                    "Falha no provedor de email. status="
+                            + status
+                            + ", body="
+                            + truncate(response.body(), 600)
+            );
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Envio de email interrompido.", ex);
+        } catch (IOException ex) {
+            throw new RuntimeException("Falha na comunicacao com API de email.", ex);
+        } catch (RuntimeException ex) {
+            log.error("[mail] falha no fallback API '{}'", subject, ex);
+            throw ex;
+        } catch (Exception ex) {
+            log.error("[mail] falha no fallback API '{}'", subject, ex);
+            throw new RuntimeException("Falha ao enviar e-mail via API.", ex);
+        }
+    }
+
+    private String buildBrevoPayload(
+            String to,
+            String subject,
+            String htmlBody,
+            @Nullable List<String> bcc,
+            MailIdentity identity
+    ) throws IOException {
+        JsonNode root = OBJECT_MAPPER.createObjectNode();
+        ((com.fasterxml.jackson.databind.node.ObjectNode) root).put("subject", subject);
+        ((com.fasterxml.jackson.databind.node.ObjectNode) root).put("htmlContent", htmlBody);
+
+        com.fasterxml.jackson.databind.node.ObjectNode senderNode =
+                ((com.fasterxml.jackson.databind.node.ObjectNode) root).putObject("sender");
+        senderNode.put("email", identity.fromEmail());
+        if (!identity.fromName().isBlank()) {
+            senderNode.put("name", identity.fromName());
+        }
+
+        com.fasterxml.jackson.databind.node.ArrayNode toNode =
+                ((com.fasterxml.jackson.databind.node.ObjectNode) root).putArray("to");
+        toNode.addObject().put("email", to);
+
+        List<String> cleanBcc = sanitizeRecipients(bcc);
+        if (!cleanBcc.isEmpty()) {
+            com.fasterxml.jackson.databind.node.ArrayNode bccNode =
+                    ((com.fasterxml.jackson.databind.node.ObjectNode) root).putArray("bcc");
+            for (String email : cleanBcc) {
+                bccNode.addObject().put("email", email);
+            }
+        }
+        if (!identity.replyTo().isBlank()) {
+            ((com.fasterxml.jackson.databind.node.ObjectNode) root)
+                    .putObject("replyTo")
+                    .put("email", identity.replyTo());
+        }
+
+        return OBJECT_MAPPER.writeValueAsString(root);
+    }
+
+    private List<String> sanitizeRecipients(@Nullable List<String> rawEmails) {
+        if (rawEmails == null || rawEmails.isEmpty()) {
+            return List.of();
+        }
+        List<String> emails = new ArrayList<>();
+        for (String rawEmail : rawEmails) {
+            String email = safeTrim(rawEmail);
+            if (!email.isBlank()) {
+                emails.add(email);
+            }
+        }
+        return emails;
+    }
+
+    private String extractMessageId(String body) {
+        if (body == null || body.isBlank()) {
+            return "";
+        }
+        try {
+            JsonNode node = OBJECT_MAPPER.readTree(body);
+            String messageId = safeTrim(node.path("messageId").asText(""));
+            if (!messageId.isBlank()) {
+                return messageId;
+            }
+            return safeTrim(node.path("id").asText(""));
+        } catch (Exception ex) {
+            return "";
+        }
+    }
+
+    private static String truncate(String value, int limit) {
+        if (value == null) {
+            return "";
+        }
+        if (value.length() <= limit) {
+            return value;
+        }
+        return value.substring(0, limit);
+    }
+
+    private boolean isConnectivityFailure(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof SocketTimeoutException
+                    || current instanceof ConnectException
+                    || current instanceof UnknownHostException) {
+                return true;
+            }
+            String message = safeTrim(current.getMessage()).toLowerCase(Locale.ROOT);
+            if (message.contains("couldn't connect to host")
+                    || message.contains("connection timed out")
+                    || message.contains("connect timed out")
+                    || message.contains("connection refused")
+                    || message.contains("read timed out")
+                    || message.contains("timeout")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private MailIdentity resolveIdentity() {
         String smtpUser = getOrDefault(KEYS_SMTP_USER, ENV_SMTP_USER, "").trim();
         String fromRaw = getOrDefault(KEYS_FROM_EMAIL, ENV_FROM, "").trim();
         ParsedFrom parsedFrom = parseFrom(fromRaw);
@@ -84,6 +316,7 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
         if (fromEmail.isBlank()) {
             throw new IllegalStateException("Email remetente nao configurado.");
         }
+
         String fromName = getFirstConfigured(KEYS_FROM_NAME);
         if (fromName.isBlank()) {
             fromName = parsedFrom.name();
@@ -92,32 +325,26 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
             fromName = getFirstEnv(ENV_FROM_NAME);
         }
 
-        JavaMailSenderImpl sender = buildSender(host);
-        try {
-            MimeMessage msg = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(msg, true, StandardCharsets.UTF_8.name());
-            helper.setValidateAddresses(true);
-            helper.setTo(to);
-            setFrom(helper, fromEmail, fromName);
-            String replyTo = getFirstConfigured(KEYS_REPLY_TO);
-            if (replyTo.isBlank()) {
-                replyTo = getFirstEnv(ENV_REPLY_TO);
-            }
-            if (!replyTo.isBlank()) {
-                helper.setReplyTo(replyTo);
-            }
-            helper.setSubject(subject);
-            helper.setText(htmlBody, true);
-            msg.setSentDate(new Date());
-            if (bcc != null && !bcc.isEmpty()) {
-                helper.setBcc(bcc.toArray(new String[0]));
-            }
-            sender.send(msg);
-            return msg.getMessageID() != null ? msg.getMessageID() : "<none>";
-        } catch (Exception ex) {
-            log.error("[mail] falha ao enviar '{}'", subject, ex);
-            throw new RuntimeException("Falha ao enviar e-mail", ex);
+        String replyTo = getFirstConfigured(KEYS_REPLY_TO);
+        if (replyTo.isBlank()) {
+            replyTo = getFirstEnv(ENV_REPLY_TO);
         }
+        return new MailIdentity(fromEmail, safeTrim(fromName), safeTrim(replyTo));
+    }
+
+    private MailApiConfig resolveApiConfig() {
+        String providerRaw = getOrDefault(KEYS_API_PROVIDER, ENV_API_PROVIDER, "").toLowerCase(Locale.ROOT);
+        String apiKey = getOrDefault(KEYS_API_KEY, ENV_API_KEY, "");
+        String baseUrl = getOrDefault(KEYS_API_BASE_URL, ENV_API_BASE_URL, BREVO_API_URL);
+
+        String provider = safeTrim(providerRaw);
+        if (provider.isBlank() && !safeTrim(apiKey).isBlank()) {
+            provider = PROVIDER_BREVO;
+        }
+        if (provider.isBlank()) {
+            return new MailApiConfig("", "", "");
+        }
+        return new MailApiConfig(provider, safeTrim(apiKey), safeTrim(baseUrl));
     }
 
     private JavaMailSenderImpl buildSender(String host) {
@@ -266,4 +493,12 @@ public class SettingsMailSenderAdapter implements MailSenderAdapter {
     }
 
     private record ParsedFrom(String email, String name) {}
+
+    private record MailIdentity(String fromEmail, String fromName, String replyTo) {}
+
+    private record MailApiConfig(String provider, String apiKey, String baseUrl) {
+        private boolean configured() {
+            return !provider.isBlank() && !apiKey.isBlank() && !baseUrl.isBlank();
+        }
+    }
 }

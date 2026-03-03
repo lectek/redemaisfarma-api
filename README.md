@@ -134,6 +134,9 @@ Em producao, se URL de banco nao estiver definida, a aplicacao falha no startup.
   - `APP_MAIL_FROM`
   - `SPRING_MAIL_HOST`
   - `SPRING_MAIL_PORT`
+  - `APP_MAIL_API_PROVIDER` (opcional, ex: `brevo`)
+  - `APP_MAIL_API_KEY` (opcional, fallback HTTPS quando SMTP falhar)
+  - `APP_MAIL_API_BASE_URL` (opcional, padrao Brevo)
 - Legado Firebird:
   - `LEGACY_SYNC_ENABLED=true`
   - `spring.datasource.firebird.jdbc-url`

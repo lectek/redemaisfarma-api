@@ -77,6 +77,25 @@
         </div>
       </fieldset>
 
+      <fieldset class="fieldset">
+        <legend>Fallback por API (HTTPS)</legend>
+        <p class="form-hint">Usado quando o SMTP estiver indisponivel (exemplo: bloqueio de porta no Railway).</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="apiProvider">Provedor</label>
+            <input id="apiProvider" class="input" th:field="*{apiProvider}" placeholder="brevo"/>
+          </div>
+          <div class="form-group">
+            <label for="apiBaseUrl">Base URL</label>
+            <input id="apiBaseUrl" class="input" th:field="*{apiBaseUrl}" placeholder="https://api.brevo.com/v3/smtp/email"/>
+          </div>
+          <div class="form-group">
+            <label for="apiKey">API key</label>
+            <input id="apiKey" class="input" type="password" th:field="*{apiKey}" autocomplete="new-password"/>
+          </div>
+        </div>
+      </fieldset>
+
       <div class="form-actions">
         <button class="btn btn-ghost" type="reset">Cancelar</button>
         <button class="btn btn-primary" type="submit">Salvar</button>

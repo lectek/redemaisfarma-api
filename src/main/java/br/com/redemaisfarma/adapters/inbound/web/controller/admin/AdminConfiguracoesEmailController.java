@@ -68,6 +68,21 @@ public class AdminConfiguracoesEmailController {
     private static final String KEY_REPLY_TO = "email.reply_to";
 
     /**
+     * Settings key for API provider fallback.
+     */
+    private static final String KEY_API_PROVIDER = "email.api_provider";
+
+    /**
+     * Settings key for API key fallback.
+     */
+    private static final String KEY_API_KEY = "email.api_key";
+
+    /**
+     * Settings key for API base URL fallback.
+     */
+    private static final String KEY_API_BASE_URL = "email.api_base_url";
+
+    /**
      * Service that stores app settings.
      */
     private final AppSettingService settings;
@@ -100,6 +115,9 @@ public class AdminConfiguracoesEmailController {
         form.setFromEmail(settings.getOrDefault(KEY_FROM_EMAIL, ""));
         form.setFromName(settings.getOrDefault(KEY_FROM_NAME, ""));
         form.setReplyTo(settings.getOrDefault(KEY_REPLY_TO, ""));
+        form.setApiProvider(settings.getOrDefault(KEY_API_PROVIDER, ""));
+        form.setApiKey(settings.getOrDefault(KEY_API_KEY, ""));
+        form.setApiBaseUrl(settings.getOrDefault(KEY_API_BASE_URL, "https://api.brevo.com/v3/smtp/email"));
 
         model.addAttribute("cfg", form);
         return "pages/admin/configuracoes/email";
@@ -155,6 +173,21 @@ public class AdminConfiguracoesEmailController {
                 "Nome do remetente"
         );
         settings.upsert(KEY_REPLY_TO, nullSafe(form.getReplyTo()), "Reply-to");
+        settings.upsert(
+                KEY_API_PROVIDER,
+                nullSafe(form.getApiProvider()),
+                "Provedor fallback API"
+        );
+        settings.upsert(
+                KEY_API_KEY,
+                nullSafe(form.getApiKey()),
+                "API key fallback email"
+        );
+        settings.upsert(
+                KEY_API_BASE_URL,
+                nullSafe(form.getApiBaseUrl()),
+                "Base URL fallback API email"
+        );
 
         ra.addFlashAttribute("success", "Configuracoes de email atualizadas.");
         return "redirect:/admin/configuracoes/email";
@@ -224,5 +257,20 @@ public class AdminConfiguracoesEmailController {
          * Reply-to address.
          */
         private String replyTo;
+
+        /**
+         * API provider for fallback (e.g. brevo).
+         */
+        private String apiProvider;
+
+        /**
+         * API key for fallback provider.
+         */
+        private String apiKey;
+
+        /**
+         * API base URL for fallback provider.
+         */
+        private String apiBaseUrl;
     }
 }
