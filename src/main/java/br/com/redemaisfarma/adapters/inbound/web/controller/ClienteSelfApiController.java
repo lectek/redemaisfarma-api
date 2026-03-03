@@ -18,6 +18,7 @@ import br.com.redemaisfarma.application.core.media.ImageStorageService;
 import br.com.redemaisfarma.application.service.CartService;
 import br.com.redemaisfarma.application.service.validation.CartValidationService;
 import br.com.redemaisfarma.application.service.PaymentMethodService;
+import br.com.redemaisfarma.application.support.DeliveryCodeGenerator;
 import br.com.redemaisfarma.application.view.CartItemVM;
 import br.com.redemaisfarma.application.view.CartSummaryVM;
 import br.com.redemaisfarma.application.view.PaymentMethodVM;
@@ -246,6 +247,7 @@ public class ClienteSelfApiController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Carrinho vazio.");
         }
 
+        Optional<UsuarioEntity> usuarioLogado = localizarUsuario(auth);
         ClienteEntity cliente = clienteOpt.get();
         PedidoEntity pedido = new PedidoEntity();
         pedido.setCliente(cliente);
@@ -253,16 +255,25 @@ public class ClienteSelfApiController {
         pedido.setTotal(orderData.getTotal());
         pedido.setTipoPagamento(tipoPagamento);
         pedido.setMetodoPagamento(req.pagamento());
+        pedido.setEnderecoEntrega(resolveEnderecoEntregaCheckout(req.enderecoEntrega(), usuarioLogado.orElse(null)));
+        pedido.setCodigoEntrega(DeliveryCodeGenerator.nextCode());
+        pedido.setCodigoEntregaGeradoEm(LocalDateTime.now());
+        pedido.setCodigoEntregaConfirmadoEm(null);
         orderData.getItems().forEach(pedido::addItem);
         PedidoEntity saved = pedidoJPARepository.save(pedido);
         cartService.clear(session);
 
         String label = paymentMethodService.resolveLabel(req.pagamento());
-        localizarUsuario(auth).ifPresent(usuario -> {
+        usuarioLogado.ifPresent(usuario -> {
             String mensagem = "Pedido #" + saved.getId() + " registrado. Pagamento: " + label + ".";
             salvarNotificacao(usuario, "PEDIDO", "Pedido registrado", mensagem);
         });
-        return new CheckoutFinalizarResponse(saved.getId(), label);
+        return new CheckoutFinalizarResponse(
+                saved.getId(),
+                label,
+                saved.getCodigoEntrega(),
+                saved.getEnderecoEntrega()
+        );
     }
 
     @Operation(summary = "Lista os produtos favoritos do cliente")
@@ -401,7 +412,21 @@ public class ClienteSelfApiController {
     private String normalizarEndereco(String endereco) {
         if (endereco == null) return null;
         String trimmed = endereco.trim();
-        return trimmed.isBlank() ? null : trimmed;
+        if (trimmed.isBlank()) {
+            return null;
+        }
+        return trimmed.length() > 255 ? trimmed.substring(0, 255) : trimmed;
+    }
+
+    private String resolveEnderecoEntregaCheckout(String requestEndereco, UsuarioEntity usuario) {
+        String enderecoDoRequest = normalizarEndereco(requestEndereco);
+        if (enderecoDoRequest != null) {
+            return enderecoDoRequest;
+        }
+        if (usuario == null) {
+            return null;
+        }
+        return normalizarEndereco(usuario.getEndereco());
     }
 
     private record ClienteIdentidade(String email, String cpf) {}
@@ -495,10 +520,16 @@ public class ClienteSelfApiController {
             @NotBlank String nome,
             @NotBlank String cpf,
             @NotBlank @Email String email,
-            @NotBlank String pagamento
+            @NotBlank String pagamento,
+            @Size(max = 255) String enderecoEntrega
     ) {}
 
-    public record CheckoutFinalizarResponse(Long pedidoId, String paymentMethodLabel) {}
+    public record CheckoutFinalizarResponse(
+            Long pedidoId,
+            String paymentMethodLabel,
+            String codigoEntrega,
+            String enderecoEntrega
+    ) {}
 
     public record FavoritoRequest(@NotNull Long produtoId) {}
 
@@ -594,6 +625,9 @@ public class ClienteSelfApiController {
             BigDecimal total,
             String status,
             String metodoPagamento,
+            String enderecoEntrega,
+            String codigoEntrega,
+            LocalDateTime codigoEntregaConfirmadoEm,
             List<PedidoItemResponse> itens
     ) {
         static PedidoDetalheResponse from(PedidoEntity p, PaymentMethodService paymentMethodService) {
@@ -606,6 +640,9 @@ public class ClienteSelfApiController {
                     p.getTotal(),
                     p.getStatus() != null ? p.getStatus().name() : DESCONHECIDO,
                     resolveMetodoLabel(p, paymentMethodService),
+                    p.getEnderecoEntrega(),
+                    p.getCodigoEntrega(),
+                    p.getCodigoEntregaConfirmadoEm(),
                     itens
             );
         }

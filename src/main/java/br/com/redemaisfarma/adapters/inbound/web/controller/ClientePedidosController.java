@@ -257,6 +257,9 @@ public class ClientePedidosController {
             BigDecimal total,
             String status,
             String metodoPagamento,
+            String enderecoEntrega,
+            String codigoEntrega,
+            LocalDateTime codigoEntregaConfirmadoEm,
             List<ItemView> itens
     ) {
         /**
@@ -283,6 +286,9 @@ public class ClientePedidosController {
                     pedido.getTotal(),
                     statusAtual,
                     metodo,
+                    pedido.getEnderecoEntrega(),
+                    pedido.getCodigoEntrega(),
+                    pedido.getCodigoEntregaConfirmadoEm(),
                     itens
             );
         }

@@ -19,10 +19,12 @@
     precoPromocional: document.getElementById("precoPromocional"),
     estoque: document.getElementById("estoque"),
     categoria: document.getElementById("categoria"),
+    tarjaMedicacao: document.getElementById("tarjaMedicacao"),
     codigoBarras: document.getElementById("codigoBarras"),
     metodoLeituraCodigoBarras: document.getElementById("metodoLeituraCodigoBarras"),
     fabricante: document.getElementById("fabricante"),
     unidade: document.getElementById("unidade"),
+    exigeReceita: document.getElementById("exigeReceita"),
     disponivel: document.getElementById("disponivel")
   };
 
@@ -96,6 +98,38 @@
       el.add(opt);
     }
     el.value = value;
+  };
+
+  const syncTarjaReceitaRule = () => {
+    const categoria = String(fields.categoria?.value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .toLowerCase();
+    const tarja = String(fields.tarjaMedicacao?.value || "").trim();
+    const categoriaMedicacoes = categoria === "medicacoes";
+
+    if (fields.tarjaMedicacao) fields.tarjaMedicacao.disabled = !categoriaMedicacoes;
+    if (!categoriaMedicacoes) {
+      if (fields.tarjaMedicacao) fields.tarjaMedicacao.value = "";
+      if (fields.exigeReceita) {
+        fields.exigeReceita.checked = false;
+        fields.exigeReceita.disabled = true;
+      }
+      return;
+    }
+
+    if (!fields.exigeReceita) return;
+    if (tarja === "TARJA_VERMELHA" || tarja === "TARJA_PRETA") {
+      fields.exigeReceita.checked = true;
+      fields.exigeReceita.disabled = true;
+      return;
+    }
+
+    if (tarja === "SEM_TARJA") {
+      fields.exigeReceita.checked = false;
+    }
+    fields.exigeReceita.disabled = false;
   };
 
   const applySuggestion = (item) => {
@@ -356,6 +390,10 @@
   pendingLoadMoreBtn?.addEventListener("click", () => {
     carregarPendentes(false);
   });
+
+  fields.categoria?.addEventListener("change", syncTarjaReceitaRule);
+  fields.tarjaMedicacao?.addEventListener("change", syncTarjaReceitaRule);
+  syncTarjaReceitaRule();
 
   if (pendingResults) {
     carregarPendentes(true);

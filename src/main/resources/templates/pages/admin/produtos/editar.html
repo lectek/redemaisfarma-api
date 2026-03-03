@@ -47,6 +47,17 @@
         </datalist>
       </label>
 
+      <label class="stack">
+        <span>Tarja da medicacao</span>
+        <select class="input" id="tarjaMedicacao">
+          <option value="">Nao se aplica</option>
+          <option value="SEM_TARJA" th:selected="${produto?.tarjaMedicacao?.name() == 'SEM_TARJA'}">Sem Tarja</option>
+          <option value="TARJA_AMARELA" th:selected="${produto?.tarjaMedicacao?.name() == 'TARJA_AMARELA'}">Tarja Amarela</option>
+          <option value="TARJA_VERMELHA" th:selected="${produto?.tarjaMedicacao?.name() == 'TARJA_VERMELHA'}">Tarja Vermelha</option>
+          <option value="TARJA_PRETA" th:selected="${produto?.tarjaMedicacao?.name() == 'TARJA_PRETA'}">Tarja Preta</option>
+        </select>
+      </label>
+
       <label class="stack md:col-span-2">
         <span>Descricao</span>
         <textarea class="input" id="descricao" rows="3" th:text="${produto?.descricao}"></textarea>
@@ -71,6 +82,16 @@
         <span>Disponivel</span>
         <input id="disponivel" type="checkbox" th:checked="${produto == null ? true : produto.disponivel}" />
       </label>
+
+      <label class="stack">
+        <span>Exige receita medica</span>
+        <input id="exigeReceita" type="checkbox" th:checked="${produto?.exigeReceita}" />
+      </label>
+
+      <p class="muted md:col-span-2">
+        Regra: nao somos autorizados a entregar medicamentos com receita obrigatoria
+        antes do recebimento da receita.
+      </p>
 
       <label class="stack md:col-span-2">
         <span>URL da imagem</span>

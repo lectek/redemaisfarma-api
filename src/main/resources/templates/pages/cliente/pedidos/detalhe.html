@@ -24,6 +24,16 @@
             <p><strong>Data:</strong> <span th:text="${#temporals.format(pedido.data, 'dd/MM/yyyy HH:mm')}">--</span></p>
             <p><strong>Status:</strong> <span class="badge" th:text="${pedido.status}">STATUS</span></p>
             <p><strong>Pagamento:</strong> <span th:text="${pedido.metodoPagamento}">PIX</span></p>
+            <p th:if="${pedido.enderecoEntrega != null and !#strings.isEmpty(pedido.enderecoEntrega)}">
+              <strong>Entrega:</strong> <span th:text="${pedido.enderecoEntrega}">Endereco</span>
+            </p>
+            <p th:if="${pedido.codigoEntrega != null and !#strings.isEmpty(pedido.codigoEntrega)}">
+              <strong>Codigo de entrega:</strong> <span th:text="${pedido.codigoEntrega}">123456</span>
+            </p>
+            <p th:if="${pedido.codigoEntregaConfirmadoEm != null}">
+              <strong>Confirmado em:</strong>
+              <span th:text="${#temporals.format(pedido.codigoEntregaConfirmadoEm, 'dd/MM/yyyy HH:mm')}">--</span>
+            </p>
           </div>
           <div>
             <p class="page-title" th:text="${#numbers.formatCurrency(pedido.total, 'pt_BR')}">R$ 0,00</p>

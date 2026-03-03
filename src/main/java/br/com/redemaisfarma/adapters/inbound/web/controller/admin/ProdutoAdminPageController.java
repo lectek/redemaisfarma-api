@@ -5,6 +5,7 @@ import br.com.redemaisfarma.adapters.outbound.legacy.repository.ProdutoLegacyRep
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.MetodoLeituraCodigoBarras;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.TarjaMedicacao;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCategoriaRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
 import br.com.redemaisfarma.application.core.media.ImageStorageService;
@@ -40,6 +41,7 @@ import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -59,6 +61,7 @@ public class ProdutoAdminPageController {
 
     private static final Logger log = LoggerFactory.getLogger(ProdutoAdminPageController.class);
     private static final String CATEGORIA_ESTOQUE_FISICO = "Estoque fisico";
+    private static final String CATEGORIA_MEDICACOES = "Medicacoes";
     private static final String MODEL_ATTR_CATEGORIAS = "categorias";
     private static final String FLASH_SUCCESS = "success";
     private static final String FLASH_WARNING = "warning";
@@ -145,6 +148,7 @@ public class ProdutoAdminPageController {
             categoria = "Sem Categoria";
         }
         produto.setCategoria(categoria);
+        this.applyMedicacaoRules(produto);
 
         if (produto.getLegacyId() != null && produto.getLegacyId() <= 0) {
             produto.setLegacyId(null);
@@ -498,9 +502,48 @@ public class ProdutoAdminPageController {
     private List<String> resolveCategorias() {
         List<String> categorias = this.categoriaRepository.findAllNomes();
         if (categorias == null || categorias.isEmpty()) {
-            return List.of("Sem Categoria");
+            return List.of("Sem Categoria", CATEGORIA_MEDICACOES);
+        }
+        if (categorias.stream().noneMatch(this::isCategoriaMedicacoes)) {
+            List<String> enriched = new ArrayList<>(categorias);
+            enriched.add(CATEGORIA_MEDICACOES);
+            return enriched;
         }
         return categorias;
+    }
+
+    private void applyMedicacaoRules(ProdutoEntity produto) {
+        boolean categoriaMedicacoes = isCategoriaMedicacoes(produto.getCategoria());
+        if (!categoriaMedicacoes) {
+            produto.setTarjaMedicacao(null);
+            produto.setExigeReceita(Boolean.FALSE);
+            return;
+        }
+
+        TarjaMedicacao tarja = produto.getTarjaMedicacao();
+        if (tarja == null) {
+            tarja = TarjaMedicacao.SEM_TARJA;
+            produto.setTarjaMedicacao(tarja);
+        }
+
+        boolean exigeReceita = switch (tarja) {
+            case SEM_TARJA -> false;
+            case TARJA_AMARELA -> Boolean.TRUE.equals(produto.getExigeReceita());
+            case TARJA_VERMELHA, TARJA_PRETA -> true;
+        };
+        produto.setExigeReceita(exigeReceita);
+    }
+
+    private boolean isCategoriaMedicacoes(String categoria) {
+        return CATEGORIA_MEDICACOES.equalsIgnoreCase(this.normalizeCategoria(categoria));
+    }
+
+    private String normalizeCategoria(String categoria) {
+        String safe = this.normalize(categoria);
+        if (safe.isEmpty()) {
+            return safe;
+        }
+        return Normalizer.normalize(safe, Normalizer.Form.NFD).replaceAll("\\p{M}+", "");
     }
 
     private String normalize(String value) {

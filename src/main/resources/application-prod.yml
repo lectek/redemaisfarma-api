@@ -167,6 +167,11 @@ app:
         height: ${APP_AI_IMAGE_POLLINATIONS_HEIGHT:1024}
         nologo: ${APP_AI_IMAGE_POLLINATIONS_NOLOGO:true}
         private: ${APP_AI_IMAGE_POLLINATIONS_PRIVATE:false}
+  route:
+    nominatim:
+      base-url: ${APP_ROUTE_NOMINATIM_BASE_URL:https://nominatim.openstreetmap.org/search}
+      user-agent: ${APP_ROUTE_NOMINATIM_USER_AGENT:RedeMaisFarma/1.0}
+      timeout-ms: ${APP_ROUTE_NOMINATIM_TIMEOUT_MS:6000}
   kafka:
     groups:
       pedidos: ${APP_KAFKA_GROUP_PEDIDOS:pedidos-consumer}

@@ -38,6 +38,11 @@ public class AdminProdutoRequestDTO {
     @Min(value = 0, message = "{produto.estoque.min}")
     private Integer estoque;
 
+    @Size(max = 32, message = "{produto.tarjaMedicacao.size}")
+    private String tarjaMedicacao;
+
+    private Boolean exigeReceita = Boolean.FALSE;
+
     private Boolean ativo = Boolean.FALSE;
 
     public String getNome() {
@@ -94,6 +99,22 @@ public class AdminProdutoRequestDTO {
 
     public void setEstoque(Integer estoque) {
         this.estoque = estoque;
+    }
+
+    public String getTarjaMedicacao() {
+        return tarjaMedicacao;
+    }
+
+    public void setTarjaMedicacao(String tarjaMedicacao) {
+        this.tarjaMedicacao = tarjaMedicacao;
+    }
+
+    public Boolean getExigeReceita() {
+        return exigeReceita;
+    }
+
+    public void setExigeReceita(Boolean exigeReceita) {
+        this.exigeReceita = exigeReceita;
     }
 
     public Boolean getAtivo() {

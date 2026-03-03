@@ -57,6 +57,18 @@ public class PedidoEntity implements Serializable {
     @Column(name = "metodo_pagamento", length = 80)
     private String metodoPagamento;
 
+    @Column(name = "endereco_entrega", length = 255)
+    private String enderecoEntrega;
+
+    @Column(name = "codigo_entrega", length = 6)
+    private String codigoEntrega;
+
+    @Column(name = "codigo_entrega_gerado_em")
+    private LocalDateTime codigoEntregaGeradoEm;
+
+    @Column(name = "codigo_entrega_confirmado_em")
+    private LocalDateTime codigoEntregaConfirmadoEm;
+
     @CreatedDate
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -122,6 +134,28 @@ public class PedidoEntity implements Serializable {
     public String getMetodoPagamento() { return metodoPagamento; }
     public void setMetodoPagamento(String metodoPagamento) { this.metodoPagamento = metodoPagamento; }
 
+    public String getEnderecoEntrega() { return enderecoEntrega; }
+    public void setEnderecoEntrega(String enderecoEntrega) { this.enderecoEntrega = enderecoEntrega; }
+
+    public String getCodigoEntrega() { return codigoEntrega; }
+    public void setCodigoEntrega(String codigoEntrega) { this.codigoEntrega = codigoEntrega; }
+
+    public LocalDateTime getCodigoEntregaGeradoEm() {
+        return codigoEntregaGeradoEm;
+    }
+    public void setCodigoEntregaGeradoEm(LocalDateTime codigoEntregaGeradoEm) {
+        this.codigoEntregaGeradoEm = codigoEntregaGeradoEm;
+    }
+
+    public LocalDateTime getCodigoEntregaConfirmadoEm() {
+        return codigoEntregaConfirmadoEm;
+    }
+    public void setCodigoEntregaConfirmadoEm(
+            LocalDateTime codigoEntregaConfirmadoEm
+    ) {
+        this.codigoEntregaConfirmadoEm = codigoEntregaConfirmadoEm;
+    }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
@@ -157,6 +191,10 @@ public class PedidoEntity implements Serializable {
                 ", status=" + status +
                 ", tipoPagamento=" + tipoPagamento +
                 ", metodoPagamento=" + metodoPagamento +
+                ", enderecoEntrega=" + enderecoEntrega +
+                ", codigoEntrega=" + codigoEntrega +
+                ", codigoEntregaGeradoEm=" + codigoEntregaGeradoEm +
+                ", codigoEntregaConfirmadoEm=" + codigoEntregaConfirmadoEm +
                 ", version=" + version +
                 '}';
     }

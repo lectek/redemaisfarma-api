@@ -3,6 +3,7 @@ package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.MetodoLeituraCodigoBarras;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoStatus;
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.TarjaMedicacao;
 import br.com.redemaisfarma.adapters.outbound.persistence.jpa.ProdutoJpaRepository;
 import br.com.redemaisfarma.application.core.media.ImageStorageService;
 import br.com.redemaisfarma.application.dto.request.AdminProdutoRequestDTO;
@@ -11,6 +12,7 @@ import br.com.redemaisfarma.application.mapper.ProdutoMapper;
 import br.com.redemaisfarma.domain.Produto;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -43,6 +45,7 @@ public class ProdutoAdminRestController {
      * Number of years used for synthetic validity in response.
      */
     private static final int DEFAULT_VALIDADE_YEARS = 1;
+    private static final String CATEGORIA_MEDICACOES = "Medicacoes";
 
     /**
      * Conflict message when trying to validate an already published product.
@@ -134,6 +137,7 @@ public class ProdutoAdminRestController {
         entity.setMetodoLeituraCodigoBarras(MetodoLeituraCodigoBarras.API);
         entity.setStatus(ProdutoStatus.IMPORTADO);
         entity.setDataImportacao(LocalDateTime.now());
+        applyMedicacaoRules(entity, dto);
 
         final ProdutoEntity salvo = repo.save(entity);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -165,6 +169,7 @@ public class ProdutoAdminRestController {
                                 MetodoLeituraCodigoBarras.API
                         );
                     }
+                    applyMedicacaoRules(atual, dto);
                     atual.setUpdatedAt(LocalDateTime.now());
                     final ProdutoEntity salvo = repo.save(atual);
                     return ResponseEntity.ok(toResponse(salvo));
@@ -340,7 +345,7 @@ public class ProdutoAdminRestController {
                 Boolean.TRUE.equals(entity.getDestaqueCarrossel());
         dto.setProdutoDestaque(produtoDestaque);
         dto.setProdutoRecomendadoIA(Boolean.FALSE);
-        dto.setProdutoControlado(Boolean.FALSE);
+        dto.setProdutoControlado(Boolean.TRUE.equals(entity.getExigeReceita()));
         dto.setAvaliacaoMedia(null);
         dto.setTags(null);
 
@@ -357,6 +362,63 @@ public class ProdutoAdminRestController {
         );
 
         return dto;
+    }
+
+    private void applyMedicacaoRules(
+            final ProdutoEntity entity,
+            final AdminProdutoRequestDTO dto
+    ) {
+        final boolean categoriaMedicacoes = CATEGORIA_MEDICACOES.equalsIgnoreCase(
+                normalizeCategoria(dto.getCategoria())
+        );
+
+        if (!categoriaMedicacoes) {
+            entity.setTarjaMedicacao(null);
+            entity.setExigeReceita(Boolean.FALSE);
+            return;
+        }
+
+        final TarjaMedicacao tarja = parseTarja(dto.getTarjaMedicacao());
+        final TarjaMedicacao safeTarja =
+                tarja == null ? TarjaMedicacao.SEM_TARJA : tarja;
+
+        entity.setTarjaMedicacao(safeTarja);
+        entity.setExigeReceita(resolveReceitaObrigatoria(safeTarja, dto.getExigeReceita()));
+    }
+
+    private TarjaMedicacao parseTarja(final String raw) {
+        final String safe = nvl(raw, "").trim();
+        if (safe.isEmpty()) {
+            return null;
+        }
+        try {
+            return TarjaMedicacao.valueOf(safe.toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Tarja de medicacao invalida."
+            );
+        }
+    }
+
+    private boolean resolveReceitaObrigatoria(
+            final TarjaMedicacao tarja,
+            final Boolean exigeReceitaInput
+    ) {
+        return switch (tarja) {
+            case SEM_TARJA -> false;
+            case TARJA_AMARELA -> Boolean.TRUE.equals(exigeReceitaInput);
+            case TARJA_VERMELHA, TARJA_PRETA -> true;
+        };
+    }
+
+    private String normalizeCategoria(final String categoria) {
+        final String safe = nvl(categoria, "").trim();
+        if (safe.isEmpty()) {
+            return "";
+        }
+        return Normalizer.normalize(safe, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "");
     }
 
     /**

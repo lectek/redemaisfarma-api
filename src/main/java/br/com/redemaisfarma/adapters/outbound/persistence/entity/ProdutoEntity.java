@@ -57,6 +57,11 @@ public class ProdutoEntity {
     private String imagemWebp;
     @Column(name="categoria", nullable=false)
     private String categoria;
+    @Enumerated(value=EnumType.STRING)
+    @Column(name="tarja_medicacao", length=32)
+    private TarjaMedicacao tarjaMedicacao;
+    @Column(name="exige_receita", nullable=false)
+    private Boolean exigeReceita;
     @Column(name="codigo_barras")
     private String codigoBarras;
     @Enumerated(value=EnumType.STRING)
@@ -122,6 +127,9 @@ public class ProdutoEntity {
         }
         if (this.status == null) {
             this.status = ProdutoStatus.IMPORTADO;
+        }
+        if (this.exigeReceita == null) {
+            this.exigeReceita = Boolean.FALSE;
         }
         if (this.metodoLeituraCodigoBarras == null) {
             this.metodoLeituraCodigoBarras = MetodoLeituraCodigoBarras.DESCONHECIDO;
@@ -232,6 +240,22 @@ public class ProdutoEntity {
 
     public void setCategoria(String categoria) {
         this.categoria = categoria;
+    }
+
+    public TarjaMedicacao getTarjaMedicacao() {
+        return this.tarjaMedicacao;
+    }
+
+    public void setTarjaMedicacao(TarjaMedicacao tarjaMedicacao) {
+        this.tarjaMedicacao = tarjaMedicacao;
+    }
+
+    public Boolean getExigeReceita() {
+        return this.exigeReceita;
+    }
+
+    public void setExigeReceita(Boolean exigeReceita) {
+        this.exigeReceita = exigeReceita;
     }
 
     public String getCodigoBarras() {

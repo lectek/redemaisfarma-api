@@ -32,6 +32,8 @@
         <div class="produto-detalhe__info">
           <div class="produto-detalhe__meta">
             <span class="badge badge--neutral" th:text="${produto.categoria}">Categoria</span>
+            <span class="badge badge--warning" th:if="${tarjaMedicacao != null}"
+                  th:text="${tarjaMedicacao.rotulo}">Tarja</span>
             <span class="badge badge--danger" th:if="${outOfStock}">Sem estoque</span>
             <span class="badge badge--warning" th:if="${produto.disponivel != null and !produto.disponivel}">Indisponivel</span>
           </div>
@@ -54,6 +56,13 @@
             <span th:if="${produto.estoque != null}" th:text="${produto.estoque}">0</span>
             <span th:if="${produto.estoque == null}">Sob consulta</span>
           </div>
+
+          <div class="alert alert-warning" th:if="${exigeReceita}">
+            <strong>Receita medica obrigatoria.</strong>
+            <p class="m-0">Nao somos autorizados a entregar antes do recebimento da receita.</p>
+          </div>
+
+          <p class="text-muted" th:if="${tarjaDescricao != null}" th:text="${tarjaDescricao}"></p>
 
           <form th:action="@{/carrinho/adicionar}" method="post" class="produto-detalhe__cta">
             <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>

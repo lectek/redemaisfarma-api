@@ -268,6 +268,13 @@ public class AdminPedidosController {
         return tipoPagamento != null ? tipoPagamento.name() : "NAO_INFORMADO";
     }
 
+    private static String resolveEnderecoEntrega(final PedidoEntity pedido) {
+        if (pedido.getEnderecoEntrega() == null || pedido.getEnderecoEntrega().isBlank()) {
+            return ENDERECO_NAO_INFORMADO;
+        }
+        return pedido.getEnderecoEntrega();
+    }
+
     /**
      * Payment view model.
      *
@@ -323,6 +330,8 @@ public class AdminPedidosController {
      * @param clienteNome customer name
      * @param clienteEmail customer email
      * @param enderecoEntrega delivery address
+     * @param codigoEntrega delivery code
+     * @param codigoEntregaConfirmadoEm delivery confirmation timestamp
      * @param pagamento payment payload
      * @param total total value
      * @param status raw status
@@ -334,6 +343,8 @@ public class AdminPedidosController {
             String clienteNome,
             String clienteEmail,
             String enderecoEntrega,
+            String codigoEntrega,
+            LocalDateTime codigoEntregaConfirmadoEm,
             PagamentoView pagamento,
             BigDecimal total,
             String status,
@@ -384,7 +395,9 @@ public class AdminPedidosController {
                     numero,
                     clienteNome,
                     clienteEmail,
-                    ENDERECO_NAO_INFORMADO,
+                    resolveEnderecoEntrega(pedido),
+                    pedido.getCodigoEntrega(),
+                    pedido.getCodigoEntregaConfirmadoEm(),
                     pagamento,
                     pedido.getTotal(),
                     statusRaw,

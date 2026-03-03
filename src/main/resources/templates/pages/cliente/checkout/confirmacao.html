@@ -22,6 +22,12 @@
         <p class="alert alert-info" th:if="${paymentMethodLabel}">
           Metodo de pagamento selecionado: <strong th:text="${paymentMethodLabel}">PIX</strong>
         </p>
+        <p class="alert alert-warning" th:if="${codigoEntrega}">
+          Codigo de confirmacao da entrega: <strong th:text="${codigoEntrega}">123456</strong>
+        </p>
+        <p class="alert alert-info" th:if="${enderecoEntrega}">
+          Endereco de entrega: <strong th:text="${enderecoEntrega}">Rua Exemplo, 123</strong>
+        </p>
 
         <form class="nota-fiscal-form" id="notaFiscalForm">
           <h2>Como deseja receber sua Nota Fiscal?</h2>

@@ -42,6 +42,8 @@ const $preco = $('#preco');
 const $imagem = $('#imagem');
 const $imagemArquivo = $('#imagemArquivo');
 const $categoria = $('#categoria');
+const $tarjaMedicacao = $('#tarjaMedicacao');
+const $exigeReceita = $('#exigeReceita');
 const $estoque = $('#estoque');
 const $codigoBarras = $('#codigoBarras');
 const $disponivel = $('#disponivel');
@@ -76,9 +78,56 @@ function fill(p) {
   if (!$preco.value) $preco.value = p.preco ?? p.precoVenda ?? '';
   if (!$imagem.value) $imagem.value = p.imagem ?? p.imagemUrl ?? '';
   if (!$categoria.value) $categoria.value = p.categoria ?? '';
+  if ($tarjaMedicacao && !$tarjaMedicacao.value) {
+    $tarjaMedicacao.value = p.tarjaMedicacao ?? '';
+  }
+  if ($exigeReceita && !$exigeReceita.checked) {
+    $exigeReceita.checked = !!p.exigeReceita;
+  }
   if (!$estoque.value) $estoque.value = p.estoque ?? p.estoqueAtual ?? 0;
   if (!$codigoBarras.value) $codigoBarras.value = p.codigoBarras ?? '';
   if ($disponivel) $disponivel.checked = (p.situacao ? p.situacao === 'ATIVO' : !!p.disponivel);
+  syncTarjaReceitaRule();
+}
+
+function normalizeCategoria(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+}
+
+function syncTarjaReceitaRule() {
+  if (!$tarjaMedicacao || !$exigeReceita) return;
+  const categoria = normalizeCategoria($categoria?.value);
+  const tarja = ($tarjaMedicacao.value || '').trim();
+  const categoriaMedicacoes = categoria === 'medicacoes';
+
+  if (!categoriaMedicacoes) {
+    $tarjaMedicacao.value = '';
+    $tarjaMedicacao.disabled = true;
+    $exigeReceita.checked = false;
+    $exigeReceita.disabled = true;
+    return;
+  }
+
+  $tarjaMedicacao.disabled = false;
+  if (!tarja) {
+    $exigeReceita.disabled = false;
+    return;
+  }
+
+  if (tarja === 'TARJA_VERMELHA' || tarja === 'TARJA_PRETA') {
+    $exigeReceita.checked = true;
+    $exigeReceita.disabled = true;
+    return;
+  }
+
+  if (tarja === 'SEM_TARJA') {
+    $exigeReceita.checked = false;
+  }
+  $exigeReceita.disabled = false;
 }
 
 async function salvar() {
@@ -91,6 +140,8 @@ async function salvar() {
     preco: parseFloat($preco.value || '0'),
     imagem: $imagem.value || null,
     categoria: $categoria.value || null,
+    tarjaMedicacao: ($tarjaMedicacao?.value || '').trim() || null,
+    exigeReceita: !!$exigeReceita?.checked,
     estoque: parseInt($estoque.value || '0', 10),
     codigoBarras: $codigoBarras.value || null,
     ativo: !!$disponivel.checked
@@ -238,7 +289,10 @@ $btnUploadImagem?.addEventListener('click', uploadImagem);
 $btnGerarIA?.addEventListener('click', gerarIA);
 $btnValidar?.addEventListener('click', validar);
 $btnPublicar?.addEventListener('click', publicar);
+$categoria?.addEventListener('change', syncTarjaReceitaRule);
+$tarjaMedicacao?.addEventListener('change', syncTarjaReceitaRule);
 
 // bootstrap
+syncTarjaReceitaRule();
 carregarProdutoSeNecessario();
 

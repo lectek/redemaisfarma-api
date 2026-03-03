@@ -161,4 +161,12 @@ public interface PedidoRepository extends JpaRepository<PedidoEntity, Long> {
     Optional<PedidoEntity> buscarDetalhePorCliente(@Param("id") Long id,
                                                    @Param("email") String email,
                                                    @Param("cpf") String cpf);
+
+    @Query("""
+           select distinct p
+             from PedidoEntity p
+             left join fetch p.cliente c
+            where p.id in :ids
+           """)
+    List<PedidoEntity> buscarPorIdsComCliente(@Param("ids") List<Long> ids);
 }

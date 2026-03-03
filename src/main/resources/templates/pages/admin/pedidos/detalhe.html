@@ -21,6 +21,14 @@
          th:text="${pedido.clienteEmail}"></p>
       <p th:if="${pedido.enderecoEntrega != null and !#strings.isEmpty(pedido.enderecoEntrega)}"
          th:text="${pedido.enderecoEntrega}"></p>
+      <p th:if="${pedido.codigoEntrega != null and !#strings.isEmpty(pedido.codigoEntrega)}">
+        <strong>Codigo de entrega:</strong>
+        <span th:text="${pedido.codigoEntrega}">123456</span>
+      </p>
+      <p th:if="${pedido.codigoEntregaConfirmadoEm != null}">
+        <strong>Entrega confirmada em:</strong>
+        <span th:text="${#temporals.format(pedido.codigoEntregaConfirmadoEm, 'dd/MM/yyyy HH:mm')}">--</span>
+      </p>
     </article>
     <article class="card">
       <h2 class="card-title">pagamento</h2>
