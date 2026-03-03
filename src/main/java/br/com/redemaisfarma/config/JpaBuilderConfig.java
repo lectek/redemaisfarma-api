@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitManager;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
@@ -18,7 +17,6 @@ public class JpaBuilderConfig {
             ObjectProvider<PersistenceUnitManager> pumProvider) {
 
         HibernateJpaVendorAdapter vendor = new HibernateJpaVendorAdapter();
-        Map<String, Object> jpaProps = new HashMap<>();
-        return new EntityManagerFactoryBuilder(vendor, jpaProps, pumProvider.getIfAvailable());
+        return new EntityManagerFactoryBuilder(vendor, dataSource -> Map.of(), pumProvider.getIfAvailable());
     }
 }

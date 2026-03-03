@@ -21,7 +21,7 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -58,18 +58,19 @@ public class SecurityMvcConfig {
         http.securityMatcher("/**")
             .cors(AbstractHttpConfigurer::disable) // use seu CorsFilter global; mude para withDefaults() se quiser habilitar aqui
             .csrf(csrf -> {
+                PathPatternRequestMatcher.Builder pathMatcherBuilder = PathPatternRequestMatcher.withDefaults();
                 CookieCsrfTokenRepository repo = CookieCsrfTokenRepository.withHttpOnlyFalse();
                 csrf.csrfTokenRepository(repo);
                 csrf.ignoringRequestMatchers(
-                        new AntPathRequestMatcher("/admin/export/**"),
-                        new AntPathRequestMatcher("/login", "POST"),
-                        new AntPathRequestMatcher("/auth/login", "POST")
+                        pathMatcherBuilder.matcher("/admin/export/**"),
+                        pathMatcherBuilder.matcher(HttpMethod.POST, "/login"),
+                        pathMatcherBuilder.matcher(HttpMethod.POST, "/auth/login")
                 );
                 if (dev) {
                     csrf.ignoringRequestMatchers(
-                            new AntPathRequestMatcher("/admin/catalogo/sincronizar"),
-                            new AntPathRequestMatcher("/webhooks/**"),
-                            new AntPathRequestMatcher("/actuator/**")
+                            pathMatcherBuilder.matcher("/admin/catalogo/sincronizar"),
+                            pathMatcherBuilder.matcher("/webhooks/**"),
+                            pathMatcherBuilder.matcher("/actuator/**")
                     );
                 }
             })
