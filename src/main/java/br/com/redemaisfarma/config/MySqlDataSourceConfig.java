@@ -105,7 +105,7 @@ public class MySqlDataSourceConfig {
         cfg.setConnectionTimeout(8000);
         cfg.setValidationTimeout(3000);
         cfg.setInitializationFailTimeout(0);
-        cfg.setKeepaliveTime(15000);
+        cfg.setKeepaliveTime(30000);
         cfg.setIdleTimeout(60000);
         cfg.setConnectionTestQuery("SELECT 1");
 
@@ -162,7 +162,6 @@ public class MySqlDataSourceConfig {
 
     private Map<String, Object> jpaProps() {
         Map<String, Object> p = new HashMap<>();
-        p.put("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
         p.put("hibernate.hbm2ddl.auto", "none");
         p.put("hibernate.show_sql", "false");
         p.put("hibernate.format_sql", "true");
