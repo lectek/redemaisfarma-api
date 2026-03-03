@@ -1,4 +1,4 @@
-﻿package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
+package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 
 import br.com.redemaisfarma.adapters.outbound.messaging.ProductImagePublisher;
 import br.com.redemaisfarma.adapters.outbound.messaging.ProductImageRequestedEvent;
