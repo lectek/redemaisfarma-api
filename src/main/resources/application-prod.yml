@@ -72,13 +72,13 @@ spring:
     listener:
       missing-topics-fatal: ${SPRING_KAFKA_MISSING_TOPICS_FATAL:true}
 
-redis:
-  enabled: false
-
   task:
     scheduling:
       pool:
         size: ${SPRING_TASK_SCHEDULING_POOL_SIZE:2}
+
+redis:
+  enabled: ${REDIS_ENABLED:false}
 
 server:
   port: ${PORT:${SERVER_PORT:8080}}
@@ -99,6 +99,11 @@ server:
     include-exception: ${SERVER_ERROR_INCLUDE_EXCEPTION:false}
 
 management:
+  health:
+    redis:
+      enabled: ${MANAGEMENT_HEALTH_REDIS_ENABLED:false}
+    mail:
+      enabled: ${MANAGEMENT_HEALTH_MAIL_ENABLED:false}
   endpoints:
     web:
       exposure:
