@@ -1,221 +1,385 @@
-﻿// /static/js/esqueci-senha.js
-const form = document.querySelector('form');
-const emailInput = document.getElementById('emailOuCpf') || document.getElementById('email');
-const alertBox = document.getElementById('alert');
-const enviarBtn = document.getElementById('enviarBtn') || form?.querySelector('button[type="submit"]');
+// /static/js/esqueci-senha.js
+(() => {
+  const form = document.getElementById('esqueciSenhaForm') || document.querySelector('form');
+  const emailInput = document.getElementById('emailOuCpf') || document.getElementById('email');
+  const alertBox = document.getElementById('alert');
+  const enviarBtn = document.getElementById('enviarBtn') || form?.querySelector('button[type="submit"]');
 
-// OTP modal (reutilizado do cadastro)
-const otpDialog = document.getElementById('otpDialog');
-const otpInputs = () => Array.from(otpDialog?.querySelectorAll('.otp') || []);
-const otpConfirmBtn = document.getElementById('otpConfirmBtn');
-const otpResendBtn  = document.getElementById('otpResendBtn');
-const otpDestinoEl  = document.getElementById('otpDestino');
-const otpError      = document.getElementById('otpError');
-const otpTimer      = document.getElementById('otpTimer');
+  const otpDialog = document.getElementById('otpDialog');
+  const otpForm = document.getElementById('otpForm');
+  const otpConfirmBtn = document.getElementById('otpConfirmBtn');
+  const otpResendBtn = document.getElementById('otpResendBtn');
+  const otpDestinoEl = document.getElementById('otpDestino');
+  const otpError = document.getElementById('otpError');
+  const otpTimer = document.getElementById('otpTimer');
+  const otpInputs = () => Array.from(otpDialog?.querySelectorAll('.otp') || []);
 
-let currentDeliveryId = null;
-let verifiedToken = null;
-let userExists = null;
-let resendCooldown = 60;
-let cooldownTimer = null;
+  let currentDeliveryId = null;
+  let verifiedToken = null;
+  let userExists = null;
+  let resendCooldown = 60;
+  let cooldownTimer = null;
+  let isVerifying = false;
 
-const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v).trim());
-const pick = (obj, ...keys) => {
-  if (!obj || typeof obj !== 'object') return undefined;
-  const found = keys.find((k) => Object.prototype.hasOwnProperty.call(obj, k));
-  return found ? obj[found] : undefined;
-};
-
-function setAlert(msg, type='error') {
-  if (!alertBox) return;
-  alertBox.textContent = msg || '';
-  alertBox.className = msg ? `alert ${type}` : 'alert';
-}
-function getCsrf() {
-  const token = document.querySelector('meta[name="_csrf"]')?.content;
-  const header = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
-  return { header, token };
-}
-function startCooldown() {
-  clearInterval(cooldownTimer);
-  let t = resendCooldown;
-  otpResendBtn.disabled = true;
-  otpTimer.textContent = t>0 ? `Reenviar em ${t}s` : '';
-  cooldownTimer = setInterval(() => {
-    t -= 1;
-    if (t <= 0) {
-      clearInterval(cooldownTimer);
-      otpResendBtn.disabled = false;
-      otpTimer.textContent = '';
-    } else {
-      otpTimer.textContent = `Reenviar em ${t}s`;
+  const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || '').trim());
+  const pick = (obj, ...keys) => {
+    if (!obj || typeof obj !== 'object') {
+      return undefined;
     }
-  }, 1000);
-}
+    const found = keys.find((k) => Object.prototype.hasOwnProperty.call(obj, k));
+    return found ? obj[found] : undefined;
+  };
 
-// 1) Start
-form?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = (emailInput?.value || '').trim();
-  if (!isEmail(email)) {
-    setAlert('Informe um e-mail vÃ¡lido.');
-    emailInput?.focus();
-    return;
-  }
-  setAlert('');
-  try {
-    enviarBtn.disabled = true;
-    enviarBtn.textContent = 'Enviando cÃ³digoâ€¦';
-    const { header, token } = getCsrf();
-
-    const resp = await fetch('/api/auth/email-claim/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', [header]: token || '' },
-      body: JSON.stringify({ email })
-    });
-    const data = await resp.json().catch(()=> ({}));
-    if (!resp.ok) {
-      setAlert(data?.message || 'NÃ£o foi possÃ­vel enviar o cÃ³digo.', 'error');
+  function setAlert(message = '', type = 'error') {
+    if (!alertBox) {
       return;
     }
-    currentDeliveryId = pick(data, 'deliveryId', 'delivery_id') || null;
-    userExists = !!pick(data, 'userExists', 'user_exists');
-    resendCooldown = Number(pick(data, 'cooldownSec', 'cooldown_sec')) || 60;
+
+    if (!message) {
+      alertBox.hidden = true;
+      alertBox.className = 'alert';
+      alertBox.textContent = '';
+      return;
+    }
+
+    let className = 'alert alert-error';
+    if (type === 'info') {
+      className = 'alert alert-info';
+    } else if (type === 'warning') {
+      className = 'alert alert-warning';
+    } else if (type === 'success') {
+      className = 'alert';
+    }
+
+    alertBox.hidden = false;
+    alertBox.className = className;
+    alertBox.textContent = message;
+  }
+
+  function setOtpError(message = '') {
+    if (otpError) {
+      otpError.textContent = message;
+    }
+  }
+
+  function getCsrf() {
+    const token = document.querySelector('meta[name="_csrf"]')?.content;
+    const header = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+    return { header, token };
+  }
+
+  async function parseJson(resp) {
+    try {
+      return await resp.json();
+    } catch {
+      return {};
+    }
+  }
+
+  function resetOtpInputs() {
+    otpInputs().forEach((input) => {
+      input.value = '';
+    });
+  }
+
+  function readOtpCode() {
+    return otpInputs()
+      .map((input) => String(input.value || '').replace(/\D/g, '').slice(0, 1))
+      .join('');
+  }
+
+  function startCooldown() {
+    if (!otpResendBtn || !otpTimer) {
+      return;
+    }
+
+    clearInterval(cooldownTimer);
+    let remaining = Number(resendCooldown) || 60;
+
+    otpResendBtn.disabled = true;
+    otpTimer.textContent = remaining > 0 ? `Reenviar em ${remaining}s` : '';
+
+    cooldownTimer = setInterval(() => {
+      remaining -= 1;
+      if (remaining <= 0) {
+        clearInterval(cooldownTimer);
+        otpResendBtn.disabled = false;
+        otpTimer.textContent = '';
+        return;
+      }
+      otpTimer.textContent = `Reenviar em ${remaining}s`;
+    }, 1000);
+  }
+
+  async function verifyCode(explicitCode) {
+    if (isVerifying) {
+      return;
+    }
+
+    const code = explicitCode || readOtpCode();
+    const email = String(emailInput?.value || '').trim();
+
+    if (!/^\d{6}$/.test(code)) {
+      setOtpError('Digite os 6 digitos.');
+      return;
+    }
 
     if (!currentDeliveryId) {
-      setAlert('NÃ£o foi possÃ­vel iniciar a validaÃ§Ã£o. Reenvie o cÃ³digo.', 'error');
+      setOtpError('Sessao OTP expirada. Reenvie o codigo.');
       return;
     }
 
-    otpInputs().forEach(i => i.value = '');
-    otpError.textContent = '';
-    otpDestinoEl.textContent = pick(data, 'maskedDestino', 'masked_destino') || email;
-    otpDialog?.showModal();
-    otpInputs()[0]?.focus();
-    startCooldown();
-    setAlert('CÃ³digo enviado. Verifique seu e-mail.', 'info');
-  } catch {
-    setAlert('Falha de rede. Tente novamente.', 'error');
-  } finally {
-    enviarBtn.disabled = false;
-    enviarBtn.textContent = 'Enviar link';
-  }
-});
-
-// UX inputs OTP
-otpDialog?.addEventListener('input', (e) => {
-  const el = e.target;
-  if (!(el instanceof HTMLInputElement)) return;
-  if (el.classList.contains('otp')) {
-    el.value = el.value.replace(/\D/g,'').slice(0,1);
-    if (el.value && el.nextElementSibling) el.nextElementSibling.focus();
-  }
-});
-document.addEventListener('keydown', (e) => {
-  if (!otpDialog?.open) return;
-  const target = e.target;
-  if (!(target instanceof Element) || !otpDialog.contains(target)) return;
-  if (e.key === 'Backspace' &&
-      target instanceof HTMLInputElement &&
-      target.classList.contains('otp') &&
-      !target.value &&
-      target.previousElementSibling) {
-    target.previousElementSibling.focus();
-  }
-});
-
-// 2) Verify
-otpConfirmBtn?.addEventListener('click', async (e) => {
-  e.preventDefault();
-  const code = otpInputs().map(i => i.value).join('');
-  const email = (emailInput?.value || '').trim();
-  if (!/^\d{6}$/.test(code)) { otpError.textContent = 'Digite os 6 dÃ­gitos.'; return; }
-  if (!currentDeliveryId) { otpError.textContent = 'SessÃ£o OTP expirada. Reenvie o cÃ³digo.'; return; }
-  try {
-    otpConfirmBtn.disabled = true;
-    otpError.textContent = '';
-    const { header, token } = getCsrf();
-
-    const resp = await fetch('/api/auth/email-claim/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', [header]: token || '' },
-      body: JSON.stringify({ delivery_id: currentDeliveryId, code, email })
-    });
-    const data = await resp.json().catch(()=> ({}));
-    if (!resp.ok) {
-      const r = data?.reason;
-      if (r === 'expired') {
-        otpError.textContent = 'CÃ³digo expirado.';
-      } else if (r === 'invalid' || r === 'too_many_attempts') {
-        otpError.textContent = 'CÃ³digo incorreto.';
-      } else {
-        otpError.textContent = data?.message || 'NÃ£o foi possÃ­vel validar o cÃ³digo.';
+    try {
+      isVerifying = true;
+      if (otpConfirmBtn) {
+        otpConfirmBtn.disabled = true;
       }
+      setOtpError('');
+
+      const { header, token } = getCsrf();
+      const resp = await fetch('/api/auth/email-claim/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [header]: token || ''
+        },
+        body: JSON.stringify({
+          delivery_id: currentDeliveryId,
+          code,
+          email
+        })
+      });
+
+      const data = await parseJson(resp);
+      if (!resp.ok) {
+        const reason = data?.reason;
+        if (reason === 'expired') {
+          setOtpError('Codigo expirado.');
+        } else if (reason === 'invalid' || reason === 'too_many_attempts') {
+          setOtpError('Codigo incorreto.');
+        } else {
+          setOtpError(data?.message || 'Nao foi possivel validar o codigo.');
+        }
+        return;
+      }
+
+      verifiedToken = pick(data, 'token');
+      userExists = !!pick(data, 'userExists', 'user_exists');
+
+      if (!verifiedToken) {
+        setOtpError('Resposta invalida do servidor. Tente novamente.');
+        return;
+      }
+
+      otpDialog?.close?.();
+
+      if (!userExists) {
+        setAlert('E-mail validado, mas nenhuma conta foi encontrada. Faca seu cadastro.', 'warning');
+        setTimeout(() => window.location.assign('/auth/cliente/cadastro'), 900);
+        return;
+      }
+
+      const novaSenha = window.prompt('E-mail confirmado. Digite a nova senha (minimo 8 caracteres):') || '';
+      if (novaSenha.length < 8) {
+        setAlert('Senha muito curta. Use no minimo 8 caracteres.', 'error');
+        return;
+      }
+
+      const resetResp = await fetch('/api/auth/password/reset-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [header]: token || ''
+        },
+        body: JSON.stringify({
+          token: verifiedToken,
+          email,
+          novaSenha
+        })
+      });
+
+      const resetData = await parseJson(resetResp);
+      if (!resetResp.ok) {
+        setAlert(resetData?.message || 'Falha ao redefinir senha.', 'error');
+        return;
+      }
+
+      setAlert('Senha redefinida com sucesso. Voce ja pode entrar.', 'success');
+      setTimeout(() => window.location.assign('/auth/login'), 700);
+    } catch {
+      setOtpError('Falha de rede. Tente novamente.');
+    } finally {
+      isVerifying = false;
+      if (otpConfirmBtn) {
+        otpConfirmBtn.disabled = false;
+      }
+    }
+  }
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const email = String(emailInput?.value || '').trim();
+    if (!isEmail(email)) {
+      setAlert('Informe um e-mail valido.', 'error');
+      emailInput?.focus();
       return;
     }
 
-    verifiedToken = data.token;
-    userExists = !!pick(data, 'userExists', 'user_exists');
-    otpDialog.close();
+    try {
+      if (enviarBtn) {
+        enviarBtn.disabled = true;
+        enviarBtn.textContent = 'Enviando codigo...';
+      }
+      setAlert('');
 
-    // Branch:
-    if (userExists) {
-      const nova = prompt('E-mail confirmado. Digite a NOVA SENHA (mÃ­n 8 chars):');
-      if (!nova || nova.length < 8) { setAlert('Senha muito curta.', 'error'); return; }
-      const resp2 = await fetch('/api/auth/password/reset-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', [header]: token || '' },
-        body: JSON.stringify({ token: verifiedToken, email, novaSenha: nova })
-      });
-      const d2 = await resp2.json().catch(()=> ({}));
-      if (!resp2.ok) { setAlert(d2?.message || 'Falha ao redefinir senha.', 'error'); return; }
-      setAlert('Senha redefinida! VocÃª jÃ¡ pode entrar.', 'success');
-      setTimeout(()=> window.location.assign('/login'), 800);
-    } else {
-      const nome = prompt('E-mail confirmado. Informe seu NOME:') || '';
-      const senha = prompt('Crie uma SENHA (mÃ­n 8 chars):') || '';
-      if (nome.trim().length < 2 || senha.length < 8) { setAlert('Dados insuficientes.', 'error'); return; }
       const { header, token } = getCsrf();
-      const resp3 = await fetch('/api/auth/register/complete-otp', {
+      const resp = await fetch('/api/auth/email-claim/start', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', [header]: token || '' },
-        body: JSON.stringify({ token: verifiedToken, email, nome, senha })
+        headers: {
+          'Content-Type': 'application/json',
+          [header]: token || ''
+        },
+        body: JSON.stringify({ email })
       });
-      const d3 = await resp3.json().catch(()=> ({}));
-      if (!resp3.ok) { setAlert(d3?.message || 'Falha ao criar conta.', 'error'); return; }
-      setAlert('Conta criada com sucesso! FaÃ§a login.', 'success');
-      setTimeout(()=> window.location.assign('/login?novo=1'), 800);
-    }
-  } catch {
-    otpError.textContent = 'Falha de rede. Tente novamente.';
-  } finally {
-    otpConfirmBtn.disabled = false;
-  }
-});
 
-// 3) Reenviar
-otpResendBtn?.addEventListener('click', async () => {
-  const email = (emailInput?.value || '').trim();
-  if (!isEmail(email)) { otpError.textContent = 'E-mail invÃ¡lido.'; return; }
-  try {
-    otpResendBtn.disabled = true;
-    const { header, token } = getCsrf();
-    const resp = await fetch('/api/auth/email-claim/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', [header]: token || '' },
-      body: JSON.stringify({ email, previous_delivery_id: currentDeliveryId })
-    });
-    const data = await resp.json().catch(()=> ({}));
-    if (resp.ok) {
+      const data = await parseJson(resp);
+      if (!resp.ok) {
+        setAlert(data?.message || 'Nao foi possivel enviar o codigo.', 'error');
+        return;
+      }
+
+      currentDeliveryId = pick(data, 'deliveryId', 'delivery_id') || null;
+      resendCooldown = Number(pick(data, 'cooldownSec', 'cooldown_sec')) || 60;
+
+      if (!currentDeliveryId) {
+        setAlert('Nao foi possivel iniciar a validacao. Reenvie o codigo.', 'error');
+        return;
+      }
+
+      resetOtpInputs();
+      setOtpError('');
+      if (otpDestinoEl) {
+        otpDestinoEl.textContent = pick(data, 'maskedDestino', 'masked_destino') || email;
+      }
+
+      if (typeof otpDialog?.showModal === 'function') {
+        otpDialog.showModal();
+        otpInputs()[0]?.focus();
+        startCooldown();
+        setAlert('Codigo enviado. Verifique seu e-mail.', 'info');
+        return;
+      }
+
+      const fallbackCode = window.prompt('Digite o codigo de 6 digitos enviado por e-mail:') || '';
+      await verifyCode(fallbackCode);
+    } catch {
+      setAlert('Falha de rede. Tente novamente.', 'error');
+    } finally {
+      if (enviarBtn) {
+        enviarBtn.disabled = false;
+        enviarBtn.textContent = 'Enviar codigo';
+      }
+    }
+  });
+
+  otpDialog?.addEventListener('input', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) || !target.classList.contains('otp')) {
+      return;
+    }
+
+    target.value = target.value.replace(/\D/g, '').slice(0, 1);
+    if (target.value && target.nextElementSibling instanceof HTMLInputElement) {
+      target.nextElementSibling.focus();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (!otpDialog?.open) {
+      return;
+    }
+
+    const target = event.target;
+    if (!(target instanceof Element) || !otpDialog.contains(target)) {
+      return;
+    }
+
+    if (
+      event.key === 'Backspace'
+      && target instanceof HTMLInputElement
+      && target.classList.contains('otp')
+      && !target.value
+      && target.previousElementSibling instanceof HTMLInputElement
+    ) {
+      target.previousElementSibling.focus();
+    }
+  });
+
+  otpConfirmBtn?.addEventListener('click', async (event) => {
+    event.preventDefault();
+    await verifyCode();
+  });
+
+  otpForm?.addEventListener('submit', async (event) => {
+    const submitterValue = event.submitter?.getAttribute('value') || '';
+    if (submitterValue === 'cancel') {
+      return;
+    }
+
+    event.preventDefault();
+    await verifyCode();
+  });
+
+  otpResendBtn?.addEventListener('click', async () => {
+    const email = String(emailInput?.value || '').trim();
+    if (!isEmail(email)) {
+      setOtpError('E-mail invalido.');
+      return;
+    }
+
+    let cooldownRestarted = false;
+    try {
+      otpResendBtn.disabled = true;
+      const { header, token } = getCsrf();
+
+      const resp = await fetch('/api/auth/email-claim/start', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [header]: token || ''
+        },
+        body: JSON.stringify({
+          email,
+          previous_delivery_id: currentDeliveryId
+        })
+      });
+
+      const data = await parseJson(resp);
+      if (!resp.ok) {
+        setOtpError(data?.message || 'Nao foi possivel reenviar.');
+        return;
+      }
+
       currentDeliveryId = pick(data, 'deliveryId', 'delivery_id') || currentDeliveryId;
-      otpDestinoEl.textContent = pick(data, 'maskedDestino', 'masked_destino') || email;
+      if (otpDestinoEl) {
+        otpDestinoEl.textContent = pick(data, 'maskedDestino', 'masked_destino') || email;
+      }
+
       resendCooldown = Number(pick(data, 'cooldownSec', 'cooldown_sec')) || 60;
       startCooldown();
-      otpError.textContent = '';
-    } else {
-      otpError.textContent = data?.message || 'NÃ£o foi possÃ­vel reenviar.';
+      cooldownRestarted = true;
+      setOtpError('');
+    } catch {
+      setOtpError('Falha de rede.');
+    } finally {
+      if (!cooldownRestarted) {
+        otpResendBtn.disabled = false;
+      }
     }
-  } catch {
-    otpError.textContent = 'Falha de rede.';
-  }
-});
+  });
+
+  otpDialog?.addEventListener('close', () => {
+    setOtpError('');
+  });
+})();

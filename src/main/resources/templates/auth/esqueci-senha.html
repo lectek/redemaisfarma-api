@@ -10,10 +10,10 @@
     <section class="form-card" aria-labelledby="titulo-esqueci-senha">
       <h1 id="titulo-esqueci-senha" class="form-title">Esqueci minha senha</h1>
       <p class="text-muted" style="margin-bottom: 0.5rem;">
-        Informe o e-mail cadastrado e enviaremos um link seguro para redefinir sua senha.
+        Informe o e-mail cadastrado e enviaremos um codigo para redefinir sua senha.
       </p>
 
-      <output id="alert" class="alert" aria-live="polite"></output>
+      <output id="alert" class="alert" aria-live="polite" hidden></output>
 
       <form id="esqueciSenhaForm"
             th:action="@{/auth/esqueci-senha}"
@@ -22,6 +22,12 @@
             autocomplete="on"
             novalidate>
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <noscript>
+          <p class="help" style="margin-bottom:0;">
+            JavaScript desativado: ao enviar este formulario voce recebera um link por e-mail.
+          </p>
+        </noscript>
 
         <div class="form-group">
           <label for="email">E-mail</label>
@@ -32,13 +38,13 @@
                  placeholder="voce@dominio.com"
                  autocomplete="email"
                  required />
-          <p class="help" style="margin-bottom:0;">Você receberá um link e um código temporário.</p>
+          <p class="help" style="margin-bottom:0;">Voce recebera um codigo temporario neste e-mail.</p>
         </div>
 
-        <button id="enviarBtn" type="submit" class="btn btn--primary">Enviar link</button>
+        <button id="enviarBtn" type="submit" class="btn btn--primary">Enviar codigo</button>
 
         <p class="mt-6" style="text-align:center">
-          Já possui conta? <a th:href="@{/auth/login}">Entrar</a>
+          Ja possui conta? <a th:href="@{/auth/login}">Entrar</a>
         </p>
       </form>
     </section>
@@ -48,24 +54,24 @@
 
   <dialog id="otpDialog" aria-labelledby="otpTitle" aria-describedby="otpDesc" aria-modal="true">
     <form method="dialog" class="otp-card" id="otpForm">
-      <h2 id="otpTitle">Verificar seu código</h2>
-      <p id="otpDesc">Enviamos um código para <strong id="otpDestino"></strong>. Digite abaixo:</p>
+      <h2 id="otpTitle">Verificar seu codigo</h2>
+      <p id="otpDesc">Enviamos um codigo para <strong id="otpDestino"></strong>. Digite abaixo:</p>
 
       <fieldset class="otp-grid">
         <legend class="visually-hidden">Codigo de 6 digitos</legend>
-        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 1" />
-        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 2" />
-        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 3" />
-        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 4" />
-        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 5" />
-        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Dígito 6" />
+        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Digito 1" autocomplete="one-time-code" />
+        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Digito 2" autocomplete="one-time-code" />
+        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Digito 3" autocomplete="one-time-code" />
+        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Digito 4" autocomplete="one-time-code" />
+        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Digito 5" autocomplete="one-time-code" />
+        <input inputmode="numeric" pattern="\d*" maxlength="1" class="otp" aria-label="Digito 6" autocomplete="one-time-code" />
       </fieldset>
 
       <p id="otpError" class="error-message" aria-live="polite"></p>
 
       <div class="otp-actions">
         <button id="otpConfirmBtn" class="btn btn--primary" type="submit" value="confirm">Confirmar</button>
-        <button id="otpResendBtn" class="btn btn--ghost" type="button">Reenviar código</button>
+        <button id="otpResendBtn" class="btn btn--ghost" type="button">Reenviar codigo</button>
         <button class="btn btn--ghost" value="cancel">Cancelar</button>
       </div>
 
