@@ -1,4 +1,4 @@
-package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
+﻿package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 
 import br.com.redemaisfarma.adapters.outbound.messaging.ProductImagePublisher;
 import br.com.redemaisfarma.adapters.outbound.messaging.ProductImageRequestedEvent;
@@ -7,6 +7,8 @@ import br.com.redemaisfarma.adapters.outbound.persistence.jpa.ProdutoJpaReposito
 import br.com.redemaisfarma.application.port.outbound.ProductImageJobRepository;
 import br.com.redemaisfarma.application.service.ProductImageJobService;
 import lombok.Generated;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
@@ -15,7 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.Instant;
 import java.util.List;
@@ -25,6 +32,10 @@ import java.util.List;
 @RequestMapping
 public class ProductImageAdminPageController {
 
+    private static final Logger log = LoggerFactory.getLogger(
+            ProductImageAdminPageController.class
+    );
+
     private final ProdutoJpaRepository produtoRepo;
     private final ProductImagePublisher publisher;
     private final ProductImageJobService jobService;
@@ -33,11 +44,11 @@ public class ProductImageAdminPageController {
 
     @Generated
     public ProductImageAdminPageController(
-            ProdutoJpaRepository produtoRepo,
-            ProductImagePublisher publisher,
-            ProductImageJobService jobService,
-            ProductImageJobRepository jobRepo,
-            @Value("${kafka.enabled:false}") boolean kafkaEnabled
+            final ProdutoJpaRepository produtoRepo,
+            final ProductImagePublisher publisher,
+            final ProductImageJobService jobService,
+            final ProductImageJobRepository jobRepo,
+            @Value("${kafka.enabled:false}") final boolean kafkaEnabled
     ) {
         this.produtoRepo = produtoRepo;
         this.publisher = publisher;
@@ -47,8 +58,8 @@ public class ProductImageAdminPageController {
     }
 
     @GetMapping("/admin/imagens")
-    public String pageProdutosSemImagem(Pageable pageable, Model model) {
-        Page<ProdutoEntity> page = produtoRepo.findSemMidia(pageable);
+    public String pageProdutosSemImagem(final Pageable pageable, final Model model) {
+        final Page<ProdutoEntity> page = produtoRepo.findSemMidia(pageable);
         model.addAttribute("page", page);
         model.addAttribute("totalSemImagem", page.getTotalElements());
         return "pages/admin/imagens/index";
@@ -56,21 +67,28 @@ public class ProductImageAdminPageController {
 
     @GetMapping("/api/admin/imagens/produtos/sem-imagem")
     @ResponseBody
-    public Page<ProdutoEntity> apiProdutosSemImagem(Pageable pageable) {
+    public Page<ProdutoEntity> apiProdutosSemImagem(final Pageable pageable) {
         return produtoRepo.findSemMidia(pageable);
     }
 
     @PostMapping("/api/admin/imagens/{produtoId}/queue")
     @ResponseBody
-    public ResponseEntity<?> queue(@PathVariable("produtoId") Long produtoId) {
-        var produto = produtoRepo.findById(produtoId).orElse(null);
+    public ResponseEntity<?> queue(@PathVariable("produtoId") final String rawProdutoId) {
+        final Long produtoId = parseProdutoId(rawProdutoId);
+        if (produtoId == null) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("ID de produto invalido.");
+        }
+
+        final var produto = produtoRepo.findById(produtoId).orElse(null);
         if (produto == null) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body("Produto não encontrado");
+                    .body("Produto nao encontrado.");
         }
 
-        ProductImageRequestedEvent event = new ProductImageRequestedEvent(
+        final ProductImageRequestedEvent event = new ProductImageRequestedEvent(
                 produto.getId(),
                 produto.getNome(),
                 produto.getFabricante(),
@@ -79,36 +97,66 @@ public class ProductImageAdminPageController {
         );
 
         if (!this.kafkaEnabled) {
-            this.jobService.process(event);
-            var lastJob = jobRepo.findLastByProduct(produtoId).orElse(null);
-            return ResponseEntity.ok(new EnqueueResponse("PROCESSADO_SYNC",
-                    lastJob == null ? null : JobView.from(lastJob)));
+            return runSyncAndBuildResponse(produtoId, event, "PROCESSADO_SYNC");
         }
 
-        publisher.publish(event);
+        try {
+            publisher.publish(event);
+        } catch (RuntimeException ex) {
+            log.warn(
+                    "Falha ao publicar no Kafka para produto {}. Fallback sync sera usado. Erro={}",
+                    produtoId,
+                    ex.getMessage(),
+                    ex
+            );
+            return runSyncAndBuildResponse(produtoId, event, "PROCESSADO_SYNC_FALLBACK");
+        }
 
-        var lastJob = jobRepo.findLastByProduct(produtoId).orElse(null);
-        return ResponseEntity.ok(new EnqueueResponse("ENFILEIRADO",
-                lastJob == null ? null : JobView.from(lastJob)));
+        final var lastJob = jobRepo.findLastByProduct(produtoId).orElse(null);
+        return ResponseEntity.ok(new EnqueueResponse(
+                "ENFILEIRADO",
+                lastJob == null ? null : JobView.from(lastJob)
+        ));
     }
 
     @PostMapping("/api/admin/imagens/{produtoId}/regenerate")
     @ResponseBody
-    public ResponseEntity<?> regenerate(@PathVariable("produtoId") Long produtoId) {
-        jobService.regenerateForced(produtoId);
-        var lastJob = jobRepo.findLastByProduct(produtoId).orElse(null);
-        return ResponseEntity.ok(new EnqueueResponse("REGERADO",
-                lastJob == null ? null : JobView.from(lastJob)));
+    public ResponseEntity<?> regenerate(@PathVariable("produtoId") final String rawProdutoId) {
+        final Long produtoId = parseProdutoId(rawProdutoId);
+        if (produtoId == null) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("ID de produto invalido.");
+        }
+
+        try {
+            jobService.regenerateForced(produtoId);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Produto nao encontrado.");
+        } catch (RuntimeException ex) {
+            log.error("Falha ao regenerar imagem para produto {}: {}", produtoId, ex.getMessage(), ex);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Falha ao processar solicitacao de imagem.");
+        }
+
+        final var lastJob = jobRepo.findLastByProduct(produtoId).orElse(null);
+        return ResponseEntity.ok(new EnqueueResponse(
+                "REGERADO",
+                lastJob == null ? null : JobView.from(lastJob)
+        ));
     }
 
     @GetMapping("/api/admin/imagens/jobs")
     @ResponseBody
     public List<JobView> jobs(
-            @RequestParam(name = "status", required = false) String status,
-            @RequestParam(defaultValue = "20") int limit,
-            @RequestParam(defaultValue = "0") int offset
+            @RequestParam(name = "status", required = false) final String status,
+            @RequestParam(defaultValue = "20") final int limit,
+            @RequestParam(defaultValue = "0") final int offset
     ) {
-        ProductImageJobRepository.Status st;
+        final ProductImageJobRepository.Status st;
         if (status == null || status.isBlank()) {
             st = ProductImageJobRepository.Status.QUEUED;
         } else {
@@ -124,11 +172,32 @@ public class ProductImageAdminPageController {
                 .toList();
     }
 
-    // ===============================
-    // Records auxiliares
-    // ===============================
+    private ResponseEntity<EnqueueResponse> runSyncAndBuildResponse(
+            final Long produtoId,
+            final ProductImageRequestedEvent event,
+            final String result
+    ) {
+        this.jobService.process(event);
+        final var lastJob = jobRepo.findLastByProduct(produtoId).orElse(null);
+        return ResponseEntity.ok(new EnqueueResponse(
+                result,
+                lastJob == null ? null : JobView.from(lastJob)
+        ));
+    }
 
-    public record EnqueueResponse(String result, JobView lastJob) {}
+    private static Long parseProdutoId(final String rawProdutoId) {
+        if (rawProdutoId == null || rawProdutoId.isBlank()) {
+            return null;
+        }
+        try {
+            return Long.parseLong(rawProdutoId.trim());
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    public record EnqueueResponse(String result, JobView lastJob) {
+    }
 
     public record JobView(
             Long id,
@@ -140,7 +209,7 @@ public class ProductImageAdminPageController {
             Instant createdAt,
             Instant updatedAt
     ) {
-        public static JobView from(ProductImageJobRepository.Job j) {
+        public static JobView from(final ProductImageJobRepository.Job j) {
             return new JobView(
                     j.id(),
                     j.productId(),

@@ -15,7 +15,11 @@
   let page = 0;
   let size = 24;
   let hasNext = false;
-  const resolveProdutoId = (p) => p?.entityId ?? p?.id ?? null;
+  const parseEntityId = (rawValue) => {
+    const value = String(rawValue ?? "").trim();
+    return /^\d+$/.test(value) ? value : null;
+  };
+  const resolveProdutoId = (p) => parseEntityId(p?.entityId ?? p?.id ?? null);
   const resolveProdutoKey = (p) => {
     const id = resolveProdutoId(p);
     return id == null ? "" : String(id);
@@ -242,10 +246,18 @@
     btn.disabled = true;
     try {
       const r = await fetch(endpoint, withCsrf({ method: "POST", credentials: "same-origin" }));
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      if (!r.ok) {
+        const raw = await r.text();
+        throw new Error(
+          normalizeErrorMessage(
+            raw,
+            `Falha ao solicitar imagem (HTTP ${r.status}).`
+          )
+        );
+      }
       toast(action === "regenerate" ? "Regeneração solicitada!" : "Geração enfileirada!");
     } catch (e) {
-      toast("Falha ao solicitar imagem.", true);
+      toast(e?.message || "Falha ao solicitar imagem.", true);
     } finally {
       btn.disabled = false;
     }
@@ -415,6 +427,14 @@
     });
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 2500);
+  }
+
+  function normalizeErrorMessage(raw, fallback) {
+    const text = String(raw || "")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return text || fallback;
   }
 
   function escapeHtml(s) {

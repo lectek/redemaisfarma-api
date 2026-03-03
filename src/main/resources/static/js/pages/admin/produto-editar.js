@@ -33,6 +33,11 @@ function normalizeErrorMessage(raw, fallback) {
   return text || fallback;
 }
 
+function resolveProdutoId(raw) {
+  const id = String(raw ?? '').trim();
+  return /^\d+$/.test(id) ? id : null;
+}
+
 const $ = (s) => document.querySelector(s);
 
 const $id = $('#id');
@@ -211,21 +216,28 @@ async function uploadImagem() {
 }
 
 async function gerarIA() {
-  const id = $id?.value;
-  if (!id) return toast('Produto ainda nao salvo.', 'err');
+  const id = resolveProdutoId($id?.value);
+  if (!id) return toast('ID do produto invalido.', 'err');
 
   const endpoint = `/api/admin/imagens/${id}/queue`;
   $btnGerarIA.disabled = true;
+  $status.textContent = 'Solicitando geracao de imagem...';
 
   try {
     const r = await fetch(endpoint, withCsrf({ method: 'POST', credentials: 'same-origin' }));
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    if (!r.ok) {
+      const raw = await r.text();
+      throw new Error(
+        normalizeErrorMessage(raw, `Falha na solicitacao de imagem (HTTP ${r.status})`)
+      );
+    }
 
     toast('Enfileirado com sucesso!', 'ok');
     $status.textContent = 'Geracao enfileirada...';
   } catch (e) {
     console.error(e);
-    toast('Falha na solicitacao de imagem', 'err');
+    $status.textContent = 'Erro ao solicitar imagem.';
+    toast(e?.message || 'Falha na solicitacao de imagem', 'err');
   } finally {
     $btnGerarIA.disabled = false;
   }
