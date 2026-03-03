@@ -48,7 +48,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/marketing/emails/campanhas")
 @PreAuthorize("hasRole('ADMIN')")
-public final class AdminMarketingEmailCampaignController {
+public class AdminMarketingEmailCampaignController {
 
     /**
      * Campaign status for scheduled campaigns.

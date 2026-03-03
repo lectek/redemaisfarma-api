@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/produtos-publico")
-public final class ProdutoPublicPageController {
+public class ProdutoPublicPageController {
 
     /**
      * Renders public product catalog page.

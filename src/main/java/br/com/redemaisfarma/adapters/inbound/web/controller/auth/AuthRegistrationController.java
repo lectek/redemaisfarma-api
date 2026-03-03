@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/auth")
-public final class AuthRegistrationController {
+public class AuthRegistrationController {
 
     /**
      * Expected amount of digits for a normalized CPF.

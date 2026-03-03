@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/configuracoes/integracoes")
 @PreAuthorize("hasRole('ADMIN')")
-public final class AdminConfiguracoesIntegracoesController {
+public class AdminConfiguracoesIntegracoesController {
 
     /**
      * Settings key for API key.

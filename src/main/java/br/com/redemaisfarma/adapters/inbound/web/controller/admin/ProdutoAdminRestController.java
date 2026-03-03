@@ -32,7 +32,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/admin/produtos")
-public final class ProdutoAdminRestController {
+public class ProdutoAdminRestController {
 
     /**
      * Product prefix used when deriving public UUID from entity id.

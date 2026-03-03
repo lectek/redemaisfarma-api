@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Profile("!test")
 @RestController
 @RequestMapping("/api/ia")
-public final class IaPublicController {
+public class IaPublicController {
 
     /**
      * Maximum accepted customer message length.

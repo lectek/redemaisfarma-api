@@ -28,7 +28,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/admin/configuracoes/pagamentos")
 @PreAuthorize("hasRole('ADMIN')")
 @Validated
-public final class PagamentosConfigController {
+public class PagamentosConfigController {
 
     /**
      * Settings key for active gateway.

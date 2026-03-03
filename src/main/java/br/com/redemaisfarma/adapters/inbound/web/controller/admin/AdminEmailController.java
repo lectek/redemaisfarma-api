@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping(value = {"/admin/email"})
-public final class AdminEmailController {
+public class AdminEmailController {
 
     /**
      * Renders the admin email center page.

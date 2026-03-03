@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/admin/users")
-public final class AdminUserRoleController {
+public class AdminUserRoleController {
 
     /**
      * Service responsible for role elevation/removal.

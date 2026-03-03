@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/produtos")
-public final class ProdutosController {
+public class ProdutosController {
 
     /**
      * Default page size for public product listing.

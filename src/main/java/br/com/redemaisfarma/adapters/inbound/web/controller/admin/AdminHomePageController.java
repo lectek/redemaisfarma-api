@@ -21,7 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/home")
 @PreAuthorize("hasRole('ADMIN')")
-public final class AdminHomePageController {
+public class AdminHomePageController {
 
     /**
      * Key storing the selected main product id for home page.

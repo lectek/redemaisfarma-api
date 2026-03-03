@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/api/auth", produces = "application/json")
 @Validated
-public final class AuthOtpActionsController {
+public class AuthOtpActionsController {
 
     /**
      * Minimum password length.

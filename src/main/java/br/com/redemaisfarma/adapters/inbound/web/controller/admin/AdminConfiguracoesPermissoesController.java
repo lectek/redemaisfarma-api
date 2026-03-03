@@ -22,7 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/configuracoes/permissoes")
 @PreAuthorize("hasRole('ADMIN')")
-public final class AdminConfiguracoesPermissoesController {
+public class AdminConfiguracoesPermissoesController {
 
     /**
      * Settings key for permission matrix payload.

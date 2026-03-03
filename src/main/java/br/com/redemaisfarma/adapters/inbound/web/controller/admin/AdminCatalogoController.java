@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
         name = "Admin - Catalogo",
         description = "Operacoes administrativas de sincronizacao do catalogo"
 )
-public final class AdminCatalogoController {
+public class AdminCatalogoController {
 
     /**
      * Service that performs catalog synchronization.

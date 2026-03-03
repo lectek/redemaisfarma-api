@@ -33,7 +33,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/configuracoes/geral")
 @PreAuthorize("hasRole('ADMIN')")
-public final class AdminConfiguracoesGeralController {
+public class AdminConfiguracoesGeralController {
 
     /**
      * Logger used by this controller.

@@ -14,7 +14,7 @@ import org.springframework.web.servlet.view.RedirectView;
 @Profile("!test")
 @Controller
 @RequestMapping("/admin")
-public final class AdminIndexRedirectController {
+public class AdminIndexRedirectController {
 
     /**
      * Default admin destination.

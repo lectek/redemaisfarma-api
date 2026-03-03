@@ -13,7 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @Validated
-public final class CartController {
+public class CartController {
 
     /**
      * Service responsible for cart operations.

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
 
 @Controller
-public final class ProdutoDetalheController {
+public class ProdutoDetalheController {
 
     /**
      * Repository used to load product detail.

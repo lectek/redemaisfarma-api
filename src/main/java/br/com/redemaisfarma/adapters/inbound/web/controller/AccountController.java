@@ -32,7 +32,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/cliente")
-public final class AccountController {
+public class AccountController {
 
     /**
      * Max avatar size in bytes (2 MB).

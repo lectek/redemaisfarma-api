@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/admin/clientes")
-public final class AdminClientesController {
+public class AdminClientesController {
 
     /**
      * First page index.

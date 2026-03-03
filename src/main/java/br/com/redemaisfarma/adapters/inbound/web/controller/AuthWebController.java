@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public final class AuthWebController {
+public class AuthWebController {
 
     /**
      * Redirects legacy login routes to the auth login page.

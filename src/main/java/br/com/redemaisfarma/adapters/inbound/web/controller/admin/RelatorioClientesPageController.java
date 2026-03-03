@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public final class RelatorioClientesPageController {
+public class RelatorioClientesPageController {
 
     /**
      * Renders the customer report page.

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/admin/usuarios")
-public final class AdminUserController {
+public class AdminUserController {
 
     /**
      * Service responsible for admin user operations.

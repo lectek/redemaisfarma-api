@@ -22,7 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/auth")
-public final class AuthController {
+public class AuthController {
 
     /**
      * Service responsible for reset password flow.

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @Profile("legacy")
 @RequestMapping("/admin")
-public final class AdminPageController {
+public class AdminPageController {
 
     /**
      * Renders admin legacy index page.

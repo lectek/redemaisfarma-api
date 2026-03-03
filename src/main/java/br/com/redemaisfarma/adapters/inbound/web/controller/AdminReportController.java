@@ -11,7 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public final class AdminReportController {
+public class AdminReportController {
 
     /**
      * Service that generates report payloads.

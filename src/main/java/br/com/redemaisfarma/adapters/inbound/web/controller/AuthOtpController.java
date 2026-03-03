@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/api/auth/otp", produces = "application/json")
 @Validated
-public final class AuthOtpController {
+public class AuthOtpController {
 
     /**
      * Internal error reason code.

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping(value = {"/site"})
-public final class SiteHomeController {
+public class SiteHomeController {
 
     /**
      * Maximum number of featured products shown on site home.

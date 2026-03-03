@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/dev/provision")
-public final class DevProvisioningController {
+public class DevProvisioningController {
 
     /**
      * Service responsible for dev provisioning flow.

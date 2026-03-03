@@ -18,7 +18,7 @@ import java.util.List;
 @Profile("!test")
 @Controller
 @RequestMapping("/admin/produtos")
-public final class ProdutoAdminEditPageController {
+public class ProdutoAdminEditPageController {
 
     /**
      * Repository used to load and update products.

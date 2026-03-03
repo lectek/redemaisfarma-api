@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
         value = "/api/suporte",
         produces = MediaType.APPLICATION_JSON_VALUE
 )
-public final class EmailSuporteController {
+public class EmailSuporteController {
 
     /**
      * Service that sends support emails.

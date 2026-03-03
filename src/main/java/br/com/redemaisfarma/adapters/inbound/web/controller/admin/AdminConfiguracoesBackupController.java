@@ -38,7 +38,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/configuracoes/backup")
 @PreAuthorize("hasRole('ADMIN')")
-public final class AdminConfiguracoesBackupController {
+public class AdminConfiguracoesBackupController {
 
     /**
      * Local directory used to store JSON backups.

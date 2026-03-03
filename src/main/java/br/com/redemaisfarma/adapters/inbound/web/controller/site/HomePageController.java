@@ -12,7 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public final class HomePageController {
+public class HomePageController {
 
     /**
      * Default number of highlighted products.

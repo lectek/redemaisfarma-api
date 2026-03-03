@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
         produces = MediaType.APPLICATION_JSON_VALUE
 )
 @Validated
-public final class AuthEmailClaimController {
+public class AuthEmailClaimController {
 
     /**
      * OTP service used for delivery and verification flows.

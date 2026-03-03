@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public final class SuportePageController {
+public class SuportePageController {
 
     /**
      * Renders the customer support page.

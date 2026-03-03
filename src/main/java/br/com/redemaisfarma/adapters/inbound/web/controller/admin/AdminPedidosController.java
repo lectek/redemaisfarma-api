@@ -24,7 +24,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/admin/pedidos")
-public final class AdminPedidosController {
+public class AdminPedidosController {
 
     /**
      * First page index used for recent orders listing.

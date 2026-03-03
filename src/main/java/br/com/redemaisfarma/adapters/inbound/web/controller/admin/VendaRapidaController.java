@@ -29,7 +29,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Profile("!test")
 @Controller
 @RequestMapping("/admin/vendas")
-public final class VendaRapidaController {
+public class VendaRapidaController {
 
     /**
      * Default product search limit.

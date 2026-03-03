@@ -6,7 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public final class LoginController {
+public class LoginController {
 
     /**
      * Feature flag that controls OAuth2 login options in the page.

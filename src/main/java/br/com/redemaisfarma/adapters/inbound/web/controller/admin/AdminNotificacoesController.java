@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/admin/notificacoes")
 @Validated
-public final class AdminNotificacoesController {
+public class AdminNotificacoesController {
 
     /**
      * Settings key that enables low stock alerts.

@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/configuracoes/design")
 @PreAuthorize("hasRole('ADMIN')")
-public final class AdminConfiguracoesDesignController {
+public class AdminConfiguracoesDesignController {
 
     /**
      * Settings key for dark theme default.

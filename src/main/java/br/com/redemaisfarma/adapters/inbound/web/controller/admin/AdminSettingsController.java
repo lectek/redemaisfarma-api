@@ -23,7 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/admin/settings")
 @PreAuthorize("hasRole('ADMIN')")
 @Validated
-public final class AdminSettingsController {
+public class AdminSettingsController {
 
     /**
      * First page index.

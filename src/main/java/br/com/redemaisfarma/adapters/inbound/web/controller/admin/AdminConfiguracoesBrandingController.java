@@ -26,7 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/configuracoes/branding")
 @PreAuthorize("hasRole('ADMIN')")
-public final class AdminConfiguracoesBrandingController {
+public class AdminConfiguracoesBrandingController {
 
     /**
      * Branding key for default logo URL.

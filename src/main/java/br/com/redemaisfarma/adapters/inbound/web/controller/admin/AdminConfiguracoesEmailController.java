@@ -15,7 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/configuracoes/email")
 @PreAuthorize("hasRole('ADMIN')")
-public final class AdminConfiguracoesEmailController {
+public class AdminConfiguracoesEmailController {
 
     /**
      * Settings key for email module enablement.

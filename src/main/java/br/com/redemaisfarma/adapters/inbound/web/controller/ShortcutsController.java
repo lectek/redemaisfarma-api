@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public final class ShortcutsController {
+public class ShortcutsController {
 
     /**
      * Redirects generic customer shortcut to account page.

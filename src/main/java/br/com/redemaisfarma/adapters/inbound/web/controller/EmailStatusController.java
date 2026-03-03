@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/api/email")
-public final class EmailStatusController {
+public class EmailStatusController {
 
     /**
      * Maximum accepted page size.

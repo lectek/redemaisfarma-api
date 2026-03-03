@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/admin/marketing/emails/campanhas")
 @PreAuthorize("hasRole('ADMIN')")
-public final class AdminMarketingEmailCampaignRestController {
+public class AdminMarketingEmailCampaignRestController {
 
     /**
      * Campaign application service.

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
         name = "App - Volta ao estoque",
         description = "Inscreve um e-mail para avisos de volta ao estoque"
 )
-public final class ProductStockSubscriptionController {
+public class ProductStockSubscriptionController {
 
     /**
      * Service for stock-subscription operations.

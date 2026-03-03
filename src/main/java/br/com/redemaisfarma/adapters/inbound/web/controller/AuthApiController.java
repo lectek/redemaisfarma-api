@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
-public final class AuthApiController {
+public class AuthApiController {
 
     /**
      * Generic bad credentials message.

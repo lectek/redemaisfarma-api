@@ -20,7 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/cliente/pedidos")
-public final class ClientePedidosController {
+public class ClientePedidosController {
 
     /**
      * Repository used to fetch customer orders.
