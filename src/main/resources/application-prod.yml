@@ -72,6 +72,11 @@ spring:
     listener:
       missing-topics-fatal: ${SPRING_KAFKA_MISSING_TOPICS_FATAL:true}
 
+  data:
+    redis:
+      repositories:
+        enabled: false
+
   task:
     scheduling:
       pool:
