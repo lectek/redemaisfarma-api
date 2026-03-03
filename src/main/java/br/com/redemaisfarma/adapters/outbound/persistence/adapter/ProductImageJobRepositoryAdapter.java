@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public class ProductImageJobRepositoryAdapter
 implements ProductImageJobRepository {
+    private static final int RESULT_URL_MAX_LENGTH = 512;
+    private static final int ERROR_MSG_MAX_LENGTH = 512;
     private final ProductImageJobJpaRepository jpa;
 
     public ProductImageJobRepositoryAdapter(ProductImageJobJpaRepository jpa) {
@@ -81,12 +83,22 @@ implements ProductImageJobRepository {
         ProductImageJobEntity e = (ProductImageJobEntity)this.jpa.findById(id).orElseThrow();
         e.setStatus(st.name());
         if (url != null) {
-            e.setResultUrl(url);
+            e.setResultUrl(this.truncate(url, RESULT_URL_MAX_LENGTH));
         }
         if (err != null) {
-            e.setErrorMsg(err);
+            e.setErrorMsg(this.truncate(err, ERROR_MSG_MAX_LENGTH));
         }
         this.jpa.save(e);
+    }
+
+    private String truncate(String value, int maxLength) {
+        if (value == null) {
+            return null;
+        }
+        if (value.length() <= maxLength) {
+            return value;
+        }
+        return value.substring(0, maxLength);
     }
 
     private ProductImageJobRepository.Job map(ProductImageJobEntity e) {
@@ -100,4 +112,3 @@ implements ProductImageJobRepository {
         return new ProductImageJobRepository.Job(e.getId(), e.getProductId(), st, e.getResultUrl(), e.getErrorMsg(), e.getFingerprint(), e.getCreatedAt(), e.getUpdatedAt());
     }
 }
-
