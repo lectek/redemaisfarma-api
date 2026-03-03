@@ -22,6 +22,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class SettingsSmsSenderAdapter implements SmsSenderAdapter {
     private static final Logger log = LoggerFactory.getLogger(SettingsSmsSenderAdapter.class);
+    private static final String PROVIDER_TWILIO = "twilio";
+    private static final String PROVIDER_BREVO = "brevo";
 
     private static final String[] KEYS_ENABLED = {"sms.enabled", "sms.ativo"};
     private static final String[] KEYS_PROVIDER = {"sms.provider"};
@@ -33,6 +35,9 @@ public class SettingsSmsSenderAdapter implements SmsSenderAdapter {
             "sms.twilio.messaging_service_sid",
             "sms.twilio_messaging_service_sid"
     };
+    private static final String[] KEYS_BREVO_API_KEY = {"sms.brevo.api_key", "sms.brevo_api_key", "sms.api_key"};
+    private static final String[] KEYS_BREVO_BASE_URL = {"sms.brevo.base_url", "sms.brevo_base_url", "sms.api_base_url"};
+    private static final String[] KEYS_BREVO_TYPE = {"sms.brevo.type", "sms.brevo_type"};
 
     private static final String[] ENV_ENABLED = {"APP_SMS_ENABLED", "SMS_ENABLED"};
     private static final String[] ENV_PROVIDER = {"APP_SMS_PROVIDER", "SMS_PROVIDER"};
@@ -45,6 +50,20 @@ public class SettingsSmsSenderAdapter implements SmsSenderAdapter {
             "TWILIO_MESSAGING_SERVICE_SID"
     };
     private static final String[] ENV_TWILIO_BASE_URL = {"APP_SMS_TWILIO_BASE_URL", "TWILIO_API_BASE_URL"};
+    private static final String[] ENV_BREVO_API_KEY = {
+            "APP_SMS_BREVO_API_KEY",
+            "SMS_BREVO_API_KEY",
+            "APP_SMS_API_KEY",
+            "SMS_API_KEY",
+            "APP_MAIL_API_KEY"
+    };
+    private static final String[] ENV_BREVO_BASE_URL = {
+            "APP_SMS_BREVO_BASE_URL",
+            "SMS_BREVO_BASE_URL",
+            "APP_SMS_API_BASE_URL",
+            "SMS_API_BASE_URL"
+    };
+    private static final String[] ENV_BREVO_TYPE = {"APP_SMS_BREVO_TYPE", "SMS_BREVO_TYPE"};
 
     private final AppSettingService settings;
     private final Environment env;
@@ -64,12 +83,14 @@ public class SettingsSmsSenderAdapter implements SmsSenderAdapter {
             throw new IllegalStateException("SMS sending is disabled.");
         }
 
-        String provider = getString(KEYS_PROVIDER, ENV_PROVIDER, "twilio").trim().toLowerCase(Locale.ROOT);
-        if (!"twilio".equals(provider)) {
-            throw new IllegalStateException("Unsupported SMS provider: " + provider);
+        String provider = resolveProvider();
+        if (PROVIDER_TWILIO.equals(provider)) {
+            return sendViaTwilio(destination, message);
         }
-
-        return sendViaTwilio(destination, message);
+        if (PROVIDER_BREVO.equals(provider)) {
+            return sendViaBrevo(destination, message);
+        }
+        throw new IllegalStateException("Unsupported SMS provider: " + provider);
     }
 
     private String sendViaTwilio(String destination, String message) {
@@ -120,7 +141,7 @@ public class SettingsSmsSenderAdapter implements SmsSenderAdapter {
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (response.statusCode() / 100 == 2) {
-                String providerId = extractJsonField(response.body(), "sid");
+                String providerId = extractJsonScalarField(response.body(), "sid");
                 return providerId.isBlank() ? "accepted" : providerId;
             }
             log.warn("[sms] Twilio rejected request. status={} body={}", response.statusCode(), safeSnippet(response.body()));
@@ -131,6 +152,69 @@ public class SettingsSmsSenderAdapter implements SmsSenderAdapter {
         } catch (IOException ex) {
             throw new IllegalStateException("SMS provider connection failed.", ex);
         }
+    }
+
+    private String sendViaBrevo(String destination, String message) {
+        String apiKey = requireNonBlank(
+                getString(KEYS_BREVO_API_KEY, ENV_BREVO_API_KEY, ""),
+                "Brevo API key not configured."
+        );
+        String fromRaw = requireNonBlank(
+                getString(KEYS_FROM, ENV_FROM, ""),
+                "Brevo sender is not configured. Set APP_SMS_FROM."
+        );
+        String sender = normalizeBrevoSender(fromRaw);
+        String defaultCountryCode = getString(KEYS_DEFAULT_COUNTRY_CODE, ENV_DEFAULT_COUNTRY_CODE, "55");
+        String recipient = normalizeToBrevoRecipient(destination, defaultCountryCode);
+        String content = normalizeMessage(message);
+        String type = normalizeBrevoType(getString(KEYS_BREVO_TYPE, ENV_BREVO_TYPE, "transactional"));
+        String baseUrl = getString(KEYS_BREVO_BASE_URL, ENV_BREVO_BASE_URL, "").trim();
+        if (baseUrl.isBlank()) {
+            baseUrl = "https://api.brevo.com";
+        }
+        baseUrl = trimTrailingSlash(baseUrl);
+
+        String payload = "{"
+                + "\"sender\":\"" + escapeJson(sender) + "\","
+                + "\"recipient\":\"" + escapeJson(recipient) + "\","
+                + "\"content\":\"" + escapeJson(content) + "\","
+                + "\"type\":\"" + escapeJson(type) + "\""
+                + "}";
+
+        HttpRequest request = HttpRequest.newBuilder(URI.create(baseUrl + "/v3/transactionalSMS/send"))
+                .timeout(Duration.ofSeconds(20))
+                .header("api-key", apiKey)
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(payload, StandardCharsets.UTF_8))
+                .build();
+
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() / 100 == 2) {
+                String providerId = extractJsonScalarField(response.body(), "messageId");
+                return providerId.isBlank() ? "accepted" : providerId;
+            }
+            log.warn("[sms] Brevo rejected request. status={} body={}", response.statusCode(), safeSnippet(response.body()));
+            throw new IllegalStateException("Brevo rejected SMS request.");
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("SMS request interrupted.", ex);
+        } catch (IOException ex) {
+            throw new IllegalStateException("SMS provider connection failed.", ex);
+        }
+    }
+
+    private String resolveProvider() {
+        String envProvider = getFirstEnv(ENV_PROVIDER);
+        if (!envProvider.isBlank()) {
+            return envProvider.trim().toLowerCase(Locale.ROOT);
+        }
+        String settingProvider = getFirstConfigured(KEYS_PROVIDER);
+        if (!settingProvider.isBlank()) {
+            return settingProvider.trim().toLowerCase(Locale.ROOT);
+        }
+        return PROVIDER_TWILIO;
     }
 
     private boolean isEnabled() {
@@ -181,6 +265,24 @@ public class SettingsSmsSenderAdapter implements SmsSenderAdapter {
             return text.substring(0, 480);
         }
         return text;
+    }
+
+    private String normalizeBrevoSender(String raw) {
+        String sender = raw == null ? "" : raw.trim();
+        if (sender.startsWith("+") && sender.substring(1).matches("\\d{1,15}")) {
+            return sender.substring(1);
+        }
+        return sender;
+    }
+
+    private String normalizeToBrevoRecipient(String destination, String defaultCountryCodeRaw) {
+        String e164 = normalizeToE164(destination, defaultCountryCodeRaw);
+        return e164.startsWith("+") ? e164.substring(1) : e164;
+    }
+
+    private String normalizeBrevoType(String raw) {
+        String normalized = raw == null ? "" : raw.trim().toLowerCase(Locale.ROOT);
+        return "marketing".equals(normalized) ? "marketing" : "transactional";
     }
 
     private String formUrlEncode(Map<String, String> formData) {
@@ -259,21 +361,42 @@ public class SettingsSmsSenderAdapter implements SmsSenderAdapter {
         return value.trim();
     }
 
-    private String extractJsonField(String json, String field) {
+    private String extractJsonScalarField(String json, String field) {
         if (json == null || json.isBlank()) {
             return "";
         }
-        String pattern = "\"" + field + "\":\"";
+        String pattern = "\"" + field + "\":";
         int start = json.indexOf(pattern);
         if (start < 0) {
             return "";
         }
         int valueStart = start + pattern.length();
-        int valueEnd = json.indexOf('"', valueStart);
+        while (valueStart < json.length() && Character.isWhitespace(json.charAt(valueStart))) {
+            valueStart++;
+        }
+        if (valueStart >= json.length()) {
+            return "";
+        }
+        if (json.charAt(valueStart) == '"') {
+            int valueEnd = json.indexOf('"', valueStart + 1);
+            if (valueEnd <= valueStart) {
+                return "";
+            }
+            return json.substring(valueStart + 1, valueEnd).trim();
+        }
+
+        int valueEnd = valueStart;
+        while (valueEnd < json.length()) {
+            char c = json.charAt(valueEnd);
+            if (c == ',' || c == '}' || Character.isWhitespace(c)) {
+                break;
+            }
+            valueEnd++;
+        }
         if (valueEnd <= valueStart) {
             return "";
         }
-        return json.substring(valueStart, valueEnd);
+        return json.substring(valueStart, valueEnd).trim();
     }
 
     private String safeSnippet(String value) {
@@ -294,5 +417,15 @@ public class SettingsSmsSenderAdapter implements SmsSenderAdapter {
         }
         return trimmed;
     }
-}
 
+    private String escapeJson(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\r", "\\r")
+                .replace("\n", "\\n");
+    }
+}

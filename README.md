@@ -137,6 +137,19 @@ Em producao, se URL de banco nao estiver definida, a aplicacao falha no startup.
   - `APP_MAIL_API_PROVIDER` (opcional, ex: `brevo`)
   - `APP_MAIL_API_KEY` (opcional, fallback HTTPS quando SMTP falhar)
   - `APP_MAIL_API_BASE_URL` (opcional, padrao Brevo)
+- SMS:
+  - `APP_SMS_ENABLED`
+  - `APP_SMS_PROVIDER` (`twilio` ou `brevo`)
+  - `APP_SMS_FROM` (remetente/sender)
+  - `APP_SMS_DEFAULT_COUNTRY_CODE` (padrao `55`)
+  - Twilio:
+    - `APP_SMS_TWILIO_ACCOUNT_SID`
+    - `APP_SMS_TWILIO_AUTH_TOKEN`
+    - `APP_SMS_TWILIO_MESSAGING_SERVICE_SID`
+  - Brevo:
+    - `APP_SMS_BREVO_API_KEY` (ou `APP_MAIL_API_KEY`)
+    - `APP_SMS_BREVO_BASE_URL` (opcional, padrao `https://api.brevo.com`)
+    - `APP_SMS_BREVO_TYPE` (opcional: `transactional` ou `marketing`)
 - Legado Firebird:
   - `LEGACY_SYNC_ENABLED=true`
   - `spring.datasource.firebird.jdbc-url`
