@@ -5,6 +5,8 @@ import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepo
 import br.com.redemaisfarma.application.service.ClienteService;
 import br.com.redemaisfarma.application.service.otp.OtpServicePort;
 import br.com.redemaisfarma.domain.Cliente;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -153,9 +155,11 @@ public class AuthOtpActionsController {
      * @param email email destination
      * @param novaSenha new password
      */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record ResetReq(
             @NotBlank String token,
             @NotBlank @Email String email,
+            @JsonAlias({"nova_senha", "novaSenha"})
             @NotBlank
             @Size(min = MIN_PASSWORD_LENGTH, max = MAX_PASSWORD_LENGTH)
             String novaSenha

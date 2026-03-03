@@ -194,7 +194,7 @@
         body: JSON.stringify({
           token: verifiedToken,
           email,
-          novaSenha
+          nova_senha: novaSenha
         })
       });
 
