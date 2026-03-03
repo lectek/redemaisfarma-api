@@ -139,7 +139,7 @@ otpConfirmBtn?.addEventListener('click', async (e) => {
     const resp = await fetch('/api/auth/email-claim/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', [header]: token || '' },
-      body: JSON.stringify({ deliveryId: currentDeliveryId, code, email })
+      body: JSON.stringify({ delivery_id: currentDeliveryId, code, email })
     });
     const data = await resp.json().catch(()=> ({}));
     if (!resp.ok) {
@@ -203,7 +203,7 @@ otpResendBtn?.addEventListener('click', async () => {
     const resp = await fetch('/api/auth/email-claim/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', [header]: token || '' },
-      body: JSON.stringify({ email, previousDeliveryId: currentDeliveryId })
+      body: JSON.stringify({ email, previous_delivery_id: currentDeliveryId })
     });
     const data = await resp.json().catch(()=> ({}));
     if (resp.ok) {

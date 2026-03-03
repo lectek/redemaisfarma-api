@@ -2,6 +2,8 @@ package br.com.redemaisfarma.adapters.inbound.web.controller;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepository;
 import br.com.redemaisfarma.application.service.otp.OtpServicePort;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -110,8 +112,10 @@ public class AuthEmailClaimController {
      * @param email user e-mail
      * @param previousDeliveryId previous delivery id
      */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record StartReq(
             @NotBlank @Email String email,
+            @JsonAlias({"previous_delivery_id", "previousDeliveryId"})
             String previousDeliveryId
     ) {
     }
@@ -143,7 +147,9 @@ public class AuthEmailClaimController {
      * @param code otp code
      * @param email user e-mail
      */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record VerifyReq(
+            @JsonAlias({"delivery_id", "deliveryId"})
             @NotBlank String deliveryId,
             @NotBlank String code,
             @NotBlank @Email String email
