@@ -3,7 +3,6 @@ package br.com.redemaisfarma.adapters.inbound.web.controller;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
 import br.com.redemaisfarma.application.core.settings.AppSettingService;
 import br.com.redemaisfarma.application.service.PasswordResetService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +29,6 @@ class PasswordResetApiControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @MockBean
     private PasswordResetService resetService;
@@ -76,9 +72,7 @@ class PasswordResetApiControllerTest {
     void resetarSenhaReturnsBadRequestForInvalidPayload() throws Exception {
         mockMvc.perform(post(BASE_URL + "/resetar-senha")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                new PasswordResetApiController.ResetarSenhaRequest("", "")
-                        )))
+                        .content("{\"token\":\"\",\"novaSenha\":\"\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value("dados_invalidos"));
     }
@@ -89,9 +83,7 @@ class PasswordResetApiControllerTest {
 
         mockMvc.perform(post(BASE_URL + "/resetar-senha")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                new PasswordResetApiController.ResetarSenhaRequest("token", "NovaSenha#123")
-                        )))
+                        .content("{\"token\":\"token\",\"novaSenha\":\"NovaSenha#123\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value("token_invalido_ou_expirado"));
     }
@@ -102,9 +94,7 @@ class PasswordResetApiControllerTest {
 
         mockMvc.perform(post(BASE_URL + "/resetar-senha")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(
-                                new PasswordResetApiController.ResetarSenhaRequest("token", "NovaSenha#123")
-                        )))
+                        .content("{\"token\":\"token\",\"novaSenha\":\"NovaSenha#123\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("alterada"));
     }
