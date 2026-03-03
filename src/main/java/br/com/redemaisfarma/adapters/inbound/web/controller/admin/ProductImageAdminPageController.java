@@ -71,7 +71,10 @@ public class ProductImageAdminPageController {
         return produtoRepo.findSemMidia(pageable);
     }
 
-    @PostMapping("/api/admin/imagens/{produtoId}/queue")
+    @PostMapping({
+            "/api/admin/imagens/{produtoId}/queue",
+            "/admin/imagens/{produtoId}/queue"
+    })
     @ResponseBody
     public ResponseEntity<?> queue(@PathVariable("produtoId") final String rawProdutoId) {
         final Long produtoId = parseProdutoId(rawProdutoId);
@@ -119,7 +122,10 @@ public class ProductImageAdminPageController {
         ));
     }
 
-    @PostMapping("/api/admin/imagens/{produtoId}/regenerate")
+    @PostMapping({
+            "/api/admin/imagens/{produtoId}/regenerate",
+            "/admin/imagens/{produtoId}/regenerate"
+    })
     @ResponseBody
     public ResponseEntity<?> regenerate(@PathVariable("produtoId") final String rawProdutoId) {
         final Long produtoId = parseProdutoId(rawProdutoId);

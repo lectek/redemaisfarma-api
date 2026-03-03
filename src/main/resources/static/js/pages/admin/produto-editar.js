@@ -219,7 +219,7 @@ async function gerarIA() {
   const id = resolveProdutoId($id?.value);
   if (!id) return toast('ID do produto invalido.', 'err');
 
-  const endpoint = `/api/admin/imagens/${id}/queue`;
+  const endpoint = `/admin/imagens/${id}/queue`;
   $btnGerarIA.disabled = true;
   $status.textContent = 'Solicitando geracao de imagem...';
 

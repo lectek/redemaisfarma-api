@@ -213,8 +213,8 @@
       const id = btn.getAttribute('data-id');
       const action = btn.getAttribute('data-action');
       const endpoint = action === 'regen'
-        ? `/api/admin/imagens/${id}/regenerate`
-        : `/api/admin/imagens/${id}/queue`;
+        ? `/admin/imagens/${id}/regenerate`
+        : `/admin/imagens/${id}/queue`;
 
       btn.disabled = true;
       try{

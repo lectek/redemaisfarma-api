@@ -240,8 +240,8 @@
   async function iaRequest(produtoId, action, btn) {
     if (!produtoId) return;
     const endpoint = action === "regenerate"
-      ? `/api/admin/imagens/${encodeURIComponent(produtoId)}/regenerate`
-      : `/api/admin/imagens/${encodeURIComponent(produtoId)}/queue`;
+      ? `/admin/imagens/${encodeURIComponent(produtoId)}/regenerate`
+      : `/admin/imagens/${encodeURIComponent(produtoId)}/queue`;
 
     btn.disabled = true;
     try {
