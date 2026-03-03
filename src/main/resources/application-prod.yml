@@ -9,10 +9,10 @@ spring:
     encoding: ${SPRING_MESSAGES_ENCODING:UTF-8}
 
   mail:
-    host: ${SPRING_MAIL_HOST}
+    host: ${SPRING_MAIL_HOST:localhost}
     port: ${SPRING_MAIL_PORT:587}
-    username: ${SPRING_MAIL_USERNAME}
-    password: ${SPRING_MAIL_PASSWORD}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
     default-encoding: UTF-8
     test-connection: ${SPRING_MAIL_TEST_CONNECTION:false}
     properties:
@@ -32,9 +32,9 @@ spring:
             protocols: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_PROTOCOLS:TLSv1.3 TLSv1.2}
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL:}
+    username: ${SPRING_DATASOURCE_USERNAME:}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       pool-name: mysqlHikari
@@ -138,12 +138,12 @@ jwt:
 
 app:
   web:
-    base-url: ${APP_WEB_BASE_URL}
+    base-url: ${APP_WEB_BASE_URL:http://localhost:8080}
     cors:
       allowed-origins: ${APP_WEB_CORS_ALLOWED_ORIGENS:}
   mail:
     enabled: ${APP_MAIL_ENABLED:true}
-    from: ${APP_MAIL_FROM}
+    from: ${APP_MAIL_FROM:no-reply@local.redemaisfarma}
     bcc: ${APP_MAIL_BCC:}
     css-url: ${APP_MAIL_CSS_URL:}
     send-timeout-ms: ${APP_MAIL_SEND_TIMEOUT_MS:10000}
