@@ -1,28 +1,29 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.validation.constraints.NotBlank
- *  org.springframework.boot.context.properties.ConfigurationProperties
- *  org.springframework.validation.annotation.Validated
- */
 package br.com.redemaisfarma.adapters.outbound.http.cliente.config;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.AssertTrue;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-@ConfigurationProperties(prefix="integrations.cliente")
+@ConfigurationProperties(prefix = "integrations.cliente")
 public class ClienteClientProperties {
-    @NotBlank
+
+    private boolean enabled;
     private String baseUrl;
     private int maxInMemorySize = 0xA00000;
     private int readTimeoutMs = 10000;
     private int writeTimeoutMs = 10000;
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     public String getBaseUrl() {
-        return this.baseUrl;
+        return baseUrl;
     }
 
     public void setBaseUrl(String baseUrl) {
@@ -30,7 +31,7 @@ public class ClienteClientProperties {
     }
 
     public int getMaxInMemorySize() {
-        return this.maxInMemorySize;
+        return maxInMemorySize;
     }
 
     public void setMaxInMemorySize(int maxInMemorySize) {
@@ -38,7 +39,7 @@ public class ClienteClientProperties {
     }
 
     public int getReadTimeoutMs() {
-        return this.readTimeoutMs;
+        return readTimeoutMs;
     }
 
     public void setReadTimeoutMs(int readTimeoutMs) {
@@ -46,11 +47,15 @@ public class ClienteClientProperties {
     }
 
     public int getWriteTimeoutMs() {
-        return this.writeTimeoutMs;
+        return writeTimeoutMs;
     }
 
     public void setWriteTimeoutMs(int writeTimeoutMs) {
         this.writeTimeoutMs = writeTimeoutMs;
     }
-}
 
+    @AssertTrue(message = "integrations.cliente.baseUrl deve ser informado quando integrations.cliente.enabled=true")
+    public boolean isBaseUrlConfiguredWhenEnabled() {
+        return !enabled || (baseUrl != null && !baseUrl.isBlank());
+    }
+}
