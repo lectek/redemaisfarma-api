@@ -36,6 +36,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -48,6 +49,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -57,6 +59,14 @@ public class ProdutoAdminPageController {
 
     private static final Logger log = LoggerFactory.getLogger(ProdutoAdminPageController.class);
     private static final String CATEGORIA_ESTOQUE_FISICO = "Estoque fisico";
+    private static final String MODEL_ATTR_CATEGORIAS = "categorias";
+    private static final String FLASH_SUCCESS = "success";
+    private static final String FLASH_WARNING = "warning";
+    private static final String PATH_PRODUTOS = "/admin/produtos";
+    private static final String REDIRECT_PRODUTOS = "redirect:" + PATH_PRODUTOS;
+    private static final String REDIRECT_PRODUTOS_BASE = "redirect:/admin/produtos/";
+    private static final String REDIRECT_PRODUTOS_NOVO = "redirect:/admin/produtos/novo";
+    private static final String SUFFIX_EDITAR = "/editar";
     private static final int MAX_PENDING_ALL_LIMIT = 200_000;
     private static final String KEY_ALERTA_ESTOQUE_ENABLED = "app.estoque.alerta.enabled";
     private static final String KEY_ALERTA_ESTOQUE_LIMITE = "app.estoque.alerta.limite";
@@ -84,7 +94,7 @@ public class ProdutoAdminPageController {
         model.addAttribute("produtos", page.getContent());
         model.addAttribute("q", q == null ? "" : q);
         model.addAttribute("categoria", categoria == null ? "" : categoria);
-        model.addAttribute("categorias", this.resolveCategorias());
+        model.addAttribute(MODEL_ATTR_CATEGORIAS, this.resolveCategorias());
         model.addAttribute("legacySyncEnabled", this.catalogSyncProvider.getIfAvailable() != null);
         this.populateEstoqueAlerta(model);
         return "pages/admin/produtos/lista";
@@ -96,7 +106,7 @@ public class ProdutoAdminPageController {
             @RequestParam(name = "categoria", required = false) String categoria,
             @RequestParam(name = "limit", defaultValue = "2000") int limit
     ) {
-        int safeLimit = Math.max(1, Math.min(limit, 50_000));
+        int safeLimit = Math.clamp(limit, 1, 50_000);
         String ts = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"));
         String filename = "produtos-" + ts + ".csv";
         String encoded = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
@@ -105,8 +115,8 @@ public class ProdutoAdminPageController {
         StreamingResponseBody body = os -> {
             try {
                 adminService.writeCsv(os, q, categoria, safeLimit);
-            } catch (Exception e) { // se writeCsv lançar checked
-                throw new RuntimeException("Falha ao gerar CSV", e);
+            } catch (IOException e) { // se writeCsv lancar checked
+                throw new UncheckedIOException("Falha ao gerar CSV", e);
             }
         };
 
@@ -118,6 +128,7 @@ public class ProdutoAdminPageController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
+    @SuppressWarnings("java:S3776")
     public String criarProduto(
             @ModelAttribute("produto") ProdutoEntity produto,
             @RequestParam(value = "imagemFile", required = false) MultipartFile imagemFile,
@@ -143,7 +154,7 @@ public class ProdutoAdminPageController {
             Optional<ProdutoEntity> existente = produtoRepository.findByLegacyId(produto.getLegacyId());
             if (existente.isPresent()) {
                 ra.addFlashAttribute("info", "Produto ja existe no catalogo. Abrindo edicao.");
-                return "redirect:/admin/produtos/" + existente.get().getId() + "/editar";
+                return REDIRECT_PRODUTOS_BASE + existente.get().getId() + SUFFIX_EDITAR;
             }
         }
 
@@ -155,7 +166,7 @@ public class ProdutoAdminPageController {
             Optional<ProdutoEntity> existentePorCodigo = produtoRepository.findByCodigoBarras(barcodeNormalizado);
             if (existentePorCodigo.isPresent()) {
                 ra.addFlashAttribute("info", "Codigo de barras ja cadastrado. Abrindo edicao.");
-                return "redirect:/admin/produtos/" + existentePorCodigo.get().getId() + "/editar";
+                return REDIRECT_PRODUTOS_BASE + existentePorCodigo.get().getId() + SUFFIX_EDITAR;
             }
             produto.setCodigoBarras(barcodeNormalizado);
         }
@@ -203,14 +214,14 @@ public class ProdutoAdminPageController {
         salvo.setPublicadoEm(null);
         produtoRepository.save(salvo);
 
-        ra.addFlashAttribute("success", "Produto criado em IMPORTADO. Valide e publique na edicao.");
-        return "redirect:/admin/produtos/" + salvo.getId() + "/editar";
+        ra.addFlashAttribute(FLASH_SUCCESS, "Produto criado em IMPORTADO. Valide e publique na edicao.");
+        return REDIRECT_PRODUTOS_BASE + salvo.getId() + SUFFIX_EDITAR;
     }
 
     @GetMapping("/novo")
     public String novoProdutoPage(Model model) {
         model.addAttribute("produto", new ProdutoEntity());
-        model.addAttribute("categorias", this.resolveCategorias());
+        model.addAttribute(MODEL_ATTR_CATEGORIAS, this.resolveCategorias());
         model.addAttribute("legacySyncEnabled", this.catalogSyncProvider.getIfAvailable() != null);
         this.populateEstoqueAlerta(model);
         return "pages/admin/produtos/form";
@@ -222,18 +233,19 @@ public class ProdutoAdminPageController {
                                          RedirectAttributes ra) {
         int safeLimit = limite == null
                 ? DEFAULT_ALERTA_ESTOQUE_LIMITE
-                : Math.max(1, Math.min(limite, 100_000));
+                : Math.clamp(limite, 1, 100_000);
         this.appSettingService.upsert(
                 KEY_ALERTA_ESTOQUE_LIMITE,
                 String.valueOf(safeLimit),
                 "Limite de estoque baixo para aviso ao admin"
         );
-        ra.addFlashAttribute("success", "Limite de alerta de estoque atualizado para " + safeLimit + ".");
+        ra.addFlashAttribute(FLASH_SUCCESS, "Limite de alerta de estoque atualizado para " + safeLimit + ".");
         return "redirect:" + this.resolveRedirectPath(redirect);
     }
 
     @GetMapping(value = "/busca-rapida", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
+    @SuppressWarnings({"java:S3776", "java:S135"})
     public List<ProdutoLookupItem> buscaRapida(
             @RequestParam("q") String q,
             @RequestParam(name = "limit", defaultValue = "8") int limit
@@ -243,7 +255,7 @@ public class ProdutoAdminPageController {
             return List.of();
         }
 
-        int safeLimit = Math.max(1, Math.min(limit, 20));
+        int safeLimit = Math.clamp(limit, 1, 20);
         Pageable pageable = PageRequest.of(0, safeLimit, Sort.by(Sort.Direction.ASC, "nome"));
 
         List<ProdutoLookupItem> itens = new ArrayList<>(safeLimit);
@@ -309,7 +321,7 @@ public class ProdutoAdminPageController {
     ) {
         String termo = this.normalizeQuery(q);
         int safePage = Math.max(page, 0);
-        int safeSize = Math.max(1, Math.min(size, 40));
+        int safeSize = Math.clamp(size, 1, 40);
         NaoProntosSlice slice = this.fetchNaoProntosSlice(termo, safePage, safeSize);
         return new ProdutoLookupPage(slice.items(), safePage, safeSize, slice.total(), slice.hasNext());
     }
@@ -335,6 +347,7 @@ public class ProdutoAdminPageController {
     }
 
     @PostMapping("/nao-prontos/publicar-aptos")
+    @SuppressWarnings("java:S3776")
     public String publicarNaoProntosAptosEmLote(
             @RequestParam(name = "q", required = false) String q,
             @RequestParam(name = "validador", required = false) String validador,
@@ -348,18 +361,18 @@ public class ProdutoAdminPageController {
 
         List<Long> ids = pendentes.stream()
                 .map(ProdutoLookupItem::id)
-                .filter(id -> id != null)
+                .filter(Objects::nonNull)
                 .distinct()
                 .toList();
 
         if (ids.isEmpty()) {
-            ra.addFlashAttribute("warning", "Nenhum item do filtro possui cadastro no catalogo para publicacao.");
+            ra.addFlashAttribute(FLASH_WARNING, "Nenhum item do filtro possui cadastro no catalogo para publicacao.");
             return this.redirectNaoProntosTodos(q);
         }
 
         List<ProdutoEntity> entidades = this.produtoRepository.findAllById(ids);
         if (entidades.isEmpty()) {
-            ra.addFlashAttribute("warning", "Nao foi possivel localizar os produtos pendentes no catalogo.");
+            ra.addFlashAttribute(FLASH_WARNING, "Nao foi possivel localizar os produtos pendentes no catalogo.");
             return this.redirectNaoProntosTodos(q);
         }
 
@@ -404,10 +417,10 @@ public class ProdutoAdminPageController {
 
         if (!paraPublicar.isEmpty()) {
             this.produtoRepository.saveAll(paraPublicar);
-            ra.addFlashAttribute("success",
+            ra.addFlashAttribute(FLASH_SUCCESS,
                     "Publicacao em lote concluida: " + paraPublicar.size() + " produto(s) publicado(s).");
         } else {
-            ra.addFlashAttribute("warning",
+            ra.addFlashAttribute(FLASH_WARNING,
                     "Nenhum produto apto para publicar. Corrija imagem, preco e estoque dos pendentes.");
         }
 
@@ -424,13 +437,13 @@ public class ProdutoAdminPageController {
     public String sincronizarEstoqueFisico(RedirectAttributes ra) {
         SincronizacaoCatalogoService syncService = this.catalogSyncProvider.getIfAvailable();
         if (syncService == null) {
-            ra.addFlashAttribute("warning", "Sincronizacao indisponivel. Ative legacy.sync.enabled e configure Firebird.");
-            return "redirect:/admin/produtos";
+            ra.addFlashAttribute(FLASH_WARNING, "Sincronizacao indisponivel. Ative legacy.sync.enabled e configure Firebird.");
+            return REDIRECT_PRODUTOS;
         }
 
         try {
             SincronizacaoCatalogoService.ResumoSync resumo = syncService.sincronizarTudo();
-            ra.addFlashAttribute("success",
+            ra.addFlashAttribute(FLASH_SUCCESS,
                     "Sincronizacao concluida. Lidos: " + resumo.lidos()
                             + ", inseridos: " + resumo.inseridos()
                             + ", atualizados: " + resumo.atualizados()
@@ -440,20 +453,20 @@ public class ProdutoAdminPageController {
             log.error("[admin-produto] falha ao sincronizar estoque fisico", ex);
             ra.addFlashAttribute("error", "Falha ao sincronizar estoque fisico. Verifique as configuracoes do legado.");
         }
-        return "redirect:/admin/produtos";
+        return REDIRECT_PRODUTOS;
     }
 
     @PostMapping("/importar-estoque-fisico")
     public String importarEstoqueFisico(RedirectAttributes ra) {
         EstoqueFisicoImportService importService = this.estoqueImportServiceProvider.getIfAvailable();
         if (importService == null) {
-            ra.addFlashAttribute("warning", "Importacao CSV indisponivel no ambiente atual.");
-            return "redirect:/admin/produtos/novo";
+            ra.addFlashAttribute(FLASH_WARNING, "Importacao CSV indisponivel no ambiente atual.");
+            return REDIRECT_PRODUTOS_NOVO;
         }
 
         try {
             EstoqueFisicoImportService.ImportacaoResumo resumo = importService.importarTodosComoNaoDisponiveis();
-            ra.addFlashAttribute("success",
+            ra.addFlashAttribute(FLASH_SUCCESS,
                     "Importacao concluida: lidos " + resumo.lidos()
                             + ", inseridos " + resumo.inseridos()
                             + ", atualizados " + resumo.atualizados()
@@ -463,19 +476,19 @@ public class ProdutoAdminPageController {
             log.error("[admin-produto] falha ao importar estoque fisico CSV", ex);
             ra.addFlashAttribute("error", "Falha ao importar estoque fisico. Verifique o arquivo CSV.");
         }
-        return "redirect:/admin/produtos/novo";
+        return REDIRECT_PRODUTOS_NOVO;
     }
 
     @GetMapping("/form")
     public String redirectFormToNovo() {
-        return "redirect:/admin/produtos/novo";
+        return REDIRECT_PRODUTOS_NOVO;
     }
 
     @GetMapping("/{id}/editar")
     public String editarProdutoPage(@PathVariable("id") Long id, Model model) {
         model.addAttribute("produtoId", id);
         this.produtoRepository.findById(id).ifPresent(produto -> model.addAttribute("produto", produto));
-        model.addAttribute("categorias", this.resolveCategorias());
+        model.addAttribute(MODEL_ATTR_CATEGORIAS, this.resolveCategorias());
         this.populateEstoqueAlerta(model);
         return "pages/admin/produtos/editar";
     }
@@ -514,10 +527,10 @@ public class ProdutoAdminPageController {
     private String resolveRedirectPath(String redirect) {
         String path = this.normalize(redirect);
         if (!StringUtils.hasText(path)) {
-            return "/admin/produtos";
+            return PATH_PRODUTOS;
         }
-        if (!path.startsWith("/admin/produtos")) {
-            return "/admin/produtos";
+        if (!path.startsWith(PATH_PRODUTOS)) {
+            return PATH_PRODUTOS;
         }
         return path;
     }
@@ -551,9 +564,10 @@ public class ProdutoAdminPageController {
         return this.resolveNaoProntosFromDatabase(q, limit, true);
     }
 
+    @SuppressWarnings({"java:S3776", "java:S135"})
     private List<ProdutoLookupItem> resolveNaoProntosFromDatabase(String q, int limit, boolean fallbackToAllWhenEmpty) {
         String termo = this.normalizeQuery(q);
-        int safeLimit = Math.max(1, Math.min(limit, MAX_PENDING_ALL_LIMIT));
+        int safeLimit = Math.clamp(limit, 1, MAX_PENDING_ALL_LIMIT);
         List<ProdutoLookupItem> itens = new ArrayList<>(Math.min(safeLimit, 2_000));
         Set<String> seen = new HashSet<>();
         int page = 0;
@@ -616,7 +630,7 @@ public class ProdutoAdminPageController {
     private CatalogoSlice fetchCatalogoSlice(String q, int page, int size) {
         String termo = this.normalizeQuery(q);
         int safePage = Math.max(page, 0);
-        int safeSize = Math.max(10, Math.min(size, 200));
+        int safeSize = Math.clamp(size, 10, 200);
         Page<ProdutoEntity> result = this.fetchCatalogoPage(termo, safePage, safeSize);
 
         // Mantem a listagem util para o admin mesmo quando o filtro nao retorna itens.
@@ -676,28 +690,7 @@ public class ProdutoAdminPageController {
         );
     }
 
-    private List<ProdutoLookupItem> resolveNaoProntosFromCsv(String termo, int limit) {
-        EstoqueFisicoCsvService csvService = this.estoqueFisicoCsvServiceProvider.getIfAvailable();
-        if (csvService == null) {
-            return List.of();
-        }
-
-        int safeLimit = Math.max(1, limit);
-        List<EstoqueFisicoCsvService.EstoqueItem> csvItems = csvService.search(termo == null ? "" : termo);
-        if (csvItems.isEmpty()) {
-            return List.of();
-        }
-
-        List<ProdutoLookupItem> mapped = new ArrayList<>(Math.min(csvItems.size(), safeLimit));
-        for (EstoqueFisicoCsvService.EstoqueItem csvItem : csvItems) {
-            if (mapped.size() >= safeLimit) {
-                break;
-            }
-            mapped.add(this.buildPendingFromCsv(csvItem));
-        }
-        return mapped;
-    }
-
+    @SuppressWarnings({"java:S3776", "java:S135"})
     private List<ProdutoLookupItem> mergeNaoProntosWithCsv(String termo,
                                                            List<ProdutoLookupItem> bancoItens,
                                                            int limit) {
@@ -793,6 +786,7 @@ public class ProdutoAdminPageController {
         return "N:" + this.normalize(item.nome()).toLowerCase(Locale.ROOT);
     }
 
+    @SuppressWarnings({"java:S3776", "java:S135"})
     private List<ProdutoLegacyEntity> buscarNoEstoqueFisico(
             ProdutoLegacyRepository legacyRepository,
             String termo,
@@ -875,7 +869,7 @@ public class ProdutoAdminPageController {
                     "ESTOQUE_FISICO",
                     nome,
                     descricao,
-                    "Estoque fisico",
+                    CATEGORIA_ESTOQUE_FISICO,
                     codigo,
                     null,
                     null,
@@ -914,6 +908,7 @@ public class ProdutoAdminPageController {
     }
 
     @Generated
+    @SuppressWarnings("java:S107")
     public ProdutoAdminPageController(ProdutoAdminService adminService,
                                       ProdutoRepository produtoRepository,
                                       ProdutoCategoriaRepository categoriaRepository,

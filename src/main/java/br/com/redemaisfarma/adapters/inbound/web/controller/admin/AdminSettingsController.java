@@ -36,11 +36,6 @@ public class AdminSettingsController {
     private static final int PAGE_SIZE_MIN = 1;
 
     /**
-     * Default page size in listing.
-     */
-    private static final int PAGE_SIZE_DEFAULT = 20;
-
-    /**
      * Success flash key.
      */
     private static final String SUCCESS_ATTR = "success";

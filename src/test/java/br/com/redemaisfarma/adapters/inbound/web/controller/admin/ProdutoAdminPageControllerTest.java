@@ -20,9 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import java.util.ArrayList;
 import java.math.BigDecimal;
 import java.util.List;
-import org.mockito.ArgumentCaptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +32,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCate
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
@@ -202,7 +203,8 @@ class ProdutoAdminPageControllerTest {
         Page<ProdutoEntity> page1 = new PageImpl<>(List.of(produto1), PageRequest.of(0, 1), 2);
         Page<ProdutoEntity> page2 = new PageImpl<>(List.of(produto2), PageRequest.of(1, 1), 2);
         when(produtoRepository.searchNaoDisponiveisByCategoria(any(), any(), any(Pageable.class)))
-                .thenReturn(page1, page2);
+                .thenReturn(page1)
+                .thenReturn(page2);
 
         mockMvc.perform(get("/admin/produtos/nao-prontos")
                         .param("q", "nim")
@@ -390,17 +392,17 @@ class ProdutoAdminPageControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/produtos/nao-prontos/todos"));
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<ProdutoEntity>> captor = ArgumentCaptor.forClass((Class) List.class);
-        verify(produtoRepository).saveAll(captor.capture());
-
-        List<ProdutoEntity> publicados = captor.getValue();
-        assertThat(publicados).hasSize(1);
-        ProdutoEntity publicado = publicados.get(0);
-        assertThat(publicado.getId()).isEqualTo(1L);
-        assertThat(publicado.getStatus()).isEqualTo(ProdutoStatus.PUBLICADO);
-        assertThat(publicado.getDisponivel()).isTrue();
-        assertThat(publicado.getPublicadoEm()).isNotNull();
+        verify(produtoRepository).saveAll(argThat((Iterable<ProdutoEntity> publicados) -> {
+            List<ProdutoEntity> lista = new ArrayList<>();
+            publicados.forEach(lista::add);
+            assertThat(lista).hasSize(1);
+            ProdutoEntity publicado = lista.get(0);
+            assertThat(publicado.getId()).isEqualTo(1L);
+            assertThat(publicado.getStatus()).isEqualTo(ProdutoStatus.PUBLICADO);
+            assertThat(publicado.getDisponivel()).isTrue();
+            assertThat(publicado.getPublicadoEm()).isNotNull();
+            return true;
+        }));
     }
 
     @Test
