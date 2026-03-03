@@ -1,15 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.validation.constraints.Email
- *  jakarta.validation.constraints.NotBlank
- *  org.springframework.http.ResponseEntity
- *  org.springframework.web.bind.annotation.PostMapping
- *  org.springframework.web.bind.annotation.RequestMapping
- *  org.springframework.web.bind.annotation.RequestParam
- *  org.springframework.web.bind.annotation.RestController
- */
 package br.com.redemaisfarma.adapters.inbound.web.controller;
 
 import br.com.redemaisfarma.application.service.DevProvisioningService;
@@ -23,24 +11,66 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value={"/api/dev/provision"})
-public class DevProvisioningController {
+@RequestMapping("/api/dev/provision")
+public final class DevProvisioningController {
+
+    /**
+     * Service responsible for dev provisioning flow.
+     */
     private final DevProvisioningService service;
 
-    public DevProvisioningController(DevProvisioningService service) {
-        this.service = service;
+    /**
+     * Creates controller with provisioning service dependency.
+     *
+     * @param provisioningService dev provisioning service
+     */
+    public DevProvisioningController(
+            final DevProvisioningService provisioningService
+    ) {
+        this.service = provisioningService;
     }
 
-    @PostMapping(value={"/start"})
-    public ResponseEntity<Map<String, Object>> start(@RequestParam @Email String email) {
-        String deliveryId = this.service.start(email);
-        return ResponseEntity.ok(Map.of("status", "sent", "deliveryId", deliveryId, "destination", email));
+    /**
+     * Starts provisioning by sending a token to destination email.
+     *
+     * @param email destination email
+     * @return provisioning start payload
+     */
+    @PostMapping("/start")
+    public ResponseEntity<Map<String, Object>> start(
+            @RequestParam("email") @Email final String email
+    ) {
+        final String deliveryId = service.start(email);
+        return ResponseEntity.ok(Map.of(
+                "status",
+                "sent",
+                "deliveryId",
+                deliveryId,
+                "destination",
+                email
+        ));
     }
 
-    @PostMapping(value={"/verify"})
-    public ResponseEntity<Map<String, Object>> verify(@RequestParam(value="token") @NotBlank String token, @RequestParam(value="password", required=false) String password, @RequestParam(value="cpfIfNew", required=false) String cpfIfNew, @RequestParam(value="nomeIfNew", required=false) String nomeIfNew) {
-        this.service.verifyByToken(token, password, cpfIfNew, nomeIfNew);
+    /**
+     * Verifies provisioning token and enables dev access.
+     *
+     * @param token verification token
+     * @param password optional password for new account
+     * @param cpfIfNew optional CPF for new account
+     * @param nomeIfNew optional name for new account
+     * @return provisioning completion payload
+     */
+    @PostMapping("/verify")
+    public ResponseEntity<Map<String, Object>> verify(
+            @RequestParam("token") @NotBlank final String token,
+            @RequestParam(value = "password", required = false)
+            final String password,
+            @RequestParam(value = "cpfIfNew", required = false)
+            final String cpfIfNew,
+            @RequestParam(value = "nomeIfNew", required = false)
+            final String nomeIfNew
+    ) {
+        service.verifyByToken(token, password, cpfIfNew, nomeIfNew);
         return ResponseEntity.ok(Map.of("status", "dev-enabled"));
     }
 }
-

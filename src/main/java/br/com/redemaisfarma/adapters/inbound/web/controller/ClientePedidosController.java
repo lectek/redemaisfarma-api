@@ -20,72 +20,165 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/cliente/pedidos")
-public class ClientePedidosController {
+public final class ClientePedidosController {
 
+    /**
+     * Repository used to fetch customer orders.
+     */
     private final PedidoRepository pedidoRepository;
+
+    /**
+     * Repository used to resolve authenticated user data.
+     */
     private final UsuarioRepository usuarioRepository;
+
+    /**
+     * Service used to map payment method ids to labels.
+     */
     private final PaymentMethodService paymentMethodService;
 
-    public ClientePedidosController(PedidoRepository pedidoRepository,
-                                    UsuarioRepository usuarioRepository,
-                                    PaymentMethodService paymentMethodService) {
-        this.pedidoRepository = pedidoRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.paymentMethodService = paymentMethodService;
+    /**
+     * Builds the controller with required dependencies.
+     *
+     * @param pedidoRepo order repository
+     * @param usuarioRepo user repository
+     * @param paymentService payment method service
+     */
+    public ClientePedidosController(
+            final PedidoRepository pedidoRepo,
+            final UsuarioRepository usuarioRepo,
+            final PaymentMethodService paymentService
+    ) {
+        this.pedidoRepository = pedidoRepo;
+        this.usuarioRepository = usuarioRepo;
+        this.paymentMethodService = paymentService;
     }
 
+    /**
+     * Lists all orders for the authenticated customer.
+     *
+     * @param model model used by thymeleaf
+     * @param auth authenticated principal
+     * @return customer order list page
+     */
     @GetMapping
-    public String listar(Model model, Authentication auth) {
-        ClienteIdentidade identidade = resolveIdentidade(auth);
+    public String listar(final Model model, final Authentication auth) {
+        final ClienteIdentidade identidade = resolveIdentidade(auth);
         if (identidade == null) {
             model.addAttribute("pedidos", List.of());
             return "pages/cliente/pedidos/lista";
         }
-        List<PedidoResumoView> pedidos = pedidoRepository
+        final List<PedidoResumoView> pedidos = pedidoRepository
                 .listarPorCliente(identidade.email(), identidade.cpf())
                 .stream()
-                .map(p -> PedidoResumoView.from(p, paymentMethodService))
+                .map(pedido ->
+                        PedidoResumoView.from(pedido, paymentMethodService)
+                )
                 .toList();
         model.addAttribute("pedidos", pedidos);
         return "pages/cliente/pedidos/lista";
     }
 
+    /**
+     * Shows one order detail page for the authenticated customer.
+     *
+     * @param id order identifier
+     * @param model model used by thymeleaf
+     * @param auth authenticated principal
+     * @param redirectAttributes redirect flash attributes
+     * @return detail page or redirect to order list
+     */
     @GetMapping("/{id}")
-    public String detalhe(@PathVariable Long id, Model model, Authentication auth, RedirectAttributes ra) {
-        ClienteIdentidade identidade = resolveIdentidade(auth);
+    public String detalhe(
+            @PathVariable("id") final Long id,
+            final Model model,
+            final Authentication auth,
+            final RedirectAttributes redirectAttributes
+    ) {
+        final ClienteIdentidade identidade = resolveIdentidade(auth);
         if (identidade == null) {
-            ra.addFlashAttribute("errorMessage", "Usuario nao encontrado.");
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Usuario nao encontrado."
+            );
             return "redirect:/cliente/pedidos";
         }
-        Optional<PedidoEntity> pedido = pedidoRepository.buscarDetalhePorCliente(id, identidade.email(), identidade.cpf());
+        final Optional<PedidoEntity> pedido =
+                pedidoRepository.buscarDetalhePorCliente(
+                        id,
+                        identidade.email(),
+                        identidade.cpf()
+                );
         if (pedido.isEmpty()) {
-            ra.addFlashAttribute("errorMessage", "Pedido nao encontrado.");
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Pedido nao encontrado."
+            );
             return "redirect:/cliente/pedidos";
         }
-        model.addAttribute("pedido", PedidoDetalheView.from(pedido.get(), paymentMethodService));
+        model.addAttribute(
+                "pedido",
+                PedidoDetalheView.from(pedido.get(), paymentMethodService)
+        );
         return "pages/cliente/pedidos/detalhe";
     }
 
-    private Optional<UsuarioEntity> localizarUsuario(Authentication auth) {
-        if (auth == null || auth.getName() == null) return Optional.empty();
+    /**
+     * Resolves the authenticated user from e-mail or CPF principal.
+     *
+     * @param auth authenticated principal
+     * @return user when found
+     */
+    private Optional<UsuarioEntity> localizarUsuario(
+            final Authentication auth
+    ) {
+        if (auth == null || auth.getName() == null) {
+            return Optional.empty();
+        }
         return usuarioRepository.findByEmailOrCpf(auth.getName());
     }
 
-    private ClienteIdentidade resolveIdentidade(Authentication auth) {
-        if (auth == null || auth.getName() == null || auth.getName().isBlank()) {
+    /**
+     * Resolves e-mail/cpf identity used to filter customer orders.
+     *
+     * @param auth authenticated principal
+     * @return identity object or null when authentication is invalid
+     */
+    private ClienteIdentidade resolveIdentidade(final Authentication auth) {
+        if (auth == null
+                || auth.getName() == null
+                || auth.getName().isBlank()) {
             return null;
         }
-        Optional<UsuarioEntity> usuario = localizarUsuario(auth);
+        final Optional<UsuarioEntity> usuario = localizarUsuario(auth);
         if (usuario.isPresent()) {
-            UsuarioEntity u = usuario.get();
-            return new ClienteIdentidade(u.getEmail(), u.getCpf());
+            final UsuarioEntity usuarioAtual = usuario.get();
+            return new ClienteIdentidade(
+                    usuarioAtual.getEmail(),
+                    usuarioAtual.getCpf()
+            );
         }
-        String principal = auth.getName().trim();
+        final String principal = auth.getName().trim();
         return new ClienteIdentidade(principal, principal);
     }
 
-    private record ClienteIdentidade(String email, String cpf) {}
+    /**
+     * Lightweight identity tuple used in customer order queries.
+     *
+     * @param email user e-mail
+     * @param cpf user cpf
+     */
+    private record ClienteIdentidade(String email, String cpf) { }
 
+    /**
+     * List view payload for customer order page.
+     *
+     * @param id order id
+     * @param data order date
+     * @param total order total
+     * @param status order status text
+     * @param metodoPagamento payment method label
+     */
     public record PedidoResumoView(
             Long id,
             LocalDateTime data,
@@ -93,29 +186,71 @@ public class ClientePedidosController {
             String status,
             String metodoPagamento
     ) {
-        static PedidoResumoView from(PedidoEntity p, PaymentMethodService paymentMethodService) {
-            String metodo = resolveMetodoLabel(p, paymentMethodService);
+        /**
+         * Builds list view payload from entity.
+         *
+         * @param pedido order entity
+         * @param paymentService payment method service
+         * @return summarized order data
+         */
+        static PedidoResumoView from(
+                final PedidoEntity pedido,
+                final PaymentMethodService paymentService
+        ) {
+            final String metodo = resolveMetodoLabel(pedido, paymentService);
+            final String statusAtual = pedido.getStatus() != null
+                    ? pedido.getStatus().name()
+                    : "DESCONHECIDO";
             return new PedidoResumoView(
-                    p.getId(),
-                    p.getData(),
-                    p.getTotal(),
-                    p.getStatus() != null ? p.getStatus().name() : "DESCONHECIDO",
+                    pedido.getId(),
+                    pedido.getData(),
+                    pedido.getTotal(),
+                    statusAtual,
                     metodo
             );
         }
     }
 
+    /**
+     * Item view payload for order detail page.
+     *
+     * @param produto product name
+     * @param quantidade item quantity
+     * @param subtotal item subtotal
+     */
     public record ItemView(
             String produto,
             Integer quantidade,
             BigDecimal subtotal
     ) {
-        static ItemView from(ItemPedidoEntity i) {
-            String nome = i.getProduto() != null ? i.getProduto().getNome() : "Produto";
-            return new ItemView(nome, i.getQuantidade(), i.getSubtotal());
+        /**
+         * Builds item view payload from order item entity.
+         *
+         * @param item order item entity
+         * @return item view data
+         */
+        static ItemView from(final ItemPedidoEntity item) {
+            final String nome = item.getProduto() != null
+                    ? item.getProduto().getNome()
+                    : "Produto";
+            return new ItemView(
+                    nome,
+                    item.getQuantidade(),
+                    item.getSubtotal()
+            );
         }
     }
 
+    /**
+     * Detail view payload for customer order detail page.
+     *
+     * @param id order id
+     * @param data order date
+     * @param total order total
+     * @param status order status text
+     * @param metodoPagamento payment method label
+     * @param itens order items
+     */
     public record PedidoDetalheView(
             Long id,
             LocalDateTime data,
@@ -124,26 +259,52 @@ public class ClientePedidosController {
             String metodoPagamento,
             List<ItemView> itens
     ) {
-        static PedidoDetalheView from(PedidoEntity p, PaymentMethodService paymentMethodService) {
-            String metodo = resolveMetodoLabel(p, paymentMethodService);
-            List<ItemView> itens = p.getItens() == null
+        /**
+         * Builds detail view payload from order entity.
+         *
+         * @param pedido order entity
+         * @param paymentService payment method service
+         * @return detail view data
+         */
+        static PedidoDetalheView from(
+                final PedidoEntity pedido,
+                final PaymentMethodService paymentService
+        ) {
+            final String metodo = resolveMetodoLabel(pedido, paymentService);
+            final List<ItemView> itens = pedido.getItens() == null
                     ? List.of()
-                    : p.getItens().stream().map(ItemView::from).toList();
+                    : pedido.getItens().stream().map(ItemView::from).toList();
+            final String statusAtual = pedido.getStatus() != null
+                    ? pedido.getStatus().name()
+                    : "DESCONHECIDO";
             return new PedidoDetalheView(
-                    p.getId(),
-                    p.getData(),
-                    p.getTotal(),
-                    p.getStatus() != null ? p.getStatus().name() : "DESCONHECIDO",
+                    pedido.getId(),
+                    pedido.getData(),
+                    pedido.getTotal(),
+                    statusAtual,
                     metodo,
                     itens
             );
         }
     }
 
-    private static String resolveMetodoLabel(PedidoEntity p, PaymentMethodService paymentMethodService) {
-        if (p.getMetodoPagamento() != null && !p.getMetodoPagamento().isBlank()) {
-            return paymentMethodService.resolveLabel(p.getMetodoPagamento());
+    /**
+     * Resolves payment method label for order list/detail views.
+     *
+     * @param pedido order entity
+     * @param paymentService payment method service
+     * @return resolved label
+     */
+    private static String resolveMetodoLabel(
+            final PedidoEntity pedido,
+            final PaymentMethodService paymentService
+    ) {
+        if (pedido.getMetodoPagamento() != null
+                && !pedido.getMetodoPagamento().isBlank()) {
+            return paymentService.resolveLabel(pedido.getMetodoPagamento());
         }
-        return p.getTipoPagamento() != null ? p.getTipoPagamento().name() : "DESCONHECIDO";
+        return pedido.getTipoPagamento() != null
+                ? pedido.getTipoPagamento().name()
+                : "DESCONHECIDO";
     }
 }

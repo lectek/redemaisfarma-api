@@ -18,9 +18,12 @@ body.admin-page {
   --layout-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
 
   /* helpers */
+  --layout-gutter: clamp(16px, 2vw, 24px);
   --header-h: 64px;
+  --site-header-height: var(--header-h);
+  --page-pad: var(--layout-gutter);
   --container-w: 1280px;
-  --safe-pad: clamp(12px, 2vw, 24px);
+  --safe-pad: var(--layout-gutter);
   --elev-1: 0 2px 6px rgba(0,0,0,.08);
   --elev-2: 0 10px 30px rgba(0,0,0,.08);
   --elev-3: 0 16px 40px rgba(0,0,0,.10);
@@ -96,7 +99,15 @@ body.admin-page {
   background-color: color-mix(in oklab, var(--layout-dark), #000 15%);
 }
 
-.admin-page .header-inner { width: 100%; display: flex; align-items: center; gap: 12px; }
+.admin-page .header-inner {
+  width: 100%;
+  max-width: var(--container-w);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
 .admin-page .logo { height: 48px; display: inline-flex; align-items: center; }
 .admin-page .logo img { max-height: 40px; }
 .site-header .logo { height: 48px; display: inline-flex; align-items: center; }
@@ -163,6 +174,22 @@ body.admin-page {
   transform: translateY(-1px);
 }
 
+/* Mantem os dois toggles alinhados a direita no mobile */
+.admin-page .sidebar-toggle {
+  margin-left: auto;
+}
+
+.admin-page .nav-toggle,
+.admin-page .sidebar-toggle {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* hambúrguer */
 .admin-page .menu-button .menu-icon,
 .admin-page .nav-toggle .menu-icon,
@@ -185,9 +212,9 @@ body.admin-page {
 .admin-page .menu-button .menu-icon::before { top: -7px; }
 .admin-page .menu-button .menu-icon::after  { top: 7px; }
 
-html.nav-open .menu-icon { background: transparent; }
-html.nav-open .menu-icon::before { transform: rotate(45deg) translate(3px,3px); }
-html.nav-open .menu-icon::after  { transform: rotate(-45deg) translate(3px,-3px); }
+html.nav-open .admin-page .nav-toggle .menu-icon { background: transparent; }
+html.nav-open .admin-page .nav-toggle .menu-icon::before { transform: rotate(45deg) translate(3px,3px); }
+html.nav-open .admin-page .nav-toggle .menu-icon::after  { transform: rotate(-45deg) translate(3px,-3px); }
 
 /* NAV MOBILE */
 .admin-page .primary-nav {
@@ -208,6 +235,28 @@ html.nav-open body.admin-page .primary-nav {
   opacity: 1;
   transform: none;
   pointer-events: auto;
+}
+
+@media (min-width: 1024px) {
+  .admin-page .site-header {
+    padding-inline: 0;
+  }
+
+  .admin-page .header-inner {
+    min-height: var(--header-h);
+    padding-inline: var(--page-pad);
+  }
+
+  .admin-page .layout--with-sidebar {
+    width: min(100%, calc(var(--container-w) + (var(--page-pad) * 2)));
+    margin-inline: auto;
+    padding-inline: var(--page-pad);
+  }
+
+  .admin-page .layout--with-sidebar .sidebar {
+    top: calc(var(--header-h) + 12px);
+    max-height: calc(100dvh - (var(--header-h) + 24px));
+  }
 }
 
 

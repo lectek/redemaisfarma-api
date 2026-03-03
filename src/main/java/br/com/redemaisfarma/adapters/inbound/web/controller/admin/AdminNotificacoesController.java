@@ -26,144 +26,319 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/admin/notificacoes")
 @Validated
-public class AdminNotificacoesController {
+public final class AdminNotificacoesController {
 
-    private static final String KEY_ALERTA_ESTOQUE_ENABLED = "app.estoque.alerta.enabled";
-    private static final String KEY_ALERTA_ESTOQUE_LIMITE = "app.estoque.alerta.limite";
+    /**
+     * Settings key that enables low stock alerts.
+     */
+    private static final String KEY_ALERTA_ESTOQUE_ENABLED =
+            "app.estoque.alerta.enabled";
+
+    /**
+     * Settings key for low stock threshold.
+     */
+    private static final String KEY_ALERTA_ESTOQUE_LIMITE =
+            "app.estoque.alerta.limite";
+
+    /**
+     * Default low stock threshold.
+     */
     private static final int DEFAULT_ALERTA_ESTOQUE_LIMITE = 10;
 
+    /**
+     * Minimum allowed low stock threshold.
+     */
+    private static final int MIN_ALERTA_ESTOQUE_LIMITE = 1;
+
+    /**
+     * Notification type for low stock messages.
+     */
+    private static final String TIPO_ESTOQUE = "ESTOQUE";
+
+    /**
+     * Max length for notification type.
+     */
+    private static final int MAX_TIPO_LEN = 40;
+
+    /**
+     * Max length for notification title.
+     */
+    private static final int MAX_TITULO_LEN = 120;
+
+    /**
+     * Max length for notification message.
+     */
+    private static final int MAX_MENSAGEM_LEN = 500;
+
+    /**
+     * Notification repository.
+     */
     private final ClienteNotificacaoRepository notificacaoRepository;
+
+    /**
+     * User repository.
+     */
     private final UsuarioRepository usuarioRepository;
+
+    /**
+     * Product repository.
+     */
     private final ProdutoRepository produtoRepository;
+
+    /**
+     * App settings service.
+     */
     private final AppSettingService appSettingService;
 
-    public AdminNotificacoesController(ClienteNotificacaoRepository notificacaoRepository,
-                                       UsuarioRepository usuarioRepository,
-                                       ProdutoRepository produtoRepository,
-                                       AppSettingService appSettingService) {
-        this.notificacaoRepository = notificacaoRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.produtoRepository = produtoRepository;
-        this.appSettingService = appSettingService;
+    /**
+     * Creates controller with dependencies.
+     *
+     * @param notificacaoRepo notification repository
+     * @param usuarioRepo user repository
+     * @param produtoRepo product repository
+     * @param settingsService settings service
+     */
+    public AdminNotificacoesController(
+            final ClienteNotificacaoRepository notificacaoRepo,
+            final UsuarioRepository usuarioRepo,
+            final ProdutoRepository produtoRepo,
+            final AppSettingService settingsService
+    ) {
+        this.notificacaoRepository = notificacaoRepo;
+        this.usuarioRepository = usuarioRepo;
+        this.produtoRepository = produtoRepo;
+        this.appSettingService = settingsService;
     }
 
+    /**
+     * Renders notifications page.
+     *
+     * @return notifications view
+     */
     @GetMapping
     public String page() {
         return "pages/admin/notificacoes";
     }
 
+    /**
+     * Sends notification to specific users.
+     *
+     * @param req request payload
+     * @return empty 200 response
+     */
     @PostMapping("/api/enviar")
-    public ResponseEntity<?> enviar(@Valid @RequestBody AdminNotificacaoRequest req) {
-        List<ClienteNotificacaoEntity> criadas = new ArrayList<>();
+    public ResponseEntity<?> enviar(
+            @Valid @RequestBody final AdminNotificacaoRequest req
+    ) {
+        final List<ClienteNotificacaoEntity> criadas = new ArrayList<>();
         for (Long userId : req.usuarioIds()) {
-            Optional<UsuarioEntity> usuario = usuarioRepository.findById(userId);
-            if (usuario.isEmpty()) continue;
-            ClienteNotificacaoEntity notificacao = new ClienteNotificacaoEntity();
-            notificacao.setUsuario(usuario.get());
-            notificacao.setTipo(req.tipo());
-            notificacao.setTitulo(req.titulo());
-            notificacao.setMensagem(req.mensagem());
-            criadas.add(notificacao);
+            final Optional<UsuarioEntity> usuario = usuarioRepository
+                    .findById(userId);
+            if (usuario.isEmpty()) {
+                continue;
+            }
+            criadas.add(createNotification(
+                    usuario.get(),
+                    req.tipo(),
+                    req.titulo(),
+                    req.mensagem()
+            ));
         }
-        if (!criadas.isEmpty()) {
-            notificacaoRepository.saveAll(criadas);
-        }
+        saveAllIfAny(criadas);
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Sends notification to all users.
+     *
+     * @param req request payload
+     * @return empty 200 response
+     */
     @PostMapping("/api/enviar/todos")
-    public ResponseEntity<?> enviarTodos(@Valid @RequestBody AdminNotificacaoBroadcastRequest req) {
-        List<UsuarioEntity> usuarios = usuarioRepository.findAll();
-        List<ClienteNotificacaoEntity> criadas = new ArrayList<>();
+    public ResponseEntity<?> enviarTodos(
+            @Valid @RequestBody final AdminNotificacaoBroadcastRequest req
+    ) {
+        final List<UsuarioEntity> usuarios = usuarioRepository.findAll();
+        final List<ClienteNotificacaoEntity> criadas = new ArrayList<>();
         for (UsuarioEntity usuario : usuarios) {
-            ClienteNotificacaoEntity notificacao = new ClienteNotificacaoEntity();
-            notificacao.setUsuario(usuario);
-            notificacao.setTipo(req.tipo());
-            notificacao.setTitulo(req.titulo());
-            notificacao.setMensagem(req.mensagem());
-            criadas.add(notificacao);
+            criadas.add(createNotification(
+                    usuario,
+                    req.tipo(),
+                    req.titulo(),
+                    req.mensagem()
+            ));
         }
-        if (!criadas.isEmpty()) {
-            notificacaoRepository.saveAll(criadas);
-        }
+        saveAllIfAny(criadas);
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Sends notification to one user.
+     *
+     * @param id user id
+     * @param req request payload
+     * @return 404 when user is not found, 200 otherwise
+     */
     @PostMapping("/api/enviar/usuario/{id}")
-    public ResponseEntity<?> enviarParaUsuario(@PathVariable("id") Long id,
-                                               @Valid @RequestBody AdminNotificacaoSingleRequest req) {
-        Optional<UsuarioEntity> usuario = usuarioRepository.findById(id);
+    public ResponseEntity<?> enviarParaUsuario(
+            @PathVariable("id") final Long id,
+            @Valid @RequestBody final AdminNotificacaoSingleRequest req
+    ) {
+        final Optional<UsuarioEntity> usuario = usuarioRepository.findById(id);
         if (usuario.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        ClienteNotificacaoEntity notificacao = new ClienteNotificacaoEntity();
-        notificacao.setUsuario(usuario.get());
-        notificacao.setTipo(req.tipo());
-        notificacao.setTitulo(req.titulo());
-        notificacao.setMensagem(req.mensagem());
+        final ClienteNotificacaoEntity notificacao = createNotification(
+                usuario.get(),
+                req.tipo(),
+                req.titulo(),
+                req.mensagem()
+        );
         notificacaoRepository.save(notificacao);
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Sends low stock notification to admin users.
+     *
+     * @return 204 when there is nothing to notify, 200 otherwise
+     */
     @PostMapping("/api/enviar/estoque-baixo")
     public ResponseEntity<?> enviarEstoqueBaixo() {
-        if (!this.appSettingService.getBoolean(KEY_ALERTA_ESTOQUE_ENABLED, true)) {
+        if (!appSettingService.getBoolean(KEY_ALERTA_ESTOQUE_ENABLED, true)) {
             return ResponseEntity.noContent().build();
         }
 
-        int limite = Math.max(1, this.appSettingService.getInt(KEY_ALERTA_ESTOQUE_LIMITE, DEFAULT_ALERTA_ESTOQUE_LIMITE));
-        int qtdBaixo = produtoRepository.findComEstoqueBaixo(limite).size();
+        final int limite = Math.max(
+                MIN_ALERTA_ESTOQUE_LIMITE,
+                appSettingService.getInt(
+                        KEY_ALERTA_ESTOQUE_LIMITE,
+                        DEFAULT_ALERTA_ESTOQUE_LIMITE
+                )
+        );
+        final int qtdBaixo = produtoRepository
+                .findComEstoqueBaixo(limite)
+                .size();
         if (qtdBaixo <= 0) {
             return ResponseEntity.noContent().build();
         }
-        List<UsuarioEntity> usuarios = usuarioRepository.findAll().stream()
+
+        final List<UsuarioEntity> usuarios = usuarioRepository.findAll()
+                .stream()
                 .filter(this::isAdminUser)
                 .toList();
         if (usuarios.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
-        List<ClienteNotificacaoEntity> criadas = new ArrayList<>();
-        String titulo = "Estoque baixo";
-        String mensagem = qtdBaixo + " produtos com estoque em " + limite + " unidades ou menos.";
+        final List<ClienteNotificacaoEntity> criadas = new ArrayList<>();
+        final String titulo = "Estoque baixo";
+        final String mensagem = qtdBaixo
+                + " produtos com estoque em "
+                + limite
+                + " unidades ou menos.";
         for (UsuarioEntity usuario : usuarios) {
-            ClienteNotificacaoEntity notificacao = new ClienteNotificacaoEntity();
-            notificacao.setUsuario(usuario);
-            notificacao.setTipo("ESTOQUE");
-            notificacao.setTitulo(titulo);
-            notificacao.setMensagem(mensagem);
-            criadas.add(notificacao);
+            criadas.add(createNotification(
+                    usuario,
+                    TIPO_ESTOQUE,
+                    titulo,
+                    mensagem
+            ));
         }
-        if (!criadas.isEmpty()) {
-            notificacaoRepository.saveAll(criadas);
-        }
+        saveAllIfAny(criadas);
         return ResponseEntity.ok().build();
     }
 
-    private boolean isAdminUser(UsuarioEntity usuario) {
+    /**
+     * Creates one notification entity.
+     *
+     * @param usuario user entity
+     * @param tipo notification type
+     * @param titulo notification title
+     * @param mensagem notification message
+     * @return notification entity
+     */
+    private ClienteNotificacaoEntity createNotification(
+            final UsuarioEntity usuario,
+            final String tipo,
+            final String titulo,
+            final String mensagem
+    ) {
+        final ClienteNotificacaoEntity notificacao =
+                new ClienteNotificacaoEntity();
+        notificacao.setUsuario(usuario);
+        notificacao.setTipo(tipo);
+        notificacao.setTitulo(titulo);
+        notificacao.setMensagem(mensagem);
+        return notificacao;
+    }
+
+    /**
+     * Persists notification batch when list is not empty.
+     *
+     * @param criadas created notifications
+     */
+    private void saveAllIfAny(final List<ClienteNotificacaoEntity> criadas) {
+        if (!criadas.isEmpty()) {
+            notificacaoRepository.saveAll(criadas);
+        }
+    }
+
+    /**
+     * Checks if user has admin role.
+     *
+     * @param usuario user entity
+     * @return true when user is admin
+     */
+    private boolean isAdminUser(final UsuarioEntity usuario) {
         if (usuario == null) {
             return false;
         }
-        Set<String> roles = usuario.getRoleNames();
+        final Set<String> roles = usuario.getRoleNames();
         return roles.contains("ADMIN") || roles.contains("ROLE_ADMIN");
     }
 
+    /**
+     * Request payload for selected users notification.
+     *
+     * @param usuarioIds user ids
+     * @param tipo notification type
+     * @param titulo notification title
+     * @param mensagem notification message
+     */
     public record AdminNotificacaoRequest(
             @NotEmpty List<Long> usuarioIds,
-            @NotBlank @Size(max = 40) String tipo,
-            @NotBlank @Size(max = 120) String titulo,
-            @NotBlank @Size(max = 500) String mensagem
-    ) {}
+            @NotBlank @Size(max = MAX_TIPO_LEN) String tipo,
+            @NotBlank @Size(max = MAX_TITULO_LEN) String titulo,
+            @NotBlank @Size(max = MAX_MENSAGEM_LEN) String mensagem
+    ) {
+    }
 
+    /**
+     * Request payload for broadcast notification.
+     *
+     * @param tipo notification type
+     * @param titulo notification title
+     * @param mensagem notification message
+     */
     public record AdminNotificacaoBroadcastRequest(
-            @NotBlank @Size(max = 40) String tipo,
-            @NotBlank @Size(max = 120) String titulo,
-            @NotBlank @Size(max = 500) String mensagem
-    ) {}
+            @NotBlank @Size(max = MAX_TIPO_LEN) String tipo,
+            @NotBlank @Size(max = MAX_TITULO_LEN) String titulo,
+            @NotBlank @Size(max = MAX_MENSAGEM_LEN) String mensagem
+    ) {
+    }
 
+    /**
+     * Request payload for single user notification.
+     *
+     * @param tipo notification type
+     * @param titulo notification title
+     * @param mensagem notification message
+     */
     public record AdminNotificacaoSingleRequest(
-            @NotBlank @Size(max = 40) String tipo,
-            @NotBlank @Size(max = 120) String titulo,
-            @NotBlank @Size(max = 500) String mensagem
-    ) {}
+            @NotBlank @Size(max = MAX_TIPO_LEN) String tipo,
+            @NotBlank @Size(max = MAX_TITULO_LEN) String titulo,
+            @NotBlank @Size(max = MAX_MENSAGEM_LEN) String mensagem
+    ) {
+    }
 }

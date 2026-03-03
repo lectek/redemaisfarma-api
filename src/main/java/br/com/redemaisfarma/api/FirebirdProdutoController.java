@@ -33,7 +33,7 @@ public class FirebirdProdutoController {
     }
 
     @GetMapping(value={"/produtos/codigo-barras/{ean}"})
-    public ProdutoLegacyEntity porEan(@PathVariable String ean) {
+    public ProdutoLegacyEntity porEan(@PathVariable("ean") String ean) {
         return this.repo.findByCodigoBarras(ean).orElse(null);
     }
 

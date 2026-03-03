@@ -17,6 +17,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -34,180 +38,252 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/configuracoes/backup")
 @PreAuthorize("hasRole('ADMIN')")
-public class AdminConfiguracoesBackupController {
+public final class AdminConfiguracoesBackupController {
 
+    /**
+     * Local directory used to store JSON backups.
+     */
     private static final Path BACKUP_DIR = Paths.get("storage", "backups");
-    private static final DateTimeFormatter FILE_TS = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
+    /**
+     * Date pattern used in generated file names.
+     */
+    private static final DateTimeFormatter FILE_TS =
+            DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
+
+    /**
+     * Repository used to read and write application settings.
+     */
     private final AppSettingRepository repository;
+
+    /**
+     * JSON serializer/deserializer for backup payload.
+     */
     private final ObjectMapper objectMapper;
 
-    public AdminConfiguracoesBackupController(AppSettingRepository repository, ObjectMapper objectMapper) {
-        this.repository = repository;
-        this.objectMapper = objectMapper;
+    /**
+     * Creates backup controller dependencies.
+     *
+     * @param settingsRepository settings repository
+     * @param mapper object mapper
+     */
+    public AdminConfiguracoesBackupController(
+            final AppSettingRepository settingsRepository,
+            final ObjectMapper mapper
+    ) {
+        this.repository = settingsRepository;
+        this.objectMapper = mapper;
     }
 
+    /**
+     * Renders backup management page.
+     *
+     * @param model view model
+     * @return backup settings page
+     */
     @GetMapping
-    public String form(Model model) {
+    public String form(final Model model) {
         model.addAttribute("backups", listBackups());
         return "pages/admin/configuracoes/backup";
     }
 
+    /**
+     * Generates a new backup file with current settings.
+     *
+     * @param ra redirect attributes
+     * @return redirect to backup page
+     */
     @PostMapping("/now")
-    public String gerarBackup(RedirectAttributes ra) {
+    public String gerarBackup(final RedirectAttributes ra) {
         try {
             Files.createDirectories(BACKUP_DIR);
-            BackupPayload payload = new BackupPayload();
-            payload.setGeradoEm(LocalDateTime.now());
+
+            final LocalDateTime now = LocalDateTime.now();
+            final BackupPayload payload = new BackupPayload();
+            payload.setGeradoEm(now);
             payload.setSettings(repository.findAll());
-            String filename = "backup-" + FILE_TS.format(LocalDateTime.now()) + ".json";
-            Path target = BACKUP_DIR.resolve(filename);
-            String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(payload);
+
+            final String filename = "backup-" + FILE_TS.format(now) + ".json";
+            final Path target = BACKUP_DIR.resolve(filename);
+            final String json = objectMapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(payload);
             Files.writeString(target, json, StandardCharsets.UTF_8);
             ra.addFlashAttribute("success", "Backup gerado: " + filename);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             ra.addFlashAttribute("error", "Falha ao gerar backup.");
         }
         return "redirect:/admin/configuracoes/backup";
     }
 
+    /**
+     * Restores settings from an existing backup file.
+     *
+     * @param id backup file id
+     * @param ra redirect attributes
+     * @return redirect to backup page
+     */
     @PostMapping("/restore/{id}")
-    public String restaurar(@PathVariable String id, RedirectAttributes ra) {
-        Path target = safeResolve(id);
+    public String restaurar(
+            @PathVariable("id") final String id,
+            final RedirectAttributes ra
+    ) {
+        final Path target = safeResolve(id);
         if (target == null || !Files.exists(target)) {
             ra.addFlashAttribute("error", "Backup nao encontrado.");
             return "redirect:/admin/configuracoes/backup";
         }
+
         try (InputStream in = Files.newInputStream(target)) {
-            BackupPayload payload = objectMapper.readValue(in, BackupPayload.class);
+            final BackupPayload payload = objectMapper.readValue(
+                    in,
+                    BackupPayload.class
+            );
             if (payload != null && payload.getSettings() != null) {
-                for (AppSettingEntity entity : payload.getSettings()) {
-                    if (entity.getSettingKey() != null) {
-                        repository.findBySettingKey(entity.getSettingKey())
-                                .map(existing -> {
-                                    existing.setSettingValue(entity.getSettingValue());
-                                    existing.setDescription(entity.getDescription());
-                                    return repository.save(existing);
-                                })
-                                .orElseGet(() -> repository.save(new AppSettingEntity(
-                                        entity.getSettingKey(),
-                                        entity.getSettingValue(),
-                                        entity.getDescription()
-                                )));
-                    }
+                for (final AppSettingEntity entity : payload.getSettings()) {
+                    upsertSetting(entity);
                 }
             }
             ra.addFlashAttribute("success", "Backup restaurado.");
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             ra.addFlashAttribute("error", "Falha ao restaurar backup.");
         }
         return "redirect:/admin/configuracoes/backup";
     }
 
+    /**
+     * Downloads a backup file by id.
+     *
+     * @param id backup file id
+     * @return file response
+     */
     @GetMapping("/download/{id}")
-    public ResponseEntity<Resource> baixar(@PathVariable String id) {
-        Path target = safeResolve(id);
+    public ResponseEntity<Resource> baixar(
+            @PathVariable("id") final String id
+    ) {
+        final Path target = safeResolve(id);
         if (target == null || !Files.exists(target)) {
             return ResponseEntity.notFound().build();
         }
+
         try {
-            InputStreamResource resource = new InputStreamResource(Files.newInputStream(target));
+            final InputStreamResource resource = new InputStreamResource(
+                    Files.newInputStream(target)
+            );
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + target.getFileName() + "\"")
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\""
+                                    + target.getFileName()
+                                    + "\""
+                    )
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(resource);
-        } catch (IOException ex) {
+        } catch (final IOException ex) {
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    private void upsertSetting(final AppSettingEntity entity) {
+        if (entity.getSettingKey() == null) {
+            return;
+        }
+
+        repository.findBySettingKey(entity.getSettingKey())
+                .map(existing -> {
+                    existing.setSettingValue(entity.getSettingValue());
+                    existing.setDescription(entity.getDescription());
+                    return repository.save(existing);
+                })
+                .orElseGet(() -> repository.save(new AppSettingEntity(
+                        entity.getSettingKey(),
+                        entity.getSettingValue(),
+                        entity.getDescription()
+                )));
     }
 
     private List<BackupItem> listBackups() {
         if (!Files.exists(BACKUP_DIR)) {
             return List.of();
         }
-        List<BackupItem> items = new ArrayList<>();
-        try {
-            Files.list(BACKUP_DIR)
-                    .filter(Files::isRegularFile)
-                    .sorted(Comparator.comparingLong(this::safeLastModified).reversed())
-                    .forEach(path -> items.add(new BackupItem(path.getFileName().toString(), formatDate(path))));
-        } catch (Exception ignored) {
+
+        final List<BackupItem> items = new ArrayList<>();
+        try (var stream = Files.list(BACKUP_DIR)) {
+            stream.filter(Files::isRegularFile)
+                    .sorted(
+                            Comparator.comparingLong(this::safeLastModified)
+                                    .reversed()
+                    )
+                    .forEach(path -> items.add(new BackupItem(
+                            path.getFileName().toString(),
+                            formatDate(path)
+                    )));
+        } catch (final Exception ignored) {
             return List.of();
         }
         return items;
     }
 
-    private long safeLastModified(Path path) {
+    private long safeLastModified(final Path path) {
         try {
             return Files.getLastModifiedTime(path).toMillis();
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             return 0L;
         }
     }
 
-    private ZonedDateTime formatDate(Path path) {
+    private ZonedDateTime formatDate(final Path path) {
         try {
-            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(safeLastModified(path)), ZoneId.systemDefault());
-        } catch (Exception ex) {
+            return ZonedDateTime.ofInstant(
+                    Instant.ofEpochMilli(safeLastModified(path)),
+                    ZoneId.systemDefault()
+            );
+        } catch (final Exception ex) {
             return ZonedDateTime.now();
         }
     }
 
-    private Path safeResolve(String id) {
+    private Path safeResolve(final String id) {
         if (id == null || id.isBlank()) {
             return null;
         }
-        Path candidate = BACKUP_DIR.resolve(Paths.get(id).getFileName()).normalize();
+
+        final Path candidate = BACKUP_DIR.resolve(
+                Paths.get(id).getFileName()
+        ).normalize();
         if (!candidate.startsWith(BACKUP_DIR)) {
             return null;
         }
         return candidate;
     }
 
-    public static class BackupItem {
-        private String nome;
-        private ZonedDateTime data;
+    @Getter
+    @AllArgsConstructor
+    public static final class BackupItem {
 
-        public BackupItem(String nome, ZonedDateTime data) {
-            this.nome = nome;
-            this.data = data;
-        }
+        /**
+         * Backup file name.
+         */
+        private final String nome;
 
-        public String getNome() {
-            return nome;
-        }
-
-        public void setNome(String nome) {
-            this.nome = nome;
-        }
-
-        public ZonedDateTime getData() {
-            return data;
-        }
-
-        public void setData(ZonedDateTime data) {
-            this.data = data;
-        }
+        /**
+         * Backup file date.
+         */
+        private final ZonedDateTime data;
     }
 
-    public static class BackupPayload {
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static final class BackupPayload {
+
+        /**
+         * Timestamp when backup was generated.
+         */
         private LocalDateTime geradoEm;
+
+        /**
+         * Settings snapshot.
+         */
         private List<AppSettingEntity> settings;
-
-        public LocalDateTime getGeradoEm() {
-            return geradoEm;
-        }
-
-        public void setGeradoEm(LocalDateTime geradoEm) {
-            this.geradoEm = geradoEm;
-        }
-
-        public List<AppSettingEntity> getSettings() {
-            return settings;
-        }
-
-        public void setSettings(List<AppSettingEntity> settings) {
-            this.settings = settings;
-        }
     }
 }

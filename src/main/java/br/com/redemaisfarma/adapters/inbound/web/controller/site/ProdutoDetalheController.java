@@ -10,19 +10,40 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
 
 @Controller
-public class ProdutoDetalheController {
+public final class ProdutoDetalheController {
 
+    /**
+     * Repository used to load product detail.
+     */
     private final ProdutoRepository produtoRepository;
 
-    public ProdutoDetalheController(ProdutoRepository produtoRepository) {
-        this.produtoRepository = produtoRepository;
+    /**
+     * Creates controller for product detail.
+     *
+     * @param repository product repository
+     */
+    public ProdutoDetalheController(final ProdutoRepository repository) {
+        this.produtoRepository = repository;
     }
 
+    /**
+     * Renders customer product detail page.
+     *
+     * @param id product id
+     * @param model view model
+     * @return detail page template
+     */
     @GetMapping({"/produto/{id}", "/produtos/{id}"})
-    public String detalhe(@PathVariable("id") Long id, Model model) {
-        ProdutoEntity produto = produtoRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        boolean outOfStock = produto.getEstoque() != null && produto.getEstoque() <= 0;
+    public String detalhe(
+            @PathVariable("id") final Long id,
+            final Model model
+    ) {
+        final ProdutoEntity produto = produtoRepository.findById(id)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND)
+                );
+        final boolean outOfStock = produto.getEstoque() != null
+                && produto.getEstoque() <= 0;
         model.addAttribute("produto", produto);
         model.addAttribute("outOfStock", outOfStock);
         return "pages/cliente/produtos/detalhe";

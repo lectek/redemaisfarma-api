@@ -52,7 +52,7 @@ public class ProdutoController {
     @Operation(summary = "Buscar produto por ID")
     @GetMapping("/{id}")
     // @PreAuthorize("hasAuthority('APP:PRODUTO:LER') or hasRole('ADMIN')")
-    public ResponseEntity<Produto> findById(@PathVariable Long id) {
+    public ResponseEntity<Produto> findById(@PathVariable("id") Long id) {
         Produto produto = produtoService.findById(id);
         return ResponseEntity.ok(produto);
     }
@@ -60,7 +60,7 @@ public class ProdutoController {
     @Operation(summary = "Atualizar produto")
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     // @PreAuthorize("hasAuthority('APP:PRODUTO:ATUALIZAR') or hasRole('ADMIN')")
-    public ResponseEntity<Produto> update(@PathVariable Long id, @Valid @RequestBody Produto produto) {
+    public ResponseEntity<Produto> update(@PathVariable("id") Long id, @Valid @RequestBody Produto produto) {
         // path param é a fonte de verdade
         produto.setId(id);
         Produto atualizado = produtoService.update(id, produto);
@@ -71,7 +71,7 @@ public class ProdutoController {
     @Operation(summary = "Excluir produto")
     @DeleteMapping("/{id}")
     // @PreAuthorize("hasAuthority('APP:PRODUTO:EXCLUIR') or hasRole('ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         produtoService.delete(id);
         log.info("Produto id={} removido.", id);
         return ResponseEntity.noContent().build();

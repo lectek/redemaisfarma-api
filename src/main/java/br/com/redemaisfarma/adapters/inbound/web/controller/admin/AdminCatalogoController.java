@@ -16,41 +16,76 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@ConditionalOnProperty(name = "legacy.sync.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(
+        name = "legacy.sync.enabled",
+        havingValue = "true",
+        matchIfMissing = false
+)
 @RequiredArgsConstructor
-@RequestMapping(path = "/admin/catalogo", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Admin - Catálogo", description = "Operações administrativas de sincronização do catálogo")
-public class AdminCatalogoController {
+@RequestMapping(
+        path = "/admin/catalogo",
+        produces = MediaType.APPLICATION_JSON_VALUE
+)
+@Tag(
+        name = "Admin - Catalogo",
+        description = "Operacoes administrativas de sincronizacao do catalogo"
+)
+public final class AdminCatalogoController {
 
+    /**
+     * Service that performs catalog synchronization.
+     */
     private final SincronizacaoCatalogoService syncService;
 
     /**
-     * Dispara a sincronização completa do catálogo.
-     * Protegido para ADMIN. Retorna um resumo da execução.
+     * Triggers full catalog synchronization.
+     *
+     * @return synchronization summary
      */
     @PostMapping(path = "/sincronizar")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('ADMIN:CATALOGO:SINCRONIZAR')")
-    @Operation(summary = "Sincronizar catálogo",
-               description = "Executa o processo de sincronização completa do catálogo e retorna um resumo da execução.")
-    public ResponseEntity<SincronizacaoCatalogoService.ResumoSync> sincronizar() {
-        StopWatch sw = new StopWatch("sincronizar-catalogo");
-        sw.start();
+    @PreAuthorize(
+            "hasRole('ADMIN') or hasAuthority('ADMIN:CATALOGO:SINCRONIZAR')"
+    )
+    @Operation(
+            summary = "Sincronizar catalogo",
+            description = "Executa o processo completo e retorna resumo"
+    )
+    public ResponseEntity<SincronizacaoCatalogoService.ResumoSync>
+            sincronizar() {
+        final StopWatch stopWatch = new StopWatch("sincronizar-catalogo");
+        stopWatch.start();
         try {
-            log.info("Iniciando sincronização de catálogo (trigger manual /admin/catalogo/sincronizar)...");
-            SincronizacaoCatalogoService.ResumoSync resumo = syncService.sincronizarTudo();
-            sw.stop();
-            log.info("Sincronização de catálogo finalizada em {} ms. Resultado: {}", sw.getTotalTimeMillis(), resumo);
+            log.info(
+                    "Iniciando sincronizacao de catalogo "
+                            + "(trigger manual /admin/catalogo/sincronizar)..."
+            );
+            final SincronizacaoCatalogoService.ResumoSync resumo =
+                    syncService.sincronizarTudo();
+            stopWatch.stop();
+            log.info(
+                    "Sincronizacao finalizada em {} ms. Resultado: {}",
+                    stopWatch.getTotalTimeMillis(),
+                    resumo
+            );
             return ResponseEntity.ok(resumo);
-        } catch (IllegalArgumentException e) {
-            // será traduzido pelo seu RestExceptionTranslator (400)
-            sw.stop();
-            log.warn("Falha de validação na sincronização do catálogo após {} ms: {}", sw.getTotalTimeMillis(), e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            // será traduzido pelo seu RestExceptionTranslator (500)
-            if (sw.isRunning()) sw.stop();
-            log.error("Erro inesperado na sincronização do catálogo após {} ms", sw.getTotalTimeMillis(), e);
-            throw e;
+        } catch (IllegalArgumentException exception) {
+            stopWatch.stop();
+            log.warn(
+                    "Falha de validacao apos {} ms: {}",
+                    stopWatch.getTotalTimeMillis(),
+                    exception.getMessage()
+            );
+            throw exception;
+        } catch (Exception exception) {
+            if (stopWatch.isRunning()) {
+                stopWatch.stop();
+            }
+            log.error(
+                    "Erro inesperado na sincronizacao apos {} ms",
+                    stopWatch.getTotalTimeMillis(),
+                    exception
+            );
+            throw exception;
         }
     }
 }

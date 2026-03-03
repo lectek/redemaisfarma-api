@@ -2,26 +2,38 @@ package br.com.redemaisfarma.adapters.inbound.web.controller.publico;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/produtos-publico")
-public class ProdutoPublicPageController {
+public final class ProdutoPublicPageController {
 
     /**
-     * Catálogo público de produtos.
-     * Usa o template produtos.html.
-     * A própria página pode consumir a API /api/public/produtos via JS,
-     * usando os parâmetros recebidos (categoria, tag, sort, page, size).
+     * Renders public product catalog page.
+     *
+     * @param categoria selected category filter
+     * @param tag selected tag filter
+     * @param ordenacao selected sort mode
+     * @param page current page number
+     * @param size page size
+     * @param model view model
+     * @return public products page
      */
     @GetMapping
     public String produtos(
-            @RequestParam(required = false) String categoria,
-            @RequestParam(required = false) String tag,
-            @RequestParam(required = false, name = "sort") String ordenacao,
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "24") Integer size,
-            Model model) {
+            @RequestParam(required = false) final String categoria,
+            @RequestParam(required = false) final String tag,
+            @RequestParam(required = false, name = "sort")
+            final String ordenacao,
+            @RequestParam(required = false, defaultValue = "0")
+            final Integer page,
+            @RequestParam(required = false, defaultValue = "24")
+            final Integer size,
+            final Model model
+    ) {
 
         model.addAttribute("categoriaSelecionada", categoria);
         model.addAttribute("tagSelecionada", tag);
@@ -29,37 +41,43 @@ public class ProdutoPublicPageController {
         model.addAttribute("page", page);
         model.addAttribute("size", size);
 
-        // Thymeleaf: src/main/resources/templates/produtos.html
         return "produtos";
     }
 
     /**
-     * Página alternativa de listagem (se você quiser usar lista.html para outra visão).
-     * Ex.: /produtos/lista?categoria=MEDICAMENTOS
+     * Renders alternate list page.
+     *
+     * @param categoria selected category filter
+     * @param tag selected tag filter
+     * @param model view model
+     * @return alternate list page
      */
     @GetMapping("/lista")
     public String lista(
-            @RequestParam(required = false) String categoria,
-            @RequestParam(required = false) String tag,
-            Model model) {
+            @RequestParam(required = false) final String categoria,
+            @RequestParam(required = false) final String tag,
+            final Model model
+    ) {
 
         model.addAttribute("categoriaSelecionada", categoria);
         model.addAttribute("tagSelecionada", tag);
 
-        // Thymeleaf: src/main/resources/templates/lista.html
         return "lista";
     }
 
     /**
-     * Página de detalhes de um produto específico.
-     * O template detalhes.html pode chamar /api/public/produtos/{id} via JS
-     * para buscar os dados completos.
+     * Renders public product details page.
+     *
+     * @param id product id
+     * @param model view model
+     * @return details page
      */
     @GetMapping("/{id}")
-    public String detalhes(@PathVariable("id") Long id, Model model) {
+    public String detalhes(
+            @PathVariable("id") final Long id,
+            final Model model
+    ) {
         model.addAttribute("produtoId", id);
-
-        // Thymeleaf: src/main/resources/templates/detalhes.html
         return "detalhes";
     }
 }

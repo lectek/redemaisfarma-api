@@ -62,19 +62,19 @@ public class AdminController {
     }
 
     @GetMapping(value={"/{page}"})
-    public String pageRoot(@PathVariable String page, Model model) {
+    public String pageRoot(@PathVariable("page") String page, Model model) {
         AdminController.setCommon(model, AdminController.titleize(page), page);
         return this.viewRoot(page);
     }
 
     @GetMapping(value={"/{section}/{page}"})
-    public String page2(@PathVariable String section, @PathVariable String page, Model model) {
+    public String page2(@PathVariable("section") String section, @PathVariable("page") String page, Model model) {
         AdminController.setCommon(model, AdminController.titleize(page), section);
         return this.view2(section, page);
     }
 
     @GetMapping(value={"/{section}/{sub}/{page}"})
-    public String page3(@PathVariable String section, @PathVariable String sub, @PathVariable String page, Model model) {
+    public String page3(@PathVariable("section") String section, @PathVariable("sub") String sub, @PathVariable("page") String page, Model model) {
         AdminController.setCommon(model, AdminController.titleize(page), section);
         return this.view3(section, sub, page);
     }

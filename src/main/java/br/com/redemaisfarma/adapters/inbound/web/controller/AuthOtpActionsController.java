@@ -1,18 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.validation.constraints.Email
- *  jakarta.validation.constraints.NotBlank
- *  jakarta.validation.constraints.Size
- *  org.springframework.http.ResponseEntity
- *  org.springframework.security.crypto.password.PasswordEncoder
- *  org.springframework.validation.annotation.Validated
- *  org.springframework.web.bind.annotation.PostMapping
- *  org.springframework.web.bind.annotation.RequestBody
- *  org.springframework.web.bind.annotation.RequestMapping
- *  org.springframework.web.bind.annotation.RestController
- */
 package br.com.redemaisfarma.adapters.inbound.web.controller;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
@@ -24,6 +9,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
@@ -33,59 +19,164 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value={"/api/auth"}, produces={"application/json"})
+@RequestMapping(value = "/api/auth", produces = "application/json")
 @Validated
-public class AuthOtpActionsController {
+public final class AuthOtpActionsController {
+
+    /**
+     * Minimum password length.
+     */
+    private static final int MIN_PASSWORD_LENGTH = 8;
+
+    /**
+     * Maximum password length.
+     */
+    private static final int MAX_PASSWORD_LENGTH = 128;
+
+    /**
+     * OTP service dependency.
+     */
     private final OtpServicePort otp;
+
+    /**
+     * User repository dependency.
+     */
     private final UsuarioRepository usuarios;
+
+    /**
+     * Password encoder dependency.
+     */
     private final PasswordEncoder encoder;
+
+    /**
+     * Customer service dependency.
+     */
     private final ClienteService clienteService;
 
-    public AuthOtpActionsController(OtpServicePort otp, UsuarioRepository usuarios, PasswordEncoder encoder, ClienteService clienteService) {
-        this.otp = otp;
-        this.usuarios = usuarios;
-        this.encoder = encoder;
-        this.clienteService = clienteService;
+    /**
+     * Creates controller with OTP-related dependencies.
+     *
+     * @param otpService otp service
+     * @param usuarioRepository user repository
+     * @param passwordEncoder password encoder
+     * @param service customer service
+     */
+    public AuthOtpActionsController(
+            final OtpServicePort otpService,
+            final UsuarioRepository usuarioRepository,
+            final PasswordEncoder passwordEncoder,
+            final ClienteService service
+    ) {
+        this.otp = otpService;
+        this.usuarios = usuarioRepository;
+        this.encoder = passwordEncoder;
+        this.clienteService = service;
     }
 
-    @PostMapping(value={"/password/reset-otp"}, consumes={"application/json"})
-    public ResponseEntity<?> resetByOtp(@RequestBody @Validated ResetReq req) {
-        if (!this.otp.consumeTokenForDestino(req.token(), req.email())) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Token inv\u00e1lido, expirado ou n\u00e3o pertence a este e-mail."));
+    /**
+     * Resets password after OTP validation.
+     *
+     * @param req request payload
+     * @return reset response payload
+     */
+    @PostMapping(path = "/password/reset-otp", consumes = "application/json")
+    public ResponseEntity<?> resetByOtp(
+            @RequestBody @Validated final ResetReq req
+    ) {
+        if (!otp.consumeTokenForDestino(req.token(), req.email())) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message",
+                    "Token invalido, expirado ou nao pertence a este e-mail."
+            ));
         }
-        UsuarioEntity user = this.usuarios.findByEmailIgnoreCase(req.email()).orElse(null);
+
+        final UsuarioEntity user = usuarios.findByEmailIgnoreCase(req.email())
+                .orElse(null);
         if (user == null) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Usu\u00e1rio n\u00e3o encontrado para este e-mail."));
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message",
+                    "Usuario nao encontrado para este e-mail."
+            ));
         }
-        user.setSenha(this.encoder.encode((CharSequence)req.novaSenha()));
-        this.usuarios.save(user);
+
+        user.setSenha(encoder.encode(req.novaSenha()));
+        usuarios.save(user);
         return ResponseEntity.ok(Map.of("message", "Senha redefinida."));
     }
 
-    @PostMapping(value={"/register/complete-otp"}, consumes={"application/json"})
-    public ResponseEntity<?> registerByOtp(@RequestBody @Validated RegisterReq req) {
-        if (!this.otp.consumeTokenForDestino(req.token(), req.email())) {
-            return ResponseEntity.badRequest().body(Map.of("message", "Token inv\u00e1lido, expirado ou n\u00e3o pertence a este e-mail."));
+    /**
+     * Completes registration after OTP validation.
+     *
+     * @param req request payload
+     * @return registration response payload
+     */
+    @PostMapping(path = "/register/complete-otp", consumes = "application/json")
+    public ResponseEntity<?> registerByOtp(
+            @RequestBody @Validated final RegisterReq req
+    ) {
+        if (!otp.consumeTokenForDestino(req.token(), req.email())) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "message",
+                    "Token invalido, expirado ou nao pertence a este e-mail."
+            ));
         }
-        if (this.usuarios.existsByEmailIgnoreCase(req.email())) {
-            return ResponseEntity.status((int)409).body(Map.of("message", "E-mail j\u00e1 cadastrado."));
+
+        if (usuarios.existsByEmailIgnoreCase(req.email())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                    "message",
+                    "E-mail ja cadastrado."
+            ));
         }
-        Cliente c = new Cliente();
-        c.setNome(req.nome());
-        c.setEmail(req.email().toLowerCase());
-        c.setSenha(this.encoder.encode((CharSequence)req.senha()));
-        c.setAtivo(true);
-        c.setCpf(null);
-        c.setTelefone(null);
-        c.setDataDeNascimento(null);
-        this.clienteService.create(c);
-        return ResponseEntity.ok(Map.of("message", "Conta criada com sucesso.", "email", req.email()));
+
+        final Cliente cliente = new Cliente();
+        cliente.setNome(req.nome());
+        cliente.setEmail(req.email().toLowerCase());
+        cliente.setSenha(encoder.encode(req.senha()));
+        cliente.setAtivo(true);
+        cliente.setCpf(null);
+        cliente.setTelefone(null);
+        cliente.setDataDeNascimento(null);
+
+        clienteService.create(cliente);
+        return ResponseEntity.ok(Map.of(
+                "message",
+                "Conta criada com sucesso.",
+                "email",
+                req.email()
+        ));
     }
 
-    public record ResetReq(@NotBlank String token, @NotBlank @Email String email, @NotBlank @Size(min=8, max=128) @NotBlank @Size(min=8, max=128) String novaSenha) {
+    /**
+     * Request payload for password reset by OTP.
+     *
+     * @param token otp token
+     * @param email email destination
+     * @param novaSenha new password
+     */
+    public record ResetReq(
+            @NotBlank String token,
+            @NotBlank @Email String email,
+            @NotBlank
+            @Size(min = MIN_PASSWORD_LENGTH, max = MAX_PASSWORD_LENGTH)
+            String novaSenha
+    ) {
     }
 
-    public record RegisterReq(@NotBlank String token, @NotBlank @Email String email, @NotBlank String nome, @NotBlank @Size(min=8, max=128) @NotBlank @Size(min=8, max=128) String senha) {
+    /**
+     * Request payload for registration completion by OTP.
+     *
+     * @param token otp token
+     * @param email account email
+     * @param nome account name
+     * @param senha account password
+     */
+    public record RegisterReq(
+            @NotBlank String token,
+            @NotBlank @Email String email,
+            @NotBlank String nome,
+            @NotBlank
+            @Size(min = MIN_PASSWORD_LENGTH, max = MAX_PASSWORD_LENGTH)
+            String senha
+    ) {
     }
 }
-

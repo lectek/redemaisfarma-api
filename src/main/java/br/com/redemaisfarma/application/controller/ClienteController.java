@@ -62,21 +62,21 @@ public class ClienteController {
     @Operation(summary = "Buscar cliente por ID")
     @GetMapping("/{id}")
     // @PreAuthorize("hasAuthority('APP:CLIENTE:LER') or hasRole('ADMIN')")
-    public ResponseEntity<Cliente> findById(@PathVariable Long id) {
+    public ResponseEntity<Cliente> findById(@PathVariable("id") Long id) {
         Cliente cliente = clienteService.findById(id);
         return ResponseEntity.ok(cliente);
     }
 
     @Operation(summary = "Buscar cliente por CPF (atalho)")
     @GetMapping("/cpf/{cpf}")
-    public ResponseEntity<Cliente> findByCpf(@PathVariable String cpf) {
+    public ResponseEntity<Cliente> findByCpf(@PathVariable("cpf") String cpf) {
         Optional<Cliente> opt = clienteService.findByCpf(cpf);
         return opt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Buscar cliente por telefone (atalho)")
     @GetMapping("/telefone/{telefone}")
-    public ResponseEntity<Cliente> findByTelefone(@PathVariable String telefone) {
+    public ResponseEntity<Cliente> findByTelefone(@PathVariable("telefone") String telefone) {
         Optional<Cliente> opt = clienteService.findByTelefone(telefone);
         return opt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -84,7 +84,7 @@ public class ClienteController {
     @Operation(summary = "Atualizar cliente")
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     // @PreAuthorize("hasAuthority('APP:CLIENTE:ATUALIZAR') or hasRole('ADMIN')")
-    public ResponseEntity<Cliente> update(@PathVariable Long id, @Valid @RequestBody Cliente cliente) {
+    public ResponseEntity<Cliente> update(@PathVariable("id") Long id, @Valid @RequestBody Cliente cliente) {
         cliente.setId(id); // path param é a fonte de verdade
         Cliente atualizado = clienteService.update(id, cliente);
         log.info("Cliente id={} atualizado.", id);
@@ -94,7 +94,7 @@ public class ClienteController {
     @Operation(summary = "Excluir cliente")
     @DeleteMapping("/{id}")
     // @PreAuthorize("hasAuthority('APP:CLIENTE:EXCLUIR') or hasRole('ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         clienteService.delete(id);
         log.info("Cliente id={} removido.", id);
         return ResponseEntity.noContent().build();

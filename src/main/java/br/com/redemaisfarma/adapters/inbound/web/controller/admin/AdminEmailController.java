@@ -1,11 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.stereotype.Controller
- *  org.springframework.web.bind.annotation.GetMapping
- *  org.springframework.web.bind.annotation.RequestMapping
- */
 package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 
 import org.springframework.stereotype.Controller;
@@ -13,8 +5,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(value={"/admin/email"})
-public class AdminEmailController {
+@RequestMapping(value = {"/admin/email"})
+public final class AdminEmailController {
+
+    /**
+     * Renders the admin email center page.
+     *
+     * @return admin email center view
+     */
     @GetMapping
     public String index() {
         return "pages/admin/email/central";

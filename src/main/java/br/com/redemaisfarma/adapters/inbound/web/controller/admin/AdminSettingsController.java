@@ -1,31 +1,12 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.validation.constraints.NotBlank
- *  org.springframework.data.domain.Page
- *  org.springframework.data.domain.PageRequest
- *  org.springframework.data.domain.Pageable
- *  org.springframework.security.access.prepost.PreAuthorize
- *  org.springframework.stereotype.Controller
- *  org.springframework.ui.Model
- *  org.springframework.validation.annotation.Validated
- *  org.springframework.web.bind.annotation.GetMapping
- *  org.springframework.web.bind.annotation.ModelAttribute
- *  org.springframework.web.bind.annotation.PathVariable
- *  org.springframework.web.bind.annotation.PostMapping
- *  org.springframework.web.bind.annotation.RequestMapping
- *  org.springframework.web.bind.annotation.RequestParam
- *  org.springframework.web.servlet.mvc.support.RedirectAttributes
- */
 package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.AppSettingEntity;
 import br.com.redemaisfarma.application.core.settings.AppSettingService;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -39,111 +20,232 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping(value={"/admin/settings"})
-@PreAuthorize(value="hasRole('ADMIN')")
+@RequestMapping("/admin/settings")
+@PreAuthorize("hasRole('ADMIN')")
 @Validated
-public class AdminSettingsController {
+public final class AdminSettingsController {
+
+    /**
+     * First page index.
+     */
+    private static final int PAGE_ZERO = 0;
+
+    /**
+     * Minimum page size.
+     */
+    private static final int PAGE_SIZE_MIN = 1;
+
+    /**
+     * Default page size in listing.
+     */
+    private static final int PAGE_SIZE_DEFAULT = 20;
+
+    /**
+     * Success flash key.
+     */
+    private static final String SUCCESS_ATTR = "success";
+
+    /**
+     * Redirect to settings listing.
+     */
+    private static final String REDIRECT_SETTINGS = "redirect:/admin/settings";
+
+    /**
+     * View for settings listing.
+     */
+    private static final String VIEW_SETTINGS = "pages/admin/settings";
+
+    /**
+     * View for create/update form.
+     */
+    private static final String VIEW_SETTINGS_FORM =
+            "pages/admin/settings-form";
+
+    /**
+     * Domain service for app settings.
+     */
     private final AppSettingService service;
 
-    public AdminSettingsController(AppSettingService service) {
-        this.service = service;
+    /**
+     * Creates controller with required service.
+     *
+     * @param appSettingService settings service
+     */
+    public AdminSettingsController(final AppSettingService appSettingService) {
+        this.service = appSettingService;
     }
 
+    /**
+     * Lists persisted settings with filter and pagination.
+     *
+     * @param q optional search term
+     * @param page page index
+     * @param size page size
+     * @param model view model
+     * @return list page
+     */
     @GetMapping
-    public String list(@RequestParam(value="q", required=false) String q, @RequestParam(value="page", defaultValue="0") int page, @RequestParam(value="size", defaultValue="20") int size, Model model) {
-        PageRequest pageable = PageRequest.of((int)Math.max(page, 0), (int)Math.max(size, 1));
-        Page<AppSettingEntity> pageData = this.service.list(q, (Pageable)pageable);
+    public String list(
+            @RequestParam(value = "q", required = false) final String q,
+            @RequestParam(value = "page", defaultValue = "0") final int page,
+            @RequestParam(value = "size", defaultValue = "20") final int size,
+            final Model model
+    ) {
+        final PageRequest pageable = PageRequest.of(
+                Math.max(page, PAGE_ZERO),
+                Math.max(size, PAGE_SIZE_MIN)
+        );
+        final Page<AppSettingEntity> pageData = service.list(q, pageable);
         model.addAttribute("pageData", pageData);
-        model.addAttribute("q", (Object)(q == null ? "" : q));
-        model.addAttribute("size", (Object)size);
-        return "pages/admin/settings";
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("size", size);
+        return VIEW_SETTINGS;
     }
 
-    @GetMapping(value={"/new"})
-    public String newForm(Model model) {
-        model.addAttribute("form", (Object)new Form());
-        return "pages/admin/settings-form";
+    /**
+     * Renders form for creating a new setting.
+     *
+     * @param model view model
+     * @return settings form page
+     */
+    @GetMapping("/new")
+    public String newForm(final Model model) {
+        model.addAttribute("form", new Form());
+        return VIEW_SETTINGS_FORM;
     }
 
-    @GetMapping(value={"/edit/{id}"})
-    public String editForm(@PathVariable Long id, Model model) {
-        AppSettingEntity entity = this.service.findById(id).orElseThrow(() -> new IllegalArgumentException("Config n\u00e3o encontrada"));
-        Form form = Form.from(entity);
-        model.addAttribute("form", (Object)form);
-        return "pages/admin/settings-form";
+    /**
+     * Renders form for editing an existing setting.
+     *
+     * @param id setting id
+     * @param model view model
+     * @return settings form page
+     */
+    @GetMapping("/edit/{id}")
+    public String editForm(
+            @PathVariable("id") final Long id,
+            final Model model
+    ) {
+        final AppSettingEntity entity = service.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Config nao encontrada")
+        );
+        model.addAttribute("form", Form.from(entity));
+        return VIEW_SETTINGS_FORM;
     }
 
+    /**
+     * Persists a new setting.
+     *
+     * @param form form payload
+     * @param ra redirect attributes
+     * @return redirect to settings listing
+     */
     @PostMapping
-    public String create(@ModelAttribute @Validated Form form, RedirectAttributes ra) {
-        this.service.create(form.getSettingKey().trim(), AdminSettingsController.nullSafe(form.getSettingValue()), AdminSettingsController.nullSafe(form.getDescription()));
-        ra.addFlashAttribute("success", (Object)"Configura\u00e7\u00e3o criada com sucesso.");
-        return "redirect:/admin/settings";
+    public String create(
+            @ModelAttribute("form") @Validated final Form form,
+            final RedirectAttributes ra
+    ) {
+        service.create(
+                form.getSettingKey().trim(),
+                nullSafe(form.getSettingValue()),
+                nullSafe(form.getDescription())
+        );
+        ra.addFlashAttribute(SUCCESS_ATTR, "Configuracao criada com sucesso.");
+        return REDIRECT_SETTINGS;
     }
 
-    @PostMapping(value={"/{id}"})
-    public String update(@PathVariable Long id, @ModelAttribute @Validated Form form, RedirectAttributes ra) {
-        this.service.update(id, form.getSettingKey().trim(), AdminSettingsController.nullSafe(form.getSettingValue()), AdminSettingsController.nullSafe(form.getDescription()));
-        ra.addFlashAttribute("success", (Object)"Configura\u00e7\u00e3o atualizada.");
-        return "redirect:/admin/settings";
+    /**
+     * Updates an existing setting.
+     *
+     * @param id setting id
+     * @param form form payload
+     * @param ra redirect attributes
+     * @return redirect to settings listing
+     */
+    @PostMapping("/{id}")
+    public String update(
+            @PathVariable("id") final Long id,
+            @ModelAttribute("form") @Validated final Form form,
+            final RedirectAttributes ra
+    ) {
+        service.update(
+                id,
+                form.getSettingKey().trim(),
+                nullSafe(form.getSettingValue()),
+                nullSafe(form.getDescription())
+        );
+        ra.addFlashAttribute(SUCCESS_ATTR, "Configuracao atualizada.");
+        return REDIRECT_SETTINGS;
     }
 
-    @PostMapping(value={"/delete/{id}"})
-    public String delete(@PathVariable Long id, RedirectAttributes ra) {
-        this.service.delete(id);
-        ra.addFlashAttribute("success", (Object)"Configura\u00e7\u00e3o removida.");
-        return "redirect:/admin/settings";
+    /**
+     * Deletes a setting.
+     *
+     * @param id setting id
+     * @param ra redirect attributes
+     * @return redirect to settings listing
+     */
+    @PostMapping("/delete/{id}")
+    public String delete(
+            @PathVariable("id") final Long id,
+            final RedirectAttributes ra
+    ) {
+        service.delete(id);
+        ra.addFlashAttribute(SUCCESS_ATTR, "Configuracao removida.");
+        return REDIRECT_SETTINGS;
     }
 
-    private static String nullSafe(String v) {
-        return v == null ? "" : v;
+    /**
+     * Returns empty string for null values.
+     *
+     * @param value source value
+     * @return null-safe string
+     */
+    private static String nullSafe(final String value) {
+        return value == null ? "" : value;
     }
 
-    public static class Form {
+    /**
+     * Form payload for app setting create/update.
+     */
+    @Getter
+    @Setter
+    public static final class Form {
+
+        /**
+         * Entity id.
+         */
         private Long id;
-        @NotBlank(message="Chave \u00e9 obrigat\u00f3ria")
-        private @NotBlank(message="Chave \u00e9 obrigat\u00f3ria") String settingKey;
+
+        /**
+         * Unique key of setting.
+         */
+        @NotBlank(message = "Chave e obrigatoria")
+        private String settingKey;
+
+        /**
+         * Setting value.
+         */
         private String settingValue;
+
+        /**
+         * Human-readable description.
+         */
         private String description;
 
-        public static Form from(AppSettingEntity e) {
-            Form f = new Form();
-            f.setId(e.getId());
-            f.setSettingKey(e.getSettingKey());
-            f.setSettingValue(e.getSettingValue());
-            f.setDescription(e.getDescription());
+        /**
+         * Creates form from persisted entity.
+         *
+         * @param entity persisted setting
+         * @return populated form
+         */
+        public static Form from(final AppSettingEntity entity) {
+            final Form f = new Form();
+            f.setId(entity.getId());
+            f.setSettingKey(entity.getSettingKey());
+            f.setSettingValue(entity.getSettingValue());
+            f.setDescription(entity.getDescription());
             return f;
-        }
-
-        public Long getId() {
-            return this.id;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
-        }
-
-        public String getSettingKey() {
-            return this.settingKey;
-        }
-
-        public void setSettingKey(String settingKey) {
-            this.settingKey = settingKey;
-        }
-
-        public String getSettingValue() {
-            return this.settingValue;
-        }
-
-        public void setSettingValue(String settingValue) {
-            this.settingValue = settingValue;
-        }
-
-        public String getDescription() {
-            return this.description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
         }
     }
 }

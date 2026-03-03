@@ -12,6 +12,8 @@ import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteRepo
 import br.com.redemaisfarma.application.service.MailService;
 import br.com.redemaisfarma.domain.enums.StatusPedido;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -22,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,185 +40,398 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "Admin - Marketing de E-mail", description = "Campanhas e templates de e-mail marketing do admin")
+@Tag(
+        name = "Admin - Marketing de E-mail",
+        description = "Campanhas e templates de e-mail marketing do admin"
+)
 @Controller
 @RequestMapping("/admin/marketing/emails/campanhas")
 @PreAuthorize("hasRole('ADMIN')")
-public class AdminMarketingEmailCampaignController {
-    private static final String STATUS_SCHEDULED = "SCHEDULED";
-    private static final String STATUS_DRAFT = "DRAFT";
-    private static final String STATUS_CANCELLED = "CANCELLED";
-    private static final String QUEUE_PENDING = "PENDING";
-    private static final String QUEUE_SENDING = "SENDING";
-    private static final String QUEUE_CANCELLED = "CANCELLED";
-    private static final List<String> QUEUE_STATUS_ORDER = List.of("PENDING", "SENDING", "SENT", "FAILED", "CANCELLED");
+public final class AdminMarketingEmailCampaignController {
 
+    /**
+     * Campaign status for scheduled campaigns.
+     */
+    private static final String STATUS_SCHEDULED = "SCHEDULED";
+
+    /**
+     * Campaign status for draft campaigns.
+     */
+    private static final String STATUS_DRAFT = "DRAFT";
+
+    /**
+     * Campaign status for cancelled campaigns.
+     */
+    private static final String STATUS_CANCELLED = "CANCELLED";
+
+    /**
+     * Queue status for pending items.
+     */
+    private static final String QUEUE_PENDING = "PENDING";
+
+    /**
+     * Queue status for sending items.
+     */
+    private static final String QUEUE_SENDING = "SENDING";
+
+    /**
+     * Queue status for cancelled items.
+     */
+    private static final String QUEUE_CANCELLED = "CANCELLED";
+
+    /**
+     * Status order used in queue dashboard.
+     */
+    private static final List<String> QUEUE_STATUS_ORDER = List.of(
+            "PENDING",
+            "SENDING",
+            "SENT",
+            "FAILED",
+            "CANCELLED"
+    );
+
+    /**
+     * Fixed day range used for inactive segment.
+     */
+    private static final int INATIVOS_90D_DIAS = 90;
+
+    /**
+     * Default payload message rendered in templates.
+     */
+    private static final String DEFAULT_TEMPLATE_MESSAGE =
+            "Confira as ofertas selecionadas para voce.";
+
+    /**
+     * View for campaigns form and listing.
+     */
+    private static final String VIEW_CAMPANHAS =
+            "pages/admin/marketing/emails/camapnhas";
+
+    /**
+     * View for queue monitor page.
+     */
+    private static final String VIEW_FILA = "pages/admin/marketing/emails/fila";
+
+    /**
+     * Redirect URL for campaigns page.
+     */
+    private static final String REDIRECT_CAMPANHAS =
+            "redirect:/admin/marketing/emails/campanhas";
+
+    /**
+     * Campaign repository.
+     */
     private final EmailCampaignRepository campaignRepository;
+
+    /**
+     * Queue repository.
+     */
     private final EmailCampaignQueueRepository queueRepository;
+
+    /**
+     * Campaign log repository.
+     */
     private final EmailCampaignLogRepository logRepository;
+
+    /**
+     * Customer repository.
+     */
     private final ClienteRepository clienteRepository;
+
+    /**
+     * User repository.
+     */
     private final UsuarioJpaRepository usuarioRepository;
+
+    /**
+     * JSON mapper.
+     */
     private final ObjectMapper objectMapper;
+
+    /**
+     * Mail rendering service.
+     */
     private final MailService mailService;
 
+    /**
+     * Creates controller with required dependencies.
+     *
+     * @param campaignRepositoryValue campaign repository
+     * @param queueRepositoryValue queue repository
+     * @param logRepositoryValue log repository
+     * @param clienteRepositoryValue customer repository
+     * @param usuarioRepositoryValue user repository
+     * @param mailServiceValue mail service
+     * @param objectMapperValue object mapper
+     */
     public AdminMarketingEmailCampaignController(
-            EmailCampaignRepository campaignRepository,
-            EmailCampaignQueueRepository queueRepository,
-            EmailCampaignLogRepository logRepository,
-            ClienteRepository clienteRepository,
-            UsuarioJpaRepository usuarioRepository,
-            MailService mailService,
-            ObjectMapper objectMapper
+            final EmailCampaignRepository campaignRepositoryValue,
+            final EmailCampaignQueueRepository queueRepositoryValue,
+            final EmailCampaignLogRepository logRepositoryValue,
+            final ClienteRepository clienteRepositoryValue,
+            final UsuarioJpaRepository usuarioRepositoryValue,
+            final MailService mailServiceValue,
+            final ObjectMapper objectMapperValue
     ) {
-        this.campaignRepository = campaignRepository;
-        this.queueRepository = queueRepository;
-        this.logRepository = logRepository;
-        this.clienteRepository = clienteRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.mailService = mailService;
-        this.objectMapper = objectMapper;
+        this.campaignRepository = campaignRepositoryValue;
+        this.queueRepository = queueRepositoryValue;
+        this.logRepository = logRepositoryValue;
+        this.clienteRepository = clienteRepositoryValue;
+        this.usuarioRepository = usuarioRepositoryValue;
+        this.mailService = mailServiceValue;
+        this.objectMapper = objectMapperValue;
     }
 
+    /**
+     * Shows queue dashboard with status counters and latest items.
+     *
+     * @param model view model
+     * @return queue dashboard view
+     */
     @Operation(summary = "Exibe o painel de monitoramento da fila de campanhas")
     @GetMapping("/fila")
-    public String fila(Model model) {
-        Map<String, Long> totals = queueRepository.countByStatus().stream()
+    public String fila(final Model model) {
+        final Map<String, Long> totals = queueRepository
+                .countByStatus()
+                .stream()
                 .collect(Collectors.toMap(
                         EmailCampaignQueueRepository.StatusCount::getStatus,
                         EmailCampaignQueueRepository.StatusCount::getTotal
                 ));
-        List<QueueStatus> statuses = QUEUE_STATUS_ORDER.stream()
-                .map(status -> new QueueStatus(status, totals.getOrDefault(status, 0L)))
+        final List<QueueStatus> statuses = QUEUE_STATUS_ORDER.stream()
+                .map(status -> new QueueStatus(
+                        status,
+                        totals.getOrDefault(status, 0L)
+                ))
                 .toList();
-        List<EmailCampaignQueue> queueItems = queueRepository.findTop20ByOrderByCreatedAtDesc();
-        Set<Long> campaignIds = queueItems.stream()
+        final List<EmailCampaignQueue> queueItems =
+                queueRepository.findTop20ByOrderByCreatedAtDesc();
+        final Set<Long> campaignIds = queueItems.stream()
                 .map(EmailCampaignQueue::getCampaignId)
                 .collect(Collectors.toSet());
-        Map<Long, String> campaignNames = campaignRepository.findAllById(campaignIds).stream()
-                .collect(Collectors.toMap(EmailCampaign::getId, EmailCampaign::getNome));
-        List<EmailCampaignLog> logs = logRepository.findTop20ByOrderByCreatedAtDesc();
+        final Map<Long, String> campaignNames = campaignRepository
+                .findAllById(campaignIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        EmailCampaign::getId,
+                        EmailCampaign::getNome
+                ));
+        final List<EmailCampaignLog> logs =
+                logRepository.findTop20ByOrderByCreatedAtDesc();
 
         model.addAttribute("statuses", statuses);
         model.addAttribute("queueItems", queueItems);
         model.addAttribute("campaignNames", campaignNames);
         model.addAttribute("logs", logs);
-        return "pages/admin/marketing/emails/fila";
+        return VIEW_FILA;
     }
 
-    @Operation(summary = "Exibe o formulário de campanhas com templates e campanhas existentes")
+    /**
+     * Renders campaigns form, templates and campaign listing.
+     *
+     * @param model view model
+     * @return campaigns view
+     */
+    @Operation(
+            summary = "Exibe o formulario de campanhas com templates e "
+                    + "campanhas existentes"
+    )
     @GetMapping
-    public String form(Model model) {
+    public String form(final Model model) {
         model.addAttribute("campanha", new CampanhaForm());
         model.addAttribute("templates", templateOptions());
-        model.addAttribute("campanhas", campaignRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")));
-        return "pages/admin/marketing/emails/camapnhas";
+        model.addAttribute(
+                "campanhas",
+                campaignRepository.findAll(
+                        Sort.by(Sort.Direction.DESC, "createdAt")
+                )
+        );
+        return VIEW_CAMPANHAS;
     }
 
+    /**
+     * Renders template preview for one campaign.
+     *
+     * @param id campaign id
+     * @return rendered HTML
+     */
     @Operation(summary = "Renderiza o preview do template usado pela campanha")
     @GetMapping(path = "/{id}/preview", produces = MediaType.TEXT_HTML_VALUE)
     @ResponseBody
-    public String preview(@PathVariable Long id) {
-        EmailCampaign campaign = findCampaign(id);
-        String segmento = extractSegment(campaign);
-        Map<String, Object> model = buildPayloadModel(campaign.getNome(), segmento);
+    public String preview(@PathVariable("id") final Long id) {
+        final EmailCampaign campaign = findCampaign(id);
+        final String segmento = extractSegment(campaign);
+        final Map<String, Object> model = buildPayloadModel(
+                campaign.getNome(),
+                segmento
+        );
         return mailService.renderTemplate(campaign.getTemplateKey(), model);
     }
 
-    @Operation(summary = "Cria uma nova campanha de e-mail e gera a fila quando agendada")
+    /**
+     * Creates one campaign and optionally enqueues recipients.
+     *
+     * @param form campaign form payload
+     * @param ra redirect attributes
+     * @return redirect URL
+     */
+    @Operation(summary = "Cria uma nova campanha de e-mail")
     @PostMapping
-    public String criar(@ModelAttribute("campanha") CampanhaForm form, RedirectAttributes ra) {
-        EmailCampaign campaign = new EmailCampaign();
+    public String criar(
+            @ModelAttribute("campanha") final CampanhaForm form,
+            final RedirectAttributes ra
+    ) {
+        final EmailCampaign campaign = new EmailCampaign();
         campaign.setNome(safe(form.getNome()));
         campaign.setAssunto(safe(form.getAssunto()));
         campaign.setTemplateKey(safe(form.getTemplateKey()));
         campaign.setSegmentJson(buildSegmentJson(form));
-        Instant scheduleAt = resolveSchedule(form);
+
+        final Instant scheduleAt = resolveSchedule(form);
         campaign.setScheduledAt(scheduleAt);
         campaign.setScheduledZone(ZoneId.systemDefault().getId());
         campaign.setValidationStatus(QUEUE_PENDING);
-        campaign.setStatus(scheduleAt == null ? STATUS_DRAFT : STATUS_SCHEDULED);
+        campaign.setStatus(
+                scheduleAt == null ? STATUS_DRAFT : STATUS_SCHEDULED
+        );
         campaignRepository.save(campaign);
 
         if (scheduleAt != null) {
-            int queued = enqueueAllClientes(campaign, scheduleAt, form);
+            final int queued = enqueueAllClientes(campaign, scheduleAt, form);
             if (queued == 0) {
-                ra.addFlashAttribute("warning", "Campanha criada, mas nenhum cliente ativo encontrado.");
+                ra.addFlashAttribute(
+                        "warning",
+                        "Campanha criada, mas nenhum cliente ativo encontrado."
+                );
             } else {
-                ra.addFlashAttribute("success", "Campanha criada e fila gerada (" + queued + ").");
+                ra.addFlashAttribute(
+                        "success",
+                        "Campanha criada e fila gerada (" + queued + ")."
+                );
             }
         } else {
             ra.addFlashAttribute("success", "Campanha criada como rascunho.");
         }
-        return "redirect:/admin/marketing/emails/campanhas";
+
+        return REDIRECT_CAMPANHAS;
     }
 
+    /**
+     * Cancels one campaign and pending queue items.
+     *
+     * @param id campaign id
+     * @param ra redirect attributes
+     * @return redirect URL
+     */
     @PostMapping("/{id}/cancel")
-    public String cancelar(@PathVariable Long id, RedirectAttributes ra) {
-        EmailCampaign campaign = findCampaign(id);
+    public String cancelar(
+            @PathVariable("id") final Long id,
+            final RedirectAttributes ra
+    ) {
+        final EmailCampaign campaign = findCampaign(id);
         campaign.setStatus(STATUS_CANCELLED);
         campaignRepository.save(campaign);
-        List<EmailCampaignQueue> queued = queueRepository.findByCampaignIdAndStatusIn(
-                campaign.getId(),
-                List.of(QUEUE_PENDING, QUEUE_SENDING)
-        );
+
+        final List<EmailCampaignQueue> queued = queueRepository
+                .findByCampaignIdAndStatusIn(
+                        campaign.getId(),
+                        List.of(QUEUE_PENDING, QUEUE_SENDING)
+                );
         queued.forEach(item -> item.setStatus(QUEUE_CANCELLED));
         queueRepository.saveAll(queued);
-        ra.addFlashAttribute("success", "Campanha cancelada e fila atualizada (" + queued.size() + ").");
-        return "redirect:/admin/marketing/emails/campanhas";
+
+        ra.addFlashAttribute(
+                "success",
+                "Campanha cancelada e fila atualizada (" + queued.size() + ")."
+        );
+        return REDIRECT_CAMPANHAS;
     }
 
-    private Instant resolveSchedule(CampanhaForm form) {
+    /**
+     * Resolves schedule instant for campaign creation.
+     *
+     * @param form campaign form payload
+     * @return resolved instant, or null for draft
+     */
+    private Instant resolveSchedule(final CampanhaForm form) {
         if (Boolean.TRUE.equals(form.getEnvioImediato())) {
             return Instant.now();
         }
-        LocalDateTime dt = form.getAgendarPara();
+
+        final LocalDateTime dt = form.getAgendarPara();
         if (dt == null) {
             return null;
         }
+
         return dt.atZone(ZoneId.systemDefault()).toInstant();
     }
 
-    private int enqueueAllClientes(EmailCampaign campaign, Instant scheduledAt, CampanhaForm form) {
-        List<Recipient> recipients = resolveRecipients(form);
+    /**
+     * Enqueues all recipients for one campaign.
+     *
+     * @param campaign campaign entity
+     * @param scheduledAt schedule instant
+     * @param form campaign form payload
+     * @return number of queued items
+     */
+    private int enqueueAllClientes(
+            final EmailCampaign campaign,
+            final Instant scheduledAt,
+            final CampanhaForm form
+    ) {
+        final List<Recipient> recipients = resolveRecipients(form);
         int total = 0;
         for (Recipient recipient : recipients) {
-            EmailCampaignQueue queue = new EmailCampaignQueue();
+            final EmailCampaignQueue queue = new EmailCampaignQueue();
             queue.setCampaignId(campaign.getId());
             queue.setRecipientEmail(recipient.email());
             queue.setRecipientName(recipient.name());
             queue.setStatus(QUEUE_PENDING);
             queue.setScheduledAt(scheduledAt);
-            queue.setPayloadJson(buildPayload(campaign.getNome(), SegmentType.from(form.getSegmento()).name()));
+            queue.setPayloadJson(buildPayload(
+                    campaign.getNome(),
+                    SegmentType.from(form.getSegmento()).name()
+            ));
             queueRepository.save(queue);
             total++;
         }
         return total;
     }
 
-    private List<Recipient> resolveRecipients(CampanhaForm form) {
-        SegmentType type = SegmentType.from(form.getSegmento());
+    /**
+     * Resolves recipient list based on selected segment.
+     *
+     * @param form campaign form payload
+     * @return recipient list
+     */
+    private List<Recipient> resolveRecipients(final CampanhaForm form) {
+        final SegmentType type = SegmentType.from(form.getSegmento());
         switch (type) {
             case VIP -> {
                 return resolveVipRecipients();
             }
             case INATIVOS_90D -> {
-                LocalDateTime cutoff = LocalDateTime.now().minusDays(90);
-                List<ClienteEntity> inativos = clienteRepository.findInativosAntesDe(cutoff);
+                final LocalDateTime cutoff = LocalDateTime.now().minusDays(
+                        INATIVOS_90D_DIAS
+                );
+                final List<ClienteEntity> inativos =
+                        clienteRepository.findInativosAntesDe(cutoff);
                 return toRecipients(inativos);
             }
             case CATEGORIA -> {
-                List<ClienteEntity> byCategoria = resolveCategoriaRecipients(form.getCategoria());
+                final List<ClienteEntity> byCategoria =
+                        resolveCategoriaRecipients(form.getCategoria());
                 return toRecipients(byCategoria);
             }
             case RECENCIA -> {
-                List<ClienteEntity> byRecencia = resolveRecencyRecipients(form.getRecenciaDias());
+                final List<ClienteEntity> byRecencia =
+                        resolveRecencyRecipients(form.getRecenciaDias());
                 return toRecipients(byRecencia);
             }
             case TICKET -> {
-                List<ClienteEntity> byTicket = resolveTicketRecipients(form.getTicketMinimo());
+                final List<ClienteEntity> byTicket =
+                        resolveTicketRecipients(form.getTicketMinimo());
                 return toRecipients(byTicket);
             }
             default -> {
@@ -223,8 +440,13 @@ public class AdminMarketingEmailCampaignController {
         }
     }
 
+    /**
+     * Resolves VIP recipients from users and active customers.
+     *
+     * @return recipient list
+     */
     private List<Recipient> resolveVipRecipients() {
-        List<Recipient> out = new ArrayList<>();
+        final List<Recipient> out = new ArrayList<>();
         usuarioRepository.findByClienteVipTrue().forEach(usuario -> {
             if (usuario.getEmail() == null || usuario.getEmail().isBlank()) {
                 return;
@@ -232,37 +454,81 @@ public class AdminMarketingEmailCampaignController {
             clienteRepository.findByEmailIgnoreCase(usuario.getEmail())
                     .filter(ClienteEntity::isAtivo)
                     .ifPresentOrElse(
-                            cliente -> out.add(new Recipient(cliente.getEmail(), cliente.getNome())),
-                            () -> out.add(new Recipient(usuario.getEmail(), usuario.getNome()))
+                            cliente -> out.add(new Recipient(
+                                    cliente.getEmail(),
+                                    cliente.getNome()
+                            )),
+                            () -> out.add(new Recipient(
+                                    usuario.getEmail(),
+                                    usuario.getNome()
+                            ))
                     );
         });
         return out;
     }
 
-    private List<ClienteEntity> resolveCategoriaRecipients(String categoria) {
+    /**
+     * Resolves category-based recipients.
+     *
+     * @param categoria category name
+     * @return customer list
+     */
+    private List<ClienteEntity> resolveCategoriaRecipients(
+            final String categoria
+    ) {
         if (categoria == null || categoria.isBlank()) {
             return List.of();
         }
-        return clienteRepository.findClientesByCategoriaComprada(categoria.trim(), StatusPedido.CANCELADO);
+        return clienteRepository.findClientesByCategoriaComprada(
+                categoria.trim(),
+                StatusPedido.CANCELADO
+        );
     }
 
-    private List<ClienteEntity> resolveRecencyRecipients(Integer dias) {
+    /**
+     * Resolves recency-based recipients.
+     *
+     * @param dias day range
+     * @return customer list
+     */
+    private List<ClienteEntity> resolveRecencyRecipients(final Integer dias) {
         if (dias == null || dias <= 0) {
             return List.of();
         }
-        LocalDateTime from = LocalDateTime.now().minusDays(dias);
-        return clienteRepository.findClientesByRecencia(from, StatusPedido.CANCELADO);
+        final LocalDateTime from = LocalDateTime.now().minusDays(dias);
+        return clienteRepository.findClientesByRecencia(
+                from,
+                StatusPedido.CANCELADO
+        );
     }
 
-    private List<ClienteEntity> resolveTicketRecipients(BigDecimal ticketMinimo) {
-        if (ticketMinimo == null || ticketMinimo.compareTo(BigDecimal.ZERO) <= 0) {
+    /**
+     * Resolves ticket-based recipients.
+     *
+     * @param ticketMinimo minimum ticket amount
+     * @return customer list
+     */
+    private List<ClienteEntity> resolveTicketRecipients(
+            final BigDecimal ticketMinimo
+    ) {
+        if (ticketMinimo == null
+                || ticketMinimo.compareTo(BigDecimal.ZERO) <= 0) {
             return List.of();
         }
-        return clienteRepository.findClientesByTicketMedio(ticketMinimo, StatusPedido.CANCELADO);
+        return clienteRepository.findClientesByTicketMedio(
+                ticketMinimo,
+                StatusPedido.CANCELADO
+        );
     }
 
-    private List<Recipient> toRecipients(List<ClienteEntity> clientes) {
-        List<Recipient> out = new ArrayList<>();
+    /**
+     * Converts customer entities to recipient payloads.
+     *
+     * @param clientes customer list
+     * @return recipient list
+     */
+    private List<Recipient> toRecipients(final List<ClienteEntity> clientes) {
+        final List<Recipient> out = new ArrayList<>();
         for (ClienteEntity cliente : clientes) {
             if (cliente == null || !cliente.isAtivo()) {
                 continue;
@@ -275,43 +541,94 @@ public class AdminMarketingEmailCampaignController {
         return out;
     }
 
-    private String buildPayload(String campaignName, String segmento) {
+    /**
+     * Builds queue payload JSON.
+     *
+     * @param campaignName campaign name
+     * @param segmento segment name
+     * @return payload JSON
+     */
+    private String buildPayload(
+            final String campaignName,
+            final String segmento
+    ) {
         try {
-            return objectMapper.writeValueAsString(buildPayloadModel(campaignName, segmento));
+            return objectMapper.writeValueAsString(
+                    buildPayloadModel(campaignName, segmento)
+            );
         } catch (Exception ex) {
             return "{}";
         }
     }
 
-    private Map<String, Object> buildPayloadModel(String campaignName, String segmento) {
+    /**
+     * Builds template model payload.
+     *
+     * @param campaignName campaign name
+     * @param segmento segment name
+     * @return payload map
+     */
+    private Map<String, Object> buildPayloadModel(
+            final String campaignName,
+            final String segmento
+    ) {
         return Map.of(
-                "headline", campaignName == null ? "" : campaignName,
-                "message", "Confira as ofertas selecionadas para voce.",
-                "segmento", segmento == null ? "" : segmento
+                "headline",
+                campaignName == null ? "" : campaignName,
+                "message",
+                DEFAULT_TEMPLATE_MESSAGE,
+                "segmento",
+                segmento == null ? "" : segmento
         );
     }
 
-    private String extractSegment(EmailCampaign campaign) {
-        if (campaign.getSegmentJson() == null || campaign.getSegmentJson().isBlank()) {
+    /**
+     * Extracts segment value from campaign JSON payload.
+     *
+     * @param campaign campaign entity
+     * @return segment value
+     */
+    private String extractSegment(final EmailCampaign campaign) {
+        if (campaign.getSegmentJson() == null
+                || campaign.getSegmentJson().isBlank()) {
             return "";
         }
         try {
-            Map<?, ?> parsed = objectMapper.readValue(campaign.getSegmentJson(), Map.class);
-            Object segmento = parsed.get("segmento");
+            final Map<?, ?> parsed = objectMapper.readValue(
+                    campaign.getSegmentJson(),
+                    Map.class
+            );
+            final Object segmento = parsed.get("segmento");
             return segmento == null ? "" : segmento.toString();
         } catch (Exception ex) {
             return "";
         }
     }
 
-    private EmailCampaign findCampaign(Long id) {
-        return campaignRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Campanha não encontrada"));
+    /**
+     * Finds campaign by id or throws 404.
+     *
+     * @param id campaign id
+     * @return campaign entity
+     */
+    private EmailCampaign findCampaign(final Long id) {
+        return campaignRepository.findById(id).orElseThrow(
+                () -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Campanha nao encontrada"
+                )
+        );
     }
 
-    private String buildSegmentJson(CampanhaForm form) {
-        SegmentType segmentType = SegmentType.from(form.getSegmento());
-        Map<String, Object> payload = new HashMap<>();
+    /**
+     * Builds segment JSON used by campaign and queue payload.
+     *
+     * @param form campaign form payload
+     * @return JSON payload
+     */
+    private String buildSegmentJson(final CampanhaForm form) {
+        final SegmentType segmentType = SegmentType.from(form.getSegmento());
+        final Map<String, Object> payload = new HashMap<>();
         payload.put("segmento", segmentType.name());
         if (form.getCategoria() != null && !form.getCategoria().isBlank()) {
             payload.put("categoria", form.getCategoria().trim());
@@ -329,6 +646,11 @@ public class AdminMarketingEmailCampaignController {
         }
     }
 
+    /**
+     * Returns template options for campaign form.
+     *
+     * @return template options
+     */
     private List<TemplateOption> templateOptions() {
         return List.of(
                 new TemplateOption("mail/promo", "Promo - basico"),
@@ -336,19 +658,111 @@ public class AdminMarketingEmailCampaignController {
         );
     }
 
-    private String safe(String value) {
+    /**
+     * Trims string values and defaults null to empty.
+     *
+     * @param value source value
+     * @return trimmed value
+     */
+    private String safe(final String value) {
         return value == null ? "" : value.trim();
     }
 
+    /**
+     * Campaign form payload.
+     */
+    @Getter
+    @Setter
+    public static final class CampanhaForm {
+
+        /**
+         * Campaign name.
+         */
+        private String nome;
+
+        /**
+         * Campaign subject.
+         */
+        private String assunto;
+
+        /**
+         * Template key.
+         */
+        private String templateKey;
+
+        /**
+         * Segment key.
+         */
+        private String segmento;
+
+        /**
+         * Category filter.
+         */
+        private String categoria;
+
+        /**
+         * Recency days filter.
+         */
+        private Integer recenciaDias;
+
+        /**
+         * Minimum ticket filter.
+         */
+        private BigDecimal ticketMinimo;
+
+        /**
+         * Immediate send flag.
+         */
+        private Boolean envioImediato;
+
+        /**
+         * Scheduled datetime.
+         */
+        private LocalDateTime agendarPara;
+    }
+
+    /**
+     * Segment types accepted by campaign builder.
+     */
     private enum SegmentType {
+
+        /**
+         * All recipients segment.
+         */
         TODOS,
+
+        /**
+         * VIP recipients segment.
+         */
         VIP,
+
+        /**
+         * Inactive recipients for 90 days segment.
+         */
         INATIVOS_90D,
+
+        /**
+         * Category-based recipients segment.
+         */
         CATEGORIA,
+
+        /**
+         * Recency-based recipients segment.
+         */
         RECENCIA,
+
+        /**
+         * Ticket-based recipients segment.
+         */
         TICKET;
 
-        static SegmentType from(String raw) {
+        /**
+         * Parses a segment type from user input.
+         *
+         * @param raw raw input
+         * @return parsed segment type
+         */
+        static SegmentType from(final String raw) {
             if (raw == null) {
                 return TODOS;
             }
@@ -360,96 +774,30 @@ public class AdminMarketingEmailCampaignController {
         }
     }
 
-    public static class CampanhaForm {
-        private String nome;
-        private String assunto;
-        private String templateKey;
-        private String segmento;
-        private String categoria;
-        private Integer recenciaDias;
-        private BigDecimal ticketMinimo;
-        private Boolean envioImediato;
-        private LocalDateTime agendarPara;
-
-        public String getNome() {
-            return nome;
-        }
-
-        public void setNome(String nome) {
-            this.nome = nome;
-        }
-
-        public String getAssunto() {
-            return assunto;
-        }
-
-        public void setAssunto(String assunto) {
-            this.assunto = assunto;
-        }
-
-        public String getTemplateKey() {
-            return templateKey;
-        }
-
-        public void setTemplateKey(String templateKey) {
-            this.templateKey = templateKey;
-        }
-
-        public String getSegmento() {
-            return segmento;
-        }
-
-        public void setSegmento(String segmento) {
-            this.segmento = segmento;
-        }
-
-        public String getCategoria() {
-            return categoria;
-        }
-
-        public void setCategoria(String categoria) {
-            this.categoria = categoria;
-        }
-
-        public Integer getRecenciaDias() {
-            return recenciaDias;
-        }
-
-        public void setRecenciaDias(Integer recenciaDias) {
-            this.recenciaDias = recenciaDias;
-        }
-
-        public BigDecimal getTicketMinimo() {
-            return ticketMinimo;
-        }
-
-        public void setTicketMinimo(BigDecimal ticketMinimo) {
-            this.ticketMinimo = ticketMinimo;
-        }
-
-        public Boolean getEnvioImediato() {
-            return envioImediato;
-        }
-
-        public void setEnvioImediato(Boolean envioImediato) {
-            this.envioImediato = envioImediato;
-        }
-
-        public LocalDateTime getAgendarPara() {
-            return agendarPara;
-        }
-
-        public void setAgendarPara(LocalDateTime agendarPara) {
-            this.agendarPara = agendarPara;
-        }
-    }
-
+    /**
+     * Template option item.
+     *
+     * @param key template key
+     * @param label template label
+     */
     public record TemplateOption(String key, String label) {
     }
 
+    /**
+     * Recipient payload.
+     *
+     * @param email recipient email
+     * @param name recipient name
+     */
     public record Recipient(String email, String name) {
     }
 
+    /**
+     * Queue status summary item.
+     *
+     * @param status queue status
+     * @param total total items
+     */
     public record QueueStatus(String status, long total) {
     }
 }

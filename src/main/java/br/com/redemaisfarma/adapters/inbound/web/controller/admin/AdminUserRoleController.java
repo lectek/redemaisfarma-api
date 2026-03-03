@@ -1,16 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.servlet.http.HttpServletRequest
- *  org.springframework.http.ResponseEntity
- *  org.springframework.security.access.prepost.PreAuthorize
- *  org.springframework.web.bind.annotation.DeleteMapping
- *  org.springframework.web.bind.annotation.PathVariable
- *  org.springframework.web.bind.annotation.PostMapping
- *  org.springframework.web.bind.annotation.RequestMapping
- *  org.springframework.web.bind.annotation.RestController
- */
 package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 
 import br.com.redemaisfarma.application.core.user.RoleAdminService;
@@ -24,26 +11,54 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value={"/admin/users"})
-public class AdminUserRoleController {
+@RequestMapping("/admin/users")
+public final class AdminUserRoleController {
+
+    /**
+     * Service responsible for role elevation/removal.
+     */
     private final RoleAdminService service;
 
-    public AdminUserRoleController(RoleAdminService service) {
-        this.service = service;
+    /**
+     * Creates controller with required role service.
+     *
+     * @param roleAdminService role admin service
+     */
+    public AdminUserRoleController(final RoleAdminService roleAdminService) {
+        this.service = roleAdminService;
     }
 
-    @PostMapping(value={"/{userId}/grant-admin"})
-    @PreAuthorize(value="hasRole('DEVELOPER')")
-    public ResponseEntity<?> grantAdmin(@PathVariable Long userId, HttpServletRequest req) {
-        this.service.grantAdmin(userId, req);
+    /**
+     * Grants admin role to a user.
+     *
+     * @param userId user id
+     * @param request current request
+     * @return empty 200 response
+     */
+    @PostMapping("/{userId}/grant-admin")
+    @PreAuthorize("hasRole('DEVELOPER')")
+    public ResponseEntity<Void> grantAdmin(
+            @PathVariable("userId") final Long userId,
+            final HttpServletRequest request
+    ) {
+        this.service.grantAdmin(userId, request);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping(value={"/{userId}/revoke-admin"})
-    @PreAuthorize(value="hasRole('DEVELOPER')")
-    public ResponseEntity<?> revokeAdmin(@PathVariable Long userId, HttpServletRequest req) {
-        this.service.revokeAdmin(userId, req);
+    /**
+     * Revokes admin role from a user.
+     *
+     * @param userId user id
+     * @param request current request
+     * @return empty 200 response
+     */
+    @DeleteMapping("/{userId}/revoke-admin")
+    @PreAuthorize("hasRole('DEVELOPER')")
+    public ResponseEntity<Void> revokeAdmin(
+            @PathVariable("userId") final Long userId,
+            final HttpServletRequest request
+    ) {
+        this.service.revokeAdmin(userId, request);
         return ResponseEntity.ok().build();
     }
 }
-

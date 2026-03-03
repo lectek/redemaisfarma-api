@@ -37,7 +37,7 @@ public class ClienteV2Controller {
     // 2. Buscar cliente por ID
     // ==================================================
     @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<Cliente> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<Cliente> buscarPorId(@PathVariable("id") Long id) {
         Cliente cliente = clienteService.findById(id);
         return ResponseEntity.ok(cliente);
     }
@@ -55,7 +55,7 @@ public class ClienteV2Controller {
     // 4. Atualizar cliente existente
     // ==================================================
     @PutMapping(value = "/{id}", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Cliente> atualizar(@PathVariable Long id, @Valid @RequestBody Cliente cliente) {
+    public ResponseEntity<Cliente> atualizar(@PathVariable("id") Long id, @Valid @RequestBody Cliente cliente) {
         Cliente atualizado = clienteService.update(id, cliente);
         return ResponseEntity.ok(atualizado);
     }
@@ -64,7 +64,7 @@ public class ClienteV2Controller {
     // 5. Deletar cliente
     // ==================================================
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable("id") Long id) {
         clienteService.delete(id);
         return ResponseEntity.noContent().build();
     }

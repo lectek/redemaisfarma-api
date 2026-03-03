@@ -51,7 +51,7 @@ public class ProdutoCategoriaAdminController {
     }
 
     @PostMapping("/{id}/atualizar")
-    public String atualizar(@PathVariable Long id, @RequestParam("nome") String nome, RedirectAttributes ra) {
+    public String atualizar(@PathVariable("id") Long id, @RequestParam("nome") String nome, RedirectAttributes ra) {
         String nomeNormalizado = normalize(nome);
         if (nomeNormalizado.isBlank()) {
             ra.addFlashAttribute("toast", "Informe o nome da categoria.");
@@ -75,7 +75,7 @@ public class ProdutoCategoriaAdminController {
     }
 
     @PostMapping("/{id}/remover")
-    public String remover(@PathVariable Long id, RedirectAttributes ra) {
+    public String remover(@PathVariable("id") Long id, RedirectAttributes ra) {
         Optional<ProdutoCategoriaEntity> existente = this.categoriaRepository.findById(id);
         if (existente.isEmpty()) {
             ra.addFlashAttribute("toast", "Categoria nao encontrada.");

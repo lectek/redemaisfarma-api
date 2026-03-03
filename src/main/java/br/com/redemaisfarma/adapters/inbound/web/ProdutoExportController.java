@@ -91,7 +91,7 @@ public class ProdutoExportController {
 
     @PatchMapping("/{id}/status")
     public ProdutoEntity updateStatus(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestParam ProdutoStatus status,
             @RequestParam(required = false) String validador
     ) {

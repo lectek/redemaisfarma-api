@@ -166,7 +166,7 @@ public class ClienteSelfApiController {
 
     @Operation(summary = "Detalha um pedido do cliente autenticado")
     @GetMapping("/pedidos/{id}")
-    public PedidoDetalheResponse detalhe(@PathVariable Long id, Authentication auth) {
+    public PedidoDetalheResponse detalhe(@PathVariable("id") Long id, Authentication auth) {
         ClienteIdentidade identidade = resolveIdentidade(auth);
         if (identidade == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -195,7 +195,7 @@ public class ClienteSelfApiController {
 
     @Operation(summary = "Atualiza a quantidade de um item do carrinho")
     @PutMapping("/carrinho/{produtoId}")
-    public CartSummaryResponse atualizar(@PathVariable Long produtoId,
+    public CartSummaryResponse atualizar(@PathVariable("produtoId") Long produtoId,
                                          @Valid @RequestBody CartUpdateRequest req,
                                          HttpSession session) {
         cartService.updateItem(session, produtoId, req.quantidade());
@@ -204,7 +204,7 @@ public class ClienteSelfApiController {
 
     @Operation(summary = "Remove um item do carrinho")
     @DeleteMapping("/carrinho/{produtoId}")
-    public CartSummaryResponse remover(@PathVariable Long produtoId, HttpSession session) {
+    public CartSummaryResponse remover(@PathVariable("produtoId") Long produtoId, HttpSession session) {
         cartService.removeItem(session, produtoId);
         return CartSummaryResponse.from(cartService.buildSummary(session));
     }
@@ -295,7 +295,7 @@ public class ClienteSelfApiController {
 
     @Operation(summary = "Remove um favorito do cliente")
     @DeleteMapping("/favoritos/{produtoId}")
-    public ResponseEntity<?> removerFavorito(@PathVariable Long produtoId, Authentication auth) {
+    public ResponseEntity<?> removerFavorito(@PathVariable("produtoId") Long produtoId, Authentication auth) {
         UsuarioEntity usuario = localizarUsuario(auth)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
         favoritoRepository.deleteByUsuarioIdAndProdutoId(usuario.getId(), produtoId);

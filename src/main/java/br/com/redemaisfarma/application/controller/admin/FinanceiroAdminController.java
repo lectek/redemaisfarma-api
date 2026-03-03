@@ -31,7 +31,7 @@ public class FinanceiroAdminController {
     }
 
     @GetMapping("/assinaturas/{id}")
-    public String detalhe(@PathVariable Long id, Model model) {
+    public String detalhe(@PathVariable("id") Long id, Model model) {
         Optional<AssinaturaView> assinatura = service.buscarAssinatura(id);
         if (assinatura.isEmpty()) {
             log.warn("Assinatura id={} não encontrada. Redirecionando para lista.", id);

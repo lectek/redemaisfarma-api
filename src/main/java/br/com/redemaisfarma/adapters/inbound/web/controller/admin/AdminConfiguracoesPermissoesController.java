@@ -5,7 +5,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,146 +22,166 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/configuracoes/permissoes")
 @PreAuthorize("hasRole('ADMIN')")
-public class AdminConfiguracoesPermissoesController {
+public final class AdminConfiguracoesPermissoesController {
 
+    /**
+     * Settings key for permission matrix payload.
+     */
     private static final String KEY_PERMISSOES = "permissoes.matriz";
 
+    /**
+     * Settings service dependency.
+     */
     private final AppSettingService settings;
+
+    /**
+     * JSON mapper used to serialize and deserialize the matrix.
+     */
     private final ObjectMapper objectMapper;
 
-    public AdminConfiguracoesPermissoesController(AppSettingService settings, ObjectMapper objectMapper) {
-        this.settings = settings;
-        this.objectMapper = objectMapper;
+    /**
+     * Creates controller with settings dependencies.
+     *
+     * @param settingsService settings service
+     * @param mapper json mapper
+     */
+    public AdminConfiguracoesPermissoesController(
+            final AppSettingService settingsService,
+            final ObjectMapper mapper
+    ) {
+        this.settings = settingsService;
+        this.objectMapper = mapper;
     }
 
+    /**
+     * Renders permissions settings form.
+     *
+     * @param model view model
+     * @return permissions settings page
+     */
     @GetMapping
-    public String form(Model model) {
-        PermissoesForm form = new PermissoesForm();
+    public String form(final Model model) {
+        final PermissoesForm form = new PermissoesForm();
         form.setRecursos(loadRecursos());
         model.addAttribute("form", form);
         return "pages/admin/configuracoes/permissoes";
     }
 
+    /**
+     * Persists permissions matrix.
+     *
+     * @param form form payload
+     * @param ra redirect attributes
+     * @return redirect to permissions settings page
+     */
     @PostMapping
-    public String salvar(@ModelAttribute("form") PermissoesForm form, RedirectAttributes ra) {
-        List<RecursoPermissao> recursos = form.getRecursos() == null ? List.of() : form.getRecursos();
+    public String salvar(
+            @ModelAttribute("form") final PermissoesForm form,
+            final RedirectAttributes ra
+    ) {
+        final List<RecursoPermissao> recursos = form.getRecursos() == null
+                ? List.of()
+                : form.getRecursos();
         try {
-            String json = objectMapper.writeValueAsString(recursos);
-            settings.upsert(KEY_PERMISSOES, json, "Matriz de permissoes por perfil");
+            final String json = objectMapper.writeValueAsString(recursos);
+            settings.upsert(
+                    KEY_PERMISSOES,
+                    json,
+                    "Matriz de permissoes por perfil"
+            );
             ra.addFlashAttribute("success", "Permissoes atualizadas.");
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             ra.addFlashAttribute("error", "Falha ao salvar permissoes.");
         }
         return "redirect:/admin/configuracoes/permissoes";
     }
 
     private List<RecursoPermissao> loadRecursos() {
-        String raw = settings.getOrDefault(KEY_PERMISSOES, "");
+        final String raw = settings.getOrDefault(KEY_PERMISSOES, "");
         if (raw != null && !raw.isBlank()) {
             try {
-                List<RecursoPermissao> list = objectMapper.readValue(raw, new TypeReference<List<RecursoPermissao>>() {});
+                final TypeReference<List<RecursoPermissao>> typeRef =
+                        new TypeReference<List<RecursoPermissao>>() { };
+                final List<RecursoPermissao> list = objectMapper.readValue(
+                        raw,
+                        typeRef
+                );
                 if (list != null && !list.isEmpty()) {
                     return list;
                 }
-            } catch (Exception ignored) {
-                // fallback
+            } catch (final Exception ignored) {
+                return defaultRecursos();
             }
         }
         return defaultRecursos();
     }
 
     private List<RecursoPermissao> defaultRecursos() {
-        List<RecursoPermissao> list = new ArrayList<>();
-        list.add(new RecursoPermissao("pedidos", "Pedidos", true, true, true));
-        list.add(new RecursoPermissao("produtos", "Produtos", true, true, false));
-        list.add(new RecursoPermissao("clientes", "Clientes", true, true, true));
-        list.add(new RecursoPermissao("financeiro", "Financeiro", true, false, false));
-        list.add(new RecursoPermissao("relatorios", "Relatorios", true, false, false));
+        final List<RecursoPermissao> list = new ArrayList<>();
+        list.add(recurso("pedidos", "Pedidos", true, true, true));
+        list.add(recurso("produtos", "Produtos", true, true, false));
+        list.add(recurso("clientes", "Clientes", true, true, true));
+        list.add(recurso("financeiro", "Financeiro", true, false, false));
+        list.add(recurso("relatorios", "Relatorios", true, false, false));
         return list;
     }
 
-    public static class PermissoesForm {
-        private List<RecursoPermissao> recursos;
-
-        public List<RecursoPermissao> getRecursos() {
-            return recursos;
-        }
-
-        public void setRecursos(List<RecursoPermissao> recursos) {
-            this.recursos = recursos;
-        }
+    private RecursoPermissao recurso(
+            final String id,
+            final String nome,
+            final boolean admin,
+            final boolean farmaceutico,
+            final boolean caixa
+    ) {
+        return new RecursoPermissao(id, nome, admin, farmaceutico, caixa);
     }
 
-    public static class RecursoPermissao {
+    /**
+     * Form payload for permission matrix page.
+     */
+    @Getter
+    @Setter
+    public static final class PermissoesForm {
+
+        /**
+         * Permission matrix items.
+         */
+        private List<RecursoPermissao> recursos;
+    }
+
+    /**
+     * Permission matrix item.
+     */
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode(of = "id")
+    public static final class RecursoPermissao {
+
+        /**
+         * Resource identifier.
+         */
         private String id;
+
+        /**
+         * Display name.
+         */
         private String nome;
+
+        /**
+         * Admin role flag.
+         */
         private boolean admin;
+
+        /**
+         * Pharmacist role flag.
+         */
         private boolean farmaceutico;
+
+        /**
+         * Cashier role flag.
+         */
         private boolean caixa;
-
-        public RecursoPermissao(String id, String nome, boolean admin, boolean farmaceutico, boolean caixa) {
-            this.id = id;
-            this.nome = nome;
-            this.admin = admin;
-            this.farmaceutico = farmaceutico;
-            this.caixa = caixa;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public String getNome() {
-            return nome;
-        }
-
-        public void setNome(String nome) {
-            this.nome = nome;
-        }
-
-        public boolean isAdmin() {
-            return admin;
-        }
-
-        public void setAdmin(boolean admin) {
-            this.admin = admin;
-        }
-
-        public boolean isFarmaceutico() {
-            return farmaceutico;
-        }
-
-        public void setFarmaceutico(boolean farmaceutico) {
-            this.farmaceutico = farmaceutico;
-        }
-
-        public boolean isCaixa() {
-            return caixa;
-        }
-
-        public void setCaixa(boolean caixa) {
-            this.caixa = caixa;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            RecursoPermissao that = (RecursoPermissao) o;
-            return Objects.equals(id, that.id);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id);
-        }
     }
 }

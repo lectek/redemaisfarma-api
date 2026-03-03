@@ -37,7 +37,7 @@ public class PedidoV2Controller {
     // Buscar por ID
     // =========================================
     @GetMapping("/{id}")
-    public ResponseEntity<Pedido> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<Pedido> buscarPorId(@PathVariable("id") Long id) {
         return ResponseEntity.of(pedidoService.findByIdOptional(id));
     }
 
@@ -53,7 +53,7 @@ public class PedidoV2Controller {
     // Atualizar
     // =========================================
     @PutMapping(value = "/{id}", consumes = "application/json")
-    public ResponseEntity<Pedido> atualizar(@PathVariable Long id, @Valid @RequestBody Pedido pedido) {
+    public ResponseEntity<Pedido> atualizar(@PathVariable("id") Long id, @Valid @RequestBody Pedido pedido) {
         Pedido atualizado = pedidoService.update(id, pedido);
         return ResponseEntity.ok(atualizado);
     }
@@ -62,7 +62,7 @@ public class PedidoV2Controller {
     // Deletar
     // =========================================
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable("id") Long id) {
         pedidoService.delete(id);
         return ResponseEntity.noContent().build();
     }

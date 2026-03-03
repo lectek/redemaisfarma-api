@@ -9,6 +9,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,26 +26,93 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/admin/configuracoes/branding")
 @PreAuthorize("hasRole('ADMIN')")
-public class AdminConfiguracoesBrandingController {
+public final class AdminConfiguracoesBrandingController {
 
+    /**
+     * Branding key for default logo URL.
+     */
     private static final String KEY_LOGO_URL = "branding.logo_url";
+
+    /**
+     * Branding key for dark logo URL.
+     */
     private static final String KEY_LOGO_URL_DARK = "branding.logo_url_dark";
+
+    /**
+     * Branding key for favicon URL.
+     */
     private static final String KEY_FAVICON_URL = "branding.favicon_url";
+
+    /**
+     * Branding key for primary color.
+     */
     private static final String KEY_COLOR_PRIMARY = "branding.cor_primaria";
+
+    /**
+     * Branding key for secondary color.
+     */
     private static final String KEY_COLOR_SECONDARY = "branding.cor_secundaria";
+
+    /**
+     * Branding key for accent color.
+     */
     private static final String KEY_COLOR_ACCENT = "branding.cor_acento";
+
+    /**
+     * Branding key for home hero image URL.
+     */
     private static final String KEY_HOME_HERO_URL = "branding.home_hero_url";
+
+    /**
+     * Branding key for home hero alt text.
+     */
     private static final String KEY_HOME_HERO_ALT = "branding.home_hero_alt";
-    private static final String KEY_BANNER_PROMO_URL = "branding.banner_promocao_url";
+
+    /**
+     * Branding key for promo banner URL.
+     */
+    private static final String KEY_BANNER_PROMO_URL =
+            "branding.banner_promocao_url";
+
+    /**
+     * Branding key for font family.
+     */
     private static final String KEY_FONT_FAMILY = "branding.font_family";
+
+    /**
+     * Branding key for theme.
+     */
     private static final String KEY_THEME = "branding.tema";
+
+    /**
+     * Branding key for border radius.
+     */
     private static final String KEY_RADIUS = "branding.radius";
+
+    /**
+     * Branding key for logo size.
+     */
     private static final String KEY_LOGO_SIZE = "branding.logo_size";
 
+    /**
+     * Legacy key for logo URL.
+     */
     private static final String LEGACY_LOGO_URL = "GERAL.logo_inicial_url";
-    private static final String LEGACY_FAVICON_URL = "GERAL.favicon_url";
-    private static final String LEGACY_HOME_HERO_URL = "GERAL.home_hero_imagem_url";
 
+    /**
+     * Legacy key for favicon URL.
+     */
+    private static final String LEGACY_FAVICON_URL = "GERAL.favicon_url";
+
+    /**
+     * Legacy key for home hero image URL.
+     */
+    private static final String LEGACY_HOME_HERO_URL =
+            "GERAL.home_hero_imagem_url";
+
+    /**
+     * All keys loaded from settings store.
+     */
     private static final Set<String> ALL_KEYS = Set.of(
             KEY_LOGO_URL,
             KEY_LOGO_URL_DARK,
@@ -63,22 +132,49 @@ public class AdminConfiguracoesBrandingController {
             LEGACY_HOME_HERO_URL
     );
 
+    /**
+     * Service used to read and write settings.
+     */
     private final AppSettingService settings;
 
-    public AdminConfiguracoesBrandingController(AppSettingService settings) {
-        this.settings = settings;
+    /**
+     * Creates controller with settings dependency.
+     *
+     * @param appSettingService settings service
+     */
+    public AdminConfiguracoesBrandingController(
+            final AppSettingService appSettingService
+    ) {
+        this.settings = appSettingService;
     }
 
+    /**
+     * Renders branding configuration form.
+     *
+     * @param model view model
+     * @return branding page
+     */
     @GetMapping
-    public String form(Model model) {
+    public String form(final Model model) {
         model.addAttribute("branding", loadForm());
         return "pages/admin/configuracoes/branding";
     }
 
+    /**
+     * Persists branding settings and optional uploaded logo.
+     *
+     * @param branding branding payload
+     * @param logoFile optional logo file
+     * @param ra redirect attributes
+     * @return redirect to branding page
+     */
     @PostMapping
-    public String salvar(@ModelAttribute("branding") BrandingForm branding,
-                         @RequestParam(name = "logoFile", required = false) MultipartFile logoFile,
-                         RedirectAttributes ra) {
+    public String salvar(
+            @ModelAttribute("branding") final BrandingForm branding,
+            @RequestParam(name = "logoFile", required = false)
+            final MultipartFile logoFile,
+            final RedirectAttributes ra
+    ) {
         boolean uploadFailed = false;
         if (logoFile != null && !logoFile.isEmpty()) {
             try {
@@ -88,38 +184,89 @@ public class AdminConfiguracoesBrandingController {
             }
         }
 
-        settings.upsert(KEY_LOGO_URL, nullSafe(branding.getLogoUrl()), "Logo principal");
-        settings.upsert(KEY_LOGO_URL_DARK, nullSafe(branding.getLogoUrlDark()), "Logo para fundo escuro");
-        settings.upsert(KEY_FAVICON_URL, nullSafe(branding.getFaviconUrl()), "Favicon");
-        settings.upsert(KEY_COLOR_PRIMARY, nullSafe(branding.getCorPrimaria()), "Cor primaria");
-        settings.upsert(KEY_COLOR_SECONDARY, nullSafe(branding.getCorSecundaria()), "Cor secundaria");
-        settings.upsert(KEY_COLOR_ACCENT, nullSafe(branding.getCorAcento()), "Cor acento");
-        settings.upsert(KEY_HOME_HERO_URL, nullSafe(branding.getHomeHeroUrl()), "Imagem principal da home");
-        settings.upsert(KEY_HOME_HERO_ALT, nullSafe(branding.getHomeHeroAlt()), "Texto alternativo do hero");
-        settings.upsert(KEY_BANNER_PROMO_URL, nullSafe(branding.getBannerPromocao()), "Banner promocao");
-        settings.upsert(KEY_FONT_FAMILY, nullSafe(branding.getFontFamily()), "Font-family");
-        settings.upsert(KEY_THEME, nullSafe(branding.getTema()), "Tema");
-        settings.upsert(KEY_RADIUS, nullSafe(branding.getRadius()), "Raio de borda");
-        settings.upsert(KEY_LOGO_SIZE, nullSafe(branding.getLogoSize()), "Tamanho da logo");
+        saveSetting(KEY_LOGO_URL, branding.getLogoUrl(), "Logo principal");
+        saveSetting(
+                KEY_LOGO_URL_DARK,
+                branding.getLogoUrlDark(),
+                "Logo para fundo escuro"
+        );
+        saveSetting(KEY_FAVICON_URL, branding.getFaviconUrl(), "Favicon");
+        saveSetting(
+                KEY_COLOR_PRIMARY,
+                branding.getCorPrimaria(),
+                "Cor primaria"
+        );
+        saveSetting(
+                KEY_COLOR_SECONDARY,
+                branding.getCorSecundaria(),
+                "Cor secundaria"
+        );
+        saveSetting(KEY_COLOR_ACCENT, branding.getCorAcento(), "Cor acento");
+        saveSetting(
+                KEY_HOME_HERO_URL,
+                branding.getHomeHeroUrl(),
+                "Imagem principal da home"
+        );
+        saveSetting(
+                KEY_HOME_HERO_ALT,
+                branding.getHomeHeroAlt(),
+                "Texto alternativo do hero"
+        );
+        saveSetting(
+                KEY_BANNER_PROMO_URL,
+                branding.getBannerPromocao(),
+                "Banner promocao"
+        );
+        saveSetting(KEY_FONT_FAMILY, branding.getFontFamily(), "Font-family");
+        saveSetting(KEY_THEME, branding.getTema(), "Tema");
+        saveSetting(KEY_RADIUS, branding.getRadius(), "Raio de borda");
+        saveSetting(KEY_LOGO_SIZE, branding.getLogoSize(), "Tamanho da logo");
 
         if (uploadFailed) {
-            ra.addFlashAttribute("warning", "Alguns uploads falharam; verifique os arquivos enviados.");
+            ra.addFlashAttribute(
+                    "warning",
+                    "Alguns uploads falharam; verifique os arquivos enviados."
+            );
         } else {
             ra.addFlashAttribute("success", "Branding atualizado.");
         }
         return "redirect:/admin/configuracoes/branding";
     }
 
+    /**
+     * Saves one setting with null-safe value.
+     *
+     * @param key setting key
+     * @param value setting value
+     * @param description setting description
+     */
+    private void saveSetting(
+            final String key,
+            final String value,
+            final String description
+    ) {
+        settings.upsert(key, nullSafe(value), description);
+    }
+
+    /**
+     * Loads branding form values from current settings.
+     *
+     * @return populated form
+     */
     private BrandingForm loadForm() {
-        Map<String, String> cfg = settings.getAllByKeys(ALL_KEYS);
-        BrandingForm form = new BrandingForm();
+        final Map<String, String> cfg = settings.getAllByKeys(ALL_KEYS);
+        final BrandingForm form = new BrandingForm();
         form.setLogoUrl(firstValue(cfg, KEY_LOGO_URL, LEGACY_LOGO_URL));
         form.setLogoUrlDark(cfg.getOrDefault(KEY_LOGO_URL_DARK, ""));
-        form.setFaviconUrl(firstValue(cfg, KEY_FAVICON_URL, LEGACY_FAVICON_URL));
+        form.setFaviconUrl(
+                firstValue(cfg, KEY_FAVICON_URL, LEGACY_FAVICON_URL)
+        );
         form.setCorPrimaria(cfg.getOrDefault(KEY_COLOR_PRIMARY, ""));
         form.setCorSecundaria(cfg.getOrDefault(KEY_COLOR_SECONDARY, ""));
         form.setCorAcento(cfg.getOrDefault(KEY_COLOR_ACCENT, ""));
-        form.setHomeHeroUrl(firstValue(cfg, KEY_HOME_HERO_URL, LEGACY_HOME_HERO_URL));
+        form.setHomeHeroUrl(
+                firstValue(cfg, KEY_HOME_HERO_URL, LEGACY_HOME_HERO_URL)
+        );
         form.setHomeHeroAlt(cfg.getOrDefault(KEY_HOME_HERO_ALT, ""));
         form.setBannerPromocao(cfg.getOrDefault(KEY_BANNER_PROMO_URL, ""));
         form.setFontFamily(cfg.getOrDefault(KEY_FONT_FAMILY, ""));
@@ -129,150 +276,138 @@ public class AdminConfiguracoesBrandingController {
         return form;
     }
 
-    private static String nullSafe(String value) {
+    /**
+     * Returns empty string when value is null.
+     *
+     * @param value source value
+     * @return null-safe value
+     */
+    private static String nullSafe(final String value) {
         return value == null ? "" : value;
     }
 
-    private static String firstValue(Map<String, String> cfg, String primary, String fallback) {
-        String value = cfg.get(primary);
+    /**
+     * Gets primary value or fallback key when primary is blank.
+     *
+     * @param cfg settings map
+     * @param primary primary key
+     * @param fallback fallback key
+     * @return resolved value
+     */
+    private static String firstValue(
+            final Map<String, String> cfg,
+            final String primary,
+            final String fallback
+    ) {
+        final String value = cfg.get(primary);
         if (value != null && !value.isBlank()) {
             return value;
         }
         return cfg.getOrDefault(fallback, "");
     }
 
-    private static String storeUpload(MultipartFile file, String prefix) throws IOException {
-        String original = StringUtils.cleanPath(Objects.requireNonNullElse(file.getOriginalFilename(), "upload"));
+    /**
+     * Stores uploaded branding file and returns public path.
+     *
+     * @param file uploaded file
+     * @param prefix filename prefix
+     * @return public file URL
+     * @throws IOException when upload fails
+     */
+    private static String storeUpload(
+            final MultipartFile file,
+            final String prefix
+    ) throws IOException {
+        final String original = StringUtils.cleanPath(
+                Objects.requireNonNullElse(file.getOriginalFilename(), "upload")
+        );
         String ext = "";
-        int dot = original.lastIndexOf('.');
+        final int dot = original.lastIndexOf('.');
         if (dot > -1 && dot < original.length() - 1) {
             ext = original.substring(dot);
         }
-        String filename = prefix + "-" + System.currentTimeMillis() + ext;
-        Path dir = Paths.get("media", "branding");
+        final String filename = prefix + "-" + System.currentTimeMillis() + ext;
+        final Path dir = Paths.get("media", "branding");
         Files.createDirectories(dir);
-        Path target = dir.resolve(filename);
-        Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+        final Path target = dir.resolve(filename);
+        Files.copy(
+                file.getInputStream(),
+                target,
+                StandardCopyOption.REPLACE_EXISTING
+        );
         return "/media/branding/" + filename;
     }
 
-    public static class BrandingForm {
+    /**
+     * Form payload for branding settings page.
+     */
+    @Getter
+    @Setter
+    public static final class BrandingForm {
+
+        /**
+         * Main logo URL.
+         */
         private String logoUrl;
+
+        /**
+         * Dark mode logo URL.
+         */
         private String logoUrlDark;
+
+        /**
+         * Favicon URL.
+         */
         private String faviconUrl;
+
+        /**
+         * Primary color.
+         */
         private String corPrimaria;
+
+        /**
+         * Secondary color.
+         */
         private String corSecundaria;
+
+        /**
+         * Accent color.
+         */
         private String corAcento;
+
+        /**
+         * Home hero image URL.
+         */
         private String homeHeroUrl;
+
+        /**
+         * Home hero alt text.
+         */
         private String homeHeroAlt;
+
+        /**
+         * Promo banner URL.
+         */
         private String bannerPromocao;
+
+        /**
+         * Font family.
+         */
         private String fontFamily;
+
+        /**
+         * Theme option.
+         */
         private String tema;
+
+        /**
+         * Border radius option.
+         */
         private String radius;
+
+        /**
+         * Logo size option.
+         */
         private String logoSize;
-
-        public String getLogoUrl() {
-            return logoUrl;
-        }
-
-        public void setLogoUrl(String logoUrl) {
-            this.logoUrl = logoUrl;
-        }
-
-        public String getLogoUrlDark() {
-            return logoUrlDark;
-        }
-
-        public void setLogoUrlDark(String logoUrlDark) {
-            this.logoUrlDark = logoUrlDark;
-        }
-
-        public String getFaviconUrl() {
-            return faviconUrl;
-        }
-
-        public void setFaviconUrl(String faviconUrl) {
-            this.faviconUrl = faviconUrl;
-        }
-
-        public String getCorPrimaria() {
-            return corPrimaria;
-        }
-
-        public void setCorPrimaria(String corPrimaria) {
-            this.corPrimaria = corPrimaria;
-        }
-
-        public String getCorSecundaria() {
-            return corSecundaria;
-        }
-
-        public void setCorSecundaria(String corSecundaria) {
-            this.corSecundaria = corSecundaria;
-        }
-
-        public String getCorAcento() {
-            return corAcento;
-        }
-
-        public void setCorAcento(String corAcento) {
-            this.corAcento = corAcento;
-        }
-
-        public String getHomeHeroUrl() {
-            return homeHeroUrl;
-        }
-
-        public void setHomeHeroUrl(String homeHeroUrl) {
-            this.homeHeroUrl = homeHeroUrl;
-        }
-
-        public String getHomeHeroAlt() {
-            return homeHeroAlt;
-        }
-
-        public void setHomeHeroAlt(String homeHeroAlt) {
-            this.homeHeroAlt = homeHeroAlt;
-        }
-
-        public String getBannerPromocao() {
-            return bannerPromocao;
-        }
-
-        public void setBannerPromocao(String bannerPromocao) {
-            this.bannerPromocao = bannerPromocao;
-        }
-
-        public String getFontFamily() {
-            return fontFamily;
-        }
-
-        public void setFontFamily(String fontFamily) {
-            this.fontFamily = fontFamily;
-        }
-
-        public String getTema() {
-            return tema;
-        }
-
-        public void setTema(String tema) {
-            this.tema = tema;
-        }
-
-        public String getRadius() {
-            return radius;
-        }
-
-        public void setRadius(String radius) {
-            this.radius = radius;
-        }
-
-        public String getLogoSize() {
-            return logoSize;
-        }
-
-        public void setLogoSize(String logoSize) {
-            this.logoSize = logoSize;
-        }
     }
 }

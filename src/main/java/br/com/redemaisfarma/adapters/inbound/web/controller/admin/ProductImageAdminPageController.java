@@ -58,7 +58,7 @@ public class ProductImageAdminPageController {
 
     @PostMapping("/api/admin/imagens/{produtoId}/queue")
     @ResponseBody
-    public ResponseEntity<?> queue(@PathVariable Long produtoId) {
+    public ResponseEntity<?> queue(@PathVariable("produtoId") Long produtoId) {
         var produto = produtoRepo.findById(produtoId).orElse(null);
         if (produto == null) {
             return ResponseEntity
@@ -81,7 +81,7 @@ public class ProductImageAdminPageController {
 
     @PostMapping("/api/admin/imagens/{produtoId}/regenerate")
     @ResponseBody
-    public ResponseEntity<?> regenerate(@PathVariable Long produtoId) {
+    public ResponseEntity<?> regenerate(@PathVariable("produtoId") Long produtoId) {
         jobService.regenerateForced(produtoId);
         var lastJob = jobRepo.findLastByProduct(produtoId).orElse(null);
         return ResponseEntity.ok(new EnqueueResponse("REGERADO",

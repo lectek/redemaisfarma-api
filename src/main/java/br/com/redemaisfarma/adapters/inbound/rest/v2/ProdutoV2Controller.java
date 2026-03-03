@@ -47,7 +47,7 @@ public class ProdutoV2Controller {
     // Buscar produto por ID
     // ==========================================================
     @GetMapping("/{id}")
-    public ResponseEntity<Produto> findById(@PathVariable Long id) {
+    public ResponseEntity<Produto> findById(@PathVariable("id") Long id) {
         Produto produto = produtoService.findById(id);
         return ResponseEntity.ok(produto);
     }
@@ -57,7 +57,7 @@ public class ProdutoV2Controller {
     // ==========================================================
     @PutMapping(value = "/{id}", consumes = "application/json")
     public ResponseEntity<Produto> update(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody CadastroProdutoRequestDTO dto
     ) {
         Produto tmp = produtoService.createFromDto(dto);
@@ -70,7 +70,7 @@ public class ProdutoV2Controller {
     // Excluir produto
     // ==========================================================
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
         produtoService.delete(id);
         return ResponseEntity.noContent().build();
     }

@@ -1,19 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  jakarta.validation.Valid
- *  org.springframework.http.HttpStatus
- *  org.springframework.http.HttpStatusCode
- *  org.springframework.http.ResponseEntity
- *  org.springframework.security.core.AuthenticationException
- *  org.springframework.util.StringUtils
- *  org.springframework.web.bind.annotation.PostMapping
- *  org.springframework.web.bind.annotation.RequestBody
- *  org.springframework.web.bind.annotation.RequestMapping
- *  org.springframework.web.bind.annotation.ResponseStatus
- *  org.springframework.web.bind.annotation.RestController
- */
 package br.com.redemaisfarma.adapters.inbound.web.controller;
 
 import br.com.redemaisfarma.adapters.inbound.web.request.RegisterRequest;
@@ -29,7 +13,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.StringUtils;
@@ -40,66 +23,194 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value={"/api/auth"})
-public class AuthApiController {
+@RequestMapping("/api/auth")
+public final class AuthApiController {
+
+    /**
+     * Generic bad credentials message.
+     */
+    private static final String MSG_INVALID_CREDENTIALS =
+            "Credenciais invalidas.";
+
+    /**
+     * Login failed message.
+     */
+    private static final String MSG_USER_OR_PASSWORD_INVALID =
+            "Usuario ou senha invalidos.";
+
+    /**
+     * Generic auth internal error message.
+     */
+    private static final String MSG_INTERNAL_AUTH_ERROR =
+            "Erro interno ao autenticar.";
+
+    /**
+     * Default tenant id when absent.
+     */
+    private static final String DEFAULT_TENANT_ID = "rede-mais-farma";
+
+    /**
+     * Welcome message returned after successful login.
+     */
+    private static final String WELCOME_MESSAGE = "Bem-vindo!";
+
+    /**
+     * Authentication service.
+     */
     private final AuthService authService;
+
+    /**
+     * User account service for registration.
+     */
     private final UserAccountService accounts;
 
-    public AuthApiController(AuthService authService, UserAccountService accounts) {
-        this.authService = authService;
-        this.accounts = accounts;
+    /**
+     * Creates controller with required dependencies.
+     *
+     * @param authServiceValue auth service
+     * @param accountServiceValue account service
+     */
+    public AuthApiController(
+            final AuthService authServiceValue,
+            final UserAccountService accountServiceValue
+    ) {
+        this.authService = authServiceValue;
+        this.accounts = accountServiceValue;
     }
 
-    @PostMapping(path={"/login"}, consumes={"application/json"}, produces={"application/json"})
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
+    /**
+     * Authenticates a user and returns token payload.
+     *
+     * @param req login request
+     * @return login response
+     */
+    @PostMapping(
+            path = "/login",
+            consumes = "application/json",
+            produces = "application/json"
+    )
+    public ResponseEntity<?> login(@Valid @RequestBody final LoginRequest req) {
         try {
-            String usuario = AuthApiController.safeTrim(req.getUsuario());
-            String senha = AuthApiController.safeTrim(req.getSenha());
-            if (!StringUtils.hasText((String)usuario) || !StringUtils.hasText((String)senha)) {
-                return ResponseEntity.status((HttpStatusCode)HttpStatus.BAD_REQUEST).body(Collections.singletonMap("error", "Credenciais inv\u00e1lidas."));
+            final String usuario = safeTrim(req.getUsuario());
+            final String senha = safeTrim(req.getSenha());
+            if (!StringUtils.hasText(usuario) || !StringUtils.hasText(senha)) {
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(Collections.singletonMap(
+                                "error",
+                                MSG_INVALID_CREDENTIALS
+                        ));
             }
-            AuthResponse auth = this.authService.authenticate(usuario, senha);
-            LoginResponseDTO.UserType userType = AuthApiController.mapUserType(auth.getRoles());
-            LoginResponseDTO dto = new LoginResponseDTO(auth.getAccessToken(), auth.getRefreshToken(), userType, auth.getUserId(), auth.getUsername(), auth.getEmail(), AuthApiController.safeList(auth.getRoles()), auth.getExpiresAt(), LocalDateTime.now(), LoginResponseDTO.AccountStatus.ACTIVE, "Bem-vindo!", auth.getTenantId() != null ? auth.getTenantId() : "rede-mais-farma", auth.getTraceId() != null ? auth.getTraceId() : UUID.randomUUID());
-            return ResponseEntity.ok((Object)dto);
-        }
-        catch (AuthenticationException ex) {
-            return ResponseEntity.status((HttpStatusCode)HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Usu\u00e1rio ou senha inv\u00e1lidos."));
-        }
-        catch (Exception ex) {
-            return ResponseEntity.status((HttpStatusCode)HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("error", "Erro interno ao autenticar."));
+            final AuthResponse auth = authService.authenticate(usuario, senha);
+            return ResponseEntity.ok(buildLoginResponse(auth));
+        } catch (AuthenticationException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap(
+                            "error",
+                            MSG_USER_OR_PASSWORD_INVALID
+                    ));
+        } catch (Exception ex) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap(
+                            "error",
+                            MSG_INTERNAL_AUTH_ERROR
+                    ));
         }
     }
 
-    @PostMapping(path={"/register"}, consumes={"application/json"}, produces={"application/json"})
-    @ResponseStatus(value=HttpStatus.CREATED)
-    public AuthResponse register(@Valid @RequestBody RegisterRequest req) {
-        this.accounts.register(req.name(), req.email(), req.cpf(), req.password());
-        return this.authService.authenticate(req.email(), req.password());
+    /**
+     * Registers a new account and immediately authenticates it.
+     *
+     * @param req registration request
+     * @return authentication payload
+     */
+    @PostMapping(
+            path = "/register",
+            consumes = "application/json",
+            produces = "application/json"
+    )
+    @ResponseStatus(HttpStatus.CREATED)
+    public AuthResponse register(
+            @Valid @RequestBody final RegisterRequest req
+    ) {
+        accounts.register(req.name(), req.email(), req.cpf(), req.password());
+        return authService.authenticate(req.email(), req.password());
     }
 
-    private static String safeTrim(String s) {
-        return s == null ? null : s.trim();
+    /**
+     * Builds login DTO using authenticated response payload.
+     *
+     * @param auth authenticated response
+     * @return login response DTO
+     */
+    private LoginResponseDTO buildLoginResponse(final AuthResponse auth) {
+        return new LoginResponseDTO(
+                auth.getAccessToken(),
+                auth.getRefreshToken(),
+                mapUserType(auth.getRoles()),
+                auth.getUserId(),
+                auth.getUsername(),
+                auth.getEmail(),
+                safeList(auth.getRoles()),
+                auth.getExpiresAt(),
+                LocalDateTime.now(),
+                LoginResponseDTO.AccountStatus.ACTIVE,
+                WELCOME_MESSAGE,
+                auth.getTenantId() != null
+                        ? auth.getTenantId()
+                        : DEFAULT_TENANT_ID,
+                auth.getTraceId() != null
+                        ? auth.getTraceId()
+                        : UUID.randomUUID()
+        );
     }
 
-    private static List<String> safeList(List<String> roles) {
+    /**
+     * Trims a string value safely.
+     *
+     * @param value source value
+     * @return trimmed value or null
+     */
+    private static String safeTrim(final String value) {
+        return value == null ? null : value.trim();
+    }
+
+    /**
+     * Returns an empty list when roles are absent.
+     *
+     * @param roles roles list
+     * @return non-null roles list
+     */
+    private static List<String> safeList(final List<String> roles) {
         return roles == null ? Collections.emptyList() : roles;
     }
 
-    private static LoginResponseDTO.UserType mapUserType(List<String> roles) {
+    /**
+     * Resolves user type based on role names.
+     *
+     * @param roles roles list
+     * @return resolved user type
+     */
+    private static LoginResponseDTO.UserType mapUserType(
+            final List<String> roles
+    ) {
         if (roles == null || roles.isEmpty()) {
             return LoginResponseDTO.UserType.CLIENTE;
         }
         for (String r : roles) {
-            if (r == null) continue;
-            String role = r.toUpperCase(Locale.ROOT);
+            if (r == null) {
+                continue;
+            }
+            final String role = r.toUpperCase(Locale.ROOT);
             if (role.contains("ROLE_ADMIN")) {
                 return LoginResponseDTO.UserType.ADMIN;
             }
-            if (!role.contains("ROLE_ATENDENTE")) continue;
-            return LoginResponseDTO.UserType.ATENDENTE;
+            if (role.contains("ROLE_ATENDENTE")) {
+                return LoginResponseDTO.UserType.ATENDENTE;
+            }
         }
         return LoginResponseDTO.UserType.CLIENTE;
     }
 }
-

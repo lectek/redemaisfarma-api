@@ -1,23 +1,7 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  lombok.Generated
- *  org.springframework.data.domain.Page
- *  org.springframework.data.domain.Pageable
- *  org.springframework.data.domain.Sort$Direction
- *  org.springframework.data.web.PageableDefault
- *  org.springframework.stereotype.Controller
- *  org.springframework.ui.Model
- *  org.springframework.web.bind.annotation.GetMapping
- *  org.springframework.web.bind.annotation.RequestMapping
- *  org.springframework.web.bind.annotation.RequestParam
- */
 package br.com.redemaisfarma.adapters.inbound.web.controller.site;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
-import lombok.Generated;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,29 +13,66 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping(value={"/produtos"})
-public class ProdutosController {
+@RequestMapping("/produtos")
+public final class ProdutosController {
+
+    /**
+     * Default page size for public product listing.
+     */
+    private static final int DEFAULT_PAGE_SIZE = 18;
+
+    /**
+     * Repository used to query public products.
+     */
     private final ProdutoRepository repo;
 
-    @GetMapping(params={"q"})
-    public String listPublic(@RequestParam String q,
-                             @RequestParam(required=false) String cat,
-                             @PageableDefault(size=18, sort={"dataCadastro"}, direction=Sort.Direction.DESC) Pageable pageable,
-                             Model model) {
-        String termo = q == null || q.isBlank() ? null : q.trim();
-        String categoria = cat == null || cat.isBlank() ? null : cat.trim();
-        Page<ProdutoEntity> page = categoria == null
-                ? this.repo.searchPublicPage(termo, pageable)
-                : this.repo.searchPublicPageByCategoria(termo, categoria, pageable);
+    /**
+     * Creates controller with product repository dependency.
+     *
+     * @param repository product repository
+     */
+    public ProdutosController(final ProdutoRepository repository) {
+        this.repo = repository;
+    }
+
+    /**
+     * Lists public products when search query parameter is present.
+     *
+     * @param q search term
+     * @param cat category filter
+     * @param pageable paging information
+     * @param model view model
+     * @return product list page
+     */
+    @GetMapping(params = "q")
+    public String listPublic(
+            @RequestParam("q") final String q,
+            @RequestParam(value = "cat", required = false) final String cat,
+            @PageableDefault(
+                    size = DEFAULT_PAGE_SIZE,
+                    sort = "dataCadastro",
+                    direction = Sort.Direction.DESC
+            ) final Pageable pageable,
+            final Model model
+    ) {
+        final String termo = normalize(q);
+        final String categoria = normalize(cat);
+
+        final Page<ProdutoEntity> page = categoria == null
+                ? repo.searchPublicPage(termo, pageable)
+                : repo.searchPublicPageByCategoria(termo, categoria, pageable);
+
         model.addAttribute("page", page);
-        model.addAttribute("q", (Object)(q == null ? "" : q));
-        model.addAttribute("cat", (Object)(categoria == null ? "" : categoria));
-        model.addAttribute("categorias", this.repo.findDistinctCategorias());
+        model.addAttribute("q", q == null ? "" : q);
+        model.addAttribute("cat", categoria == null ? "" : categoria);
+        model.addAttribute("categorias", repo.findDistinctCategorias());
         return "pages/cliente/produtos/lista";
     }
 
-    @Generated
-    public ProdutosController(ProdutoRepository repo) {
-        this.repo = repo;
+    private static String normalize(final String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
     }
 }
