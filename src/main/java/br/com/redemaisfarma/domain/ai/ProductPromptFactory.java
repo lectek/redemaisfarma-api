@@ -12,10 +12,8 @@ import org.springframework.stereotype.Component;
 public class ProductPromptFactory {
     public Map<String, Object> varsFromProduto(ProdutoRepositoryPort.ProdutoDTO p) {
         return Map.of(
-                "nome", this.safe(p.nome()),
                 "descricao", this.safe(p.descricao()),
                 "categoria", this.safe(p.categoria()),
-                "fabricante", this.safe(p.fabricante()),
                 "codigo", this.safe(p.codigoBarras()),
                 "cores", List.of("#0077FF", "#00CC88")
         );
@@ -25,10 +23,8 @@ public class ProductPromptFactory {
         StringBuilder sb = new StringBuilder(
                 "Packshot profissional de produto farmaceutico para ecommerce, fundo branco puro, "
                         + "luz de estudio suave e sombra discreta.");
-        this.appendField(sb, "Produto", p.nome());
         this.appendField(sb, "Descricao", p.descricao());
         this.appendField(sb, "Categoria", p.categoria());
-        this.appendField(sb, "Fabricante", p.fabricante());
         this.appendField(sb, "Codigo", p.codigoBarras());
         sb.append(" Mostrar somente o produto, sem textos, sem logo adicional e sem marca d'agua.");
         return sb.toString();
