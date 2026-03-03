@@ -161,6 +161,10 @@ app:
     groups:
       pedidos: ${APP_KAFKA_GROUP_PEDIDOS:pedidos-consumer}
 
+kafka:
+  enabled: ${KAFKA_ENABLED:false}
+  bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:}
+
 legacy:
   sync:
     enabled: false
