@@ -11,9 +11,6 @@ WORKDIR /workspace
 COPY pom.xml mvnw* ./
 COPY .mvn .mvn
 
-# Dependency cache
-RUN mvn -B -ntp dependency:go-offline
-
 # Copy source
 COPY src src
 
