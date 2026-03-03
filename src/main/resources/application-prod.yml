@@ -157,6 +157,16 @@ app:
       account-sid: ${APP_SMS_TWILIO_ACCOUNT_SID:${TWILIO_ACCOUNT_SID:}}
       auth-token: ${APP_SMS_TWILIO_AUTH_TOKEN:${TWILIO_AUTH_TOKEN:}}
       messaging-service-sid: ${APP_SMS_TWILIO_MESSAGING_SERVICE_SID:${TWILIO_MESSAGING_SERVICE_SID:}}
+  ai:
+    image:
+      provider: ${APP_AI_IMAGE_PROVIDER:pollinations}
+      pollinations:
+        base-url: ${APP_AI_IMAGE_POLLINATIONS_BASE_URL:https://image.pollinations.ai/prompt}
+        model: ${APP_AI_IMAGE_POLLINATIONS_MODEL:flux}
+        width: ${APP_AI_IMAGE_POLLINATIONS_WIDTH:1024}
+        height: ${APP_AI_IMAGE_POLLINATIONS_HEIGHT:1024}
+        nologo: ${APP_AI_IMAGE_POLLINATIONS_NOLOGO:true}
+        private: ${APP_AI_IMAGE_POLLINATIONS_PRIVATE:false}
   kafka:
     groups:
       pedidos: ${APP_KAFKA_GROUP_PEDIDOS:pedidos-consumer}

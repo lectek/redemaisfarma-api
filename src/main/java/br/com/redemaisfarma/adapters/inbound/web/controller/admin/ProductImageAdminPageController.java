@@ -7,6 +7,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.jpa.ProdutoJpaReposito
 import br.com.redemaisfarma.application.port.outbound.ProductImageJobRepository;
 import br.com.redemaisfarma.application.service.ProductImageJobService;
 import lombok.Generated;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,18 +29,21 @@ public class ProductImageAdminPageController {
     private final ProductImagePublisher publisher;
     private final ProductImageJobService jobService;
     private final ProductImageJobRepository jobRepo;
+    private final boolean kafkaEnabled;
 
     @Generated
     public ProductImageAdminPageController(
             ProdutoJpaRepository produtoRepo,
             ProductImagePublisher publisher,
             ProductImageJobService jobService,
-            ProductImageJobRepository jobRepo
+            ProductImageJobRepository jobRepo,
+            @Value("${kafka.enabled:false}") boolean kafkaEnabled
     ) {
         this.produtoRepo = produtoRepo;
         this.publisher = publisher;
         this.jobService = jobService;
         this.jobRepo = jobRepo;
+        this.kafkaEnabled = kafkaEnabled;
     }
 
     @GetMapping("/admin/imagens")
@@ -66,13 +70,22 @@ public class ProductImageAdminPageController {
                     .body("Produto não encontrado");
         }
 
-        publisher.publish(new ProductImageRequestedEvent(
+        ProductImageRequestedEvent event = new ProductImageRequestedEvent(
                 produto.getId(),
                 produto.getNome(),
                 produto.getFabricante(),
                 produto.getCategoria(),
                 String.valueOf(produto.getId())
-        ));
+        );
+
+        if (!this.kafkaEnabled) {
+            this.jobService.process(event);
+            var lastJob = jobRepo.findLastByProduct(produtoId).orElse(null);
+            return ResponseEntity.ok(new EnqueueResponse("PROCESSADO_SYNC",
+                    lastJob == null ? null : JobView.from(lastJob)));
+        }
+
+        publisher.publish(event);
 
         var lastJob = jobRepo.findLastByProduct(produtoId).orElse(null);
         return ResponseEntity.ok(new EnqueueResponse("ENFILEIRADO",

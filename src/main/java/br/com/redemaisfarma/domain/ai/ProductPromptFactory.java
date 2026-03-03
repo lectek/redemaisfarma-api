@@ -1,9 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  org.springframework.stereotype.Component
- */
 package br.com.redemaisfarma.domain.ai;
 
 import br.com.redemaisfarma.application.port.outbound.ProdutoRepositoryPort;
@@ -17,11 +11,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductPromptFactory {
     public Map<String, Object> varsFromProduto(ProdutoRepositoryPort.ProdutoDTO p) {
-        return Map.of("descricao", this.safe(p.descricao()), "categoria", this.safe(p.categoria()), "codigo", this.safe(p.codigoBarras()), "cores", List.of("#0077FF", "#00CC88"));
+        return Map.of(
+                "nome", this.safe(p.nome()),
+                "descricao", this.safe(p.descricao()),
+                "categoria", this.safe(p.categoria()),
+                "fabricante", this.safe(p.fabricante()),
+                "codigo", this.safe(p.codigoBarras()),
+                "cores", List.of("#0077FF", "#00CC88")
+        );
     }
 
     public String promptForProduto(ProdutoRepositoryPort.ProdutoDTO p) {
-        return "product studio photography, clean white seamless background, soft shadow,\ncentered, high detail, commercial e-commerce packshot,\nshow only the product, no extra props, no text, no watermark\n";
+        StringBuilder sb = new StringBuilder(
+                "Packshot profissional de produto farmaceutico para ecommerce, fundo branco puro, "
+                        + "luz de estudio suave e sombra discreta.");
+        this.appendField(sb, "Produto", p.nome());
+        this.appendField(sb, "Descricao", p.descricao());
+        this.appendField(sb, "Categoria", p.categoria());
+        this.appendField(sb, "Fabricante", p.fabricante());
+        this.appendField(sb, "Codigo", p.codigoBarras());
+        sb.append(" Mostrar somente o produto, sem textos, sem logo adicional e sem marca d'agua.");
+        return sb.toString();
     }
 
     public String fingerprint(String preset, Map<String, Object> vars) {
@@ -49,5 +59,11 @@ public class ProductPromptFactory {
     private String safe(String s) {
         return s == null ? "" : s;
     }
-}
 
+    private void appendField(StringBuilder sb, String label, String value) {
+        String safeValue = this.safe(value);
+        if (!safeValue.isBlank()) {
+            sb.append(' ').append(label).append(": ").append(safeValue).append('.');
+        }
+    }
+}
