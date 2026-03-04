@@ -196,11 +196,19 @@ public class ProductImageAdminPageController {
         this.jobService.process(event);
         final var lastJob = jobRepo.findLastByProduct(produtoId).orElse(null);
         final JobView jobView = lastJob == null ? null : JobView.from(lastJob);
+        final boolean productHasImage = produtoRepo.findById(produtoId)
+                .map(produto -> produto.getImagem() != null
+                        && !produto.getImagem().isBlank())
+                .orElse(false);
         if (lastJob == null) {
             return ResponseEntity.accepted().body(new EnqueueResponse(result, null));
         }
 
         if (lastJob.status() == ProductImageJobRepository.Status.ERROR) {
+            if (productHasImage) {
+                return ResponseEntity.ok()
+                        .body(new EnqueueResponse("PROCESSADO_SYNC_IMAGEM_EXISTENTE", jobView));
+            }
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                     .body(new EnqueueResponse("ERRO_SYNC", jobView));
         }

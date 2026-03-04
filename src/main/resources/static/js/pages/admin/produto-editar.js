@@ -403,7 +403,12 @@ async function gerarIA() {
     }
 
     const result = String(payload?.result || '');
-    if (lastJobStatus === 'DONE' || result.startsWith('PROCESSADO_SYNC')) {
+    if (
+      lastJobStatus === 'DONE'
+      || result.startsWith('PROCESSADO_SYNC')
+      || result === 'REGERADO'
+      || result === 'PROCESSADO_SYNC_IMAGEM_EXISTENTE'
+    ) {
       toast('Imagem gerada e salva!', 'ok');
       $status.textContent = 'Imagem gerada e salva.';
     } else {

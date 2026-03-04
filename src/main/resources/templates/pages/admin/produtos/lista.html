@@ -833,6 +833,7 @@
         const done = status === 'DONE'
           || result.startsWith('PROCESSADO_SYNC')
           || result === 'REGERADO'
+          || result === 'PROCESSADO_SYNC_IMAGEM_EXISTENTE'
           || alreadyHasImage;
         const row = btn.closest('tr');
         if (done) {
