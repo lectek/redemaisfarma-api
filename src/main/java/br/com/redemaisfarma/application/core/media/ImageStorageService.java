@@ -5,7 +5,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -66,6 +69,37 @@ public class ImageStorageService {
         Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
 
         return joinPublic(props.getUserPublicBase(), fname);
+    }
+
+    public String saveProductImagePng(Long productId, BufferedImage image)
+            throws IOException {
+        if (image == null) {
+            throw new IOException("Imagem invalida para persistencia.");
+        }
+
+        Path base = Paths.get(props.getDir()).toAbsolutePath().normalize();
+        Files.createDirectories(base);
+
+        String ts = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String fname = "produto-"
+                + (productId == null ? "na" : productId)
+                + "-"
+                + ts
+                + ".png";
+
+        Path target = base.resolve(fname);
+        try (OutputStream out = Files.newOutputStream(
+                target,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING
+        )) {
+            if (!ImageIO.write(image, "png", out)) {
+                throw new IOException("Falha ao converter imagem para PNG.");
+            }
+        }
+
+        return joinPublic(props.getPublicBase(), fname);
     }
 
     private static String extractExtension(String name) {
