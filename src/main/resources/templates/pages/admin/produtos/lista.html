@@ -175,6 +175,33 @@
       cursor: not-allowed;
     }
 
+    .admin-produtos-page .modal-content--image {
+      width: min(760px, 95vw);
+    }
+
+    .admin-produtos-page .modal-image-preview {
+      width: 100%;
+      max-height: min(70vh, 620px);
+      object-fit: contain;
+      border-radius: 12px;
+      border: 1px solid #dbe6f5;
+      background: #f8fafc;
+      display: block;
+    }
+
+    .admin-produtos-page .modal-image-actions {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .admin-produtos-page .modal-image-error {
+      color: #991b1b;
+      font-weight: 600;
+      margin: 8px 0 0;
+    }
+
     @media (max-width: 1100px) {
       .admin-produtos-page .filter-bar {
         grid-template-columns: 1fr 1fr;
@@ -322,7 +349,10 @@
               <span th:if="${p.imagem == null or #strings.isEmpty(p.imagem)}"
                     class="badge badge--warning">Sem imagem</span>
               <a th:if="${p.imagem != null and !#strings.isEmpty(p.imagem)}"
-                 th:href="${p.imagem}" target="_blank" class="badge badge--success">Ver</a>
+                 th:href="${p.imagem}"
+                 th:attr="data-image-url=${p.imagem}"
+                 data-action="preview-image"
+                 class="badge badge--success">Ver</a>
             </td>
 
             <td class="table-actions">
@@ -355,6 +385,38 @@
     </section>
 
     <section th:replace="~{fragments/modal :: confirm('modal-excluir','Excluir produto','Essa acao nao pode ser desfeita.','Excluir','Cancelar')}"></section>
+
+    <section id="modal-imagem-preview"
+             class="modal"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="modal-imagem-preview-title"
+             hidden>
+      <div class="modal-backdrop" data-close-preview></div>
+      <div class="modal-content modal-content--image" role="document">
+        <header class="modal-header">
+          <h2 id="modal-imagem-preview-title">Imagem do produto</h2>
+          <button class="modal-close" type="button" aria-label="Fechar" data-close-preview>&times;</button>
+        </header>
+        <div class="modal-body">
+          <img id="modal-imagem-preview-img"
+               class="modal-image-preview"
+               alt="Pre-visualizacao da imagem do produto"
+               loading="lazy" />
+          <p id="modal-imagem-preview-error"
+             class="modal-image-error"
+             hidden>Falha ao carregar a imagem.</p>
+          <div class="modal-image-actions">
+            <a id="modal-imagem-preview-open"
+               class="btn btn-ghost"
+               href="#"
+               target="_blank"
+               rel="noopener noreferrer"
+               hidden>Abrir em nova aba</a>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -380,11 +442,64 @@
   // ---- Integracao Imagem IA (queue/regenerate) ----
   (()=>{
     const toastBox = document.getElementById('toast');
+    const previewModal = document.getElementById('modal-imagem-preview');
+    const previewImg = document.getElementById('modal-imagem-preview-img');
+    const previewError = document.getElementById('modal-imagem-preview-error');
+    const previewOpen = document.getElementById('modal-imagem-preview-open');
+    let previewUrl = '';
+
     const toast = (m,t='ok')=>{
       const el=document.createElement('div');
       el.className=`toast ${t}`; el.textContent=m;
       toastBox.appendChild(el); setTimeout(()=>el.remove(),3500);
     };
+
+    const closePreviewModal = ()=>{
+      if (!previewModal) return;
+      previewModal.setAttribute('hidden', '');
+      if (previewImg) {
+        previewImg.removeAttribute('src');
+        previewImg.removeAttribute('hidden');
+      }
+      if (previewError) {
+        previewError.setAttribute('hidden', '');
+      }
+      previewUrl = '';
+    };
+
+    const openPreviewModal = (url)=>{
+      if (!previewModal || !previewImg || !url) return;
+      previewUrl = String(url).trim();
+      if (!previewUrl) return;
+
+      previewImg.removeAttribute('hidden');
+      previewImg.setAttribute('src', previewUrl);
+      if (previewError) {
+        previewError.setAttribute('hidden', '');
+      }
+      if (previewOpen) {
+        previewOpen.setAttribute('href', previewUrl);
+        previewOpen.removeAttribute('hidden');
+      }
+      previewModal.removeAttribute('hidden');
+    };
+
+    if (previewImg) {
+      previewImg.addEventListener('error', ()=>{
+        previewImg.setAttribute('hidden', '');
+        if (previewError) {
+          previewError.textContent = 'Imagem indisponivel no link atual. Use "Regenerar" para criar uma nova imagem.';
+          previewError.removeAttribute('hidden');
+        }
+      });
+      previewImg.addEventListener('load', ()=>{
+        previewImg.removeAttribute('hidden');
+        if (previewError) {
+          previewError.setAttribute('hidden', '');
+        }
+      });
+    }
+
     const parseJsonSafely = (raw)=>{
       try { return JSON.parse(raw); } catch { return null; }
     };
@@ -410,7 +525,7 @@
       if (resultUrl) {
         const safe = escapeAttr(resultUrl);
         if (badgeCell) {
-          badgeCell.innerHTML = `<a href="${safe}" target="_blank" class="badge badge--success">Ver</a>`;
+          badgeCell.innerHTML = `<a href="${safe}" data-image-url="${safe}" data-action="preview-image" class="badge badge--success">Ver</a>`;
         }
         if (thumb) {
           thumb.src = resultUrl;
@@ -431,6 +546,27 @@
       init.headers = Object.assign({}, init.headers||{}, { [CSRF_HEADER]: CSRF_TOKEN });
       return init;
     };
+
+    document.addEventListener('click', (ev)=>{
+      const previewLink = ev.target.closest('a[data-action="preview-image"][data-image-url]');
+      if (previewLink) {
+        ev.preventDefault();
+        openPreviewModal(previewLink.getAttribute('data-image-url'));
+        return;
+      }
+
+      const closeBtn = ev.target.closest('[data-close-preview]');
+      if (closeBtn) {
+        ev.preventDefault();
+        closePreviewModal();
+      }
+    });
+
+    document.addEventListener('keydown', (ev)=>{
+      if (ev.key === 'Escape' && previewModal && !previewModal.hasAttribute('hidden')) {
+        closePreviewModal();
+      }
+    });
 
     document.addEventListener('click', async (ev)=>{
       const btn = ev.target.closest('button[data-action][data-id]');
