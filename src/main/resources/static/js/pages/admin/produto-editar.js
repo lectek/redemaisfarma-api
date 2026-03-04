@@ -227,9 +227,14 @@ async function gerarIA() {
   const id = resolveProdutoId($id?.value);
   if (!id) return toast('ID do produto invalido.', 'err');
 
-  const endpoint = `/admin/imagens/${id}/queue`;
+  const hasCurrentImage = String($imagem?.value || '').trim().length > 0;
+  const endpoint = hasCurrentImage
+    ? `/admin/imagens/${id}/regenerate`
+    : `/admin/imagens/${id}/queue`;
   $btnGerarIA.disabled = true;
-  $status.textContent = 'Solicitando geracao de imagem...';
+  $status.textContent = hasCurrentImage
+    ? 'Solicitando regeneracao de imagem...'
+    : 'Solicitando geracao de imagem...';
 
   try {
     const r = await fetch(endpoint, withCsrf({ method: 'POST', credentials: 'same-origin' }));
@@ -263,8 +268,10 @@ async function gerarIA() {
       toast('Imagem gerada e salva!', 'ok');
       $status.textContent = 'Imagem gerada e salva.';
     } else {
-      toast('Enfileirado com sucesso!', 'ok');
-      $status.textContent = 'Geracao enfileirada...';
+      toast(hasCurrentImage ? 'Regeneracao solicitada!' : 'Enfileirado com sucesso!', 'ok');
+      $status.textContent = hasCurrentImage
+        ? 'Regeneracao enfileirada...'
+        : 'Geracao enfileirada...';
     }
   } catch (e) {
     console.error(e);
