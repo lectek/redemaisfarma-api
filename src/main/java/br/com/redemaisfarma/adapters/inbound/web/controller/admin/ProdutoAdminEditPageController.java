@@ -3,6 +3,7 @@ package br.com.redemaisfarma.adapters.inbound.web.controller.admin;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.ProdutoEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoCategoriaRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ProdutoRepository;
+import br.com.redemaisfarma.application.core.settings.AppSettingService;
 import lombok.Generated;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,8 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/produtos")
 public class ProdutoAdminEditPageController {
+    private static final String KEY_ALERTA_ESTOQUE_LIMITE = "app.estoque.alerta.limite";
+    private static final int DEFAULT_ALERTA_ESTOQUE_LIMITE = 10;
 
     /**
      * Repository used to load and update products.
@@ -29,6 +32,7 @@ public class ProdutoAdminEditPageController {
      * Repository used to resolve category names.
      */
     private final ProdutoCategoriaRepository categoriaRepository;
+    private final AppSettingService appSettingService;
 
     /**
      * Shows product edit page.
@@ -46,6 +50,7 @@ public class ProdutoAdminEditPageController {
         model.addAttribute("produto", produto);
         model.addAttribute("produtoId", id);
         model.addAttribute("categorias", this.resolveCategorias());
+        model.addAttribute("alertaEstoqueLimite", this.resolveAlertaEstoqueLimite());
         return "pages/admin/produtos/editar";
     }
 
@@ -97,10 +102,12 @@ public class ProdutoAdminEditPageController {
     @Generated
     public ProdutoAdminEditPageController(
             final ProdutoRepository productRepository,
-            final ProdutoCategoriaRepository productCategoryRepository
+            final ProdutoCategoriaRepository productCategoryRepository,
+            final AppSettingService appSettingService
     ) {
         this.repo = productRepository;
         this.categoriaRepository = productCategoryRepository;
+        this.appSettingService = appSettingService;
     }
 
     /**
@@ -114,5 +121,15 @@ public class ProdutoAdminEditPageController {
             return List.of("Sem Categoria");
         }
         return categorias;
+    }
+
+    private int resolveAlertaEstoqueLimite() {
+        return Math.max(
+                1,
+                this.appSettingService.getInt(
+                        KEY_ALERTA_ESTOQUE_LIMITE,
+                        DEFAULT_ALERTA_ESTOQUE_LIMITE
+                )
+        );
     }
 }

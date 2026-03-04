@@ -60,6 +60,8 @@ const $tarjaMedicacao = $('#tarjaMedicacao');
 const $exigeReceita = $('#exigeReceita');
 const $estoque = $('#estoque');
 const $alertaEstoqueLimite = $('#alertaEstoqueLimite');
+const $perfilVenda = $('#perfilVenda');
+const $perfilVendaHint = $('#perfilVendaHint');
 const $codigoBarras = $('#codigoBarras');
 const $disponivel = $('#disponivel');
 const $validador = $('#validador');
@@ -71,6 +73,15 @@ const $btnUploadImagem = $('#btn-upload-imagem');
 const $btnValidar = $('#btn-validar');
 const $btnPublicar = $('#btn-publicar');
 let imageUploadInProgress = false;
+
+const ALERTA_ESTOQUE_MIN = 1;
+const ALERTA_ESTOQUE_MAX = 100000;
+const ALERTA_ESTOQUE_PADRAO = 10;
+const PERFIL_VENDA_MULTIPLIERS = Object.freeze({
+  LENTA: 0.6,
+  NORMAL: 1,
+  RAPIDA: 1.8
+});
 
 async function carregarProdutoSeNecessario() {
   // Se já veio do SSR, não precisa. Mantemos apenas como fallback
@@ -108,6 +119,7 @@ function fill(p) {
   if ($disponivel) $disponivel.checked = (p.situacao ? p.situacao === 'ATIVO' : !!p.disponivel);
   updateImagePreview($imagem.value);
   syncTarjaReceitaRule();
+  syncPerfilVendaFromLimite();
 }
 
 function imagePlaceholderUrl() {
@@ -160,6 +172,101 @@ function syncTarjaReceitaRule() {
   $exigeReceita.disabled = false;
 }
 
+function parsePositiveInt(raw) {
+  const parsed = parseInt(String(raw ?? '').trim(), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function clampAlertaLimite(value) {
+  if (!Number.isFinite(value)) return ALERTA_ESTOQUE_PADRAO;
+  return Math.min(ALERTA_ESTOQUE_MAX, Math.max(ALERTA_ESTOQUE_MIN, value));
+}
+
+function resolveLimiteGlobal() {
+  const fromDataAttr = parsePositiveInt($alertaEstoqueLimite?.dataset?.globalLimite);
+  return clampAlertaLimite(fromDataAttr ?? ALERTA_ESTOQUE_PADRAO);
+}
+
+function resolveLimitePorPerfil(perfil) {
+  const multiplier = PERFIL_VENDA_MULTIPLIERS[perfil];
+  if (!multiplier) return null;
+  return clampAlertaLimite(Math.round(resolveLimiteGlobal() * multiplier));
+}
+
+function resolvePerfilPeloLimite(limiteAtual) {
+  if (limiteAtual == null) return 'NORMAL';
+  for (const perfil of Object.keys(PERFIL_VENDA_MULTIPLIERS)) {
+    if (limiteAtual === resolveLimitePorPerfil(perfil)) {
+      return perfil;
+    }
+  }
+  return 'PERSONALIZADO';
+}
+
+function resolvePerfilHint(perfil, limiteAtual) {
+  const limiteGlobal = resolveLimiteGlobal();
+  switch (perfil) {
+    case 'LENTA':
+      return `Venda lenta: limite sugerido ${resolveLimitePorPerfil('LENTA')} (global ${limiteGlobal}).`;
+    case 'NORMAL':
+      return `Venda normal: limite sugerido ${resolveLimitePorPerfil('NORMAL')} (global ${limiteGlobal}).`;
+    case 'RAPIDA':
+      return `Venda rapida: limite sugerido ${resolveLimitePorPerfil('RAPIDA')} (global ${limiteGlobal}).`;
+    default:
+      if (limiteAtual == null) {
+        return `Personalizado: em branco usa o limite global (${limiteGlobal}).`;
+      }
+      return `Personalizado: limite manual atual ${limiteAtual}.`;
+  }
+}
+
+function applyPerfilHint(perfil, limiteAtual) {
+  if (!$perfilVendaHint) return;
+  $perfilVendaHint.textContent = resolvePerfilHint(perfil, limiteAtual);
+}
+
+function syncPerfilVendaFromLimite() {
+  if (!$perfilVenda || !$alertaEstoqueLimite) return;
+  const limiteAtual = parsePositiveInt($alertaEstoqueLimite.value);
+  const perfil = resolvePerfilPeloLimite(limiteAtual);
+  $perfilVenda.value = perfil;
+  applyPerfilHint(perfil, limiteAtual);
+}
+
+function onPerfilVendaChange() {
+  if (!$perfilVenda || !$alertaEstoqueLimite) return;
+  const perfil = String($perfilVenda.value || 'PERSONALIZADO').toUpperCase();
+  if (perfil === 'PERSONALIZADO') {
+    applyPerfilHint(perfil, parsePositiveInt($alertaEstoqueLimite.value));
+    return;
+  }
+
+  const limite = resolveLimitePorPerfil(perfil);
+  if (limite != null) {
+    $alertaEstoqueLimite.value = String(limite);
+  }
+  applyPerfilHint(perfil, limite);
+}
+
+function onAlertaLimiteInput() {
+  if (!$perfilVenda || !$alertaEstoqueLimite) return;
+  const limiteAtual = parsePositiveInt($alertaEstoqueLimite.value);
+  const perfil = resolvePerfilPeloLimite(limiteAtual);
+  $perfilVenda.value = perfil;
+  applyPerfilHint(perfil, limiteAtual);
+}
+
+function normalizeAlertaLimite() {
+  if (!$alertaEstoqueLimite) return;
+  const parsed = parsePositiveInt($alertaEstoqueLimite.value);
+  if (parsed == null) {
+    $alertaEstoqueLimite.value = '';
+  } else {
+    $alertaEstoqueLimite.value = String(clampAlertaLimite(parsed));
+  }
+  onAlertaLimiteInput();
+}
+
 async function salvar() {
   const id = $id?.value;
   if (!id) return toast('ID do produto ausente.', 'err');
@@ -175,10 +282,8 @@ async function salvar() {
     estoque: parseInt($estoque.value || '0', 10),
     alertaEstoqueLimite: (() => {
       if (!$alertaEstoqueLimite) return null;
-      const raw = String($alertaEstoqueLimite.value || '').trim();
-      if (!raw) return null;
-      const parsed = parseInt(raw, 10);
-      return Number.isFinite(parsed) ? parsed : null;
+      const parsed = parsePositiveInt($alertaEstoqueLimite.value);
+      return parsed == null ? null : clampAlertaLimite(parsed);
     })(),
     codigoBarras: $codigoBarras.value || null,
     ativo: !!$disponivel.checked
@@ -376,6 +481,9 @@ $btnValidar?.addEventListener('click', validar);
 $btnPublicar?.addEventListener('click', publicar);
 $categoria?.addEventListener('change', syncTarjaReceitaRule);
 $tarjaMedicacao?.addEventListener('change', syncTarjaReceitaRule);
+$perfilVenda?.addEventListener('change', onPerfilVendaChange);
+$alertaEstoqueLimite?.addEventListener('input', onAlertaLimiteInput);
+$alertaEstoqueLimite?.addEventListener('blur', normalizeAlertaLimite);
 $imagem?.addEventListener('input', () => updateImagePreview($imagem.value));
 $imagemArquivo?.addEventListener('change', () => {
   if ($imagemArquivo?.files?.length) {
@@ -385,6 +493,7 @@ $imagemArquivo?.addEventListener('change', () => {
 
 // bootstrap
 syncTarjaReceitaRule();
+syncPerfilVendaFromLimite();
 carregarProdutoSeNecessario();
 updateImagePreview($imagem?.value);
 

@@ -391,12 +391,23 @@
                 <div class="panel-body">
                   <p class="hint">Defina um limite individual para este produto. Quando vazio, vale o limite global.</p>
                   <div class="field">
+                    <label for="perfilVenda">Perfil de venda</label>
+                    <select class="input" id="perfilVenda">
+                      <option value="PERSONALIZADO">Personalizado</option>
+                      <option value="LENTA">Venda lenta</option>
+                      <option value="NORMAL">Venda normal</option>
+                      <option value="RAPIDA">Venda rapida</option>
+                    </select>
+                    <p id="perfilVendaHint" class="hint">Use "Venda rapida" para aumentar preventivamente o limite de alerta.</p>
+                  </div>
+                  <div class="field">
                     <label for="alertaEstoqueLimite">Limite deste produto</label>
                     <input class="input"
                            id="alertaEstoqueLimite"
                            type="number"
                            min="1"
                            max="100000"
+                           th:attr="data-global-limite=${alertaEstoqueLimite}"
                            th:value="${produto?.alertaEstoqueLimite}" />
                   </div>
                   <p class="hint">Limite global atual: <strong th:text="${alertaEstoqueLimite}">10</strong> unidades.</p>
