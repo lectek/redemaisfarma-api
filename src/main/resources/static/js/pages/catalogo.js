@@ -255,7 +255,13 @@
           )
         );
       }
-      toast(action === "regenerate" ? "Regeneração solicitada!" : "Geração enfileirada!");
+      const payload = await r.json().catch(() => null);
+      const result = String(payload?.result || "");
+      if (result.startsWith("PROCESSADO_SYNC")) {
+        toast("Imagem gerada e salva!");
+      } else {
+        toast(action === "regenerate" ? "Regeneração solicitada!" : "Geração enfileirada!");
+      }
     } catch (e) {
       toast(e?.message || "Falha ao solicitar imagem.", true);
     } finally {

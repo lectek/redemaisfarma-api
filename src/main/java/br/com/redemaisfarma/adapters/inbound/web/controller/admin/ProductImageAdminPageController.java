@@ -99,27 +99,30 @@ public class ProductImageAdminPageController {
                 String.valueOf(produto.getId())
         );
 
+        boolean kafkaPublished = false;
+        if (this.kafkaEnabled) {
+            try {
+                publisher.publish(event);
+                kafkaPublished = true;
+            } catch (RuntimeException ex) {
+                log.warn(
+                        "Falha ao publicar no Kafka para produto {}. Fallback sync sera usado. Erro={}",
+                        produtoId,
+                        ex.getMessage(),
+                        ex
+                );
+            }
+        }
+
+        final String result;
         if (!this.kafkaEnabled) {
-            return runSyncAndBuildResponse(produtoId, event, "PROCESSADO_SYNC");
+            result = "PROCESSADO_SYNC";
+        } else if (kafkaPublished) {
+            result = "PROCESSADO_SYNC_E_ENFILEIRADO";
+        } else {
+            result = "PROCESSADO_SYNC_FALLBACK";
         }
-
-        try {
-            publisher.publish(event);
-        } catch (RuntimeException ex) {
-            log.warn(
-                    "Falha ao publicar no Kafka para produto {}. Fallback sync sera usado. Erro={}",
-                    produtoId,
-                    ex.getMessage(),
-                    ex
-            );
-            return runSyncAndBuildResponse(produtoId, event, "PROCESSADO_SYNC_FALLBACK");
-        }
-
-        final var lastJob = jobRepo.findLastByProduct(produtoId).orElse(null);
-        return ResponseEntity.ok(new EnqueueResponse(
-                "ENFILEIRADO",
-                lastJob == null ? null : JobView.from(lastJob)
-        ));
+        return runSyncAndBuildResponse(produtoId, event, result);
     }
 
     @PostMapping({

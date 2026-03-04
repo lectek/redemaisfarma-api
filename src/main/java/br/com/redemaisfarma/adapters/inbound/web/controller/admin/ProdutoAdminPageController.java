@@ -490,6 +490,55 @@ public class ProdutoAdminPageController {
         return REDIRECT_PRODUTOS_NOVO;
     }
 
+    @PostMapping("/{id}/validar")
+    @ResponseBody
+    public ResponseEntity<String> validarProdutoFluxo(
+            @PathVariable("id") final Long id,
+            @RequestParam("validador") final String validador
+    ) {
+        return this.produtoRepository.findById(id)
+                .map(entity -> {
+                    if (entity.getStatus() == ProdutoStatus.PUBLICADO) {
+                        return ResponseEntity
+                                .status(org.springframework.http.HttpStatus.CONFLICT)
+                                .body("Produto publicado nao pode voltar para VALIDADO.");
+                    }
+                    entity.setStatus(ProdutoStatus.VALIDADO);
+                    entity.setValidador(this.resolveValidadorNome(validador));
+                    entity.setUpdatedAt(LocalDateTime.now());
+                    this.produtoRepository.save(entity);
+                    return ResponseEntity.ok("VALIDADO");
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/publicar")
+    @ResponseBody
+    public ResponseEntity<String> publicarProdutoFluxo(
+            @PathVariable("id") final Long id,
+            @RequestParam("validador") final String validador
+    ) {
+        return this.produtoRepository.findById(id)
+                .map(entity -> {
+                    if (entity.getStatus() != ProdutoStatus.VALIDADO) {
+                        return ResponseEntity
+                                .status(org.springframework.http.HttpStatus.CONFLICT)
+                                .body("Produto deve estar VALIDADO antes de PUBLICAR.");
+                    }
+                    entity.setStatus(ProdutoStatus.PUBLICADO);
+                    entity.setValidador(this.resolveValidadorNome(validador));
+                    entity.setPublicadoEm(LocalDateTime.now());
+                    entity.setUpdatedAt(LocalDateTime.now());
+                    this.produtoRepository.save(entity);
+                    return ResponseEntity.ok("PUBLICADO");
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    private String resolveValidadorNome(final String validador) {
+        return StringUtils.hasText(validador) ? validador.trim() : "admin-web";
+    }
+
     @GetMapping("/{id}/editar")
     public String editarProdutoPage(@PathVariable("id") Long id, Model model) {
         model.addAttribute("produtoId", id);

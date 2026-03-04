@@ -231,9 +231,15 @@ async function gerarIA() {
         normalizeErrorMessage(raw, `Falha na solicitacao de imagem (HTTP ${r.status})`)
       );
     }
-
-    toast('Enfileirado com sucesso!', 'ok');
-    $status.textContent = 'Geracao enfileirada...';
+    const payload = await r.json().catch(() => null);
+    const result = String(payload?.result || '');
+    if (result.startsWith('PROCESSADO_SYNC')) {
+      toast('Imagem gerada e salva!', 'ok');
+      $status.textContent = 'Imagem gerada e salva.';
+    } else {
+      toast('Enfileirado com sucesso!', 'ok');
+      $status.textContent = 'Geracao enfileirada...';
+    }
   } catch (e) {
     console.error(e);
     $status.textContent = 'Erro ao solicitar imagem.';
@@ -258,7 +264,7 @@ async function moverFluxo(acao) {
   if (!id) return toast('Produto ainda nao salvo.', 'err');
 
   const validador = encodeURIComponent(validadorAtual());
-  const endpoint = `/api/admin/produtos/${id}/${acao}?validador=${validador}`;
+  const endpoint = `/admin/produtos/${id}/${acao}?validador=${validador}`;
   const acaoLabel = acao === 'validar' ? 'validando' : 'publicando';
 
   setFluxoButtonsDisabled(true);
