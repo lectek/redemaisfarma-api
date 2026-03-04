@@ -4,12 +4,9 @@ FROM maven:3.9.6-eclipse-temurin-21 AS builder
 WORKDIR /workspace
 
 COPY pom.xml ./
-COPY mvnw ./
-COPY .mvn .mvn
 COPY src src
 
-RUN chmod +x mvnw \
- && ./mvnw -B -ntp -DskipTests=true -DskipITs=true package
+RUN mvn -B -ntp -DskipTests=true -DskipITs=true package
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
