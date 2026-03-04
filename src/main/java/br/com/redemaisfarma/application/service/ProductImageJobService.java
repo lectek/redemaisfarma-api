@@ -21,6 +21,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Set;
 import java.util.Map;
 import java.util.Optional;
 
@@ -31,6 +32,15 @@ public class ProductImageJobService {
     private static final String PRESET = "packshot";
     private static final Duration HTTP_CONNECT_TIMEOUT = Duration.ofSeconds(12);
     private static final Duration HTTP_REQUEST_TIMEOUT = Duration.ofSeconds(25);
+    private static final Duration HTTP_RETRY_BASE_DELAY = Duration.ofMillis(700);
+    private static final int HTTP_DOWNLOAD_MAX_ATTEMPTS = 3;
+    private static final String HTTP_ERROR_PREFIX = "Falha ao baixar imagem da IA. HTTP ";
+    private static final String IMAGE_FETCH_USER_AGENT =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                    + "(KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
+    private static final Set<Integer> RETRYABLE_HTTP_STATUS = Set.of(
+            408, 425, 429, 500, 502, 503, 504, 520, 521, 522, 523, 524, 525, 526, 527, 529, 530
+    );
 
     private final ProdutoRepositoryPort produtos;
     private final ProductImageJobRepository jobs;
@@ -81,7 +91,7 @@ public class ProductImageJobService {
             ImageGenRequestDTO req = new ImageGenRequestDTO(PRESET, prompt, vars, null, true, true);
 
             String generatedUrl = imageStudio.generateSync(req);
-            String persistedPngUrl = persistAsPng(p.id(), generatedUrl);
+            String persistedPngUrl = persistImageWithFallback(p.id(), generatedUrl);
             produtos.updateImagem(p.id(), persistedPngUrl);
             jobs.markDone(job.id(), persistedPngUrl);
 
@@ -106,7 +116,7 @@ public class ProductImageJobService {
             ImageGenRequestDTO req = new ImageGenRequestDTO(PRESET, promptFactory.promptForProduto(p), vars, null, true, true);
 
             String generatedUrl = imageStudio.generateSync(req);
-            String persistedPngUrl = persistAsPng(p.id(), generatedUrl);
+            String persistedPngUrl = persistImageWithFallback(p.id(), generatedUrl);
             produtos.updateImagem(p.id(), persistedPngUrl);
             jobs.markDone(job.id(), persistedPngUrl);
 
@@ -123,32 +133,14 @@ public class ProductImageJobService {
             throw new IOException("URL gerada da imagem esta vazia.");
         }
 
-        final HttpRequest request;
+        final URI imageUri;
         try {
-            request = HttpRequest.newBuilder(URI.create(generatedUrl))
-                    .GET()
-                    .timeout(HTTP_REQUEST_TIMEOUT)
-                    .header("Accept", "image/*")
-                    .header("User-Agent", "RedeMaisFarma/1.0")
-                    .build();
+            imageUri = URI.create(generatedUrl);
         } catch (IllegalArgumentException ex) {
             throw new IOException("URL gerada da imagem e invalida.", ex);
         }
 
-        final HttpResponse<byte[]> response;
-        try {
-            response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-            throw new IOException("Download da imagem foi interrompido.", ex);
-        }
-
-        final int status = response.statusCode();
-        if (status < 200 || status >= 300) {
-            throw new IOException("Falha ao baixar imagem da IA. HTTP " + status);
-        }
-
-        final byte[] body = response.body();
+        final byte[] body = downloadImageBodyWithRetry(imageUri);
         if (body == null || body.length == 0) {
             throw new IOException("Conteudo da imagem gerada esta vazio.");
         }
@@ -159,5 +151,93 @@ public class ProductImageJobService {
         }
 
         return this.imageStorageService.saveProductImagePng(productId, image);
+    }
+
+    private byte[] downloadImageBodyWithRetry(final URI imageUri) throws IOException {
+        IOException lastIo = null;
+        int lastStatus = -1;
+
+        for (int attempt = 1; attempt <= HTTP_DOWNLOAD_MAX_ATTEMPTS; attempt++) {
+            final HttpRequest request = HttpRequest.newBuilder(imageUri)
+                    .GET()
+                    .timeout(HTTP_REQUEST_TIMEOUT)
+                    .header("Accept", "image/avif,image/webp,image/apng,image/*,*/*;q=0.8")
+                    .header("User-Agent", IMAGE_FETCH_USER_AGENT)
+                    .header("Referer", "https://image.pollinations.ai/")
+                    .build();
+
+            final HttpResponse<byte[]> response;
+            try {
+                response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw new IOException("Download da imagem foi interrompido.", ex);
+            } catch (IOException ex) {
+                lastIo = ex;
+                if (attempt < HTTP_DOWNLOAD_MAX_ATTEMPTS) {
+                    sleepBeforeRetry(attempt);
+                    continue;
+                }
+                throw ex;
+            }
+
+            final int status = response.statusCode();
+            if (status >= 200 && status < 300) {
+                return response.body();
+            }
+
+            lastStatus = status;
+            if (attempt < HTTP_DOWNLOAD_MAX_ATTEMPTS && RETRYABLE_HTTP_STATUS.contains(status)) {
+                sleepBeforeRetry(attempt);
+                continue;
+            }
+            break;
+        }
+
+        if (lastStatus > 0) {
+            throw new IOException("Falha ao baixar imagem da IA. HTTP " + lastStatus);
+        }
+        throw new IOException("Falha ao baixar imagem da IA.", lastIo);
+    }
+
+    private static void sleepBeforeRetry(final int attempt) throws IOException {
+        final long delayMs = HTTP_RETRY_BASE_DELAY.toMillis() * attempt;
+        try {
+            Thread.sleep(delayMs);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Retry de download foi interrompido.", ex);
+        }
+    }
+
+    private String persistImageWithFallback(final Long productId, final String generatedUrl)
+            throws IOException {
+        try {
+            return persistAsPng(productId, generatedUrl);
+        } catch (IOException ex) {
+            if (canFallbackToRemoteUrl(generatedUrl, ex)) {
+                log.warn(
+                        "Fallback para URL remota da IA no produto {}: {}",
+                        productId,
+                        ex.getMessage()
+                );
+                return generatedUrl.trim();
+            }
+            throw ex;
+        }
+    }
+
+    private static boolean canFallbackToRemoteUrl(final String generatedUrl, final IOException ex) {
+        if (generatedUrl == null || generatedUrl.isBlank()) {
+            return false;
+        }
+        final String trimmed = generatedUrl.trim();
+        if (!(trimmed.startsWith("http://") || trimmed.startsWith("https://"))) {
+            return false;
+        }
+        final String message = ex.getMessage() == null ? "" : ex.getMessage();
+        return message.startsWith(HTTP_ERROR_PREFIX)
+                || message.contains("Conteudo da imagem gerada esta vazio")
+                || message.contains("Formato da imagem gerada nao e suportado");
     }
 }
