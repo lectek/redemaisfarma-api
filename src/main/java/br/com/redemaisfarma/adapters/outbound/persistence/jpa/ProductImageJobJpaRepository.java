@@ -16,9 +16,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ProductImageJobJpaRepository
 extends JpaRepository<ProductImageJobEntity, Long> {
     public Page<ProductImageJobEntity> findByStatusOrderByCreatedAtAsc(String var1, Pageable var2);
-
-    public ProductImageJobEntity findTopByProductIdOrderByCreatedAtDesc(Long var1);
+    public ProductImageJobEntity findTopByProductIdOrderByIdDesc(Long var1);
 
     public boolean existsByProductIdAndFingerprint(Long var1, String var2);
 }
-

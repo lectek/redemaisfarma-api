@@ -64,7 +64,7 @@ implements ProductImageJobRepository {
     }
 
     public Optional<ProductImageJobRepository.Job> findLastByProduct(Long productId) {
-        ProductImageJobEntity e = this.jpa.findTopByProductIdOrderByCreatedAtDesc(productId);
+        ProductImageJobEntity e = this.jpa.findTopByProductIdOrderByIdDesc(productId);
         return Optional.ofNullable(e).map(this::map);
     }
 
