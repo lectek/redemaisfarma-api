@@ -138,6 +138,7 @@ public class ProdutoAdminRestController {
         entity.setStatus(ProdutoStatus.IMPORTADO);
         entity.setDataImportacao(LocalDateTime.now());
         applyMedicacaoRules(entity, dto);
+        entity.setAlertaEstoqueLimite(sanitizeAlertaEstoqueLimite(dto.getAlertaEstoqueLimite()));
 
         final ProdutoEntity salvo = repo.save(entity);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -170,6 +171,7 @@ public class ProdutoAdminRestController {
                         );
                     }
                     applyMedicacaoRules(atual, dto);
+                    atual.setAlertaEstoqueLimite(sanitizeAlertaEstoqueLimite(dto.getAlertaEstoqueLimite()));
                     atual.setUpdatedAt(LocalDateTime.now());
                     final ProdutoEntity salvo = repo.save(atual);
                     return ResponseEntity.ok(toResponse(salvo));
@@ -330,6 +332,7 @@ public class ProdutoAdminRestController {
         dto.setImagem(entity.getImagem());
         dto.setCategoria(entity.getCategoria());
         dto.setEstoqueAtual(entity.getEstoque());
+        dto.setAlertaEstoqueLimite(entity.getAlertaEstoqueLimite());
         dto.setValidade(LocalDate.now().plusYears(DEFAULT_VALIDADE_YEARS));
         dto.setCodigoBarras(entity.getCodigoBarras());
         dto.setMarca(entity.getFabricante());
@@ -462,6 +465,13 @@ public class ProdutoAdminRestController {
                             DUPLICATE_NAME_MESSAGE
                     );
                 });
+    }
+
+    private Integer sanitizeAlertaEstoqueLimite(final Integer rawValue) {
+        if (rawValue == null) {
+            return null;
+        }
+        return Math.clamp(rawValue, 1, 100_000);
     }
 
     /**

@@ -38,7 +38,10 @@ public interface ProdutoRepository extends JpaRepository<ProdutoEntity, Long> {
 
     long countByCategoriaIgnoreCase(String categoria);
 
-    @Query("SELECT p FROM ProdutoEntity p WHERE p.estoque <= :limite")
+    @Query("""
+            SELECT p FROM ProdutoEntity p
+            WHERE p.estoque <= COALESCE(p.alertaEstoqueLimite, :limite)
+            """)
     List<ProdutoEntity> findComEstoqueBaixo(@Param("limite") Integer limite);
 
     List<ProdutoEntity> findByDisponivelTrue();

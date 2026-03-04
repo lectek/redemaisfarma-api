@@ -84,6 +84,9 @@ implements Serializable {
     @Min(value=0L, message="{produto.estoqueAtual.min}")
     @JsonProperty(value="estoqueAtual")
     private @NotNull(message="{produto.estoqueAtual.notNull}") @Min(value=0L, message="{produto.estoqueAtual.min}") Integer estoqueAtual;
+    @Schema(description="Limite personalizado para alerta de estoque baixo", example="12")
+    @JsonProperty(value="alertaEstoqueLimite")
+    private Integer alertaEstoqueLimite;
     @Schema(description="Data de validade do produto", type="string", format="date", example="2026-12-31", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message="{produto.validade.notNull}")
     @Future(message="{produto.validade.future}")
@@ -230,6 +233,14 @@ implements Serializable {
         this.estoqueAtual = estoqueAtual;
     }
 
+    public Integer getAlertaEstoqueLimite() {
+        return this.alertaEstoqueLimite;
+    }
+
+    public void setAlertaEstoqueLimite(Integer alertaEstoqueLimite) {
+        this.alertaEstoqueLimite = alertaEstoqueLimite;
+    }
+
     public LocalDate getValidade() {
         return this.validade;
     }
@@ -342,5 +353,4 @@ implements Serializable {
 
     }
 }
-
 

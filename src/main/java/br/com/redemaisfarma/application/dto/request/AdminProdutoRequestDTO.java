@@ -1,6 +1,7 @@
 package br.com.redemaisfarma.application.dto.request;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,6 +38,10 @@ public class AdminProdutoRequestDTO {
     @NotNull(message = "{produto.estoque.notNull}")
     @Min(value = 0, message = "{produto.estoque.min}")
     private Integer estoque;
+
+    @Min(value = 1, message = "{produto.alertaEstoqueLimite.min}")
+    @Max(value = 100000, message = "{produto.alertaEstoqueLimite.max}")
+    private Integer alertaEstoqueLimite;
 
     @Size(max = 32, message = "{produto.tarjaMedicacao.size}")
     private String tarjaMedicacao;
@@ -99,6 +104,14 @@ public class AdminProdutoRequestDTO {
 
     public void setEstoque(Integer estoque) {
         this.estoque = estoque;
+    }
+
+    public Integer getAlertaEstoqueLimite() {
+        return alertaEstoqueLimite;
+    }
+
+    public void setAlertaEstoqueLimite(Integer alertaEstoqueLimite) {
+        this.alertaEstoqueLimite = alertaEstoqueLimite;
     }
 
     public String getTarjaMedicacao() {

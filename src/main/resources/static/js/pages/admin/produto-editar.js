@@ -53,11 +53,13 @@ const $nome = $('#nome');
 const $descricao = $('#descricao');
 const $preco = $('#preco');
 const $imagem = $('#imagem');
+const $imagemPreview = $('#imagem-preview');
 const $imagemArquivo = $('#imagemArquivo');
 const $categoria = $('#categoria');
 const $tarjaMedicacao = $('#tarjaMedicacao');
 const $exigeReceita = $('#exigeReceita');
 const $estoque = $('#estoque');
+const $alertaEstoqueLimite = $('#alertaEstoqueLimite');
 const $codigoBarras = $('#codigoBarras');
 const $disponivel = $('#disponivel');
 const $validador = $('#validador');
@@ -68,6 +70,7 @@ const $btnGerarIA = $('#btn-gerar-ia');
 const $btnUploadImagem = $('#btn-upload-imagem');
 const $btnValidar = $('#btn-validar');
 const $btnPublicar = $('#btn-publicar');
+let imageUploadInProgress = false;
 
 async function carregarProdutoSeNecessario() {
   // Se já veio do SSR, não precisa. Mantemos apenas como fallback
@@ -90,6 +93,9 @@ function fill(p) {
   if (!$descricao.value) $descricao.value = p.descricao ?? '';
   if (!$preco.value) $preco.value = p.preco ?? p.precoVenda ?? '';
   if (!$imagem.value) $imagem.value = p.imagem ?? p.imagemUrl ?? '';
+  if ($alertaEstoqueLimite && !$alertaEstoqueLimite.value) {
+    $alertaEstoqueLimite.value = p.alertaEstoqueLimite ?? '';
+  }
   if (!$categoria.value) $categoria.value = p.categoria ?? '';
   if ($tarjaMedicacao && !$tarjaMedicacao.value) {
     $tarjaMedicacao.value = p.tarjaMedicacao ?? '';
@@ -100,7 +106,18 @@ function fill(p) {
   if (!$estoque.value) $estoque.value = p.estoque ?? p.estoqueAtual ?? 0;
   if (!$codigoBarras.value) $codigoBarras.value = p.codigoBarras ?? '';
   if ($disponivel) $disponivel.checked = (p.situacao ? p.situacao === 'ATIVO' : !!p.disponivel);
+  updateImagePreview($imagem.value);
   syncTarjaReceitaRule();
+}
+
+function imagePlaceholderUrl() {
+  return '/img/produtos/placeholder-generico.png';
+}
+
+function updateImagePreview(url) {
+  if (!$imagemPreview) return;
+  const value = String(url || '').trim();
+  $imagemPreview.src = value || imagePlaceholderUrl();
 }
 
 function normalizeCategoria(value) {
@@ -156,6 +173,13 @@ async function salvar() {
     tarjaMedicacao: ($tarjaMedicacao?.value || '').trim() || null,
     exigeReceita: !!$exigeReceita?.checked,
     estoque: parseInt($estoque.value || '0', 10),
+    alertaEstoqueLimite: (() => {
+      if (!$alertaEstoqueLimite) return null;
+      const raw = String($alertaEstoqueLimite.value || '').trim();
+      if (!raw) return null;
+      const parsed = parseInt(raw, 10);
+      return Number.isFinite(parsed) ? parsed : null;
+    })(),
     codigoBarras: $codigoBarras.value || null,
     ativo: !!$disponivel.checked
   };
@@ -187,17 +211,22 @@ async function salvar() {
 }
 
 async function uploadImagem() {
+  if (imageUploadInProgress) return;
   const id = $id?.value;
   if (!id) return toast('Produto ainda nao salvo.', 'err');
 
   const file = $imagemArquivo?.files?.[0];
-  if (!file) return toast('Selecione uma imagem para enviar.', 'err');
+  if (!file) {
+    $imagemArquivo?.click();
+    return;
+  }
 
   const formData = new FormData();
   formData.append('file', file);
 
   $status.textContent = 'Enviando imagem...';
   $btnUploadImagem.disabled = true;
+  imageUploadInProgress = true;
 
   try {
     const r = await fetch(`/api/admin/produtos/${id}/imagem`, withCsrf({
@@ -211,7 +240,10 @@ async function uploadImagem() {
       throw new Error(normalizeErrorMessage(raw, `Falha no upload (HTTP ${r.status})`));
     }
     const url = (await r.text())?.trim();
-    if (url) $imagem.value = url;
+    if (url) {
+      $imagem.value = url;
+      updateImagePreview(url);
+    }
     $status.textContent = 'Imagem enviada.';
     toast('Imagem atualizada!', 'ok');
   } catch (e) {
@@ -220,6 +252,7 @@ async function uploadImagem() {
     toast(e?.message || 'Falha ao enviar imagem', 'err');
   } finally {
     $btnUploadImagem.disabled = false;
+    imageUploadInProgress = false;
   }
 }
 
@@ -261,6 +294,7 @@ async function gerarIA() {
     const resultUrl = String(payload?.lastJob?.resultUrl || '').trim();
     if (resultUrl) {
       $imagem.value = resultUrl;
+      updateImagePreview(resultUrl);
     }
 
     const result = String(payload?.result || '');
@@ -342,8 +376,15 @@ $btnValidar?.addEventListener('click', validar);
 $btnPublicar?.addEventListener('click', publicar);
 $categoria?.addEventListener('change', syncTarjaReceitaRule);
 $tarjaMedicacao?.addEventListener('change', syncTarjaReceitaRule);
+$imagem?.addEventListener('input', () => updateImagePreview($imagem.value));
+$imagemArquivo?.addEventListener('change', () => {
+  if ($imagemArquivo?.files?.length) {
+    uploadImagem();
+  }
+});
 
 // bootstrap
 syncTarjaReceitaRule();
 carregarProdutoSeNecessario();
+updateImagePreview($imagem?.value);
 

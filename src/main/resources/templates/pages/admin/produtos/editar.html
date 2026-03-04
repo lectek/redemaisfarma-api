@@ -3,150 +3,440 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Editar produto - Admin</title>
+  <title>Editar Produto - Admin</title>
   <link rel="stylesheet" th:href="@{/css/main.css}" />
 
-  <!-- CSRF -->
   <meta name="_csrf" th:content="${_csrf.token}"/>
   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 
   <style>
-    #toast{position:fixed;right:16px;bottom:16px;display:grid;gap:8px;z-index:9999}
-    .toast{background:#0f1320;color:#e9eef6;border:1px solid rgba(255,255,255,.07);
-           border-radius:12px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-    .toast.ok{border-color:rgba(46,204,113,.5)}
-    .toast.err{border-color:rgba(231,76,60,.5)}
+    .admin-produto-editar-page {
+      --edit-bg: #f3f5fb;
+      --edit-card: #ffffff;
+      --edit-border: #dde3ef;
+      --edit-muted: #6b7280;
+      --edit-ink: #1f2937;
+      --edit-blue: #2563eb;
+      --edit-blue-strong: #1d4ed8;
+      --edit-danger: #991b1b;
+      --edit-shadow: 0 16px 40px rgba(15, 23, 42, 0.10);
+    }
+
+    body.admin-produto-editar-page {
+      background:
+        radial-gradient(860px 340px at 8% -12%, rgba(37, 99, 235, 0.14), transparent 56%),
+        radial-gradient(980px 400px at 98% 0%, rgba(190, 24, 93, 0.12), transparent 60%),
+        var(--edit-bg);
+    }
+
+    .admin-produto-editar-page .site-header {
+      background: linear-gradient(95deg, #0f172a 0%, #1e3a8a 52%, #2563eb 100%);
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.22);
+      border-bottom: 0;
+    }
+
+    .admin-produto-editar-page .layout.layout--with-sidebar {
+      width: min(100%, 1560px);
+      margin-inline: auto;
+      padding-inline: clamp(12px, 1.5vw, 24px);
+      gap: clamp(12px, 1.4vw, 22px);
+    }
+
+    .admin-produto-editar-page .sidebar {
+      background: linear-gradient(185deg, #7f1d45 0%, #9f294f 45%, #7c1f3d 100%);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 18px 42px rgba(49, 12, 24, 0.35);
+      color: #fff;
+    }
+
+    .admin-produto-editar-page .sidebar__link {
+      color: #f8e9ef;
+      border-radius: 12px;
+      min-height: 42px;
+      width: 100%;
+    }
+
+    .admin-produto-editar-page .sidebar__link:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .admin-produto-editar-page .sidebar__link.is-active {
+      background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+      box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.85);
+      color: #ffffff;
+    }
+
+    .admin-produto-editar-page .editor-shell {
+      border: 1px solid var(--edit-border);
+      border-radius: 18px;
+      background: var(--edit-card);
+      box-shadow: var(--edit-shadow);
+      overflow: hidden;
+    }
+
+    .admin-produto-editar-page .editor-topbar {
+      padding: clamp(18px, 2vw, 24px);
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--edit-border);
+      background: #ffffff;
+    }
+
+    .admin-produto-editar-page .editor-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--edit-blue-strong);
+      font-weight: 700;
+      text-decoration: none;
+      margin-bottom: 10px;
+    }
+
+    .admin-produto-editar-page .editor-title {
+      margin: 0;
+      color: var(--edit-ink);
+      letter-spacing: -0.02em;
+    }
+
+    .admin-produto-editar-page .editor-subtitle {
+      margin: 6px 0 0;
+      color: var(--edit-muted);
+    }
+
+    .admin-produto-editar-page .editor-top-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .admin-produto-editar-page .editor-top-actions .btn {
+      min-width: 100px;
+    }
+
+    .admin-produto-editar-page .editor-content {
+      padding: clamp(16px, 1.6vw, 24px);
+    }
+
+    .admin-produto-editar-page .editor-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr);
+      gap: 14px;
+    }
+
+    .admin-produto-editar-page .editor-side {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .admin-produto-editar-page .panel {
+      border: 1px solid var(--edit-border);
+      border-radius: 14px;
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .admin-produto-editar-page .panel-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--edit-border);
+      background: #fafbff;
+    }
+
+    .admin-produto-editar-page .panel-head h2 {
+      margin: 0;
+      font-size: 1.08rem;
+      color: var(--edit-ink);
+      letter-spacing: -0.01em;
+    }
+
+    .admin-produto-editar-page .panel-body {
+      padding: 14px 16px 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .admin-produto-editar-page .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .admin-produto-editar-page .field label {
+      font-size: 0.96rem;
+      color: #374151;
+      font-weight: 650;
+    }
+
+    .admin-produto-editar-page .field-two {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .admin-produto-editar-page .check-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 650;
+      color: #374151;
+    }
+
+    .admin-produto-editar-page .hint {
+      margin: 0;
+      font-size: 0.92rem;
+      color: var(--edit-muted);
+      line-height: 1.35;
+    }
+
+    .admin-produto-editar-page .status-line {
+      margin: 0;
+      min-height: 22px;
+      color: var(--edit-muted);
+      font-weight: 600;
+    }
+
+    .admin-produto-editar-page .flow-row {
+      display: flex;
+      gap: 10px;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .admin-produto-editar-page .image-preview {
+      width: 100%;
+      height: 210px;
+      object-fit: contain;
+      border-radius: 12px;
+      border: 1px solid #d8e1ef;
+      background: #f7f9fd;
+    }
+
+    .admin-produto-editar-page .image-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .admin-produto-editar-page .image-file-input {
+      padding: 8px;
+      font-size: 0.92rem;
+    }
+
+    #toast {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      display: grid;
+      gap: 8px;
+      z-index: 9999;
+    }
+
+    .toast {
+      background: #0f1320;
+      color: #e9eef6;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .toast.ok { border-color: rgba(46, 204, 113, 0.5); }
+    .toast.err { border-color: rgba(231, 76, 60, 0.5); }
+
+    @media (max-width: 1140px) {
+      .admin-produto-editar-page .editor-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .admin-produto-editar-page .editor-topbar {
+        flex-direction: column;
+      }
+
+      .admin-produto-editar-page .editor-top-actions {
+        width: 100%;
+      }
+
+      .admin-produto-editar-page .editor-top-actions .btn {
+        flex: 1 1 auto;
+      }
+
+      .admin-produto-editar-page .field-two {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
-<body class="body-flex">
-<header th:replace="~{fragments/header :: header}"></header>
+<body class="body-flex admin-page admin-produto-editar-page">
+<header th:replace="~{fragments/admin-header :: adminHeader}"></header>
 
 <div class="layout layout--with-sidebar">
   <aside th:replace="~{fragments/admin-sidebar :: adminSidebar('produtos')}"></aside>
 
-  <main class="container stack mt-4 mb-6" th:with="id=${produtoId} ?: ${produto?.id}">
-  <div class="between">
-    <h1 class="page-title">Editar produto</h1>
-    <a class="btn btn-ghost" th:href="@{/admin/produtos}">Voltar</a>
-  </div>
-
-  <div class="card p-4">
-    <form id="form-editar" class="grid grid-cols-1 md:grid-cols-2 gap-4" onsubmit="return false;">
-      <input type="hidden" id="id" th:value="${id}" />
-
-      <label class="stack">
-        <span>Nome</span>
-        <input class="input" id="nome" type="text" th:value="${produto?.nome}" required />
-      </label>
-
-      <label class="stack">
-        <span>Categoria</span>
-        <input class="input" id="categoria" type="text" th:value="${produto?.categoria}" list="datalist-cat" />
-        <datalist id="datalist-cat">
-          <option th:each="c: ${categorias}" th:value="${c}"></option>
-        </datalist>
-      </label>
-
-      <label class="stack">
-        <span>Tarja da medicacao</span>
-        <select class="input" id="tarjaMedicacao">
-          <option value="">Nao se aplica</option>
-          <option value="SEM_TARJA" th:selected="${produto?.tarjaMedicacao?.name() == 'SEM_TARJA'}">Sem Tarja</option>
-          <option value="TARJA_AMARELA" th:selected="${produto?.tarjaMedicacao?.name() == 'TARJA_AMARELA'}">Tarja Amarela</option>
-          <option value="TARJA_VERMELHA" th:selected="${produto?.tarjaMedicacao?.name() == 'TARJA_VERMELHA'}">Tarja Vermelha</option>
-          <option value="TARJA_PRETA" th:selected="${produto?.tarjaMedicacao?.name() == 'TARJA_PRETA'}">Tarja Preta</option>
-        </select>
-      </label>
-
-      <label class="stack md:col-span-2">
-        <span>Descricao</span>
-        <textarea class="input" id="descricao" rows="3" th:text="${produto?.descricao}"></textarea>
-      </label>
-
-      <label class="stack">
-        <span>Preco de venda</span>
-        <input class="input" id="preco" type="number" step="0.01" min="0" th:value="${produto?.precoVenda}" />
-      </label>
-
-      <label class="stack">
-        <span>Estoque</span>
-        <input class="input" id="estoque" type="number" step="1" min="0" th:value="${produto?.estoque}" />
-      </label>
-
-      <label class="stack">
-        <span>Codigo de barras (EAN)</span>
-        <input class="input" id="codigoBarras" type="text" th:value="${produto?.codigoBarras}" />
-      </label>
-
-      <label class="stack">
-        <span>Disponivel</span>
-        <input id="disponivel" type="checkbox" th:checked="${produto == null ? true : produto.disponivel}" />
-      </label>
-
-      <label class="stack">
-        <span>Exige receita medica</span>
-        <input id="exigeReceita" type="checkbox" th:checked="${produto?.exigeReceita}" />
-      </label>
-
-      <p class="muted md:col-span-2">
-        Regra: nao somos autorizados a entregar medicamentos com receita obrigatoria
-        antes do recebimento da receita.
-      </p>
-
-      <label class="stack md:col-span-2">
-        <span>URL da imagem</span>
-        <input class="input" id="imagem" type="url" th:value="${produto?.imagem}" />
-      </label>
-
-      <label class="stack md:col-span-2">
-        <span>Imagem do produto</span>
-        <div class="row gap-2">
-          <input class="input" id="imagemArquivo" type="file" accept="image/*" />
-          <button id="btn-upload-imagem" class="btn btn-ghost" type="button">Enviar imagem</button>
+  <main id="main-content" class="container mt-4 mb-6" th:with="id=${produtoId} ?: ${produto?.id}">
+    <section class="editor-shell">
+      <div class="editor-topbar">
+        <div>
+          <a class="editor-back" th:href="@{/admin/produtos}">Voltar</a>
+          <h1 class="editor-title">Editar Produto</h1>
+          <p class="editor-subtitle">Gerencie informacoes, estoque e imagem do produto.</p>
         </div>
-        <small class="muted">A imagem enviada substitui a atual.</small>
-      </label>
 
-      <!-- Acoes IA -->
-      <div class="form-row gap-2 md:col-span-2">
-        <button id="btn-gerar-ia" class="btn btn-primary" type="button" th:attr="data-id=${id}">
-          Gerar imagem com IA
-        </button>
-      </div>
-
-      <div class="form-row gap-2 md:col-span-2">
-        <label class="stack" style="min-width: 220px;">
-          <span>Validador</span>
-          <input class="input" id="validador" type="text" placeholder="ex: admin-web" />
-        </label>
-        <div class="row gap-2" style="align-items: end;">
-          <button id="btn-validar" class="btn btn-ghost" type="button">Validar</button>
+        <div class="editor-top-actions">
+          <button id="btn-salvar" class="btn btn-ghost" type="button">Salvar</button>
           <button id="btn-publicar" class="btn btn-primary" type="button">Publicar</button>
         </div>
       </div>
-      <small class="muted md:col-span-2">Fluxo: IMPORTADO -&gt; VALIDADO -&gt; PUBLICADO.</small>
 
-      <div class="md:col-span-2 between mt-2">
-        <div class="row gap-2">
-          <button id="btn-salvar" class="btn btn-primary" type="button">Salvar</button>
-          <a class="btn btn-ghost" th:href="@{/admin/produtos}">Cancelar</a>
-        </div>
-        <span id="status" class="muted"></span>
+      <div class="editor-content">
+        <form id="form-editar" onsubmit="return false;">
+          <input type="hidden" id="id" th:value="${id}" />
+
+          <div class="editor-grid">
+            <section class="panel">
+              <header class="panel-head">
+                <h2>Informacoes do Produto</h2>
+              </header>
+              <div class="panel-body">
+                <div class="field">
+                  <label for="nome">Nome do produto</label>
+                  <input class="input" id="nome" type="text" th:value="${produto?.nome}" required />
+                </div>
+
+                <div class="field">
+                  <label for="categoria">Categoria</label>
+                  <input class="input" id="categoria" type="text" th:value="${produto?.categoria}" list="datalist-cat" />
+                  <datalist id="datalist-cat">
+                    <option th:each="c: ${categorias}" th:value="${c}"></option>
+                  </datalist>
+                </div>
+
+                <div class="field">
+                  <label for="descricao">Descricao</label>
+                  <textarea class="input" id="descricao" rows="4" th:text="${produto?.descricao}"></textarea>
+                </div>
+
+                <div class="field">
+                  <label for="codigoBarras">Codigo de barras (EAN)</label>
+                  <input class="input" id="codigoBarras" type="text" th:value="${produto?.codigoBarras}" />
+                </div>
+
+                <div class="flow-row">
+                  <div class="field" style="min-width: 220px;">
+                    <label for="validador">Validador</label>
+                    <input class="input" id="validador" type="text" placeholder="ex: admin-web" />
+                  </div>
+                  <button id="btn-validar" class="btn btn-ghost" type="button">Validar</button>
+                </div>
+
+                <p id="status" class="status-line"></p>
+              </div>
+            </section>
+
+            <aside class="editor-side">
+              <section class="panel">
+                <header class="panel-head">
+                  <h2>Preco e Estoque</h2>
+                </header>
+                <div class="panel-body">
+                  <div class="field-two">
+                    <div class="field">
+                      <label for="preco">Preco de venda</label>
+                      <input class="input" id="preco" type="number" step="0.01" min="0" th:value="${produto?.precoVenda}" />
+                    </div>
+                    <div class="field">
+                      <label for="estoque">Estoque disponivel</label>
+                      <input class="input" id="estoque" type="number" step="1" min="0" th:value="${produto?.estoque}" />
+                    </div>
+                  </div>
+
+                  <label class="check-line" for="disponivel">
+                    <input id="disponivel" type="checkbox" th:checked="${produto == null ? true : produto.disponivel}" />
+                    Produto ativo
+                  </label>
+                </div>
+              </section>
+
+              <section class="panel">
+                <header class="panel-head">
+                  <h2>Controle de Receita</h2>
+                </header>
+                <div class="panel-body">
+                  <label class="check-line" for="exigeReceita">
+                    <input id="exigeReceita" type="checkbox" th:checked="${produto?.exigeReceita}" />
+                    Exige receita medica
+                  </label>
+
+                  <div class="field">
+                    <label for="tarjaMedicacao">Tarja</label>
+                    <select class="input" id="tarjaMedicacao">
+                      <option value="">Nao se aplica</option>
+                      <option value="SEM_TARJA" th:selected="${produto?.tarjaMedicacao?.name() == 'SEM_TARJA'}">Sem tarja</option>
+                      <option value="TARJA_AMARELA" th:selected="${produto?.tarjaMedicacao?.name() == 'TARJA_AMARELA'}">Tarja amarela</option>
+                      <option value="TARJA_VERMELHA" th:selected="${produto?.tarjaMedicacao?.name() == 'TARJA_VERMELHA'}">Tarja vermelha</option>
+                      <option value="TARJA_PRETA" th:selected="${produto?.tarjaMedicacao?.name() == 'TARJA_PRETA'}">Tarja preta</option>
+                    </select>
+                  </div>
+
+                  <p class="hint">Medicamentos com receita obrigatoria devem ser enviados apenas apos validacao.</p>
+                </div>
+              </section>
+
+              <section class="panel">
+                <header class="panel-head">
+                  <h2>Alerta de Estoque</h2>
+                </header>
+                <div class="panel-body">
+                  <p class="hint">Defina um limite individual para este produto. Quando vazio, vale o limite global.</p>
+                  <div class="field">
+                    <label for="alertaEstoqueLimite">Limite deste produto</label>
+                    <input class="input"
+                           id="alertaEstoqueLimite"
+                           type="number"
+                           min="1"
+                           max="100000"
+                           th:value="${produto?.alertaEstoqueLimite}" />
+                  </div>
+                  <p class="hint">Limite global atual: <strong th:text="${alertaEstoqueLimite}">10</strong> unidades.</p>
+                </div>
+              </section>
+
+              <section class="panel">
+                <header class="panel-head">
+                  <h2>Imagem do Produto</h2>
+                </header>
+                <div class="panel-body">
+                  <img id="imagem-preview"
+                       class="image-preview"
+                       th:src="${produto?.imagem} ?: @{/img/produtos/placeholder-generico.png}"
+                       src="/img/produtos/placeholder-generico.png"
+                       alt="Imagem do produto" />
+
+                  <div class="image-actions">
+                    <input class="input image-file-input" id="imagemArquivo" type="file" accept="image/*" />
+                    <button id="btn-upload-imagem" class="btn btn-primary" type="button">Selecionar imagem</button>
+                    <button id="btn-gerar-ia" class="btn btn-ghost" type="button" th:attr="data-id=${id}">Gerar imagem com IA</button>
+                  </div>
+
+                  <div class="field">
+                    <label for="imagem">URL da imagem</label>
+                    <input class="input" id="imagem" type="url" th:value="${produto?.imagem}" />
+                  </div>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </form>
       </div>
-    </form>
-  </div>
-</main>
+    </section>
+  </main>
 </div>
 
 <div id="toast"></div>
 
 <script th:src="@{/js/pages/admin/produto-editar.js}"></script>
-
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>
-
-
-
-
-

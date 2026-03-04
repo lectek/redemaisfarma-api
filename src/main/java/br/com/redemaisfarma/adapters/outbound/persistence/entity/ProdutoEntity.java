@@ -73,6 +73,8 @@ public class ProdutoEntity {
     private String unidade;
     @Column(name="estoque")
     private Integer estoque;
+    @Column(name="alerta_estoque_limite")
+    private Integer alertaEstoqueLimite;
     @Column(name="disponivel")
     private Boolean disponivel;
     @Column(name="fabricante")
@@ -296,6 +298,14 @@ public class ProdutoEntity {
 
     public void setEstoque(Integer estoque) {
         this.estoque = estoque;
+    }
+
+    public Integer getAlertaEstoqueLimite() {
+        return this.alertaEstoqueLimite;
+    }
+
+    public void setAlertaEstoqueLimite(Integer alertaEstoqueLimite) {
+        this.alertaEstoqueLimite = alertaEstoqueLimite;
     }
 
     public Boolean getDisponivel() {
