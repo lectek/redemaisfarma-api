@@ -95,6 +95,18 @@
       grid-template-columns: minmax(280px, 1.4fr) minmax(180px, .8fr) auto auto;
       align-items: center;
       gap: 10px;
+      background: #f8fbff;
+      border-color: #d7e0ec;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    .admin-produtos-page .filter-bar .input,
+    .admin-produtos-page .filter-bar .select {
+      min-height: 44px;
+      border-radius: 12px;
+      border: 1px solid #d7e0ec;
+      background: #eef3fa;
+      color: #334155;
     }
 
     .admin-produtos-page .filter-bar .btn,
@@ -103,74 +115,259 @@
     }
 
     .admin-produtos-page .table-responsive {
-      border-radius: 16px;
+      border-radius: 14px;
       overflow: auto;
-      border: 1px solid var(--prod-border);
-      background: #ffffff;
+      border: 1px solid #d7e0ec;
+      background: #f8fbff;
+      padding: 8px;
     }
 
     .admin-produtos-page .table {
-      min-width: 980px;
+      min-width: 1080px;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 1px solid #d7e0ec;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
     }
 
     .admin-produtos-page .table th {
-      background: #f8fbff;
-      color: #1e293b;
-      font-size: .72rem;
-      letter-spacing: .05em;
+      background: #f4f7fc;
+      color: #60738c;
+      font-size: .78rem;
+      letter-spacing: .04em;
       text-transform: uppercase;
       font-weight: 800;
-      border-bottom: 1px solid #dbe6f5;
+      border-bottom: 1px solid #d7e0ec;
+      padding: 12px 14px;
+      white-space: nowrap;
     }
+
+    .admin-produtos-page .table th:nth-child(1) { width: 88px; }
+    .admin-produtos-page .table th:nth-child(2) { width: 360px; }
+    .admin-produtos-page .table th:nth-child(3) { width: 170px; }
+    .admin-produtos-page .table th:nth-child(4) { width: 110px; }
+    .admin-produtos-page .table th:nth-child(5) { width: 95px; }
+    .admin-produtos-page .table th:nth-child(6) { width: 150px; }
+    .admin-produtos-page .table th:nth-child(7) { width: 130px; }
+    .admin-produtos-page .table th:nth-child(8) { width: 210px; }
+    .admin-produtos-page .table th:nth-child(9) { width: 210px; }
 
     .admin-produtos-page .table td {
       vertical-align: middle;
-      border-bottom: 1px solid #edf2fa;
+      border-bottom: 1px solid #e7edf6;
+      border-right: 1px solid #e9eff7;
+      padding: 14px;
+      color: #334155;
+    }
+
+    .admin-produtos-page .table th {
+      border-right: 1px solid #e9eff7;
+    }
+
+    .admin-produtos-page .table th:last-child,
+    .admin-produtos-page .table td:last-child {
+      border-right: 0;
+    }
+
+    .admin-produtos-page .table tbody tr:last-child td {
+      border-bottom: 0;
     }
 
     .admin-produtos-page .table tbody tr:hover {
       background: #f8fbff;
     }
 
+    .admin-produtos-page .table td:nth-child(2) {
+      font-weight: 700;
+      line-height: 1.35;
+      max-width: 360px;
+    }
+
+    .admin-produtos-page .table td:nth-child(3) {
+      color: #41566f;
+      font-weight: 600;
+    }
+
+    .admin-produtos-page .table td:nth-child(4),
+    .admin-produtos-page .table td:nth-child(5),
+    .admin-produtos-page .table td:nth-child(6) {
+      font-weight: 600;
+    }
+
+    .admin-produtos-page .table-thumb-shell {
+      position: relative;
+      width: 58px;
+      height: 58px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #d7e0ec;
+      background: #eef3f9;
+      display: grid;
+      place-items: center;
+    }
+
     .admin-produtos-page .table-thumb {
-      width: 56px;
-      height: 56px;
-      border-radius: 14px;
-      border: 1px solid #dbe6f5;
-      background: #f8fafc;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       display: block;
     }
 
-    .admin-produtos-page .table-actions {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(86px, 1fr));
-      gap: 8px;
-      min-width: 210px;
+    .admin-produtos-page .table-thumb-shell.is-placeholder .table-thumb {
+      opacity: .2;
+      filter: grayscale(1);
     }
 
-    .admin-produtos-page .table-actions .btn {
+    .admin-produtos-page .table-thumb-caption {
+      position: absolute;
+      inset: auto 0 7px 0;
+      text-align: center;
+      font-size: .74rem;
+      color: #70849d;
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    .admin-produtos-page .table-thumb-shell:not(.is-placeholder) .table-thumb-caption {
+      display: none;
+    }
+
+    .admin-produtos-page .table-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-size: .84rem;
+      line-height: 1;
+      font-weight: 700;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .admin-produtos-page .table-pill--status-on {
+      color: #166534;
+      border-color: #86efac;
+      background: #dcfce7;
+    }
+
+    .admin-produtos-page .table-pill--status-off {
+      color: #64748b;
+      border-color: #cbd5e1;
+      background: #e2e8f0;
+    }
+
+    .admin-produtos-page .table-pill--ia-ready {
+      color: #1f7a63;
+      border-color: #9bd9c7;
+      background: #c7f0e5;
+    }
+
+    .admin-produtos-page .table-pill--ia-ready::before {
+      content: '\2713';
+      margin-right: 6px;
+      font-size: .72rem;
+      line-height: 1;
+      display: inline-block;
+    }
+
+    .admin-produtos-page .table-pill--ia-missing {
+      color: #64748b;
+      border-color: #cbd5e1;
+      background: #e2e8f0;
+    }
+
+    .admin-produtos-page .table-pill--ia-processing {
+      color: #92400e;
+      border-color: #fcd34d;
+      background: #fef3c7;
+    }
+
+    .admin-produtos-page .ia-status-cell {
+      min-width: 196px;
+    }
+
+    .admin-produtos-page .ia-cell-stack {
+      display: grid;
+      gap: 8px;
+      align-items: start;
+      justify-items: start;
+    }
+
+    .admin-produtos-page .ia-status-pill-wrap {
+      min-height: 30px;
+      display: flex;
+      align-items: center;
+    }
+
+    .admin-produtos-page .ia-tools {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(74px, 1fr));
+      gap: 8px;
+    }
+
+    .admin-produtos-page .ia-tools .btn-action {
+      width: 100%;
+      justify-content: center;
+      min-height: 32px;
+      border-radius: 10px;
+      font-size: .78rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      padding-inline: 0;
+    }
+
+    .admin-produtos-page .table-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(84px, 1fr));
+      gap: 8px;
+      min-width: 230px;
+    }
+
+    .admin-produtos-page .table-actions .btn-action {
       width: 100%;
       justify-content: center;
       min-height: 36px;
       border-radius: 10px;
       font-size: .85rem;
       font-weight: 700;
+      border: 1px solid transparent;
     }
 
-    .admin-produtos-page .table-actions .btn[data-action='queue'] {
-      background: linear-gradient(180deg, var(--prod-blue) 0%, var(--prod-blue-dark) 100%);
-      border-color: #1d4ed8;
+    .admin-produtos-page .table-actions .btn-action--edit {
+      background: linear-gradient(180deg, #3f8ad0 0%, #2f74bd 100%);
+      border-color: #2f74bd;
       color: #ffffff;
     }
 
-    .admin-produtos-page .table-actions .btn[data-open] {
-      border-color: #fecaca;
-      color: #991b1b;
-      background: #fff5f5;
+    .admin-produtos-page .table-actions .btn-action--delete {
+      background: linear-gradient(180deg, #ef5768 0%, #dc4255 100%);
+      border-color: #dc4255;
+      color: #ffffff;
     }
 
-    .admin-produtos-page .table-actions .btn[data-action='regen'][disabled] {
+    .admin-produtos-page .btn-action--queue {
+      background: #edf4ff;
+      border-color: #bfd5f0;
+      color: #2e618f;
+      min-height: 32px;
+      font-size: .78rem;
+    }
+
+    .admin-produtos-page .btn-action--regen {
+      background: #f8fafc;
+      border-color: #d8e3f0;
+      color: #475569;
+      min-height: 32px;
+      font-size: .78rem;
+    }
+
+    .admin-produtos-page .btn-action--regen[disabled] {
       opacity: .45;
       cursor: not-allowed;
     }
@@ -325,14 +522,18 @@
           </tr>
         </thead>
         <tbody>
-          <tr th:each="p : ${produtos}">
+          <tr th:each="p : ${produtos}" th:attr="data-product-id=${p.id}">
             <td>
-              <img class="table-thumb"
-                   th:src="${p.imagem} ?: @{/img/placeholder.png}"
-                   th:alt="'Imagem de ' + ${p.nome}"
-                   width="56"
-                   height="56"
-                   loading="lazy"/>
+              <figure class="table-thumb-shell"
+                      th:classappend="${p.imagem == null or #strings.isEmpty(p.imagem)} ? ' is-placeholder' : ''">
+                <img class="table-thumb"
+                     th:src="${p.imagem} ?: @{/img/placeholder.png}"
+                     th:alt="'Imagem de ' + ${p.nome}"
+                     width="56"
+                     height="56"
+                     loading="lazy"/>
+                <figcaption class="table-thumb-caption">Imagem</figcaption>
+              </figure>
             </td>
             <td th:text="${p.nome}">Dipirona 500mg</td>
             <td th:text="${p.codigoBarras}">7890000000000</td>
@@ -340,40 +541,47 @@
             <td th:text="${p.estoque}">0</td>
             <td th:text="${p.categoria}">Generico</td>
             <td>
-              <span th:if="${p.disponivel}" class="badge badge--success">Ativo</span>
-              <span th:if="${p.disponivel == null or !p.disponivel}" class="badge badge--warning">Indisponivel</span>
+              <span th:if="${p.disponivel}" class="table-pill table-pill--status-on">Disponivel</span>
+              <span th:if="${p.disponivel == null or !p.disponivel}"
+                    class="table-pill table-pill--status-off">Indisponivel</span>
             </td>
 
             <!-- status imagem IA -->
-            <td>
-              <span th:if="${p.imagem == null or #strings.isEmpty(p.imagem)}"
-                    class="badge badge--warning">Sem imagem</span>
-              <a th:if="${p.imagem != null and !#strings.isEmpty(p.imagem)}"
-                 th:href="${p.imagem}"
-                 th:attr="data-image-url=${p.imagem}"
-                 data-action="preview-image"
-                 class="badge badge--success">Ver</a>
+            <td class="ia-status-cell">
+              <div class="ia-cell-stack">
+                <div class="ia-status-pill-wrap">
+                  <span th:if="${p.imagem == null or #strings.isEmpty(p.imagem)}"
+                        class="table-pill table-pill--ia-missing">Sem imagem</span>
+                  <a th:if="${p.imagem != null and !#strings.isEmpty(p.imagem)}"
+                     th:href="${p.imagem}"
+                     th:attr="data-image-url=${p.imagem}"
+                     data-action="preview-image"
+                     class="table-pill table-pill--ia-ready">Ver</a>
+                </div>
+                <div class="ia-tools">
+                  <button class="btn btn-action btn-action--queue"
+                          type="button"
+                          data-action="queue"
+                          th:attr="data-id=${p.id}">
+                    Gerar
+                  </button>
+                  <button class="btn btn-action btn-action--regen"
+                          type="button"
+                          data-action="regen"
+                          th:attr="data-id=${p.id}"
+                          th:disabled="${p.imagem == null or #strings.isEmpty(p.imagem)}">
+                    Regenerar
+                  </button>
+                </div>
+              </div>
             </td>
 
             <td class="table-actions">
-              <a class="btn btn-ghost" th:href="@{|/admin/produtos/${p.id}/editar|}">Editar</a>
-              <button class="btn btn-ghost" type="button" th:attr="data-id=${p.id}" data-open="#modal-excluir">Excluir</button>
-
-              <!-- NOVOS: gerar/regenerar via fila -->
-              <button class="btn btn-primary"
+              <a class="btn btn-action btn-action--edit" th:href="@{|/admin/produtos/${p.id}/editar|}">Editar</a>
+              <button class="btn btn-action btn-action--delete"
                       type="button"
-                      data-action="queue"
-                      th:attr="data-id=${p.id}">
-                Gerar
-              </button>
-
-              <button class="btn btn-ghost"
-                      type="button"
-                      data-action="regen"
                       th:attr="data-id=${p.id}"
-                      th:disabled="${p.imagem == null or #strings.isEmpty(p.imagem)}">
-                Regenerar
-              </button>
+                      data-open="#modal-excluir">Excluir</button>
             </td>
           </tr>
 
@@ -517,26 +725,36 @@
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
     };
+    const withCacheBust = (url)=>{
+      const cleanUrl = String(url || '').trim();
+      if (!cleanUrl) return '';
+      return `${cleanUrl}${cleanUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
+    };
     const updateRowState = (row, resultUrl, isProcessing)=>{
       if(!row) return;
-      const badgeCell = row.querySelector('td:nth-child(8)');
+      const statusWrap = row.querySelector('.ia-status-pill-wrap');
       const thumb = row.querySelector('.table-thumb');
+      const thumbShell = row.querySelector('.table-thumb-shell');
       const regenBtn = row.querySelector('button[data-action="regen"]');
       if (resultUrl) {
         const safe = escapeAttr(resultUrl);
-        if (badgeCell) {
-          badgeCell.innerHTML = `<a href="${safe}" data-image-url="${safe}" data-action="preview-image" class="badge badge--success">Ver</a>`;
+        if (statusWrap) {
+          statusWrap.innerHTML =
+            `<a href="${safe}" data-image-url="${safe}" data-action="preview-image" class="table-pill table-pill--ia-ready">Ver</a>`;
         }
         if (thumb) {
-          thumb.src = resultUrl;
+          thumb.src = withCacheBust(resultUrl);
+        }
+        if (thumbShell) {
+          thumbShell.classList.remove('is-placeholder');
         }
         if (regenBtn) {
           regenBtn.disabled = false;
         }
         return;
       }
-      if (isProcessing && badgeCell) {
-        badgeCell.innerHTML = '<span class="badge badge--warning">Em processamento...</span>';
+      if (isProcessing && statusWrap) {
+        statusWrap.innerHTML = '<span class="table-pill table-pill--ia-processing">Em processamento...</span>';
       }
     };
 
@@ -546,6 +764,13 @@
       init.headers = Object.assign({}, init.headers||{}, { [CSRF_HEADER]: CSRF_TOKEN });
       return init;
     };
+
+    document.querySelectorAll('.table-thumb').forEach((thumb)=>{
+      thumb.addEventListener('error', ()=>{
+        thumb.setAttribute('src', '/img/placeholder.png');
+        thumb.closest('.table-thumb-shell')?.classList.add('is-placeholder');
+      }, { once: true });
+    });
 
     document.addEventListener('click', (ev)=>{
       const previewLink = ev.target.closest('a[data-action="preview-image"][data-image-url]');
