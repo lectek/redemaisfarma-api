@@ -91,6 +91,13 @@ public class ProductImageAdminPageController {
                     .body("Produto nao encontrado.");
         }
 
+        if (produto.getImagem() != null && !produto.getImagem().isBlank()) {
+            return ResponseEntity.ok(new EnqueueResponse(
+                    "JA_POSSUI_IMAGEM",
+                    JobView.doneWithImage(produto.getId(), produto.getImagem())
+            ));
+        }
+
         final ProductImageRequestedEvent event = new ProductImageRequestedEvent(
                 produto.getId(),
                 produto.getNome(),
@@ -239,6 +246,19 @@ public class ProductImageAdminPageController {
                     j.fingerprint(),
                     j.createdAt(),
                     j.updatedAt()
+            );
+        }
+
+        public static JobView doneWithImage(final Long productId, final String imageUrl) {
+            return new JobView(
+                    null,
+                    productId,
+                    ProductImageJobRepository.Status.DONE.name(),
+                    imageUrl,
+                    null,
+                    null,
+                    null,
+                    null
             );
         }
     }

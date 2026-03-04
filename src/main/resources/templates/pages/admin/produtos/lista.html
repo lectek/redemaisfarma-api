@@ -829,10 +829,14 @@
 
         const result = String(payload?.result || '');
         const resultUrl = String(payload?.lastJob?.resultUrl || '').trim();
-        const done = status === 'DONE' || result.startsWith('PROCESSADO_SYNC');
+        const alreadyHasImage = result === 'JA_POSSUI_IMAGEM';
+        const done = status === 'DONE'
+          || result.startsWith('PROCESSADO_SYNC')
+          || result === 'REGERADO'
+          || alreadyHasImage;
         const row = btn.closest('tr');
         if (done) {
-          toast('Imagem gerada e salva', 'ok');
+          toast(alreadyHasImage ? 'Produto ja possui imagem' : 'Imagem gerada e salva', 'ok');
           updateRowState(row, resultUrl, false);
         } else {
           toast(action==='regen' ? 'Regeneracao enfileirada' : 'Geracao enfileirada', 'ok');
