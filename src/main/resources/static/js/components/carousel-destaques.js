@@ -21,6 +21,8 @@ const imgOrPlaceholder = (url) => {
   const u = (url || '').trim();
   if (!u) return '/img/produtos/placeholder-generico.png';            // ajuste se teu placeholder for outro path
   if (/^https?:\/\/|^\/\//i.test(u)) return u;
+  if (u.startsWith('/')) return u;
+  if (/^(media|images|img|assets)\//i.test(u)) return `/${u}`;
   return `/media/products/${u.replace(/^[/\\]+/, '')}`;
 };
 

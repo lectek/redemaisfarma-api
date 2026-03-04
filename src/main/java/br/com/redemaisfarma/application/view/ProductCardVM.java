@@ -78,6 +78,8 @@ public record ProductCardVM(
         if (raw == null || raw.isBlank()) return "/images/placeholders/product.png";
         final String r = raw.trim();
         if (r.startsWith("http://") || r.startsWith("https://") || r.startsWith("//")) return r;
+        if (r.startsWith("/")) return r;
+        if (r.matches("^(media|images|img|assets)/.*")) return "/" + r;
         return "/media/products/" + r.replaceFirst("^[/\\\\]+", "");
     }
 

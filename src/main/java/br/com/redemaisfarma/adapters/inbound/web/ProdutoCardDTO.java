@@ -96,6 +96,12 @@ public record ProdutoCardDTO(Long id, String nome, String imagem, String imagemW
         if (r.startsWith("http://") || r.startsWith("https://") || r.startsWith("//")) {
             return r;
         }
+        if (r.startsWith("/")) {
+            return r;
+        }
+        if (r.matches("^(media|images|img|assets)/.*")) {
+            return "/" + r;
+        }
         r = r.replaceFirst("^[/\\\\]+", "");
         return "/media/products/" + r;
     }
@@ -122,4 +128,3 @@ public record ProdutoCardDTO(Long id, String nome, String imagem, String imagemW
         public String categoria();
     }
 }
-
