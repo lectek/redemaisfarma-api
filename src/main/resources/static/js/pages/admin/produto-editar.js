@@ -33,6 +33,14 @@ function normalizeErrorMessage(raw, fallback) {
   return text || fallback;
 }
 
+function parseJsonSafely(raw) {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 function resolveProdutoId(raw) {
   const id = String(raw ?? '').trim();
   return /^\d+$/.test(id) ? id : null;
@@ -225,15 +233,33 @@ async function gerarIA() {
 
   try {
     const r = await fetch(endpoint, withCsrf({ method: 'POST', credentials: 'same-origin' }));
+    const raw = await r.text();
+    const payload = parseJsonSafely(raw);
+
     if (!r.ok) {
-      const raw = await r.text();
       throw new Error(
-        normalizeErrorMessage(raw, `Falha na solicitacao de imagem (HTTP ${r.status})`)
+        normalizeErrorMessage(
+          payload?.lastJob?.errorMsg || payload?.message || raw,
+          `Falha na solicitacao de imagem (HTTP ${r.status})`
+        )
       );
     }
-    const payload = await r.json().catch(() => null);
+
+    const lastJobStatus = String(payload?.lastJob?.status || '');
+    const lastJobError = payload?.lastJob?.errorMsg || '';
+    if (lastJobStatus === 'ERROR') {
+      throw new Error(
+        normalizeErrorMessage(lastJobError, 'A IA nao conseguiu gerar a imagem para esse produto.')
+      );
+    }
+
+    const resultUrl = String(payload?.lastJob?.resultUrl || '').trim();
+    if (resultUrl) {
+      $imagem.value = resultUrl;
+    }
+
     const result = String(payload?.result || '');
-    if (result.startsWith('PROCESSADO_SYNC')) {
+    if (lastJobStatus === 'DONE' || result.startsWith('PROCESSADO_SYNC')) {
       toast('Imagem gerada e salva!', 'ok');
       $status.textContent = 'Imagem gerada e salva.';
     } else {

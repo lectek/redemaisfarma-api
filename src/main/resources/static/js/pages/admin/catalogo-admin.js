@@ -246,21 +246,34 @@
     btn.disabled = true;
     try {
       const r = await fetch(endpoint, withCsrf({ method: "POST", credentials: "same-origin" }));
+      const raw = await r.text();
+      const payload = parseJsonSafely(raw);
+
       if (!r.ok) {
-        const raw = await r.text();
         throw new Error(
           normalizeErrorMessage(
-            raw,
+            payload?.lastJob?.errorMsg || payload?.message || raw,
             `Falha ao solicitar imagem (HTTP ${r.status}).`
           )
         );
       }
-      const payload = await r.json().catch(() => null);
+
+      const lastJobStatus = String(payload?.lastJob?.status || "");
+      if (lastJobStatus === "ERROR") {
+        throw new Error(
+          normalizeErrorMessage(
+            payload?.lastJob?.errorMsg,
+            "A IA nao conseguiu gerar a imagem para esse produto."
+          )
+        );
+      }
+
       const result = String(payload?.result || "");
-      if (result.startsWith("PROCESSADO_SYNC")) {
+      if (lastJobStatus === "DONE" || result.startsWith("PROCESSADO_SYNC")) {
         toast("Imagem gerada e salva!");
+        carregar();
       } else {
-        toast(action === "regenerate" ? "Regeneração solicitada!" : "Geração enfileirada!");
+        toast(action === "regenerate" ? "Regeneracao solicitada!" : "Geracao enfileirada!");
       }
     } catch (e) {
       toast(e?.message || "Falha ao solicitar imagem.", true);
@@ -441,6 +454,14 @@
       .replace(/\s+/g, " ")
       .trim();
     return text || fallback;
+  }
+
+  function parseJsonSafely(raw) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
   }
 
   function escapeHtml(s) {

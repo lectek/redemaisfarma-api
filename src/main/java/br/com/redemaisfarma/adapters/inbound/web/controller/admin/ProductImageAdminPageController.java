@@ -188,10 +188,21 @@ public class ProductImageAdminPageController {
     ) {
         this.jobService.process(event);
         final var lastJob = jobRepo.findLastByProduct(produtoId).orElse(null);
-        return ResponseEntity.ok(new EnqueueResponse(
-                result,
-                lastJob == null ? null : JobView.from(lastJob)
-        ));
+        final JobView jobView = lastJob == null ? null : JobView.from(lastJob);
+        if (lastJob == null) {
+            return ResponseEntity.accepted().body(new EnqueueResponse(result, null));
+        }
+
+        if (lastJob.status() == ProductImageJobRepository.Status.ERROR) {
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(new EnqueueResponse("ERRO_SYNC", jobView));
+        }
+
+        if (lastJob.status() != ProductImageJobRepository.Status.DONE) {
+            return ResponseEntity.accepted().body(new EnqueueResponse(result, jobView));
+        }
+
+        return ResponseEntity.ok(new EnqueueResponse(result, jobView));
     }
 
     private static Long parseProdutoId(final String rawProdutoId) {
