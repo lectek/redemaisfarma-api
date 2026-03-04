@@ -10,8 +10,190 @@
   <meta name="_csrf" th:content="${_csrf.token}"/>
   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 
+  <style>
+    .admin-produtos-page {
+      --prod-bg: #f4f7fb;
+      --prod-card: #ffffff;
+      --prod-border: #d9e3f1;
+      --prod-ink: #0f172a;
+      --prod-muted: #64748b;
+      --prod-blue: #1d4ed8;
+      --prod-blue-dark: #1e3a8a;
+      --prod-danger: #dc2626;
+      --prod-shadow: 0 14px 36px rgba(15, 23, 42, 0.1);
+    }
+
+    body.admin-produtos-page {
+      background:
+        radial-gradient(900px 380px at 6% -12%, rgba(30, 64, 175, 0.16), transparent 58%),
+        radial-gradient(760px 320px at 96% 2%, rgba(190, 24, 93, 0.12), transparent 60%),
+        var(--prod-bg);
+    }
+
+    .admin-produtos-page .site-header {
+      background: linear-gradient(95deg, #0f172a 0%, #1e3a8a 52%, #2563eb 100%);
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.22);
+      border-bottom: 0;
+    }
+
+    .admin-produtos-page .site-header .nav-toggle {
+      display: none !important;
+    }
+
+    .admin-produtos-page .layout.layout--with-sidebar {
+      width: min(100%, 1540px);
+      margin-inline: auto;
+      padding-inline: clamp(12px, 1.6vw, 24px);
+      gap: clamp(12px, 1.4vw, 22px);
+    }
+
+    .admin-produtos-page .sidebar {
+      background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+      border: 1px solid #1f2937;
+      box-shadow: 0 18px 36px rgba(2, 8, 23, 0.28);
+      color: #e2e8f0;
+    }
+
+    .admin-produtos-page .sidebar__link {
+      width: 100%;
+      border-radius: 12px;
+      min-height: 42px;
+      color: #e2e8f0;
+    }
+
+    .admin-produtos-page .sidebar__link:hover {
+      background: rgba(148, 163, 184, 0.18);
+    }
+
+    .admin-produtos-page .sidebar__link.is-active {
+      background: rgba(59, 130, 246, 0.22);
+      box-shadow: inset 3px 0 0 #60a5fa;
+    }
+
+    .admin-produtos-page main.container {
+      padding-inline: 0;
+    }
+
+    .admin-produtos-page .page-title {
+      color: var(--prod-ink);
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
+    }
+
+    .admin-produtos-page .page-lead {
+      color: var(--prod-muted);
+    }
+
+    .admin-produtos-page .card {
+      border: 1px solid var(--prod-border);
+      background: var(--prod-card);
+      box-shadow: var(--prod-shadow);
+      border-radius: 16px;
+    }
+
+    .admin-produtos-page .filter-bar {
+      grid-template-columns: minmax(280px, 1.4fr) minmax(180px, .8fr) auto auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .admin-produtos-page .filter-bar .btn,
+    .admin-produtos-page .page-actions .btn {
+      min-height: 40px;
+    }
+
+    .admin-produtos-page .table-responsive {
+      border-radius: 16px;
+      overflow: auto;
+      border: 1px solid var(--prod-border);
+      background: #ffffff;
+    }
+
+    .admin-produtos-page .table {
+      min-width: 980px;
+    }
+
+    .admin-produtos-page .table th {
+      background: #f8fbff;
+      color: #1e293b;
+      font-size: .72rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      font-weight: 800;
+      border-bottom: 1px solid #dbe6f5;
+    }
+
+    .admin-produtos-page .table td {
+      vertical-align: middle;
+      border-bottom: 1px solid #edf2fa;
+    }
+
+    .admin-produtos-page .table tbody tr:hover {
+      background: #f8fbff;
+    }
+
+    .admin-produtos-page .table-thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      border: 1px solid #dbe6f5;
+      background: #f8fafc;
+      object-fit: cover;
+      display: block;
+    }
+
+    .admin-produtos-page .table-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(86px, 1fr));
+      gap: 8px;
+      min-width: 210px;
+    }
+
+    .admin-produtos-page .table-actions .btn {
+      width: 100%;
+      justify-content: center;
+      min-height: 36px;
+      border-radius: 10px;
+      font-size: .85rem;
+      font-weight: 700;
+    }
+
+    .admin-produtos-page .table-actions .btn[data-action='queue'] {
+      background: linear-gradient(180deg, var(--prod-blue) 0%, var(--prod-blue-dark) 100%);
+      border-color: #1d4ed8;
+      color: #ffffff;
+    }
+
+    .admin-produtos-page .table-actions .btn[data-open] {
+      border-color: #fecaca;
+      color: #991b1b;
+      background: #fff5f5;
+    }
+
+    .admin-produtos-page .table-actions .btn[data-action='regen'][disabled] {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 1100px) {
+      .admin-produtos-page .filter-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .admin-produtos-page .filter-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-produtos-page .table-actions {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+
 </head>
-<body class="body-flex admin-page">
+<body class="body-flex admin-page admin-produtos-page">
 <header th:replace="~{fragments/admin-header :: adminHeader}"></header>
 
 <div class="layout layout--with-sidebar">
@@ -118,7 +300,12 @@
         <tbody>
           <tr th:each="p : ${produtos}">
             <td>
-              <img class="table-thumb" th:src="${p.imagem} ?: @{/img/placeholder.png}" alt="" width="48" height="48" loading="lazy"/>
+              <img class="table-thumb"
+                   th:src="${p.imagem} ?: @{/img/placeholder.png}"
+                   th:alt="'Imagem de ' + ${p.nome}"
+                   width="56"
+                   height="56"
+                   loading="lazy"/>
             </td>
             <td th:text="${p.nome}">Dipirona 500mg</td>
             <td th:text="${p.codigoBarras}">7890000000000</td>
@@ -154,7 +341,7 @@
                       type="button"
                       data-action="regen"
                       th:attr="data-id=${p.id}"
-                      th:disabled="${p.imagem != null and !#strings.isEmpty(p.imagem)}">
+                      th:disabled="${p.imagem == null or #strings.isEmpty(p.imagem)}">
                 Regenerar
               </button>
             </td>
@@ -198,6 +385,45 @@
       el.className=`toast ${t}`; el.textContent=m;
       toastBox.appendChild(el); setTimeout(()=>el.remove(),3500);
     };
+    const parseJsonSafely = (raw)=>{
+      try { return JSON.parse(raw); } catch { return null; }
+    };
+    const normalizeErrorMessage = (raw, fallback)=>{
+      const text = String(raw || '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return text || fallback;
+    };
+    const escapeAttr = (value)=>{
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    };
+    const updateRowState = (row, resultUrl, isProcessing)=>{
+      if(!row) return;
+      const badgeCell = row.querySelector('td:nth-child(8)');
+      const thumb = row.querySelector('.table-thumb');
+      const regenBtn = row.querySelector('button[data-action="regen"]');
+      if (resultUrl) {
+        const safe = escapeAttr(resultUrl);
+        if (badgeCell) {
+          badgeCell.innerHTML = `<a href="${safe}" target="_blank" class="badge badge--success">Ver</a>`;
+        }
+        if (thumb) {
+          thumb.src = resultUrl;
+        }
+        if (regenBtn) {
+          regenBtn.disabled = false;
+        }
+        return;
+      }
+      if (isProcessing && badgeCell) {
+        badgeCell.innerHTML = '<span class="badge badge--warning">Em processamento...</span>';
+      }
+    };
 
     const CSRF_TOKEN = document.querySelector('meta[name="_csrf"]')?.content;
     const CSRF_HEADER = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
@@ -219,20 +445,41 @@
       btn.disabled = true;
       try{
         const res = await fetch(endpoint, withCsrf({ method:'POST', credentials:'same-origin' }));
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
-        toast(action==='regen' ? 'Regeneracao solicitada' : 'Enfileirado com sucesso','ok');
+        const raw = await res.text();
+        const payload = parseJsonSafely(raw);
+        if(!res.ok) {
+          throw new Error(
+            normalizeErrorMessage(
+              payload?.lastJob?.errorMsg || payload?.message || raw,
+              `Falha ao solicitar imagem (HTTP ${res.status}).`
+            )
+          );
+        }
 
-        // Atualiza badge da linha (opcional)
+        const status = String(payload?.lastJob?.status || '');
+        if (status === 'ERROR') {
+          throw new Error(
+            normalizeErrorMessage(
+              payload?.lastJob?.errorMsg,
+              'A IA nao conseguiu gerar imagem para esse produto.'
+            )
+          );
+        }
+
+        const result = String(payload?.result || '');
+        const resultUrl = String(payload?.lastJob?.resultUrl || '').trim();
+        const done = status === 'DONE' || result.startsWith('PROCESSADO_SYNC');
         const row = btn.closest('tr');
-        if(row){
-          const badgeCell = row.querySelector('td:nth-child(8)'); // coluna "Imagem IA"
-          if(badgeCell){
-            badgeCell.innerHTML = '<span class="badge badge--warning">Em processamento...</span>';
-          }
+        if (done) {
+          toast('Imagem gerada e salva', 'ok');
+          updateRowState(row, resultUrl, false);
+        } else {
+          toast(action==='regen' ? 'Regeneracao enfileirada' : 'Geracao enfileirada', 'ok');
+          updateRowState(row, resultUrl, true);
         }
       }catch(err){
         console.error(err);
-        toast('Falha ao enviar acao','err');
+        toast(err?.message || 'Falha ao enviar acao','err');
       }finally{
         btn.disabled = false;
       }
