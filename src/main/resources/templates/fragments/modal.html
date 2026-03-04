@@ -46,6 +46,7 @@
       <button type="button"
               class="btn-confirmar"
               th:if="${showConfirm}"
+              data-confirm="true"
               th:text="${confirmLabel}"
               th:attrappend="${confirmAttrs}">
         Confirmar
@@ -53,3 +54,21 @@
     </footer>
   </div>
 </div>
+
+<!-- Compatibilidade com telas antigas que usam fragments/modal :: confirm(...) -->
+<th:block th:fragment="confirm(
+        id='modal-confirm',
+        title='Confirmar',
+        bodyText=${null},
+        confirmLabel='Confirmar',
+        cancelLabel='Cancelar'
+     )">
+  <div th:replace="~{fragments/modal :: modal(
+        id=${id},
+        title=${title},
+        bodyText=${bodyText},
+        confirmLabel=${confirmLabel},
+        cancelLabel=${cancelLabel},
+        showConfirm=${true}
+     )}"></div>
+</th:block>
