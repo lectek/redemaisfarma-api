@@ -8,7 +8,7 @@
         confirmLabel='Confirmar',
         cancelLabel='Cancelar',
         showConfirm=${true},
-        confirmAttrs=${null}   /* map: ex. ${#{'data-action':'/carrinho/adicionar','data-id':produto.id}} */
+        confirmAttrs=${null}
      )"
      th:attr="id=${id}"
      class="modal"
@@ -43,6 +43,7 @@
       <button type="button" class="btn-cancelar" data-close-modal
               th:text="${cancelLabel}">Cancelar</button>
 
+      <!-- confirmAttrs aceita map para th:attrappend -->
       <button type="button"
               class="btn-confirmar"
               th:if="${showConfirm}"
