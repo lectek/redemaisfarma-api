@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.NonNull;
@@ -279,7 +280,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             log.debug("handleExceptionInternal (4xx): {}", ex.getMessage());
         }
 
-        return new ResponseEntity<>(std, headers, status);
+        HttpHeaders responseHeaders = new HttpHeaders();
+        if (headers != null) {
+            responseHeaders.putAll(headers);
+        }
+
+        // MVC requests may arrive with text/html preset; force JSON for map error bodies.
+        if (responseHeaders.getContentType() != null
+                && responseHeaders.getContentType().isCompatibleWith(MediaType.TEXT_HTML)) {
+            responseHeaders.setContentType(MediaType.APPLICATION_JSON);
+        }
+
+        return new ResponseEntity<>(std, responseHeaders, status);
     }
 
     // ===== Helpers =====

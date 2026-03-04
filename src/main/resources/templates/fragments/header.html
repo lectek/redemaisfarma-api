@@ -38,6 +38,16 @@
       </ul>
     </nav>
 
+    <button class="theme-toggle"
+            type="button"
+            data-theme-toggle
+            aria-pressed="false"
+            aria-label="Ativar modo escuro"
+            title="Alternar tema">
+      <span class="theme-toggle__icon" aria-hidden="true">☾</span>
+      <span class="theme-toggle__label">Tema</span>
+    </button>
+
     <a th:href="${headerUserAuthenticated} ? @{/cliente/conta} : @{/auth/login}"
        class="header-account"
        th:attr="aria-label=${headerUserAuthenticated} ? 'Abrir minha conta' : 'Entrar na conta'">
@@ -55,4 +65,5 @@
 
   <!-- backdrop do menu mobile (você já tem CSS pronto pra isso) -->
   <button type="button" class="nav-backdrop" aria-label="Fechar menu"></button>
+  <script defer th:src="@{/js/theme-toggle.js}"></script>
 </header>

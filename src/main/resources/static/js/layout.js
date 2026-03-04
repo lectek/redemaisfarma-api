@@ -128,9 +128,19 @@ function initSkipLinks() {
    ==================== */
 function initDarkModeDetection() {
   try {
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      document.documentElement.setAttribute("data-theme", "dark");
+    const root = document.documentElement;
+    const stored = window.localStorage ? window.localStorage.getItem("rmf-theme") : null;
+    if (stored === "dark" || stored === "light") {
+      root.setAttribute("data-theme", stored);
+      root.style.colorScheme = stored;
+      return;
     }
+
+    const prefersDark = window.matchMedia
+      && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const theme = prefersDark ? "dark" : "light";
+    root.setAttribute("data-theme", theme);
+    root.style.colorScheme = theme;
   } catch {}
 }
 

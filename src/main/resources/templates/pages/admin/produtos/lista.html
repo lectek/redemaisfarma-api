@@ -553,7 +553,7 @@
                   <span th:if="${p.imagem == null or #strings.isEmpty(p.imagem)}"
                         class="table-pill table-pill--ia-missing">Sem imagem</span>
                   <a th:if="${p.imagem != null and !#strings.isEmpty(p.imagem)}"
-                     th:href="${p.imagem}"
+                     href="#"
                      th:attr="data-image-url=${p.imagem}"
                      data-action="preview-image"
                      class="table-pill table-pill--ia-ready">Ver</a>
@@ -740,7 +740,7 @@
         const safe = escapeAttr(resultUrl);
         if (statusWrap) {
           statusWrap.innerHTML =
-            `<a href="${safe}" data-image-url="${safe}" data-action="preview-image" class="table-pill table-pill--ia-ready">Ver</a>`;
+            `<a href="#" data-image-url="${safe}" data-action="preview-image" class="table-pill table-pill--ia-ready">Ver</a>`;
         }
         if (thumb) {
           thumb.src = withCacheBust(resultUrl);

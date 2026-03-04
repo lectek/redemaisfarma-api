@@ -34,9 +34,11 @@
       <!-- Conteúdo simples por texto/HTML (bodyText) -->
       <!-- Quando bodyFrag for usado, este bloco é omitido -->
     </div>
-    <div class="modal-body" th:if="${bodyFrag != null}" th:insert="${bodyFrag}">
-      <!-- Ou injete um fragmento externo (bodyFrag) -->
-    </div>
+    <th:block th:if="${bodyFrag != null}">
+      <div class="modal-body" th:replace="~{${bodyFrag}}">
+        <!-- Ou injete um fragmento externo (bodyFrag) -->
+      </div>
+    </th:block>
 
     <!-- Rodapé -->
     <footer class="modal-footer">

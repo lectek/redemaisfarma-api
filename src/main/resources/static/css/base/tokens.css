@@ -64,5 +64,8 @@
   --color-neutral-1:#0f172a; --color-neutral-2:#0b1220; --color-neutral-3:#1e293b;
   --color-neutral-4:#334155; --color-neutral-5:#94a3b8; --color-light:#e5e7eb;
   --layout-bg:var(--color-neutral-2); --layout-card:var(--color-neutral-1);
+  --layout-dark:var(--color-light);
   --layout-border:var(--color-neutral-3); --layout-shadow:0 10px 28px rgba(0,0,0,.35);
+  --layout-accent:#38bdf8;
+  --layout-accent-hover:#0ea5e9;
 }

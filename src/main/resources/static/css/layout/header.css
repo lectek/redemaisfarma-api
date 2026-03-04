@@ -31,6 +31,18 @@
   --header-cta-bg-hover: #0284c7;
 }
 
+:root[data-theme="dark"]{
+  --header-bg: rgba(11, 18, 32, 0.92);
+  --header-border: #1f2937;
+  --header-shadow: 0 12px 30px rgba(2, 6, 23, 0.55);
+  --header-link-color: #e2e8f0;
+  --header-link-hover: #f8fafc;
+  --header-link-border: color-mix(in oklab, #94a3b8 28%, transparent);
+  --header-link-hover-bg: color-mix(in oklab, #1e293b 66%, transparent);
+  --header-cta-bg: #0284c7;
+  --header-cta-bg-hover: #0369a1;
+}
+
 .sidebar{
   background: var(--sidebar-bg);
   border: 1px solid var(--sidebar-border);
@@ -248,7 +260,12 @@ html.sidebar-compact .sidebar__link span{
   position: sticky;
   inset: 0;
   z-index: var(--header-z);
-  background: var(--header-bg);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--header-bg) 90%, #ffffff 10%),
+      var(--header-bg)
+    );
   border-bottom: 1px solid var(--header-border);
   box-shadow: var(--header-shadow);
   backdrop-filter: saturate(120%) blur(14px);
@@ -383,6 +400,41 @@ html.sidebar-compact .sidebar__link span{
   fill: currentColor;
 }
 
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  min-width: 46px;
+  height: 42px;
+  padding: 0 .7rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in oklab, var(--header-border) 78%, transparent);
+  background: color-mix(in oklab, var(--header-bg) 84%, #000 16%);
+  color: var(--header-link-color);
+  font-weight: 700;
+  font-size: .82rem;
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  border-color: color-mix(in oklab, var(--header-link-color) 36%, transparent);
+  background: color-mix(in oklab, var(--header-bg) 68%, #000 32%);
+  transform: translateY(-1px);
+}
+
+.theme-toggle__icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.theme-toggle__label {
+  font-size: .72rem;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
 .site-header .primary-nav .nav-list {
   gap: 0.35rem;
 }
@@ -464,6 +516,18 @@ html.sidebar-compact .sidebar__link span{
     padding-right: 0;
   }
 
+  .theme-toggle {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    padding: 0;
+  }
+
+  .theme-toggle__label {
+    display: none;
+  }
+
   .site-header .header-account__name {
     display: none;
   }
@@ -478,6 +542,10 @@ html.sidebar-compact .sidebar__link span{
 @media (max-width: 1023.98px) {
   .sidebar-toggle {
     display: inline-flex;
+  }
+
+  .theme-toggle__label {
+    display: none;
   }
 
   .site-header .header-account__name {

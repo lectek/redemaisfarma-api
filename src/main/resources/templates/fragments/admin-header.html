@@ -35,5 +35,16 @@
         </li>
       </ul>
     </nav>
+
+    <button class="theme-toggle"
+            type="button"
+            data-theme-toggle
+            aria-pressed="false"
+            aria-label="Ativar modo escuro"
+            title="Alternar tema">
+      <span class="theme-toggle__icon" aria-hidden="true">☾</span>
+      <span class="theme-toggle__label">Tema</span>
+    </button>
   </div>
+  <script defer th:src="@{/js/theme-toggle.js}"></script>
 </header>
