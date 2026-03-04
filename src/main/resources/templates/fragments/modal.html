@@ -64,11 +64,13 @@
         cancelLabel='Cancelar'
      )">
   <div th:replace="~{fragments/modal :: modal(
-        id=${id},
-        title=${title},
-        bodyText=${bodyText},
-        confirmLabel=${confirmLabel},
-        cancelLabel=${cancelLabel},
-        showConfirm=${true}
+        ${id},
+        ${title},
+        ${bodyText},
+        ${null},
+        ${confirmLabel},
+        ${cancelLabel},
+        ${true},
+        ${null}
      )}"></div>
 </th:block>
