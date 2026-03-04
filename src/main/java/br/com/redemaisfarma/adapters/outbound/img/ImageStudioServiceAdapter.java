@@ -159,7 +159,12 @@ public class ImageStudioServiceAdapter implements ImageStudioUseCase {
         if (value == null) {
             return "";
         }
-        return value.replaceAll("\\s+", " ").trim();
+        // Pollinations recebe o prompt na path; separadores podem quebrar o roteamento.
+        String sanitized = value
+                .replace('/', ' ')
+                .replace('\\', ' ')
+                .replace('|', ' ');
+        return sanitized.replaceAll("\\s+", " ").trim();
     }
 
     private static String urlEncode(String value) {
