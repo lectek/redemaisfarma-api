@@ -33,7 +33,7 @@
             <tr th:each="p : ${pedidos}">
               <td th:text="${p.id}">0001</td>
               <td th:text="${#temporals.format(p.data, 'dd/MM/yyyy HH:mm')}">--</td>
-              <td th:text="${#numbers.formatCurrency(p.total, 'pt_BR')}">R$ 0,00</td>
+              <td th:text="${#numbers.formatCurrency(p.total)}">R$ 0,00</td>
               <td th:text="${p.metodoPagamento}">PIX</td>
               <td><span class="badge" th:text="${p.status}">STATUS</span></td>
               <td class="actions">

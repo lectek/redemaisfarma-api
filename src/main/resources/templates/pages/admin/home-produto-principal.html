@@ -39,9 +39,9 @@
                         th:selected="${selectedId} == ${p.id}"
                         th:attr="data-img=${p.imagem} ?: @{/img/produtos/placeholder-generico.png},
                                  data-nome=${p.nome},
-                                 data-preco=${p.preco != null ? #numbers.formatCurrency(p.preco, 'pt_BR') : 'R$ 0,00'},
+                                 data-preco=${p.preco != null ? #numbers.formatCurrency(p.preco) : 'R$ 0,00'},
                                  data-disponivel=${p.disponivel ? 'Disponivel' : 'Indisponivel'}"
-                        th:text="${p.nome} + (p.preco != null ? ' - ' + #numbers.formatCurrency(p.preco, 'pt_BR') : '') + (p.disponivel ? ' (disponivel)' : ' (indisponivel)')">
+                        th:text="${p.nome} + (p.preco != null ? ' - ' + #numbers.formatCurrency(p.preco) : '') + (p.disponivel ? ' (disponivel)' : ' (indisponivel)')">
                 </option>
               </select>
             </div>

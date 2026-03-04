@@ -43,11 +43,11 @@
 
           <div class="produto-detalhe__price">
             <div th:if="${hasPromo}">
-              <span class="price-old" th:text="${#numbers.formatCurrency(produto.precoVenda, 'pt_BR')}">R$ 0,00</span>
-              <span class="price-now" th:text="${#numbers.formatCurrency(produto.precoPromocional, 'pt_BR')}">R$ 0,00</span>
+              <span class="price-old" th:text="${#numbers.formatCurrency(produto.precoVenda)}">R$ 0,00</span>
+              <span class="price-now" th:text="${#numbers.formatCurrency(produto.precoPromocional)}">R$ 0,00</span>
             </div>
             <div th:if="${!hasPromo}">
-              <span class="price-now" th:text="${#numbers.formatCurrency(produto.precoVenda, 'pt_BR')}">R$ 0,00</span>
+              <span class="price-now" th:text="${#numbers.formatCurrency(produto.precoVenda)}">R$ 0,00</span>
             </div>
           </div>
 

@@ -19,7 +19,7 @@
       </div>
       <p class="card-descricao" th:text="${p.descricao}">Descricao</p>
       <div class="card-preco-acao">
-        <span class="card-preco" th:text="${#numbers.formatCurrency(p.preco, 'pt_BR')}">R$ 0,00</span>
+        <span class="card-preco" th:text="${#numbers.formatCurrency(p.preco)}">R$ 0,00</span>
         <a class="btn-detalhes" th:href="@{'/produto/' + ${p.id}}">Ver detalhes</a>
         <form th:action="@{/carrinho/adicionar}" method="post" class="inline">
           <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
@@ -57,7 +57,7 @@
         <div class="carousel__info">
           <h3 class="carousel__title" th:text="${p.nome}">Nome</h3>
           <div class="price">
-            <span class="new" th:text="${#numbers.formatCurrency(p.preco, 'pt_BR')}">R$ 0,00</span>
+            <span class="new" th:text="${#numbers.formatCurrency(p.preco)}">R$ 0,00</span>
           </div>
           <a class="carousel__cta" th:href="@{'/produto/' + ${p.id}}">Ver produto</a>
         </div>

@@ -36,7 +36,7 @@
             </p>
           </div>
           <div>
-            <p class="page-title" th:text="${#numbers.formatCurrency(pedido.total, 'pt_BR')}">R$ 0,00</p>
+            <p class="page-title" th:text="${#numbers.formatCurrency(pedido.total)}">R$ 0,00</p>
           </div>
         </div>
       </section>
@@ -55,7 +55,7 @@
             <tr th:each="i : ${pedido.itens}">
               <td th:text="${i.produto}">Produto</td>
               <td th:text="${i.quantidade}">1</td>
-              <td th:text="${#numbers.formatCurrency(i.subtotal, 'pt_BR')}">R$ 0,00</td>
+              <td th:text="${#numbers.formatCurrency(i.subtotal)}">R$ 0,00</td>
             </tr>
             <tr th:if="${#lists.isEmpty(pedido.itens)}">
               <td colspan="3" class="text-center text-muted">Nenhum item encontrado.</td>

@@ -166,25 +166,25 @@
                   <p class="checkout-item__name" th:text="${i.nome}">Produto</p>
                   <p class="checkout-item__qty" th:text="${i.quantidade + ' unidade(s)'}">1 unidade(s)</p>
                 </div>
-                <p class="checkout-item__subtotal" th:text="${#numbers.formatCurrency(i.subtotal, 'pt_BR')}">R$ 0,00</p>
+                <p class="checkout-item__subtotal" th:text="${#numbers.formatCurrency(i.subtotal)}">R$ 0,00</p>
               </article>
 
               <div class="checkout-summary__line">
                 <span>Subtotal</span>
-                <span th:text="${#numbers.formatCurrency(subtotalValue, 'pt_BR')}">R$ 0,00</span>
+                <span th:text="${#numbers.formatCurrency(subtotalValue)}">R$ 0,00</span>
               </div>
               <div class="checkout-summary__line">
                 <span>Frete</span>
-                <span th:text="${#numbers.formatCurrency(shipping, 'pt_BR')}">R$ 0,00</span>
+                <span th:text="${#numbers.formatCurrency(shipping)}">R$ 0,00</span>
               </div>
               <div class="checkout-summary__line">
                 <span>Cupom de Desconto</span>
-                <span th:text="${'-' + #numbers.formatCurrency(discount, 'pt_BR')}">-R$ 0,00</span>
+                <span th:text="${'-' + #numbers.formatCurrency(discount)}">-R$ 0,00</span>
               </div>
 
               <div class="checkout-summary__total">
                 <span>Total</span>
-                <strong th:text="${#numbers.formatCurrency(totalValue, 'pt_BR')}">R$ 0,00</strong>
+                <strong th:text="${#numbers.formatCurrency(totalValue)}">R$ 0,00</strong>
               </div>
 
               <button form="checkoutForm" type="submit" class="btn btn--primary checkout-submit"

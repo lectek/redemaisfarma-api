@@ -35,7 +35,7 @@
 
             <div class="produto-info stack gap-8">
               <span class="produto-nome font-semibold text-base" th:text="${i.nome}">Produto</span>
-              <span class="produto-preco text-sm" th:text="${#numbers.formatCurrency(i.precoUnitario, 'pt_BR')}">R$ 0,00</span>
+              <span class="produto-preco text-sm" th:text="${#numbers.formatCurrency(i.precoUnitario)}">R$ 0,00</span>
               <span class="text-sm text-muted" th:if="${i.invalid}" th:text="${i.issue}">Indisponivel.</span>
               <div class="produto-quantidade flex gap-8 items-center">
                 <form th:action="@{/carrinho/atualizar}" method="post" class="inline">
@@ -73,7 +73,7 @@
 
           <div class="resumo-linha flex justify-between">
             <span>Subtotal:</span>
-            <span th:text="${#numbers.formatCurrency(cartSummary.subtotal, 'pt_BR')}">R$ 0,00</span>
+            <span th:text="${#numbers.formatCurrency(cartSummary.subtotal)}">R$ 0,00</span>
           </div>
 
           <div class="resumo-linha flex justify-between">
@@ -83,7 +83,7 @@
 
           <div class="resumo-linha total flex justify-between font-bold">
             <span>Total:</span>
-            <span th:text="${#numbers.formatCurrency(cartSummary.total, 'pt_BR')}">R$ 0,00</span>
+            <span th:text="${#numbers.formatCurrency(cartSummary.total)}">R$ 0,00</span>
           </div>
 
           <a th:if="${!cartEmpty}" th:href="@{/checkout}" class="btn btn--primary">Finalizar Compra</a>
