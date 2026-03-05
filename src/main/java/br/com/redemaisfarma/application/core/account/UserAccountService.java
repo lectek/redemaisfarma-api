@@ -1,5 +1,7 @@
 package br.com.redemaisfarma.application.core.account;
 
+import br.com.redemaisfarma.adapters.outbound.persistence.entity.ClienteEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepository;
 import br.com.redemaisfarma.domain.user.Role;
@@ -7,16 +9,23 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Service
 public class UserAccountService {
 
     private final UsuarioRepository usuarios;
+    private final ClienteRepository clientes;
     private final PasswordEncoder encoder;
 
-    public UserAccountService(UsuarioRepository usuarios, PasswordEncoder encoder) {
+    public UserAccountService(
+            UsuarioRepository usuarios,
+            ClienteRepository clientes,
+            PasswordEncoder encoder
+    ) {
         this.usuarios = usuarios;
+        this.clientes = clientes;
         this.encoder = encoder;
     }
 
@@ -51,7 +60,33 @@ public class UserAccountService {
         u.setCpf(cpfNorm);
         u.setSenha(encoder.encode(senhaPura));
         u.setRoles(Set.of(Role.of("ROLE_USER")));
-        return usuarios.save(u);
+        UsuarioEntity salvo = usuarios.save(u);
+
+        syncClienteCadastro(emailNorm, cpfNorm, nameNorm, salvo.getSenha());
+        return salvo;
+    }
+
+    private void syncClienteCadastro(
+            final String email,
+            final String cpf,
+            final String nome,
+            final String senhaCodificada
+    ) {
+        final Optional<ClienteEntity> byEmail = clientes.findByEmailIgnoreCase(email);
+        final Optional<ClienteEntity> byCpf = clientes.findByCpf(cpf);
+
+        if (byEmail.isPresent() && byCpf.isPresent()
+                && !byEmail.get().getId().equals(byCpf.get().getId())) {
+            throw new IllegalStateException("Cadastro inconsistente para email/cpf.");
+        }
+
+        final ClienteEntity cliente = byEmail.or(() -> byCpf).orElseGet(ClienteEntity::new);
+        cliente.setNome(nome);
+        cliente.setEmail(email);
+        cliente.setCpf(cpf);
+        cliente.setAtivo(true);
+        cliente.setSenha(senhaCodificada);
+        clientes.save(cliente);
     }
 
     private static String normalizeEmail(String email) {

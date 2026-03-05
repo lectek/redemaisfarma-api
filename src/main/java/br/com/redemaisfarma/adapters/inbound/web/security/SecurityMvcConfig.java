@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -33,9 +34,11 @@ import java.util.Arrays;
 public class SecurityMvcConfig {
 
     private final Environment env;
+    private final SessionRegistry sessionRegistry;
 
-    public SecurityMvcConfig(Environment env) {
+    public SecurityMvcConfig(Environment env, SessionRegistry sessionRegistry) {
         this.env = env;
+        this.sessionRegistry = sessionRegistry;
     }
 
     private boolean isDevLike() {
@@ -160,6 +163,8 @@ public class SecurityMvcConfig {
             .sessionManagement(sm -> sm
                     .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                     .sessionFixation(sf -> sf.migrateSession())
+                    .maximumSessions(-1)
+                    .sessionRegistry(this.sessionRegistry)
             )
             .headers(headers -> headers
                     .contentSecurityPolicy(csp -> csp.policyDirectives(

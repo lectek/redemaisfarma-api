@@ -1,6 +1,7 @@
 package br.com.redemaisfarma.application.core.account;
 
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
+import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepository;
 import br.com.redemaisfarma.domain.user.Role;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,9 @@ class UserAccountServiceTest {
     private UsuarioRepository usuarios;
 
     @Mock
+    private ClienteRepository clientes;
+
+    @Mock
     private PasswordEncoder encoder;
 
     @InjectMocks
@@ -41,11 +45,14 @@ class UserAccountServiceTest {
         when(usuarios.existsByEmailIgnoreCase(anyString())).thenReturn(false);
         when(usuarios.existsByCpf(anyString())).thenReturn(false);
         when(usuarios.save(org.mockito.ArgumentMatchers.any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(clientes.findByEmailIgnoreCase(anyString())).thenReturn(java.util.Optional.empty());
+        when(clientes.findByCpf(anyString())).thenReturn(java.util.Optional.empty());
 
         service.register(null, "User@Example.com", null, "senhaSegura123");
 
         ArgumentCaptor<UsuarioEntity> captor = ArgumentCaptor.forClass(UsuarioEntity.class);
         verify(usuarios).save(captor.capture());
+        verify(clientes).save(org.mockito.ArgumentMatchers.any());
         UsuarioEntity saved = captor.getValue();
 
         assertThat(saved.getEmail()).isEqualTo("user@example.com");

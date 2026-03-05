@@ -5,6 +5,29 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Clientes - Admin</title>
   <link rel="stylesheet" th:href="@{/css/main.css}"/>
+  <style>
+    .presence {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .9rem;
+      font-weight: 600;
+    }
+    .presence__dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #94a3b8;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.15);
+    }
+    .presence--online .presence__dot {
+      background: #16a34a;
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.16);
+    }
+    .presence--offline .presence__dot {
+      background: #94a3b8;
+    }
+  </style>
 </head>
 <body class="body-flex admin-page">
 <header th:replace="~{fragments/admin-header :: adminHeader}"></header>
@@ -42,6 +65,11 @@
         <span class="stat-value" th:text="${totalClientesInativos ?: 0}">0</span>
         <span class="stat-hint">Sem compras no periodo</span>
       </article>
+      <article class="stat-card">
+        <span class="stat-label">Online</span>
+        <span class="stat-value" th:text="${totalClientesOnline ?: 0}">0</span>
+        <span class="stat-hint">Com sessao ativa agora</span>
+      </article>
     </section>
 
     <form class="filter-bar card p-16 mb-4" method="get" th:action="@{/admin/clientes}">
@@ -68,6 +96,7 @@
             <th>Telefone</th>
             <th>Cadastro</th>
             <th>Status</th>
+            <th>Online</th>
             <th>Acoes</th>
           </tr>
         </thead>
@@ -82,12 +111,19 @@
               <span th:if="${c.ativo}" class="badge badge--success">Ativo</span>
               <span th:if="${!c.ativo}" class="badge badge--neutral">Inativo</span>
             </td>
+            <td>
+              <span class="presence"
+                    th:classappend="${onlineClienteMap != null and onlineClienteMap[c.id]} ? ' presence--online' : ' presence--offline'">
+                <span class="presence__dot" aria-hidden="true"></span>
+                <span th:text="${onlineClienteMap != null and onlineClienteMap[c.id]} ? 'Online' : 'Offline'">Offline</span>
+              </span>
+            </td>
             <td class="table-actions">
               <a class="btn btn-ghost" href="#">Detalhes</a>
             </td>
           </tr>
           <tr th:if="${clientes == null or #lists.isEmpty(clientes)}">
-            <td colspan="7" class="muted text-center">Nenhum cliente encontrado. Ajuste filtros ou importe sua base.</td>
+            <td colspan="8" class="muted text-center">Nenhum cliente encontrado. Ajuste filtros ou importe sua base.</td>
           </tr>
         </tbody>
       </table>
