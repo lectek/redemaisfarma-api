@@ -4,6 +4,7 @@ import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteRepository;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepository;
 import br.com.redemaisfarma.domain.user.Role;
+import br.com.redemaisfarma.domain.user.RoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,9 +14,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,12 +35,16 @@ class UserAccountServiceTest {
     @Mock
     private PasswordEncoder encoder;
 
+    @Mock
+    private RoleRepository roles;
+
     @InjectMocks
     private UserAccountService service;
 
     @BeforeEach
     void setUp() {
         when(encoder.encode(anyString())).thenReturn("encoded");
+        when(roles.findByNome("ROLE_USER")).thenReturn(Optional.of(Role.of("ROLE_USER")));
     }
 
     @Test
@@ -59,5 +66,21 @@ class UserAccountServiceTest {
         assertThat(saved.getNome()).isEqualTo("user");
         assertThat(saved.getCpf()).hasSize(11);
         assertThat(saved.getRoles()).isEqualTo(Set.of(Role.of("ROLE_USER")));
+    }
+
+    @Test
+    void registerCreatesRoleWhenDefaultDoesNotExist() {
+        when(roles.findByNome("ROLE_USER")).thenReturn(Optional.empty());
+        when(roles.findByNome("USER")).thenReturn(Optional.empty());
+        when(roles.save(any(Role.class))).thenReturn(Role.of("ROLE_USER"));
+        when(usuarios.existsByEmailIgnoreCase(anyString())).thenReturn(false);
+        when(usuarios.existsByCpf(anyString())).thenReturn(false);
+        when(usuarios.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(clientes.findByEmailIgnoreCase(anyString())).thenReturn(Optional.empty());
+        when(clientes.findByCpf(anyString())).thenReturn(Optional.empty());
+
+        service.register("Cliente", "novo@example.com", "12345678901", "senhaSegura123");
+
+        verify(roles).save(any(Role.class));
     }
 }

@@ -5,27 +5,34 @@ import br.com.redemaisfarma.adapters.outbound.persistence.repository.ClienteRepo
 import br.com.redemaisfarma.adapters.outbound.persistence.entity.UsuarioEntity;
 import br.com.redemaisfarma.adapters.outbound.persistence.repository.UsuarioRepository;
 import br.com.redemaisfarma.domain.user.Role;
+import br.com.redemaisfarma.domain.user.RoleRepository;
+import java.util.Optional;
+import java.util.Set;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-import java.util.Set;
-
 @Service
 public class UserAccountService {
 
+    private static final String ROLE_USER = "ROLE_USER";
+    private static final String USER = "USER";
+
     private final UsuarioRepository usuarios;
     private final ClienteRepository clientes;
+    private final RoleRepository roles;
     private final PasswordEncoder encoder;
 
     public UserAccountService(
             UsuarioRepository usuarios,
             ClienteRepository clientes,
+            RoleRepository roles,
             PasswordEncoder encoder
     ) {
         this.usuarios = usuarios;
         this.clientes = clientes;
+        this.roles = roles;
         this.encoder = encoder;
     }
 
@@ -59,11 +66,27 @@ public class UserAccountService {
         u.setEmail(emailNorm);
         u.setCpf(cpfNorm);
         u.setSenha(encoder.encode(senhaPura));
-        u.setRoles(Set.of(Role.of("ROLE_USER")));
+        u.setRoles(Set.of(resolveDefaultRole()));
         UsuarioEntity salvo = usuarios.save(u);
 
         syncClienteCadastro(emailNorm, cpfNorm, nameNorm, salvo.getSenha());
         return salvo;
+    }
+
+    private Role resolveDefaultRole() {
+        return roles.findByNome(ROLE_USER)
+                .or(() -> roles.findByNome(USER))
+                .orElseGet(this::createDefaultRoleSafely);
+    }
+
+    private Role createDefaultRoleSafely() {
+        try {
+            return roles.save(Role.of(ROLE_USER));
+        } catch (DataIntegrityViolationException ex) {
+            return roles.findByNome(ROLE_USER)
+                    .or(() -> roles.findByNome(USER))
+                    .orElseThrow(() -> ex);
+        }
     }
 
     private void syncClienteCadastro(
